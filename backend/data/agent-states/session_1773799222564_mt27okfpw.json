@@ -1,0 +1,44 @@
+{
+  "id": "session_1773799222564_mt27okfpw",
+  "task": "测试搜索功能",
+  "context": {},
+  "status": "checkpoint",
+  "createdAt": 1773799222564,
+  "updatedAt": 1773799222569,
+  "checkpoints": [
+    {
+      "id": "cp_1773799222569_erpq1e",
+      "createdAt": 1773799222569,
+      "state": {
+        "iteration": 1,
+        "status": "running",
+        "context": {},
+        "toolResults": [
+          {
+            "tool": "web_search",
+            "input": {
+              "query": "测试功能"
+            },
+            "output": {
+              "success": false,
+              "error": "未配置API密钥"
+            },
+            "timestamp": 1773799222568
+          }
+        ],
+        "pendingAction": null,
+        "error": null
+      },
+      "metadata": {
+        "iteration": 1,
+        "toolCallsCount": 1
+      }
+    }
+  ],
+  "currentCheckpoint": "cp_1773799222569_erpq1e",
+  "metadata": {
+    "iterations": 1,
+    "toolCalls": 0,
+    "errors": 0
+  }
+}

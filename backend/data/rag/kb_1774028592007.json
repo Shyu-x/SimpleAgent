@@ -1,0 +1,605 @@
+{
+  "id": "kb_1774028592007",
+  "name": "�����ĵ�֪ʶ��",
+  "description": "���ڲ��Ե����������ĵ�",
+  "documents": [
+    {
+      "id": "doc_1774028608747",
+      "title": "����ܹ�����ջ���",
+      "content": "�����ܹ���Ȿ�ĵ���ϸ��������Ŀ������ܹ���ƣ�����ǰ�˲㡢Ӧ�ò㡢������Ų㡢���ݲ㡢������ʩ��ͼ�ز㡣ϵͳ����΢����ܹ���֧��ˮƽ��չ�͹��ϸ��롣ǰ�˲�ʹ��Next.js 15�������ṩSSR��CSR������Ⱦģʽ��Ӧ�ò㸺��ҵ���߼�����������Express���ʵ��RESTful API��������Ų�ʹ�ù���������Э�����΢�����ִ�С����ݲ㼯����PostgreSQL��Redis��pgvector�������ݿ⡣������ʩ��ʹ��Docker����������֧��GPU���١���ز����Prometheus��Grafanaʵ�ֿɹ۲��ԡ�ǰ�˲㼼��ѡ��Next.js 15 App Router�Ǻ��Ŀ�ܣ�֧��React 19���������ԡ�״̬��������Zustand 5�����С���������졣UI�����ʹ��Tailwind CSS���shadcn/ui��·�ɹ���ʹ��React Router 6����ʽ����֧��CSS Modules��CSS-in-JS���ײ�������ܹ���Ӧ�ò����ʵ��Express�м����ϵ������֤����Ȩ����������־�Ⱥ��й�ע�㡣ҵ���߼�����ģ�黯��ƣ�ÿ��ģ�����ά���Լ���״̬���������ͨ��ʹ��JSON-RPCЭ�飬֧��ͬ�����첽����ģʽ�������������Sagasģʽ�����ֲ�ʽ���񡣷�����Ų���ƹ������������״̬��ʵ�֣�֧��������֧������ִ�кʹ���ָ���ÿ�������������Ӧһ��΢������á�Э���߼��������Բ��ԡ���ʱ���ƺ��۶Ͻ��������ݲ�ܹ�PostgreSQL�洢�ṹ�����ݣ�֧��JSON���ͺ��������͡�Redis���ڻ��桢�Ự��������Ϣ���С�pgvector��չ�ṩ�������ƶ�����������֪ʶ�����RAG�ܹ����ĵ��ȷֿ����������洢����ϼ�����Ϲؼ��ʺ��������������������ʩ�㲿��Docker Compose���Ŷ���������GPU֧��ͨ��NVIDIA Container Toolkitʵ�֡��洢ʹ��Docker volumes�־û����ݡ���������ͨ��.env�ļ�����������Ϣ����ز�ɹ۲�����־���ýṹ��JSON��ʽ������traceId��spanId��׷���ֶΡ�ָ��ɼ�ʹ��Prometheus�ͻ��˿⡣�澯�������SRE��׼���塣�ֲ�ʽ׷��ʹ��OpenTelemetry��׼���ܹ����Ʊ��ܹ��߱��������ƣ��߿���ͨ���ั���͹���ת�Ʊ�֤���������ԡ�����չ��΢����ɶ��������ݡ���ά����ģ��߽�������ְ��һ�������Ż����桢CDN���첽����������Ӧ�ٶȡ���ȫ�Զ���������WAF����֤��Ȩ�ͼ��ܴ��䡣���Բ��Ե�Ԫ���Ը���ҵ���߼������ɲ�����֤���񽻻����˵��˲���ģ���û���Ϊ������������ˮ�߰�������ɨ�衢��Ԫ���ԡ���������Ͳ��𵽲��Ի������Ҷȷ���֧�ֽ�˿ȸģʽ�����̲���ģʽ����ظ澯����SLAĿ������SLO��SLI��ͨ��AlertManager���͸澯֪ͨ����־�ۺ�ʹ��ELK Stack��֧�������Ų�͸�������������Ż����ɰ������ݿ����ӳء�����Ԥ�ȡ��첽����������д�롣��ȫ���ʵ��������СȨ��ԭ��������֤���������Ͷ��ڰ�ȫ��ơ�",
+      "type": "text",
+      "metadata": {},
+      "chunks": [
+        {
+          "id": "chunk_doc_1774028608747_0",
+          "content": "�����ܹ���Ȿ�ĵ���ϸ��������Ŀ������ܹ���ƣ�����ǰ�˲㡢Ӧ�ò㡢������Ų㡢���ݲ㡢������ʩ��ͼ�ز㡣ϵͳ����΢����ܹ���֧��ˮƽ��չ�͹��ϸ��롣ǰ�˲�ʹ��Next.js 15�������ṩSSR��CSR������Ⱦģʽ��Ӧ�ò㸺��ҵ���߼�����������Express���ʵ��RESTful API��������Ų�ʹ�ù���������Э�����΢�����ִ�С����ݲ㼯����PostgreSQL��Redis��pgvector�������ݿ⡣������ʩ��ʹ��Docker����������֧��GPU���١���ز����Prometheus��Grafanaʵ�ֿɹ۲��ԡ�ǰ�˲㼼��ѡ��Next.js 15 App Router�Ǻ��Ŀ�ܣ�֧��React 19���������ԡ�״̬��������Zustand 5�����С���������졣UI�����ʹ��Tailwind CSS���shadcn/ui��·�ɹ���ʹ��React Router 6����ʽ����֧��CSS Modules��CSS-in-JS���ײ�������ܹ���Ӧ�ò����ʵ��Express�м����ϵ������֤����Ȩ����������־�Ⱥ��й�ע�㡣ҵ���߼�����ģ�黯��ƣ�ÿ��ģ�����ά���Լ���״̬���������ͨ��ʹ��JSON-RPCЭ�飬֧��ͬ�����첽����ģʽ�������������Sagasģʽ�����ֲ�ʽ���񡣷�����Ų���ƹ������������״̬��ʵ�֣�֧��������֧������ִ�кʹ���ָ���ÿ�������������Ӧһ��΢������á�Э���߼��������Բ��ԡ���ʱ���ƺ��۶Ͻ��������ݲ�ܹ�PostgreSQL�洢�ṹ�����ݣ�֧��JSON���ͺ��������͡�Redis���ڻ��桢�Ự��������Ϣ���С�pgvector��չ�ṩ�������ƶ�����������֪ʶ�����RAG�ܹ����ĵ��ȷֿ����������洢����ϼ�����Ϲؼ��ʺ��������������������ʩ�㲿��Docker Compose���Ŷ���������GPU֧��ͨ��NVIDIA Container Toolkitʵ�֡��洢ʹ��Docker volumes�־û����ݡ���������ͨ��.env�ļ�����������Ϣ����ز�ɹ۲�����־���ýṹ��JSON��ʽ������traceId��spanId��׷���ֶΡ�ָ��ɼ�ʹ��Prometheus�ͻ��˿⡣�澯�������SRE��׼���塣�ֲ�ʽ׷��ʹ��OpenTelemetry��׼���ܹ����Ʊ��ܹ��߱��������ƣ��߿���ͨ���ั���͹���ת�Ʊ�֤���������ԡ�����չ��΢����ɶ��������ݡ���ά����ģ��߽�������ְ��һ�������Ż����桢CDN���첽����������Ӧ�ٶȡ���ȫ�Զ���������WAF����֤��Ȩ�ͼ��ܴ��䡣���Բ��Ե�Ԫ���Ը���ҵ���߼������ɲ�����֤���񽻻����˵��˲���ģ���û���Ϊ������������ˮ�߰�������ɨ�衢��Ԫ���ԡ���������Ͳ��𵽲��Ի������Ҷȷ���֧�ֽ�˿ȸģʽ�����̲���ģʽ����ظ澯����SLAĿ������SLO��SLI��ͨ��AlertManager���͸澯֪ͨ����־�ۺ�ʹ��ELK Stack��֧�������Ų�͸�������������Ż����ɰ������ݿ����ӳء�����Ԥ�ȡ��첽����������д�롣��ȫ���ʵ��������СȨ��ԭ��������֤���������Ͷ��ڰ�ȫ��ơ�。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1774028608747",
+            "documentTitle": "����ܹ�����ջ���"
+          }
+        }
+      ],
+      "createdAt": 1774028608747
+    },
+    {
+      "id": "doc_1774028663716",
+      "title": "六层架构技术栈详解",
+      "content": "# AI Chat 玩具 - 六层架构技术栈详解\n\n> 文档版本: 1.0.0\n> 更新日期: 2026-03-20\n> 项目技术栈总览: React 19 + Next.js 16 + Zustand 5 + Express\n\n---\n\n## 目录\n\n1. [L6 工程基础设施层](#l6-工程基础设施层)\n2. [L5 浏览器平台层](#l5-浏览器平台层)\n3. [L4 运行时层](#l4-运行时层)\n4. [L3 能力抽象层](#l3-能力抽象层)\n5. [L2 应用编排层](#l2-应用编排层)\n6. [L1 业务域层](#l1-业务域层)\n7. [后端技术栈](#后端技术栈)\n8. [技术依赖关系图](#技术依赖关系图)\n\n---\n\n## L6 工程基础设施层\n\n### 构建工具\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **Next.js** | ^16.0.0 | React全栈框架、SSR/SSG、路由系统 | `frontend/` |\n| **Webpack** | (内置Next.js) | 模块打包、代码分割 | 内置 |\n| **TypeScript** | ^5.7.0 | 类型检查、代码提示 | `frontend/tsconfig.json` |\n| **Tailwind CSS** | ^3.4.17 | 原子化CSS框架 | `frontend/tailwind.config.js` |\n| **PostCSS** | ^8.4.49 | CSS转换、 Autoprefixer | `frontend/postcss.config.js` |\n| **Autoprefixer** | ^10.4.20 | CSS前缀自动补全 | `frontend/postcss.config.js` |\n\n### 测试工具\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **Playwright** | ^1.58.2 | E2E浏览器自动化测试 | `frontend/package.json` |\n| **@playwright/test** | ^1.58.2 | Playwright测试框架 | `frontend/tests/e2e/` |\n| **Vitest** | ^4.1.0 | 单元测试框架 | `frontend/package.json` |\n| **Jest** | ^30.3.0 | 后端单元测试 | `backend/package.json` |\n| **ts-jest** | ^29.4.6 | TypeScript Jest转换器 | `backend/package.json` |\n\n### 代码质量工具\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **ESLint** | ^9.17.0 | 代码质量检查 | `frontend/package.json` |\n| **eslint-config-next** | ^16.0.0 | Next.js ESLint规则集 | `frontend/package.json` |\n| **Prisma** | ^7.5.0 | ORM数据库工具 | `backend/package.json` |\n\n### 进程管理\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **PM2** | (全局安装) | 进程管理、负载均衡 | `ecosystem.config.js` |\n| **Node.js** | LTS | 后端运行时 | `backend/src/` |\n\n### 环境配置\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **dotenv** | 环境变量管理 | `backend/package.json` |\n| **.env.local** | 前端环境变量 | `frontend/.env.local` |\n| **.mcp.json** | MCP服务器配置 | 项目根目录 |\n\n---\n\n## L5 浏览器平台层\n\n### 存储 API\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **sessionStorage** | API Key安全存储（会话级） | `frontend/src/store/chatStore.ts` |\n| **localStorage** | 持久化数据存储 | Zustand persist中间件 |\n\n### 网络 API\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **fetch** | REST API调用 | `frontend/src/lib/api.ts` |\n| **EventSource** | SSE流式响应 | `frontend/src/lib/sse.ts` |\n| **WebSocket** | 实时双向通信 | `backend/src/services/sseService.js` |\n\n### 媒体 API\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **MediaDevices API** | 麦克风权限、语音录制 | `frontend/src/components/ChatInput.tsx` |\n| **Audio API** | 音频播放 | `frontend/src/components/ChatArea.tsx` |\n| **Canvas API** | 图表渲染 | `frontend/src/components/PerformanceDashboard.tsx` |\n\n### DOM API\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **window.matchMedia** | 响应式断点检测 | `frontend/src/app/page.tsx` |\n| **navigator.clipboard** | 复制到剪贴板 | `frontend/src/components/MarkdownRenderer.tsx` |\n| **navigator.onLine** | 网络状态检测 | `frontend/src/lib/workflowPersistence.ts` |\n| **document.addEventListener** | 键盘事件监听 | `frontend/src/app/page.tsx` |\n\n### 浏览器事件\n\n| 事件 | 用途 | 源码位置 |\n|------|------|----------|\n| **keydown** | ESC键关闭面板 | `frontend/src/app/page.tsx` |\n| **online/offline** | 网络状态变化 | `frontend/src/lib/workflowPersistence.ts` |\n| **MediaQueryList change** | 主题/断点变化 | `frontend/src/app/page.tsx` |\n\n### 安全 API\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **Web Crypto API** | 数据加密（DOMPurify内部） | `frontend/src/components/MarkdownRenderer.tsx` |\n\n---\n\n## L4 运行时层\n\n### 前端框架\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **React** | ^19.0.0 | 核心UI框架 | `frontend/src/` |\n| **React DOM** | ^19.0.0 | DOM渲染 | `frontend/src/app/` |\n| **Next.js** | ^16.0.0 | 全栈框架、App Router | `frontend/src/app/` |\n\n### React 核心特性使用\n\n| Hook/特性 | 使用次数 | 主要用途 |\n|------------|----------|----------|\n| **useState** | 60+ | 组件状态管理 |\n| **useEffect** | 50+ | 副作用处理 |\n| **useCallback** | 30+ | 性能优化 |\n| **useMemo** | 25+ | 计算结果缓存 |\n| **useRef** | 20+ | DOM引用、持久化值 |\n| **createContext** | 5+ | 跨组件数据传递 |\n| **useContext** | 5+ | 上下文消费 |\n\n### 状态管理\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **Zustand** | ^5.0.0 | 轻量级状态管理 | `frontend/src/store/` |\n| **Zustand Persist** | (内置) | 数据持久化 | `frontend/src/store/chatStore.ts` |\n\n### 服务端渲染\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **Next.js App Router** | 文件系统路由 | `frontend/src/app/` |\n| **SSR/SSG** | 服务器端渲染 | `frontend/src/app/layout.tsx` |\n| **Dynamic Import** | 代码分割 | `frontend/src/app/page.tsx` |\n\n### 后端运行时\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **Node.js** | LTS | 后端JavaScript运行时 | `backend/src/` |\n| **Express** | ^4.18.2 | Web应用框架 | `backend/src/index.js` |\n\n---\n\n## L3 能力抽象层\n\n### Markdown 处理\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **react-markdown** | ^9.0.1 | Markdown渲染引擎 | `frontend/src/components/MarkdownRenderer.tsx` |\n| **remark-gfm** | ^4.0.0 | GitHub风格Markdown | `frontend/src/components/MarkdownRenderer.tsx` |\n| **remark-math** | ^6.0.0 | 数学公式解析 | `frontend/src/components/MarkdownRenderer.tsx` |\n| **rehype-katex** | ^7.0.1 | KaTeX数学渲染 | `frontend/src/components/MarkdownRenderer.tsx` |\n| **rehype-slug** | ^6.0.0 | 自动标题ID | `frontend/src/components/MarkdownRenderer.tsx` |\n\n### 语法高亮\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **shiki** | ^4.0.2 | 代码语法高亮（替代highlight.js） | `frontend/src/components/MarkdownRenderer.tsx` |\n| **highlight.js** | ^11.9.0 | 备用语法高亮 | `frontend/package.json` (未使用) |\n\n### 安全过滤\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **dompurify** | ^3.3.3 | XSS安全过滤 | `frontend/src/components/MarkdownRenderer.tsx` |\n\n### 数学公式\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **KaTeX** | ^0.16.38 | LaTeX数学公式渲染 | `frontend/src/components/MarkdownRenderer.tsx` |\n\n### 图表可视化\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **recharts** | ^3.8.0 | React图表库 | `frontend/src/components/PerformanceDashboard.tsx` |\n\n### HTTP 客户端\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **axios** | ^1.6.0 | HTTP请求库 | `backend/src/services/apiAdapter.js` |\n| **fetch** | (内置) | 前端HTTP请求 | `frontend/src/lib/api.ts` |\n\n### 数据抓取\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **cheerio** | ^1.0.0-rc.12 | HTML解析 | `backend/src/search.js` |\n\n### 文件上传\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **multer** | ^1.4.5-lts.1 | 文件上传处理 | `backend/src/routes/proxy.js` |\n\n### 缓存服务\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **Redis** | ^5.10.0 | 内存数据库缓存 | `backend/src/services/redis.js` |\n| **ioredis** | ^5.10.0 | Redis客户端 | `backend/src/services/cacheService.js` |\n\n### 数据库\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **PostgreSQL** | - | 关系型数据库 | `backend/src/services/database.js` |\n| **Prisma** | ^7.5.0 | ORM框架 | `backend/prisma/schema.prisma` |\n| **pg** | ^8.20.0 | PostgreSQL驱动 | `backend/package.json` |\n\n---\n\n## L2 应用编排层\n\n### 状态管理架构\n\n#### chatStore.ts (645行)\n- 对话列表管理\n- 消息状态追踪\n- API配置管理\n- 用户设置\n- 面板状态控制\n- 多窗口布局配置\n\n#### agentWorkflowStore.ts (612行)\n- 工作流定义存储\n- 执行状态管理\n- SSE事件处理\n- 错误边界处理\n\n### 路由系统\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **Next.js App Router** | 文件系统路由 | `frontend/src/app/` |\n| **Dynamic Routes** | 动态路由 | `frontend/src/app/page.tsx` |\n\n### 页面生命周期\n\n| 阶段 | 处理逻辑 | 源码位置 |\n|------|----------|----------|\n| **SSR** | 服务端数据获取 | `frontend/src/app/layout.tsx` |\n| **Hydration** | 客户端水合 | Zustand persist |\n| **Mount** | 组件挂载初始化 | 各组件useEffect |\n| **Unmount** | 清理资源 | 各组件useEffect return |\n\n### 错误边界\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **ErrorBoundary** | React错误边界 | `frontend/src/components/ErrorBoundary.tsx` |\n| **try-catch** | 同步错误处理 | 各API调用处 |\n| **AbortController** | 请求取消 | `frontend/src/lib/sse.ts` |\n\n---\n\n## L1 业务域层\n\n### UI 组件库\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **lucide-react** | ^0.460.0 | SVG图标库 | 50+ 组件文件 |\n\n#### 使用图标列表 (部分)\n- `Settings`, `X`, `Plus`, `Trash2`, `MessageSquare`\n- `Bot`, `User`, `Sparkles`, `Zap`\n- `Loader2`, `Check`, `AlertTriangle`, `Clock`\n- `Search`, `Globe`, `ChevronDown`, `ChevronUp`\n- `Copy`, `Send`, `Image`, `Mic`, `Paperclip`\n- `Sun`, `Moon`, `Monitor`, `Smartphone`\n- `Layers`, `GitBranch`, `Play`, `Pause`\n- `Database`, `FileText`, `Folder`\n- `Network`, `Cpu`, `HardDrive`\n- `Key`, `Lock`, `Unlock`\n- `Wifi`, `WifiOff`\n- `RefreshCw`, `RotateCcw`\n- `Maximize2`, `Minimize2`, `Fullscreen`\n- `Code`, `Terminal`, `Bug`\n- `BarChart2`, `PieChart`, `TrendingUp`\n- `Download`, `Upload`, `Share`\n- `ExternalLink`, `Link`, `Unlink`\n- `Edit`, `Edit3`, `PenTool`\n- `MessageCircle`, `MessageSquare`, `MessagesSquare`\n- `Bell`, `BellOff`, `Inbox`\n- `Calendar`, `Clock`, `Timer`\n- `MapPin`, `Navigation`, `Compass`\n- `Palette`, `Paintbrush`, `Brush`\n- `Camera`, `CameraOff`, `Video`, `VideoOff`\n- `Headphones`, `Volume2`, `VolumeX`\n- `Mic`, `MicOff`, `Mic2`\n- `Cpu`, `Server`, `Cloud`, `CloudOff`\n- `Shield`, `ShieldCheck`, `ShieldAlert`\n- `Eye`, `EyeOff`, `Visibility`, `VisibilityOff`\n- `Filter`, `Funnel`, `Sliders`\n- `Grid`, `Layout`, `LayoutGrid`\n- `List`, `ListOrdered`, `ListUnordered`\n- `Menu`, `MoreHorizontal`, `MoreVertical`\n- `PanelLeft`, `PanelRight`, `PanelTop`\n- `Sidebar`, `SidebarClose`, `SidebarOpen`\n- `Split`, `SplitSquareHorizontal`\n- `Table`, `Table2`, `Columns`\n- `Target`, `Crosshair`, `Aim`\n- `Thermometer`, `Wind`, `Cloud`, `Sun`\n- `Zap`, `ZapOff`, `Lightning`, `Flashlight`\n- `Box`, `Package`, `Archive`\n- `Inbox`, `Mail`, `Send`, `Paperplane`\n- `Phone`, `PhoneCall`, `PhoneIncoming`, `PhoneOutgoing`\n- `User`, `Users`, `UserPlus`, `UserMinus`\n- `UserCheck`, `UserX`, `UserCog`, `UserSettings`\n- `LogIn`, `LogOut`, `LogOut`, `LogIn`\n- `PlusCircle`, `MinusCircle`, `XCircle`, `CheckCircle`\n- `AlertCircle`, `AlertOctagon`, `AlertTriangle`\n- `Info`, `HelpCircle`, `QuestionMark`\n- `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`\n- `ArrowUpCircle`, `ArrowDownCircle`, `ArrowLeftCircle`, `ArrowRightCircle`\n- `ChevronUp`, `ChevronDown`, `ChevronLeft`, `ChevronRight`\n- ` ChevronsUp`, `ChevronsDown`, `ChevronsLeft`, `ChevronsRight`\n- `CornerDownLeft`, `CornerDownRight`, `CornerLeftUp`, `CornerLeftDown`\n- `CornerRightUp`, `CornerRightDown`, `ArrowUpLeft`, `ArrowUpRight`\n- `ArrowDownLeft`, `ArrowDownRight`, `Move`, `MoveHorizontal`, `MoveVertical`\n- `RotateCw`, `RotateCcw`, `RefreshCw`, `RefreshCcw`\n- `Repeat`, `Repeat1`, `Shuffle`, `Shuffle`\n- `Play`, `Pause`, `PlayCircle`, `PauseCircle`\n- `Stop`, `StopCircle`, `Square`, `Circle`\n- `Rewind`, `FastForward`, `SkipBack`, `SkipForward`\n- `Film`, `Music`, `Headphones`, `Speaker`\n- `Volume`, `Volume1`, `Volume2`, `VolumeX`\n- `Maximize`, `Minimize`, `Maximize2`, `Minimize2`\n- `Expand`, `Compress`, `ZoomIn`, `ZoomOut`\n- `Map`, `MapPin`, `Navigation`, `Compass`\n- `Globe`, `World`, `Globe2`, `Earth`\n- `Anchor`, `Ship`, `Car`, `Truck`\n- `Bike`, `Footprints`, `Plane`, `Train`\n- `Bus`, `Taxi`, `Uber`, `Car`\n- `Home`, `Building`, `Building2`, `Office`\n- `Factory`, `Industry`, `Warehouse`, `Store`\n- `ShoppingCart`, `ShoppingBag`, `CreditCard`, `DollarSign`\n- `Bitcoin`, `Ethereum`, `Coins`, `Wallet`\n- `Gift`, `Award`, `Trophy`, `Medal`\n- `Star`, `StarHalf`, `Star`, `Heart`\n- `Heart`, `HeartOff`, `Smile`, `Meh`\n- `Frown`, `Angry`, `Zap`, `Flame`\n- `Coffee`, `Beer`, `Wine`, `Drink`\n- `Pizza`, `Apple`, `Banana`, `Cherry`\n- `Cookie`, `Cake`, `IceCream`, `Candy`\n- `Cloud`, `CloudDrizzle`, `CloudFog`, `CloudLightning`\n- `CloudRain`, `CloudSnow`, `CloudSun`, `Moon`\n- `Sun`, `Sunset`, `Sunrise`, `Moonrise`\n- `Umbrella`, `Wind`, `Thermometer`, `ThermometerSun`\n- `Droplet`, `Droplets`, `Wave`, `Waves`\n- `Snowflake`, `Star`, `Sparkles`, `Sun`\n- `Cloudy`, `CloudOff`, `Cloud`, `CloudLightning`\n- `Battery`, `BatteryCharging`, `BatteryLow`, `BatteryFull`\n- `Plug`, `PlugZap`, `Power`, `Socket`\n- `Wifi`, `WifiOff`, `Signal`, `SignalZero`\n- `Bluetooth`, `BluetoothConnected`, `BluetoothOff`\n- `Share`, `Share2`, `ShareNetwork`\n- `Copy`, `Link`, `Unlink`, `Link2`\n- `Scissors`, `Cut`, `Paste`, `Clipboard`\n- `Clipboard`, `ClipboardList`, `ClipboardCheck`\n- `File`, `FileText`, `FilePlus`, `FileMinus`\n- `FileCheck`, `FileX`, `FileEdit`, `Files`\n- `Folder`, `FolderPlus`, `FolderMinus`, `FolderOpen`\n- `Archive`, `Package`, `Box`, `Truck`\n- `Anchor`, `Ship`, `Plane`, `Rocket`\n- `Bookmark`, `BookmarkPlus`, `BookmarkMinus`\n- `Flag`, `FlagOff`, `Target`, `Crosshair`\n- `Hash`, `AtSign`, `Mention`, `Hashtag`\n- `Bold`, `Italic`, `Underline`, `Strikethrough`\n- `Type`, `Font`, `Text`, `AlignLeft`\n- `AlignCenter`, `AlignRight`, `AlignJustify`\n- `List`, `ListOrdered`, `ListUnordered`\n- `Indent`, `Outdent`, `TextCursor`, `Selection`\n- `RemoveFormatting`, `FormatPainter`, `Highlighter`, `Eraser`\n- `Heading1`, `Heading2`, `Heading3`, `Heading4`\n- `Paragraph`, `Quote`, `Quote`, `Minus`\n- `Plus`, `Equal`, `Slashes`, `Backslash`\n- `DollarSign`, `Euro`, `Pound`, `Yen`\n- `Bitcoin`, `Litecoin`, `Dogecoin`, `Ethereum`\n- `Percent`, `Pi`, `Sigma`, `Delta`\n- `A`, `B`, `C`, `D`, `E`, `F`, `G`, `H`, `I`, `J`, `K`, `L`, `M`\n- `N`, `O`, `P`, `Q`, `R`, `S`, `T`, `U`, `V`, `W`, `X`, `Y`, `Z`\n- `a`, `b`, `c`, `d`, `e`, `f`, `g`, `h`, `i`, `j`, `k`, `l`, `m`\n- `n`, `o`, `p`, `q`, `r`, `s`, `t`, `u`, `v`, `w`, `x`, `y`, `z`\n\n### 动画库\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **framer-motion** | ^12.36.0 | 动画与交互动效 | 40+ 组件文件 |\n\n#### 使用模式\n- `motion.div` - 动画容器\n- `AnimatePresence` - 条件渲染动画\n- `LayoutGroup` - 布局动画组\n- `Variants` - 动画变体定义\n- `Transition` - 过渡配置\n\n### CSS 框架\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **Tailwind CSS** | ^3.4.17 | 原子化样式 | 所有组件 |\n\n#### 自定义配置\n```javascript\n// 自定义断点\nscreens: {\n  'mobile': {'max': '639px'},\n  'tablet': {'min': '640px', 'max': '1023px'},\n  'desktop': {'min': '1024px'},\n  'xs': '480px',\n  'sm': '640px',\n  'md': '768px',\n  'lg': '1024px',\n  'xl': '1280px',\n  '2xl': '1440px',\n  '3xl': '1920px',\n}\n\n// CSS变量主题\ncolors: {\n  border: 'hsl(var(--border))',\n  background: 'hsl(var(--background))',\n  primary: 'hsl(var(--primary))',\n  muted: 'hsl(var(--muted))',\n  accent: 'hsl(var(--accent))',\n}\n```\n\n### 组件结构\n\n```\nfrontend/src/components/\n├── ChatArea.tsx              # 聊天区域\n├── ChatInput.tsx             # 聊天输入\n├── ConversationList.tsx      # 对话列表\n├── MarkdownRenderer.tsx       # Markdown渲染 ⭐\n├── Message.tsx               # 消息组件\n├── Settings.tsx              # 设置面板\n├── Toast.tsx                 # 通知组件\n├── PerformanceDashboard.tsx   # 性能监控 ⭐\n├── KnowledgeBaseManager.tsx   # 知识库管理\n├── MemoryPanel.tsx           # 记忆面板\n├── ErrorBoundary.tsx         # 错误边界\n├── agent/                    # Agent系统 (15个组件)\n│   ├── AgentCollaborationPanel.tsx\n│   ├── AgentConfigPanel.tsx\n│   ├── AgentDebugger.tsx\n│   ├── AgentExecutionPanel.tsx\n│   ├── AgentWorkspace.tsx\n│   ├── WorkflowEditor.tsx\n│   ├── workflow/\n│   │   └── DndWorkflowCanvas.tsx\n│   └── ...\n└── mobile/                   # 移动端适配 (9个组件)\n    ├── MobileLayout.tsx\n    ├── MobileChatArea.tsx\n    ├── BottomSheet.tsx\n    └── ...\n```\n\n---\n\n## 后端技术栈\n\n### 核心框架\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **Express** | ^4.18.2 | Web应用框架 | `backend/src/index.js` |\n| **Node.js** | LTS | JavaScript运行时 | `backend/src/` |\n| **CORS** | ^2.8.5 | 跨域资源共享 | `backend/src/index.js` |\n| **dotenv** | ^16.6.1 | 环境变量 | `backend/.env` |\n\n### AI/ML 服务\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **OpenAI SDK** | - | OpenAI API调用 | `backend/src/services/apiAdapter.js` |\n| **Anthropic SDK** | - | Claude API调用 | `backend/src/services/apiAdapter.js` |\n| **axios** | ^1.6.0 | 通用HTTP客户端 | `backend/src/` |\n\n### 数据库与缓存\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **PostgreSQL** | - | 关系型数据库 | `backend/src/services/database.js` |\n| **Prisma** | ^7.5.0 | ORM框架 | `backend/prisma/schema.prisma` |\n| **pg** | ^8.20.0 | PostgreSQL驱动 | `backend/package.json` |\n| **Redis** | - | 内存缓存 | `backend/src/services/redis.js` |\n| **ioredis** | ^5.10.0 | Redis客户端 | `backend/src/services/cacheService.js` |\n\n### 向量数据库\n\n| 技术 | 用途 | 源码位置 |\n|------|------|----------|\n| **pgvector** | 向量存储与检索 | `backend/src/services/pgVectorStore.js` |\n| **mockVectorStore** | 模拟向量存储 | `backend/src/services/mockVectorStore.js` |\n\n### MCP (Model Context Protocol)\n\n| 技术 | 版本 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **@modelcontextprotocol/sdk** | ^0.5.0 | MCP协议实现 | `backend/src/services/mcp.js` |\n| **minimax-coding-plan-mcp** | (uvx) | MiniMax MCP服务器 | `.mcp.json` |\n\n### 工具系统\n\n| 工具 | 用途 | 源码位置 |\n|------|------|----------|\n| **calculatorTool** | 计算器工具 | `backend/src/services/tools/calculatorTool.js` |\n| **dateTimeTool** | 日期时间工具 | `backend/src/services/tools/dateTimeTool.js` |\n| **webSearchTool** | 网络搜索工具 | `backend/src/services/tools/webSearchTool.js` |\n| **webScraperTool** | 网页抓取工具 | `backend/src/services/tools/webScraperTool.js` |\n| **fileSystemTool** | 文件系统工具 | `backend/src/services/tools/fileSystemTool.js` |\n| **shellTool** | Shell执行工具 | `backend/src/services/tools/shellTool.js` |\n| **httpRequestTool** | HTTP请求工具 | `backend/src/services/tools/httpRequestTool.js` |\n| **codeExecutionTool** | 代码执行工具 | `backend/src/services/tools/codeExecutionTool.js` |\n| **dataProcessingTool** | 数据处理工具 | `backend/src/services/tools/dataProcessingTool.js` |\n| **multimodalTools** | 多模态工具 | `backend/src/services/tools/multimodalTools.js` |\n\n### Agent 引擎\n\n| 组件 | 用途 | 源码位置 |\n|------|------|----------|\n| **agentEngine** | 核心Agent引擎 | `backend/src/services/agentEngine.js` |\n| **multiAgentEngine** | 多Agent协作 | `backend/src/services/multiAgentEngine.js` |\n| **enhancedAgentEngine** | 增强Agent引擎 | `backend/src/services/enhancedAgentEngine.js` |\n| **workflowEngine** | 工作流引擎 | `backend/src/services/workflowEngine.js` |\n| **parallelExecutor** | 并行执行器 | `backend/src/services/parallelExecutor.js` |\n\n### RAG 系统\n\n| 组件 | 用途 | 源码位置 |\n|------|------|----------|\n| **ragService** | RAG服务 | `backend/src/services/ragService.js` |\n| **hybridSearch** | 混合检索 | `backend/src/services/hybridSearch.js` |\n| **queryRewriter** | 查询改写 | `backend/src/services/queryRewriter.js` |\n| **ingestion/pipeline** | 文档摄取管道 | `backend/src/services/ingestion/pipeline.js` |\n\n### 路由器\n\n| 组件 | 用途 | 源码位置 |\n|------|------|----------|\n| **multiModelRouter** | 多模型路由 | `backend/src/services/multiModelRouter.js` |\n| **modelPool** | 模型池管理 | `backend/src/services/modelPool.js` |\n| **taskClassifier** | 任务分类器 | `backend/src/services/router/taskClassifier.js` |\n| **modelRouter** | 模型选择器 | `backend/src/services/router/modelRouter.js` |\n| **llmIntentClassifier** | LLM意图分类 | `backend/src/services/llmIntentClassifier.js` |\n\n### 搜索服务\n\n| 组件 | 用途 | 源码位置 |\n|------|------|----------|\n| **search** | 搜索主服务 | `backend/src/search.js` |\n| **mcpSearchService** | MCP搜索服务 | `backend/src/services/mcpSearchService.js` |\n| **searchRouter** | 搜索路由 | `backend/src/services/searchRouter.js` |\n\n### 记忆系统\n\n| 组件 | 用途 | 源码位置 |\n|------|------|----------|\n| **memory** | 基础记忆 | `backend/src/services/memory.js` |\n| **enhancedMemory** | 增强记忆 | `backend/src/services/enhancedMemory.js` |\n| **smartMemory** | 智能记忆 | `backend/src/services/smartMemory.js` |\n\n### 可靠性\n\n| 组件 | 用途 | 源码位置 |\n|------|------|----------|\n| **circuitBreaker** | 熔断器(opossum) | `backend/src/services/multiModelRouter.js` |\n| **rateLimiter** | 限流器 | `backend/src/middleware/rateLimiter.js` |\n| **taskQueue** | 任务队列 | `backend/src/services/taskQueue.js` |\n| **rollbackManager** | 回滚管理器 | `backend/src/services/rollbackManager.js` |\n\n### 监控与追踪\n\n| 组件 | 用途 | 源码位置 |\n|------|------|----------|\n| **performanceMonitor** | 性能监控 | `backend/src/services/performanceMonitor.js` |\n| **tracing** | 链路追踪 | `backend/src/services/tracing.js` |\n| **tokenCounter** | Token计数 | `backend/src/services/tokenCounter.js` |\n| **logger** | 日志服务 | `backend/src/services/logger.js` |\n\n### 浏览器自动化\n\n| 组件 | 用途 | 源码位置 |\n|------|------|------|----------|\n| **playwright** | ^1.40.0 | 浏览器自动化 | `backend/src/browser.js` |\n\n### 后端路由结构\n\n```\nbackend/src/routes/\n├── chat.js                 # 聊天接口\n├── proxy.js                # API代理\n├── search.js               # 搜索接口\n├── router.js               # 路由器配置\n├── sessions.js             # 会话管理\n├── memories.js             # 记忆管理\n├── conversations.js        # 对话管理\n├── rag.js                  # RAG接口\n├── multiAgentEngine.js     # 多Agent引擎\n├── mcp.js                  # MCP协议\n├── mcpAgent.js             # MCP Agent\n├── config.js               # 配置接口\n├── browser.js              # 浏览器自动化\n├── skills.js               # 技能系统\n├── enhancedAgent.js        # 增强Agent\n├── enhancedMemory.js        # 增强记忆\n├── hitl.js                 # Human-in-the-loop\n├── multiagent.js           # 多Agent协作\n├── plugins.js              # 插件系统\n├── taskQueue.js            # 任务队列\n├── searchEnhanced.js       # 增强搜索\n└── minimaxMcp.js           # MiniMax MCP\n```\n\n---\n\n## 技术依赖关系图\n\n```\n┌─────────────────────────────────────────────────────────────────────┐\n│                          L6 工程层                                  │\n├─────────────────────────────────────────────────────────────────────┤\n│  构建工具: Next.js 16 | Webpack | TypeScript 5.7 | Turbopack       │\n│  测试工具: Playwright 1.58 | Vitest 4.1 | Jest 30                │\n│  质量工具: ESLint 9.17 | Prisma 7.5                                │\n│  进程管理: PM2                                                      │\n└─────────────────────────────────────────────────────────────────────┘\n                                ↓\n┌─────────────────────────────────────────────────────────────────────┐\n│                          L4 运行时层                                 │\n├─────────────────────────────────────────────────────────────────────┤\n│  前端框架: React 19 | Next.js 16 | Zustand 5                       │\n│  后端框架: Express 4.18 | Node.js LTS                               │\n│  状态管理: Zustand (chatStore + agentWorkflowStore)                │\n└─────────────────────────────────────────────────────────────────────┘\n                                ↓\n┌─────────────────────────────────────────────────────────────────────┐\n│                          L2 应用编排层                               │\n├─────────────────────────────────────────────────────────────────────┤\n│  路由系统: Next.js App Router (文件系统路由)                         │\n│  生命周期: SSR → Hydration → Mount → Unmount                       │\n│  错误边界: ErrorBoundary + try-catch + AbortController             │\n└─────────────────────────────────────────────────────────────────────┘\n                                ↓\n┌─────────────────────────────────────────────────────────────────────┐\n│                          L1 业务域层                                 │\n├─────────────────────────────────────────────────────────────────────┤\n│  UI组件: lucide-react 0.460 (100+ SVG图标)                         │\n│  动画效果: framer-motion 12 (motion, AnimatePresence, LayoutGroup) │\n│  样式系统: Tailwind CSS 3.4 (原子化CSS + CSS变量主题)               │\n│  业务组件: 70+ React组件 (ChatArea, Settings, Agent, Mobile等)    │\n└─────────────────────────────────────────────────────────────────────┘\n                                ↓\n┌─────────────────────────────────────────────────────────────────────┐\n│                          L3 能力抽象层                               │\n├─────────────────────────────────────────────────────────────────────┤\n│  Markdown: react-markdown 9 | remark-gfm 4 | remark-math 6         │\n│  语法高亮: shiki 4 (替代highlight.js)                               │\n│  安全过滤: dompurify 3 (XSS防护)                                   │\n│  数学公式: KaTeX 0.16 + rehype-katex 7                             │\n│  图表可视化: recharts 3.8                                          │\n│  HTTP客户端: axios 1.6 | fetch (内置)                               │\n│  数据解析: cheerio 1.0 (HTML解析)                                   │\n│  文件上传: multer 1.4                                               │\n│  缓存: Redis 5.10 | ioredis 5.10                                   │\n│  数据库: PostgreSQL | Prisma 7.5 | pg 8.20                         │\n└─────────────────────────────────────────────────────────────────────┘\n                                ↓\n┌─────────────────────────────────────────────────────────────────────┐\n│                          L5 浏览器层                                 │\n├─────────────────────────────────────────────────────────────────────┤\n│  存储API: sessionStorage (API Key) | localStorage (Zustand persist)│\n│  网络API: fetch | EventSource (SSE) | WebSocket                    │\n│  媒体API: MediaDevices | Audio API | Canvas                        │\n│  DOM API: matchMedia | clipboard | navigator.onLine                 │\n│  浏览器事件: keydown | online/offline | MediaQueryList change      │\n│  安全API: Web Crypto (DOMPurify内部使用)                           │\n└─────────────────────────────────────────────────────────────────────┘\n```\n\n---\n\n## 完整依赖清单\n\n### 前端 (frontend/package.json)\n\n#### 生产依赖\n```json\n{\n  \"react\": \"^19.0.0\",\n  \"react-dom\": \"^19.0.0\",\n  \"next\": \"^16.0.0\",\n  \"zustand\": \"^5.0.0\",\n  \"framer-motion\": \"^12.36.0\",\n  \"react-markdown\": \"^9.0.1\",\n  \"remark-gfm\": \"^4.0.0\",\n  \"remark-math\": \"^6.0.0\",\n  \"rehype-katex\": \"^7.0.1\",\n  \"rehype-slug\": \"^6.0.0\",\n  \"shiki\": \"^4.0.2\",\n  \"dompurify\": \"^3.3.3\",\n  \"recharts\": \"^3.8.0\",\n  \"lucide-react\": \"^0.460.0\",\n  \"katex\": \"^0.16.38\",\n  \"@types/katex\": \"^0.16.8\"\n}\n```\n\n#### 开发依赖\n```json\n{\n  \"typescript\": \"^5.7.0\",\n  \"@types/react\": \"^19.0.0\",\n  \"@types/react-dom\": \"^19.0.0\",\n  \"@types/node\": \"^22.19.15\",\n  \"@types/dompurify\": \"^3.0.5\",\n  \"tailwindcss\": \"^3.4.17\",\n  \"autoprefixer\": \"^10.4.20\",\n  \"postcss\": \"^8.4.49\",\n  \"eslint\": \"^9.17.0\",\n  \"eslint-config-next\": \"^16.0.0\",\n  \"@playwright/test\": \"^1.58.2\",\n  \"playwright\": \"^1.58.2\",\n  \"vitest\": \"^4.1.0\"\n}\n```\n\n### 后端 (backend/package.json)\n\n#### 生产依赖\n```json\n{\n  \"express\": \"^4.18.2\",\n  \"cors\": \"^2.8.5\",\n  \"dotenv\": \"^16.6.1\",\n  \"axios\": \"^1.6.0\",\n  \"cheerio\": \"^1.0.0-rc.12\",\n  \"multer\": \"^1.4.5-lts.1\",\n  \"ioredis\": \"^5.10.0\",\n  \"uuid\": \"^9.0.1\",\n  \"pg\": \"^8.20.0\",\n  \"playwright\": \"^1.40.0\",\n  \"opossum\": \"^5.0.1\",\n  \"vm2\": \"^3.10.5\",\n  \"@prisma/client\": \"^7.5.0\",\n  \"@modelcontextprotocol/sdk\": \"^0.5.0\"\n}\n```\n\n#### 开发依赖\n```json\n{\n  \"jest\": \"^30.3.0\",\n  \"ts-jest\": \"^29.4.6\",\n  \"prisma\": \"^7.5.0\",\n  \"@types/jest\": \"^30.0.0\"\n}\n```\n\n---\n\n## 总结\n\n| 层级 | 主要技术 | 依赖数量 |\n|------|----------|----------|\n| L6 工程层 | Next.js 16, TypeScript 5.7, Playwright, Vitest, ESLint | 13 |\n| L4 运行时层 | React 19, Next.js 16, Zustand 5, Express 4.18 | 4 |\n| L2 应用编排层 | Next.js Router, Zustand Store, ErrorBoundary | 3 |\n| L1 业务域层 | framer-motion 12, lucide-react 0.460, Tailwind CSS 3.4 | 3 |\n| L3 能力抽象层 | react-markdown, shiki, recharts, dompurify, KaTeX, axios, cheerio, multer, Redis, Prisma | 15+ |\n| L5 浏览器层 | fetch, sessionStorage, navigator APIs, Clipboard API | 内置 |\n\n**核心技术栈**: React 19 + Next.js 16 + Zustand 5 + Tailwind CSS 3.4 + framer-motion 12\n\n**总依赖数量**: 50+ 个npm包\n",
+      "type": "text",
+      "metadata": {},
+      "chunks": [
+        {
+          "id": "chunk_doc_1774028663716_0",
+          "content": "# AI Chat 玩具 - 六层架构技术栈详解。> 文档版本: 1.0.0。> 更新日期: 2026-03-20。> 项目技术栈总览: React 19 + Next.js 16 + Zustand 5 + Express。---。## 目录。1. [L6 工程基础设施层](#l6-工程基础设施层)。2. [L5 浏览器平台层](#l5-浏览器平台层)。3. [L4 运行时层](#l4-运行时层)。4. [L3 能力抽象层](#l3-能力抽象层)。5. [L2 应用编排层](#l2-应用编排层)。6. [L1 业务域层](#l1-业务域层)。7. [后端技术栈](#后端技术栈)。8. [技术依赖关系图](#技术依赖关系图)。---。## L6 工程基础设施层。### 构建工具。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **Next.js** | ^16.0.0 | React全栈框架、SSR/SSG、路由系统 | `frontend/` |。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_1",
+          "content": "^16.0.0 | React全栈框架、SSR/SSG、路由系统 | `frontend/` |。| **Webpack** | (内置Next.js) | 模块打包、代码分割 | 内置 |。| **TypeScript** | ^5.7.0 | 类型检查、代码提示 | `frontend/tsconfig.json` |。| **Tailwind CSS** | ^3.4.17 | 原子化CSS框架 | `frontend/tailwind.config.js` |。| **PostCSS** | ^8.4.49 | CSS转换、 Autoprefixer | `frontend/postcss.config.js` |。| **Autoprefixer** | ^10.4.20 | CSS前缀自动补全 | `frontend/postcss.config.js` |。### 测试工具。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。",
+          "index": 1,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_2",
+          "content": "本 | 用途 | 源码位置 |。|------|------|------|----------|。| **Playwright** | ^1.58.2 | E2E浏览器自动化测试 | `frontend/package.json` |。| **@playwright/test** | ^1.58.2 | Playwright测试框架 | `frontend/tests/e2e/` |。| **Vitest** | ^4.1.0 | 单元测试框架 | `frontend/package.json` |。| **Jest** | ^30.3.0 | 后端单元测试 | `backend/package.json` |。| **ts-jest** | ^29.4.6 | TypeScript Jest转换器 | `backend/package.json` |。### 代码质量工具。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。",
+          "index": 2,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_3",
+          "content": "本 | 用途 | 源码位置 |。|------|------|------|----------|。| **ESLint** | ^9.17.0 | 代码质量检查 | `frontend/package.json` |。| **eslint-config-next** | ^16.0.0 | Next.js ESLint规则集 | `frontend/package.json` |。| **Prisma** | ^7.5.0 | ORM数据库工具 | `backend/package.json` |。### 进程管理。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **PM2** | (全局安装) | 进程管理、负载均衡 | `ecosystem.config.js` |。| **Node.js** | LTS | 后端运行时 | `backend/src/` |。### 环境配置。| 技术 | 用途 | 源码位置 |。|------|------|----------|。",
+          "index": 3,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_4",
+          "content": "境配置。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **dotenv** | 环境变量管理 | `backend/package.json` |。| **.env.local** | 前端环境变量 | `frontend/.env.local` |。| **.mcp.json** | MCP服务器配置 | 项目根目录 |。---。## L5 浏览器平台层。### 存储 API。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **sessionStorage** | API Key安全存储（会话级） | `frontend/src/store/chatStore.ts` |。| **localStorage** | 持久化数据存储 | Zustand persist中间件 |。### 网络 API。| 技术 | 用途 | 源码位置 |。|------|------|----------|。",
+          "index": 4,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_5",
+          "content": "API。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **fetch** | REST API调用 | `frontend/src/lib/api.ts` |。| **EventSource** | SSE流式响应 | `frontend/src/lib/sse.ts` |。| **WebSocket** | 实时双向通信 | `backend/src/services/sseService.js` |。### 媒体 API。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **MediaDevices API** | 麦克风权限、语音录制 | `frontend/src/components/ChatInput.tsx` |。| **Audio API** | 音频播放 | `frontend/src/components/ChatArea.tsx` |。",
+          "index": 5,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_6",
+          "content": "| 音频播放 | `frontend/src/components/ChatArea.tsx` |。| **Canvas API** | 图表渲染 | `frontend/src/components/PerformanceDashboard.tsx` |。### DOM API。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **window.matchMedia** | 响应式断点检测 | `frontend/src/app/page.tsx` |。| **navigator.clipboard** | 复制到剪贴板 | `frontend/src/components/MarkdownRenderer.tsx` |。| **navigator.onLine** | 网络状态检测 | `frontend/src/lib/workflowPersistence.ts` |。| **document.addEventListener** | 键盘事件监听 | `frontend/src/app/page.tsx` |。### 浏览器事件。",
+          "index": 6,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_7",
+          "content": "键盘事件监听 | `frontend/src/app/page.tsx` |。### 浏览器事件。| 事件 | 用途 | 源码位置 |。|------|------|----------|。| **keydown** | ESC键关闭面板 | `frontend/src/app/page.tsx` |。| **online/offline** | 网络状态变化 | `frontend/src/lib/workflowPersistence.ts` |。| **MediaQueryList change** | 主题/断点变化 | `frontend/src/app/page.tsx` |。### 安全 API。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **Web Crypto API** | 数据加密（DOMPurify内部） | `frontend/src/components/MarkdownRenderer.tsx` |。---。## L4 运行时层。### 前端框架。| 技术 | 版本 | 用途 | 源码位置 |。",
+          "index": 7,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_8",
+          "content": "|。---。## L4 运行时层。### 前端框架。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **React** | ^19.0.0 | 核心UI框架 | `frontend/src/` |。| **React DOM** | ^19.0.0 | DOM渲染 | `frontend/src/app/` |。| **Next.js** | ^16.0.0 | 全栈框架、App Router | `frontend/src/app/` |。### React 核心特性使用。| Hook/特性 | 使用次数 | 主要用途 |。|------------|----------|----------|。| **useState** | 60+ | 组件状态管理 |。| **useEffect** | 50+ | 副作用处理 |。| **useCallback** | 30+ | 性能优化 |。| **useMemo** | 25+ | 计算结果缓存 |。| **useRef** | 20+ | DOM引用、持久化值 |。",
+          "index": 8,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_9",
+          "content": "25+ | 计算结果缓存 |。| **useRef** | 20+ | DOM引用、持久化值 |。| **createContext** | 5+ | 跨组件数据传递 |。| **useContext** | 5+ | 上下文消费 |。### 状态管理。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **Zustand** | ^5.0.0 | 轻量级状态管理 | `frontend/src/store/` |。| **Zustand Persist** | (内置) | 数据持久化 | `frontend/src/store/chatStore.ts` |。### 服务端渲染。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **Next.js App Router** | 文件系统路由 | `frontend/src/app/` |。| **SSR/SSG** | 服务器端渲染 | `frontend/src/app/layout.tsx` |。",
+          "index": 9,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_10",
+          "content": "/SSG** | 服务器端渲染 | `frontend/src/app/layout.tsx` |。| **Dynamic Import** | 代码分割 | `frontend/src/app/page.tsx` |。### 后端运行时。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **Node.js** | LTS | 后端JavaScript运行时 | `backend/src/` |。| **Express** | ^4.18.2 | Web应用框架 | `backend/src/index.js` |。---。## L3 能力抽象层。### Markdown 处理。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **react-markdown** | ^9.0.1 | Markdown渲染引擎 | `frontend/src/components/MarkdownRenderer.tsx` |。",
+          "index": 10,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_11",
+          "content": "`frontend/src/components/MarkdownRenderer.tsx` |。| **remark-gfm** | ^4.0.0 | GitHub风格Markdown | `frontend/src/components/MarkdownRenderer.tsx` |。| **remark-math** | ^6.0.0 | 数学公式解析 | `frontend/src/components/MarkdownRenderer.tsx` |。| **rehype-katex** | ^7.0.1 | KaTeX数学渲染 | `frontend/src/components/MarkdownRenderer.tsx` |。| **rehype-slug** | ^6.0.0 | 自动标题ID | `frontend/src/components/MarkdownRenderer.tsx` |。### 语法高亮。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。",
+          "index": 11,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_12",
+          "content": "本 | 用途 | 源码位置 |。|------|------|------|----------|。| **shiki** | ^4.0.2 | 代码语法高亮（替代highlight.js） | `frontend/src/components/MarkdownRenderer.tsx` |。| **highlight.js** | ^11.9.0 | 备用语法高亮 | `frontend/package.json` (未使用) |。### 安全过滤。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **dompurify** | ^3.3.3 | XSS安全过滤 | `frontend/src/components/MarkdownRenderer.tsx` |。### 数学公式。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。",
+          "index": 12,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_13",
+          "content": "本 | 用途 | 源码位置 |。|------|------|------|----------|。| **KaTeX** | ^0.16.38 | LaTeX数学公式渲染 | `frontend/src/components/MarkdownRenderer.tsx` |。### 图表可视化。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **recharts** | ^3.8.0 | React图表库 | `frontend/src/components/PerformanceDashboard.tsx` |。### HTTP 客户端。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **axios** | ^1.6.0 | HTTP请求库 | `backend/src/services/apiAdapter.js` |。| **fetch** | (内置) | 前端HTTP请求 | `frontend/src/lib/api.ts` |。",
+          "index": 13,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_14",
+          "content": "* | (内置) | 前端HTTP请求 | `frontend/src/lib/api.ts` |。### 数据抓取。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **cheerio** | ^1.0.0-rc.12 | HTML解析 | `backend/src/search.js` |。### 文件上传。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **multer** | ^1.4.5-lts.1 | 文件上传处理 | `backend/src/routes/proxy.js` |。### 缓存服务。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **Redis** | ^5.10.0 | 内存数据库缓存 | `backend/src/services/redis.js` |。",
+          "index": 14,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_15",
+          "content": "0.0 | 内存数据库缓存 | `backend/src/services/redis.js` |。| **ioredis** | ^5.10.0 | Redis客户端 | `backend/src/services/cacheService.js` |。### 数据库。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **PostgreSQL** | - | 关系型数据库 | `backend/src/services/database.js` |。| **Prisma** | ^7.5.0 | ORM框架 | `backend/prisma/schema.prisma` |。| **pg** | ^8.20.0 | PostgreSQL驱动 | `backend/package.json` |。---。## L2 应用编排层。### 状态管理架构。#### chatStore.ts (645行)。- 对话列表管理。- 消息状态追踪。- API配置管理。- 用户设置。- 面板状态控制。- 多窗口布局配置。",
+          "index": 15,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_16",
+          "content": "列表管理。- 消息状态追踪。- API配置管理。- 用户设置。- 面板状态控制。- 多窗口布局配置。#### agentWorkflowStore.ts (612行)。- 工作流定义存储。- 执行状态管理。- SSE事件处理。- 错误边界处理。### 路由系统。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **Next.js App Router** | 文件系统路由 | `frontend/src/app/` |。| **Dynamic Routes** | 动态路由 | `frontend/src/app/page.tsx` |。### 页面生命周期。| 阶段 | 处理逻辑 | 源码位置 |。|------|----------|----------|。| **SSR** | 服务端数据获取 | `frontend/src/app/layout.tsx` |。| **Hydration** | 客户端水合 | Zustand persist |。| **Mount** | 组件挂载初始化 | 各组件useEffect |。",
+          "index": 16,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_17",
+          "content": "persist |。| **Mount** | 组件挂载初始化 | 各组件useEffect |。| **Unmount** | 清理资源 | 各组件useEffect return |。### 错误边界。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **ErrorBoundary** | React错误边界 | `frontend/src/components/ErrorBoundary.tsx` |。| **try-catch** | 同步错误处理 | 各API调用处 |。| **AbortController** | 请求取消 | `frontend/src/lib/sse.ts` |。---。## L1 业务域层。### UI 组件库。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **lucide-react** | ^0.460.0 | SVG图标库 | 50+ 组件文件 |。#### 使用图标列表 (部分)。",
+          "index": 17,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_18",
+          "content": "| ^0.460.0 | SVG图标库 | 50+ 组件文件 |。#### 使用图标列表 (部分)。- `Settings`, `X`, `Plus`, `Trash2`, `MessageSquare`。- `Bot`, `User`, `Sparkles`, `Zap`。- `Loader2`, `Check`, `AlertTriangle`, `Clock`。- `Search`, `Globe`, `ChevronDown`, `ChevronUp`。- `Copy`, `Send`, `Image`, `Mic`, `Paperclip`。- `Sun`, `Moon`, `Monitor`, `Smartphone`。- `Layers`, `GitBranch`, `Play`, `Pause`。- `Database`, `FileText`, `Folder`。- `Network`, `Cpu`, `HardDrive`。- `Key`, `Lock`, `Unlock`。- `Wifi`, `WifiOff`。- `RefreshCw`, `RotateCcw`。",
+          "index": 18,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_19",
+          "content": "k`。- `Wifi`, `WifiOff`。- `RefreshCw`, `RotateCcw`。- `Maximize2`, `Minimize2`, `Fullscreen`。- `Code`, `Terminal`, `Bug`。- `BarChart2`, `PieChart`, `TrendingUp`。- `Download`, `Upload`, `Share`。- `ExternalLink`, `Link`, `Unlink`。- `Edit`, `Edit3`, `PenTool`。- `MessageCircle`, `MessageSquare`, `MessagesSquare`。- `Bell`, `BellOff`, `Inbox`。- `Calendar`, `Clock`, `Timer`。- `MapPin`, `Navigation`, `Compass`。- `Palette`, `Paintbrush`, `Brush`。- `Camera`, `CameraOff`, `Video`, `VideoOff`。",
+          "index": 19,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_20",
+          "content": "ush`。- `Camera`, `CameraOff`, `Video`, `VideoOff`。- `Headphones`, `Volume2`, `VolumeX`。- `Mic`, `MicOff`, `Mic2`。- `Cpu`, `Server`, `Cloud`, `CloudOff`。- `Shield`, `ShieldCheck`, `ShieldAlert`。- `Eye`, `EyeOff`, `Visibility`, `VisibilityOff`。- `Filter`, `Funnel`, `Sliders`。- `Grid`, `Layout`, `LayoutGrid`。- `List`, `ListOrdered`, `ListUnordered`。- `Menu`, `MoreHorizontal`, `MoreVertical`。- `PanelLeft`, `PanelRight`, `PanelTop`。- `Sidebar`, `SidebarClose`, `SidebarOpen`。",
+          "index": 20,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_21",
+          "content": "elTop`。- `Sidebar`, `SidebarClose`, `SidebarOpen`。- `Split`, `SplitSquareHorizontal`。- `Table`, `Table2`, `Columns`。- `Target`, `Crosshair`, `Aim`。- `Thermometer`, `Wind`, `Cloud`, `Sun`。- `Zap`, `ZapOff`, `Lightning`, `Flashlight`。- `Box`, `Package`, `Archive`。- `Inbox`, `Mail`, `Send`, `Paperplane`。- `Phone`, `PhoneCall`, `PhoneIncoming`, `PhoneOutgoing`。- `User`, `Users`, `UserPlus`, `UserMinus`。- `UserCheck`, `UserX`, `UserCog`, `UserSettings`。- `LogIn`, `LogOut`, `LogOut`, `LogIn`。",
+          "index": 21,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_22",
+          "content": "rSettings`。- `LogIn`, `LogOut`, `LogOut`, `LogIn`。- `PlusCircle`, `MinusCircle`, `XCircle`, `CheckCircle`。- `AlertCircle`, `AlertOctagon`, `AlertTriangle`。- `Info`, `HelpCircle`, `QuestionMark`。- `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`。- `ArrowUpCircle`, `ArrowDownCircle`, `ArrowLeftCircle`, `ArrowRightCircle`。- `ChevronUp`, `ChevronDown`, `ChevronLeft`, `ChevronRight`。- ` ChevronsUp`, `ChevronsDown`, `ChevronsLeft`, `ChevronsRight`。",
+          "index": 22,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_23",
+          "content": ", `ChevronsDown`, `ChevronsLeft`, `ChevronsRight`。- `CornerDownLeft`, `CornerDownRight`, `CornerLeftUp`, `CornerLeftDown`。- `CornerRightUp`, `CornerRightDown`, `ArrowUpLeft`, `ArrowUpRight`。- `ArrowDownLeft`, `ArrowDownRight`, `Move`, `MoveHorizontal`, `MoveVertical`。- `RotateCw`, `RotateCcw`, `RefreshCw`, `RefreshCcw`。- `Repeat`, `Repeat1`, `Shuffle`, `Shuffle`。- `Play`, `Pause`, `PlayCircle`, `PauseCircle`。- `Stop`, `StopCircle`, `Square`, `Circle`。",
+          "index": 23,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_24",
+          "content": "ircle`。- `Stop`, `StopCircle`, `Square`, `Circle`。- `Rewind`, `FastForward`, `SkipBack`, `SkipForward`。- `Film`, `Music`, `Headphones`, `Speaker`。- `Volume`, `Volume1`, `Volume2`, `VolumeX`。- `Maximize`, `Minimize`, `Maximize2`, `Minimize2`。- `Expand`, `Compress`, `ZoomIn`, `ZoomOut`。- `Map`, `MapPin`, `Navigation`, `Compass`。- `Globe`, `World`, `Globe2`, `Earth`。- `Anchor`, `Ship`, `Car`, `Truck`。- `Bike`, `Footprints`, `Plane`, `Train`。- `Bus`, `Taxi`, `Uber`, `Car`。",
+          "index": 24,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_25",
+          "content": ", `Plane`, `Train`。- `Bus`, `Taxi`, `Uber`, `Car`。- `Home`, `Building`, `Building2`, `Office`。- `Factory`, `Industry`, `Warehouse`, `Store`。- `ShoppingCart`, `ShoppingBag`, `CreditCard`, `DollarSign`。- `Bitcoin`, `Ethereum`, `Coins`, `Wallet`。- `Gift`, `Award`, `Trophy`, `Medal`。- `Star`, `StarHalf`, `Star`, `Heart`。- `Heart`, `HeartOff`, `Smile`, `Meh`。- `Frown`, `Angry`, `Zap`, `Flame`。- `Coffee`, `Beer`, `Wine`, `Drink`。- `Pizza`, `Apple`, `Banana`, `Cherry`。",
+          "index": 25,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_26",
+          "content": "`, `Drink`。- `Pizza`, `Apple`, `Banana`, `Cherry`。- `Cookie`, `Cake`, `IceCream`, `Candy`。- `Cloud`, `CloudDrizzle`, `CloudFog`, `CloudLightning`。- `CloudRain`, `CloudSnow`, `CloudSun`, `Moon`。- `Sun`, `Sunset`, `Sunrise`, `Moonrise`。- `Umbrella`, `Wind`, `Thermometer`, `ThermometerSun`。- `Droplet`, `Droplets`, `Wave`, `Waves`。- `Snowflake`, `Star`, `Sparkles`, `Sun`。- `Cloudy`, `CloudOff`, `Cloud`, `CloudLightning`。- `Battery`, `BatteryCharging`, `BatteryLow`, `BatteryFull`。",
+          "index": 26,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_27",
+          "content": "`, `BatteryCharging`, `BatteryLow`, `BatteryFull`。- `Plug`, `PlugZap`, `Power`, `Socket`。- `Wifi`, `WifiOff`, `Signal`, `SignalZero`。- `Bluetooth`, `BluetoothConnected`, `BluetoothOff`。- `Share`, `Share2`, `ShareNetwork`。- `Copy`, `Link`, `Unlink`, `Link2`。- `Scissors`, `Cut`, `Paste`, `Clipboard`。- `Clipboard`, `ClipboardList`, `ClipboardCheck`。- `File`, `FileText`, `FilePlus`, `FileMinus`。- `FileCheck`, `FileX`, `FileEdit`, `Files`。- `Folder`, `FolderPlus`, `FolderMinus`, `FolderOpen`。",
+          "index": 27,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_28",
+          "content": "older`, `FolderPlus`, `FolderMinus`, `FolderOpen`。- `Archive`, `Package`, `Box`, `Truck`。- `Anchor`, `Ship`, `Plane`, `Rocket`。- `Bookmark`, `BookmarkPlus`, `BookmarkMinus`。- `Flag`, `FlagOff`, `Target`, `Crosshair`。- `Hash`, `AtSign`, `Mention`, `Hashtag`。- `Bold`, `Italic`, `Underline`, `Strikethrough`。- `Type`, `Font`, `Text`, `AlignLeft`。- `AlignCenter`, `AlignRight`, `AlignJustify`。- `List`, `ListOrdered`, `ListUnordered`。- `Indent`, `Outdent`, `TextCursor`, `Selection`。",
+          "index": 28,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_29",
+          "content": "。- `Indent`, `Outdent`, `TextCursor`, `Selection`。- `RemoveFormatting`, `FormatPainter`, `Highlighter`, `Eraser`。- `Heading1`, `Heading2`, `Heading3`, `Heading4`。- `Paragraph`, `Quote`, `Quote`, `Minus`。- `Plus`, `Equal`, `Slashes`, `Backslash`。- `DollarSign`, `Euro`, `Pound`, `Yen`。- `Bitcoin`, `Litecoin`, `Dogecoin`, `Ethereum`。- `Percent`, `Pi`, `Sigma`, `Delta`。- `A`, `B`, `C`, `D`, `E`, `F`, `G`, `H`, `I`, `J`, `K`, `L`, `M`。- `N`, `O`, `P`, `Q`, `R`, `S`, `T`, `U`, `V`, `W`, `X`, `Y`, `Z`。",
+          "index": 29,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_30",
+          "content": "`Q`, `R`, `S`, `T`, `U`, `V`, `W`, `X`, `Y`, `Z`。- `a`, `b`, `c`, `d`, `e`, `f`, `g`, `h`, `i`, `j`, `k`, `l`, `m`。- `n`, `o`, `p`, `q`, `r`, `s`, `t`, `u`, `v`, `w`, `x`, `y`, `z`。### 动画库。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **framer-motion** | ^12.36.0 | 动画与交互动效 | 40+ 组件文件 |。#### 使用模式。- `motion.div` - 动画容器。- `AnimatePresence` - 条件渲染动画。- `LayoutGroup` - 布局动画组。- `Variants` - 动画变体定义。- `Transition` - 过渡配置。### CSS 框架。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。",
+          "index": 30,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_31",
+          "content": "本 | 用途 | 源码位置 |。|------|------|------|----------|。| **Tailwind CSS** | ^3.4.17 | 原子化样式 | 所有组件 |。#### 自定义配置。```javascript。// 自定义断点。screens: {。  'mobile': {'max': '639px'},。  'tablet': {'min': '640px', 'max': '1023px'},。  'desktop': {'min': '1024px'},。  'xs': '480px',。  'sm': '640px',。  'md': '768px',。  'lg': '1024px',。  'xl': '1280px',。  '2xl': '1440px',。  '3xl': '1920px',。}。// CSS变量主题。colors: {。  border: 'hsl(var(--border))',。  background: 'hsl(var(--background))',。",
+          "index": 31,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_32",
+          "content": "order))',。  background: 'hsl(var(--background))',。  primary: 'hsl(var(--primary))',。  muted: 'hsl(var(--muted))',。  accent: 'hsl(var(--accent))',。}。```。### 组件结构。```。frontend/src/components/。├── ChatArea.tsx              # 聊天区域。├── ChatInput.tsx             # 聊天输入。├── ConversationList.tsx      # 对话列表。├── MarkdownRenderer.tsx       # Markdown渲染 ⭐。├── Message.tsx               # 消息组件。├── Settings.tsx              # 设置面板。├── Toast.tsx                 # 通知组件。├── PerformanceDashboard.tsx   # 性能监控 ⭐。",
+          "index": 32,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_33",
+          "content": "# 通知组件。├── PerformanceDashboard.tsx   # 性能监控 ⭐。├── KnowledgeBaseManager.tsx   # 知识库管理。├── MemoryPanel.tsx           # 记忆面板。├── ErrorBoundary.tsx         # 错误边界。├── agent/                    # Agent系统 (15个组件)。│   ├── AgentCollaborationPanel.tsx。│   ├── AgentConfigPanel.tsx。│   ├── AgentDebugger.tsx。│   ├── AgentExecutionPanel.tsx。│   ├── AgentWorkspace.tsx。│   ├── WorkflowEditor.tsx。│   ├── workflow/。│   │   └── DndWorkflowCanvas.tsx。│   └── ...。└── mobile/                   # 移动端适配 (9个组件)。",
+          "index": 33,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_34",
+          "content": "...。└── mobile/                   # 移动端适配 (9个组件)。    ├── MobileLayout.tsx。    ├── MobileChatArea.tsx。    ├── BottomSheet.tsx。    └── ...。```。---。## 后端技术栈。### 核心框架。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **Express** | ^4.18.2 | Web应用框架 | `backend/src/index.js` |。| **Node.js** | LTS | JavaScript运行时 | `backend/src/` |。| **CORS** | ^2.8.5 | 跨域资源共享 | `backend/src/index.js` |。| **dotenv** | ^16.6.1 | 环境变量 | `backend/.env` |。### AI/ML 服务。| 技术 | 版本 | 用途 | 源码位置 |。",
+          "index": 34,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_35",
+          "content": "kend/.env` |。### AI/ML 服务。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **OpenAI SDK** | - | OpenAI API调用 | `backend/src/services/apiAdapter.js` |。| **Anthropic SDK** | - | Claude API调用 | `backend/src/services/apiAdapter.js` |。| **axios** | ^1.6.0 | 通用HTTP客户端 | `backend/src/` |。### 数据库与缓存。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **PostgreSQL** | - | 关系型数据库 | `backend/src/services/database.js` |。| **Prisma** | ^7.5.0 | ORM框架 | `backend/prisma/schema.prisma` |。",
+          "index": 35,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_36",
+          "content": "^7.5.0 | ORM框架 | `backend/prisma/schema.prisma` |。| **pg** | ^8.20.0 | PostgreSQL驱动 | `backend/package.json` |。| **Redis** | - | 内存缓存 | `backend/src/services/redis.js` |。| **ioredis** | ^5.10.0 | Redis客户端 | `backend/src/services/cacheService.js` |。### 向量数据库。| 技术 | 用途 | 源码位置 |。|------|------|----------|。| **pgvector** | 向量存储与检索 | `backend/src/services/pgVectorStore.js` |。| **mockVectorStore** | 模拟向量存储 | `backend/src/services/mockVectorStore.js` |。### MCP (Model Context Protocol)。",
+          "index": 36,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_37",
+          "content": "ectorStore.js` |。### MCP (Model Context Protocol)。| 技术 | 版本 | 用途 | 源码位置 |。|------|------|------|----------|。| **@modelcontextprotocol/sdk** | ^0.5.0 | MCP协议实现 | `backend/src/services/mcp.js` |。| **minimax-coding-plan-mcp** | (uvx) | MiniMax MCP服务器 | `.mcp.json` |。### 工具系统。| 工具 | 用途 | 源码位置 |。|------|------|----------|。| **calculatorTool** | 计算器工具 | `backend/src/services/tools/calculatorTool.js` |。| **dateTimeTool** | 日期时间工具 | `backend/src/services/tools/dateTimeTool.js` |。",
+          "index": 37,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_38",
+          "content": "| `backend/src/services/tools/dateTimeTool.js` |。| **webSearchTool** | 网络搜索工具 | `backend/src/services/tools/webSearchTool.js` |。| **webScraperTool** | 网页抓取工具 | `backend/src/services/tools/webScraperTool.js` |。| **fileSystemTool** | 文件系统工具 | `backend/src/services/tools/fileSystemTool.js` |。| **shellTool** | Shell执行工具 | `backend/src/services/tools/shellTool.js` |。| **httpRequestTool** | HTTP请求工具 | `backend/src/services/tools/httpRequestTool.js` |。",
+          "index": 38,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_39",
+          "content": "`backend/src/services/tools/httpRequestTool.js` |。| **codeExecutionTool** | 代码执行工具 | `backend/src/services/tools/codeExecutionTool.js` |。| **dataProcessingTool** | 数据处理工具 | `backend/src/services/tools/dataProcessingTool.js` |。| **multimodalTools** | 多模态工具 | `backend/src/services/tools/multimodalTools.js` |。### Agent 引擎。| 组件 | 用途 | 源码位置 |。|------|------|----------|。| **agentEngine** | 核心Agent引擎 | `backend/src/services/agentEngine.js` |。",
+          "index": 39,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_40",
+          "content": "Agent引擎 | `backend/src/services/agentEngine.js` |。| **multiAgentEngine** | 多Agent协作 | `backend/src/services/multiAgentEngine.js` |。| **enhancedAgentEngine** | 增强Agent引擎 | `backend/src/services/enhancedAgentEngine.js` |。| **workflowEngine** | 工作流引擎 | `backend/src/services/workflowEngine.js` |。| **parallelExecutor** | 并行执行器 | `backend/src/services/parallelExecutor.js` |。### RAG 系统。| 组件 | 用途 | 源码位置 |。|------|------|----------|。| **ragService** | RAG服务 | `backend/src/services/ragService.js` |。",
+          "index": 40,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_41",
+          "content": "| RAG服务 | `backend/src/services/ragService.js` |。| **hybridSearch** | 混合检索 | `backend/src/services/hybridSearch.js` |。| **queryRewriter** | 查询改写 | `backend/src/services/queryRewriter.js` |。| **ingestion/pipeline** | 文档摄取管道 | `backend/src/services/ingestion/pipeline.js` |。### 路由器。| 组件 | 用途 | 源码位置 |。|------|------|----------|。| **multiModelRouter** | 多模型路由 | `backend/src/services/multiModelRouter.js` |。| **modelPool** | 模型池管理 | `backend/src/services/modelPool.js` |。",
+          "index": 41,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_42",
+          "content": "* | 模型池管理 | `backend/src/services/modelPool.js` |。| **taskClassifier** | 任务分类器 | `backend/src/services/router/taskClassifier.js` |。| **modelRouter** | 模型选择器 | `backend/src/services/router/modelRouter.js` |。| **llmIntentClassifier** | LLM意图分类 | `backend/src/services/llmIntentClassifier.js` |。### 搜索服务。| 组件 | 用途 | 源码位置 |。|------|------|----------|。| **search** | 搜索主服务 | `backend/src/search.js` |。| **mcpSearchService** | MCP搜索服务 | `backend/src/services/mcpSearchService.js` |。",
+          "index": 42,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_43",
+          "content": "服务 | `backend/src/services/mcpSearchService.js` |。| **searchRouter** | 搜索路由 | `backend/src/services/searchRouter.js` |。### 记忆系统。| 组件 | 用途 | 源码位置 |。|------|------|----------|。| **memory** | 基础记忆 | `backend/src/services/memory.js` |。| **enhancedMemory** | 增强记忆 | `backend/src/services/enhancedMemory.js` |。| **smartMemory** | 智能记忆 | `backend/src/services/smartMemory.js` |。### 可靠性。| 组件 | 用途 | 源码位置 |。|------|------|----------|。",
+          "index": 43,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_44",
+          "content": "可靠性。| 组件 | 用途 | 源码位置 |。|------|------|----------|。| **circuitBreaker** | 熔断器(opossum) | `backend/src/services/multiModelRouter.js` |。| **rateLimiter** | 限流器 | `backend/src/middleware/rateLimiter.js` |。| **taskQueue** | 任务队列 | `backend/src/services/taskQueue.js` |。| **rollbackManager** | 回滚管理器 | `backend/src/services/rollbackManager.js` |。### 监控与追踪。| 组件 | 用途 | 源码位置 |。|------|------|----------|。| **performanceMonitor** | 性能监控 | `backend/src/services/performanceMonitor.js` |。",
+          "index": 44,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_45",
+          "content": "| `backend/src/services/performanceMonitor.js` |。| **tracing** | 链路追踪 | `backend/src/services/tracing.js` |。| **tokenCounter** | Token计数 | `backend/src/services/tokenCounter.js` |。| **logger** | 日志服务 | `backend/src/services/logger.js` |。### 浏览器自动化。| 组件 | 用途 | 源码位置 |。|------|------|------|----------|。| **playwright** | ^1.40.0 | 浏览器自动化 | `backend/src/browser.js` |。### 后端路由结构。```。backend/src/routes/。├── chat.js                 # 聊天接口。├── proxy.js                # API代理。",
+          "index": 45,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_46",
+          "content": "# 聊天接口。├── proxy.js                # API代理。├── search.js               # 搜索接口。├── router.js               # 路由器配置。├── sessions.js             # 会话管理。├── memories.js             # 记忆管理。├── conversations.js        # 对话管理。├── rag.js                  # RAG接口。├── multiAgentEngine.js     # 多Agent引擎。├── mcp.js                  # MCP协议。├── mcpAgent.js             # MCP Agent。├── config.js               # 配置接口。├── browser.js              # 浏览器自动化。├── skills.js               # 技能系统。",
+          "index": 46,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_47",
+          "content": "# 浏览器自动化。├── skills.js               # 技能系统。├── enhancedAgent.js        # 增强Agent。├── enhancedMemory.js        # 增强记忆。├── hitl.js                 # Human-in-the-loop。├── multiagent.js           # 多Agent协作。├── plugins.js              # 插件系统。├── taskQueue.js            # 任务队列。├── searchEnhanced.js       # 增强搜索。└── minimaxMcp.js           # MiniMax MCP。```。---。## 技术依赖关系图。```。┌─────────────────────────────────────────────────────────────────────┐。",
+          "index": 47,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_48",
+          "content": "────────────────────────────────────────────────┐。│                          L6 工程层                                  │。├─────────────────────────────────────────────────────────────────────┤。│  构建工具: Next.js 16 | Webpack | TypeScript 5.7 | Turbopack       │。│  测试工具: Playwright 1.58 | Vitest 4.1 | Jest 30                │。│  质量工具: ESLint 9.17 | Prisma 7.5                                │。│  进程管理: PM2                                                      │。",
+          "index": 48,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_49",
+          "content": "│。└─────────────────────────────────────────────────────────────────────┘。                                ↓。┌─────────────────────────────────────────────────────────────────────┐。│                          L4 运行时层                                 │。├─────────────────────────────────────────────────────────────────────┤。│  前端框架: React 19 | Next.js 16 | Zustand 5                       │。",
+          "index": 49,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_50",
+          "content": "| Next.js 16 | Zustand 5                       │。│  后端框架: Express 4.18 | Node.js LTS                               │。│  状态管理: Zustand (chatStore + agentWorkflowStore)                │。└─────────────────────────────────────────────────────────────────────┘。                                ↓。┌─────────────────────────────────────────────────────────────────────┐。│                          L2 应用编排层                               │。",
+          "index": 50,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_51",
+          "content": "L2 应用编排层                               │。├─────────────────────────────────────────────────────────────────────┤。│  路由系统: Next.js App Router (文件系统路由)                         │。│  生命周期: SSR → Hydration → Mount → Unmount                       │。│  错误边界: ErrorBoundary + try-catch + AbortController             │。└─────────────────────────────────────────────────────────────────────┘。                                ↓。┌─────────────────────────────────────────────────────────────────────┐。",
+          "index": 51,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_52",
+          "content": "────────────────────────────────────────────────┐。│                          L1 业务域层                                 │。├─────────────────────────────────────────────────────────────────────┤。│  UI组件: lucide-react 0.460 (100+ SVG图标)                         │。│  动画效果: framer-motion 12 (motion, AnimatePresence, LayoutGroup) │。│  样式系统: Tailwind CSS 3.4 (原子化CSS + CSS变量主题)               │。│  业务组件: 70+ React组件 (ChatArea, Settings, Agent, Mobile等)    │。",
+          "index": 52,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_53",
+          "content": "React组件 (ChatArea, Settings, Agent, Mobile等)    │。└─────────────────────────────────────────────────────────────────────┘。                                ↓。┌─────────────────────────────────────────────────────────────────────┐。│                          L3 能力抽象层                               │。├─────────────────────────────────────────────────────────────────────┤。│  Markdown: react-markdown 9 | remark-gfm 4 | remark-math 6         │。",
+          "index": 53,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_54",
+          "content": "rkdown 9 | remark-gfm 4 | remark-math 6         │。│  语法高亮: shiki 4 (替代highlight.js)                               │。│  安全过滤: dompurify 3 (XSS防护)                                   │。│  数学公式: KaTeX 0.16 + rehype-katex 7                             │。│  图表可视化: recharts 3.8                                          │。│  HTTP客户端: axios 1.6 | fetch (内置)                               │。│  数据解析: cheerio 1.0 (HTML解析)                                   │。",
+          "index": 54,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_55",
+          "content": "1.0 (HTML解析)                                   │。│  文件上传: multer 1.4                                               │。│  缓存: Redis 5.10 | ioredis 5.10                                   │。│  数据库: PostgreSQL | Prisma 7.5 | pg 8.20                         │。└─────────────────────────────────────────────────────────────────────┘。                                ↓。┌─────────────────────────────────────────────────────────────────────┐。",
+          "index": 55,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_56",
+          "content": "────────────────────────────────────────────────┐。│                          L5 浏览器层                                 │。├─────────────────────────────────────────────────────────────────────┤。│  存储API: sessionStorage (API Key) | localStorage (Zustand persist)│。│  网络API: fetch | EventSource (SSE) | WebSocket                    │。│  媒体API: MediaDevices | Audio API | Canvas                        │。│  DOM API: matchMedia | clipboard | navigator.onLine                 │。",
+          "index": 56,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_57",
+          "content": "| clipboard | navigator.onLine                 │。│  浏览器事件: keydown | online/offline | MediaQueryList change      │。│  安全API: Web Crypto (DOMPurify内部使用)                           │。└─────────────────────────────────────────────────────────────────────┘。```。---。## 完整依赖清单。### 前端 (frontend/package.json)。#### 生产依赖。```json。{。  \"react\": \"^19.0.0\",。  \"react-dom\": \"^19.0.0\",。  \"next\": \"^16.0.0\",。  \"zustand\": \"^5.0.0\",。  \"framer-motion\": \"^12.36.0\",。  \"react-markdown\": \"^9.0.1\",。  \"remark-gfm\": \"^4.0.0\",。",
+          "index": 57,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_58",
+          "content": "ct-markdown\": \"^9.0.1\",。  \"remark-gfm\": \"^4.0.0\",。  \"remark-math\": \"^6.0.0\",。  \"rehype-katex\": \"^7.0.1\",。  \"rehype-slug\": \"^6.0.0\",。  \"shiki\": \"^4.0.2\",。  \"dompurify\": \"^3.3.3\",。  \"recharts\": \"^3.8.0\",。  \"lucide-react\": \"^0.460.0\",。  \"katex\": \"^0.16.38\",。  \"@types/katex\": \"^0.16.8\"。}。```。#### 开发依赖。```json。{。  \"typescript\": \"^5.7.0\",。  \"@types/react\": \"^19.0.0\",。  \"@types/react-dom\": \"^19.0.0\",。  \"@types/node\": \"^22.19.15\",。  \"@types/dompurify\": \"^3.0.5\",。  \"tailwindcss\": \"^3.4.17\",。",
+          "index": 58,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_59",
+          "content": "dompurify\": \"^3.0.5\",。  \"tailwindcss\": \"^3.4.17\",。  \"autoprefixer\": \"^10.4.20\",。  \"postcss\": \"^8.4.49\",。  \"eslint\": \"^9.17.0\",。  \"eslint-config-next\": \"^16.0.0\",。  \"@playwright/test\": \"^1.58.2\",。  \"playwright\": \"^1.58.2\",。  \"vitest\": \"^4.1.0\"。}。```。### 后端 (backend/package.json)。#### 生产依赖。```json。{。  \"express\": \"^4.18.2\",。  \"cors\": \"^2.8.5\",。  \"dotenv\": \"^16.6.1\",。  \"axios\": \"^1.6.0\",。  \"cheerio\": \"^1.0.0-rc.12\",。  \"multer\": \"^1.4.5-lts.1\",。  \"ioredis\": \"^5.10.0\",。  \"uuid\": \"^9.0.1\",。",
+          "index": 59,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_60",
+          "content": "s.1\",。  \"ioredis\": \"^5.10.0\",。  \"uuid\": \"^9.0.1\",。  \"pg\": \"^8.20.0\",。  \"playwright\": \"^1.40.0\",。  \"opossum\": \"^5.0.1\",。  \"vm2\": \"^3.10.5\",。  \"@prisma/client\": \"^7.5.0\",。  \"@modelcontextprotocol/sdk\": \"^0.5.0\"。}。```。#### 开发依赖。```json。{。  \"jest\": \"^30.3.0\",。  \"ts-jest\": \"^29.4.6\",。  \"prisma\": \"^7.5.0\",。  \"@types/jest\": \"^30.0.0\"。}。```。---。## 总结。| 层级 | 主要技术 | 依赖数量 |。|------|----------|----------|。| L6 工程层 | Next.js 16, TypeScript 5.7, Playwright, Vitest, ESLint | 13 |。",
+          "index": 60,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_61",
+          "content": "TypeScript 5.7, Playwright, Vitest, ESLint | 13 |。| L4 运行时层 | React 19, Next.js 16, Zustand 5, Express 4.18 | 4 |。| L2 应用编排层 | Next.js Router, Zustand Store, ErrorBoundary | 3 |。| L1 业务域层 | framer-motion 12, lucide-react 0.460, Tailwind CSS 3.4 | 3 |。| L3 能力抽象层 | react-markdown, shiki, recharts, dompurify, KaTeX, axios, cheerio, multer, Redis, Prisma | 15+ |。| L5 浏览器层 | fetch, sessionStorage, navigator APIs, Clipboard API | 内置 |。",
+          "index": 61,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        },
+        {
+          "id": "chunk_doc_1774028663716_62",
+          "content": "sionStorage, navigator APIs, Clipboard API | 内置 |。**核心技术栈**: React 19 + Next.js 16 + Zustand 5 + Tailwind CSS 3.4 + framer-motion 12。**总依赖数量**: 50+ 个npm包。",
+          "index": 62,
+          "metadata": {
+            "documentId": "doc_1774028663716",
+            "documentTitle": "六层架构技术栈详解"
+          }
+        }
+      ],
+      "createdAt": 1774028663716
+    }
+  ],
+  "createdAt": 1774028592007,
+  "updatedAt": 1774028663720
+}

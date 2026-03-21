@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-15-0833",
+  "baseUrl": "http://localhost:5173",
+  "summary": {
+    "pass": 5,
+    "fail": 1
+  },
+  "results": [
+    {
+      "name": "模型切换同步 baseURL",
+      "status": "pass"
+    },
+    {
+      "name": "OpenAI 模型真实请求走对应 provider",
+      "status": "pass"
+    },
+    {
+      "name": "MiniMax 模型真实请求可返回结果",
+      "status": "pass"
+    },
+    {
+      "name": "设置在刷新后保留当前会话配置",
+      "status": "pass"
+    },
+    {
+      "name": "记忆面板会话笔记与全局记忆写入会话存储",
+      "status": "fail",
+      "error": "locator.waitFor: Timeout 8000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByText('回归笔记-session-note') to be visible\u001b[22m\n"
+    },
+    {
+      "name": "工具市场安装状态在当前会话内持久化",
+      "status": "pass"
+    }
+  ],
+  "screenshotPath": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\2026-03-15-0833-deep-function-regression.png"
+}

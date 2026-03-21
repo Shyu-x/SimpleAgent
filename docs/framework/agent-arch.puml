@@ -1,0 +1,260 @@
+@startuml
+' MiniMax Agent 系统架构图
+' 包含:
+' 1. Agent 执行循环图 (Activity Diagram)
+' 2. 工具系统架构图 (Class Diagram)
+' 3. 消息流程图 (Class Diagram)
+' 4. SSE 事件流图 (Sequence Diagram)
+' 5. Mini-Agent Python 架构对比
+
+' ==============================================
+' 1. AGENT 执行循环图 (Activity Diagram)
+' ==============================================
+
+title MiniMax Agent 执行循环
+
+start
+
+:初始化会话
+  构建系统提示词
+  初始化消息历史;
+
+:添加用户任务消息;
+
+while (step < maxSteps) is (yes)
+  :检查用户取消?;
+  if (已取消) then (yes)
+    :返回"任务取消";
+    stop
+  endif
+
+  :估算 Token 数量;
+
+  if (Token > limit) then (yes)
+    :发出 token_limit_warning 事件;
+  endif
+
+  :调用 MiniMax M2.7 API;
+
+  :解析响应
+  (思考 + 文本 + 工具调用;
+
+  :添加助手消息到历史;
+
+  if (有工具调用?) then (yes)
+    :执行工具;
+    :获取工具结果;
+    :添加工具结果消息到历史;
+    :发出 tool_call 事件;
+    :step++
+    继续循环;
+  else (no)
+    :发出 complete 事件;
+    :返回最终结果;
+    stop
+  endif
+endwhile
+
+:达到最大步数限制
+发出 max_steps_reached 事件;
+stop
+
+' ==============================================
+' 2. 工具系统架构图 (Class Diagram)
+' ==============================================
+
+legend top right
+legend
+  <b>工具类层次结构
+endlegend
+
+classDiagram
+  BaseTool <|-- FileReadTool
+  BaseTool <|-- FileWriteTool
+  BaseTool <|-- FileListTool
+  BaseTool <|-- ShellTool
+  BaseTool <|-- WebSearchTool
+
+  class BaseTool {
+    +String name
+    +String description
+    +Object parameters
+    +getSchema() ToolSchema
+    +getOpenAISchema() OpenAISchema
+    +execute(input)~ToolResult~
+  }
+
+  class FileReadTool {
+    +String workspaceDir
+    +execute(input)~ToolResult~
+  }
+
+  class FileWriteTool {
+    +String workspaceDir
+    +execute(input)~ToolResult~
+  }
+
+  class FileListTool {
+    +String workspaceDir
+    +_listRecursive() List~String~
+    +execute(input)~ToolResult~
+  }
+
+  class ShellTool {
+    +String workspaceDir
+    +execute(input)~ToolResult~
+  }
+
+  class WebSearchTool {
+    +execute(input)~ToolResult~
+  }
+
+  class ToolResult {
+    +boolean success
+    +String content
+    +Error error
+    +toJSON() Object
+  }
+
+  class MiniMaxAgentRunner {
+    +List~BaseTool~ tools
+    +int maxSteps
+    +int tokenLimit
+    +boolean reasoningSplit
+    +addUserMessage()
+    +run()
+    +executeTool()
+    +callAPI()
+    +estimateTokens()
+  }
+
+  MiniMaxAgentRunner "1" *-- "many" BaseTool : 包含
+
+' ==============================================
+' 3. 消息结构 - Message 类图
+' ==============================================
+
+classDiagram
+  class Message {
+    +String role
+    +content
+    +String thinking
+    +List~Object~ tool_calls
+    +String tool_call_id
+    +toAPIFormat() OpenAI格式
+  }
+
+  class ToolResult {
+    +boolean success
+    +String content
+    +Error error
+  }
+
+  class MiniMaxAgentRunner "1" *-- "many" Message : 维护
+
+note for Message "当 reasoning_split=true\n在 toAPIFormat() 中:\n- role/system/user/assistant/tool\n- content 保留完整响应\n- 若 thinking -> reasoning_details 字段\n- 若 tool_calls -> tool_calls 数组\n- 工具结果 -> role=tool 携带 tool_call_id"
+
+' API 消息格式对比
+
+note left
+  | 参数 | 说明 |
+  |------|------|
+  | reasoning_split=true | 思考分离到 reasoning_details |
+  | reasoning_split=false | 思考以 <think> 嵌入 content |
+end note
+
+' ==============================================
+' 4. SSE 事件流 - 序列图
+' ==============================================
+
+actor User
+participant Frontend
+participant Backend
+participant MiniMaxAgentRunner
+participant MiniMaxAPI
+
+User -> Frontend: 提交任务 (POST /execute
+activate Frontend
+Frontend -> Backend: sessionId + task
+activate Backend
+Backend -> MiniMaxAgentRunner: run()
+activate MiniMaxAgentRunner
+
+note over MiniMaxAgentRunner: 初始化消息历史
+
+MiniMaxAgentRunner -> MiniMaxAPI: 调用 API (messages + tools
+activate MiniMaxAPI
+MiniMaxAPI --> MiniMaxAgentRunner: 返回响应 (thinking + text + tool_calls
+deactivate MiniMaxAPI
+
+loop 每一步骤循环
+
+MiniMaxAgentRunner -> Backend: 发出 step_start 事件
+Backend -> Frontend: SSE event: step_start
+Frontend -> User: 显示步骤开始
+
+alt 有工具调用
+
+  MiniMaxAgentRunner -> MiniMaxAgentRunner: executeTool
+  执行工具
+
+  MiniMaxAgentRunner -> Backend: 发出 tool_call 事件
+  Backend -> Frontend: SSE event: tool_call
+  Frontend -> User: 显示工具调用
+
+  MiniMaxAgentRunner -> MiniMaxAgentRunner: 添加工具结果到消息历史
+
+else 无工具调用
+
+  MiniMaxAgentRunner -> Backend: 发出 complete 事件
+  Backend -> Frontend: SSE event: complete
+  Frontend -> User: 显示最终结果
+
+  MiniMaxAgentRunner -> Backend: 发出 done 事件
+  Backend -> Frontend: data: done
+  关闭连接
+
+end
+
+deactivate MiniMaxAgentRunner
+deactivate Backend
+deactivate Frontend
+
+' SSE 事件类型
+
+note over Backend
+  <b>SSE 事件类型:
+  - start: 开始执行开始
+  - step_start: 新步骤开始
+  - thinking: 思考内容增量
+  - tool_call: 工具调用及结果
+  - complete: 任务完成
+  - error: 错误发生
+  - cancelled: 用户取消
+  - max_steps_reached: 达到步数上限
+  - done: 流结束
+end note
+
+' ==============================================
+' 5. Mini-Agent (Python) vs 本项目 (JS) 对比
+' ==============================================
+
+| 对比 | Mini-Agent (Python) | AI Chat 玩具 (JS)
+|------|---------------------|-------------------
+| 编程语言 | Python | Node.js + JavaScript
+| 消息摘要 | 支持 (超过 token 限制自动摘要 | 估算 token，警告但不摘要
+| 工具执行 | 同步/异步 | 异步 Promise
+| 交错式思维 | 原生支持 | 原生支持
+| 流式输出 | Streaming | SSE 流式事件
+| 会话管理 | 进程内 | 内存 Map
+| 消息格式 | OpenAI 格式 | Anthropic 兼容 (也支持 OpenAI
+| 最大步数 | 可配置 | 默认 50 步
+| Token 限制 | 默认 128K | 默认 80K
+
+' 核心执行循环结构相同:
+- while step < max_steps
+- LLM 推理
+- 工具调用 → 执行 → 循环
+- 无工具调用 → 结束
+
+@enduml

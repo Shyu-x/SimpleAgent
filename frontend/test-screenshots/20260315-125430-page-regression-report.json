@@ -1,0 +1,53 @@
+{
+  "appUrl": "http://localhost:5173",
+  "runAt": "2026-03-15T04:54:30.711Z",
+  "checks": [
+    {
+      "name": "页面加载",
+      "status": "PASS",
+      "detail": "主页面加载成功",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125430-desktop-home.png"
+    },
+    {
+      "name": "输入框",
+      "status": "PASS",
+      "detail": "检测到可输入聊天框",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125430-input-visible.png"
+    },
+    {
+      "name": "历史切换",
+      "status": "PASS",
+      "detail": "上下键可在历史消息间切换",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125430-history-switch.png"
+    },
+    {
+      "name": "模板面板",
+      "status": "FAIL",
+      "detail": "未找到模板/Prompt 入口按钮",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125430-template-fail.png"
+    },
+    {
+      "name": "工具市场",
+      "status": "PASS",
+      "detail": "工具市场可打开",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125430-tool-market.png"
+    },
+    {
+      "name": "记忆面板",
+      "status": "FAIL",
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button[title*=\"记忆\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <button title=\"记忆\" tabindex=\"0\" class=\"rounded-xl p-1.5 transition-all duration-300 text-[hsl(var(--text-muted))] hover:bg-[hsl(var(--bg-surface))]/96\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"flex items-center justify-between border-b p-4\">…</div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"flex items-center justify-between border-b p-4\">…</div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    37 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"flex items-center justify-between border-b p-4\">…</div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125430-memory-fail.png"
+    },
+    {
+      "name": "移动端入口",
+      "status": "PASS",
+      "detail": "检测到移动端菜单或底部导航入口",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125430-mobile-entry.png"
+    }
+  ],
+  "summary": {
+    "pass": 5,
+    "fail": 2,
+    "total": 7
+  }
+}

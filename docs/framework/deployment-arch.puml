@@ -1,0 +1,78 @@
+@startuml AI Chat 玩具 - 部署架构图
+!theme plain
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam node {
+  BackgroundColor #F0F0F0
+  BorderColor gray
+}
+
+node "用户端浏览器" as client {
+  rectangle "浏览器\n(Chrome/Firefox/Safari)" as browser
+}
+
+node "CDN / 边缘网络" as cdn {
+  rectangle "静态资源\nHTML/CSS/JS/Images" as staticContent
+}
+
+node "生产环境服务器" as production {
+  node "Frontend Tier" as frontendTier {
+    rectangle "Next.js\nSSR/SSG" as nextjs
+    port frontendPort "3000"
+  }
+
+  node "Backend Tier" as backendTier {
+    rectangle "Node.js\nExpress" as express
+    rectangle "API路由层" as apiRouter
+    rectangle "Agent引擎" as agentEngine
+    rectangle "MCP工具系统" as mcpSystem
+    port backendPort "30000"
+  }
+
+  node "数据存储" as storage {
+    rectangle "向量知识库\n(内存/文件)" as vectorDb
+    rectangle "会话历史\n(内存)" as sessionStore
+  }
+}
+
+cloud "外部LLM服务" as llmCloud {
+  rectangle "OpenAI API"
+  rectangle "Anthropic API"
+  rectangle "Google Gemini"
+  rectangle "MiniMax API"
+  rectangle "DeepSeek API"
+  rectangle "智谱AI API"
+}
+
+client --> cdn : 请求静态资源
+client --> nextjs : 访问页面
+browser --> nextjs : HTTPS
+nextjs --> express : API调用
+express --> llmCloud : 转发API请求
+llmCloud --> express : 流式响应
+express --> nextjs : SSE流式输出
+express --> storage : 读写知识数据
+
+note as N1
+**部署模式**
+
+*开发环境*
+- 前端: Vite dev server (端口 3000/5173)
+- 后端: Node.js Express (端口 30000)
+- 本地运行，分离进程
+
+*生产环境*
+- 前端: Next.js 独立部署
+- 后端: Node.js + PM2 进程管理
+- 支持 Docker Compose 一键部署
+- 支持 Nginx 反向代理
+
+*容器化*
+- Docker 镜像支持
+- docker-compose.yml 一键启动
+- 自动重启、健康检查
+end note
+
+@enduml

@@ -1,0 +1,53 @@
+{
+  "appUrl": "http://localhost:5173",
+  "runAt": "2026-03-15T05:23:58.851Z",
+  "checks": [
+    {
+      "name": "页面加载",
+      "status": "PASS",
+      "detail": "主页面加载成功",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-132358-desktop-home.png"
+    },
+    {
+      "name": "输入框",
+      "status": "PASS",
+      "detail": "检测到可输入聊天框",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-132358-input-visible.png"
+    },
+    {
+      "name": "历史切换",
+      "status": "PASS",
+      "detail": "上下键可在历史消息间切换",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-132358-history-switch.png"
+    },
+    {
+      "name": "模板面板",
+      "status": "PASS",
+      "detail": "智能体模板面板可打开",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-132358-template-panel.png"
+    },
+    {
+      "name": "工具市场",
+      "status": "PASS",
+      "detail": "工具市场可打开",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-132358-tool-market.png"
+    },
+    {
+      "name": "记忆面板",
+      "status": "PASS",
+      "detail": "记忆面板可打开",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-132358-memory-panel.png"
+    },
+    {
+      "name": "移动端入口",
+      "status": "PASS",
+      "detail": "检测到移动端菜单或底部导航入口",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-132358-mobile-entry.png"
+    }
+  ],
+  "summary": {
+    "pass": 7,
+    "fail": 0,
+    "total": 7
+  }
+}

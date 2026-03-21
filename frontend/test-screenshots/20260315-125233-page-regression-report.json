@@ -1,0 +1,35 @@
+{
+  "appUrl": "http://localhost:5173",
+  "runAt": "2026-03-15T04:52:33.905Z",
+  "checks": [
+    {
+      "name": "页面加载",
+      "status": "PASS",
+      "detail": "主页面加载成功",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125233-desktop-home.png"
+    },
+    {
+      "name": "输入框",
+      "status": "PASS",
+      "detail": "检测到聊天输入框",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125233-input-visible.png"
+    },
+    {
+      "name": "桌面主流程",
+      "status": "FAIL",
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('textarea').first()\u001b[22m\n\u001b[2m    - locator resolved to <textarea rows=\"1\" disabled placeholder=\"发送消息...\" class=\"flex-1 resize-none border-none bg-transparent px-2 sm:px-3 py-2 text-sm outline-none disabled:opacity-50 min-h-[44px] placeholder:text-muted-foreground/60 self-center\"></textarea>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    5 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\u001b[2m    32 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md p-4\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125233-desktop-fatal.png"
+    },
+    {
+      "name": "移动端入口",
+      "status": "PASS",
+      "detail": "检测到移动端菜单或底部导航入口",
+      "screenshot": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\20260315-125233-mobile-entry.png"
+    }
+  ],
+  "summary": {
+    "pass": 3,
+    "fail": 1,
+    "total": 4
+  }
+}

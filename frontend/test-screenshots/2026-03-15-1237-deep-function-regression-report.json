@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-03-15-1237",
+  "baseUrl": "http://localhost:5173",
+  "summary": {
+    "pass": 6,
+    "fail": 0
+  },
+  "results": [
+    {
+      "name": "模型切换同步 baseURL",
+      "status": "pass"
+    },
+    {
+      "name": "OpenAI 模型真实请求走对应 provider",
+      "status": "pass"
+    },
+    {
+      "name": "MiniMax 模型真实请求可返回结果",
+      "status": "pass"
+    },
+    {
+      "name": "设置在刷新后保留当前会话配置",
+      "status": "pass"
+    },
+    {
+      "name": "记忆面板会话笔记与全局记忆写入会话存储",
+      "status": "pass"
+    },
+    {
+      "name": "工具市场安装状态在当前会话内持久化",
+      "status": "pass"
+    }
+  ],
+  "screenshotPath": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\2026-03-15-1237-deep-function-regression.png"
+}

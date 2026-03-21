@@ -1,0 +1,101 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+excalidraw.log
+backend/*.log
+
+# Testing
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# ===========================================
+# Project-specific ignores
+# ===========================================
+
+# 项目配置文件（不适合公开）
+CLAUDE.md
+
+# 开发文档（内部流程，不上传）
+CHANGELOG.md
+
+# 内部开发文档（整个目录忽略）
+docs/AI-Chat开发手记.md
+docs/BROWSER_AUTOMATION_PLAYBOOK.md
+docs/DEPLOYMENT.md
+docs/功能测试文档.md
+docs/功能评估.md
+docs/技术调研与选型报告.md
+docs/架构分析改良报告.md
+docs/架构设计方案.md
+docs/架构评估报告_大厂标准.md
+docs/源码详细分析报告.md
+
+# PlantUML 源文件（不需要上传）
+docs/README_*.puml
+
+# 测试相关（结果、报告、语料）
+tests/量化分析结果/
+tests/量化测试结果/
+tests/压测结果/
+tests/参数评估结果/
+tests/多对照实验结果/
+tests/对照实验_完整/
+tests/对照实验_快速/
+tests/*报告*.md
+tests/*报告*.html
+tests/*优化*.md
+tests/*改进*.md
+tests/NLP测试语料集.md
+tests/超大规模NLP测试语料集.md
+backend/tests/量化分析结果/
+
+# 后端测试脚本（开发用）
+backend/tests/量化分析_runner.js
+backend/tests/*_test.js
+backend/tests/*.test.js
+
+# Excalidraw 设计图
+*.excalidraw
+
+# Docker 相关（可选保留）
+.dockerignore
+
+# 临时文件
+tmp/
+temp/

@@ -1,0 +1,188 @@
+/* 代码高亮样式 */
+.code-highlight {
+  position: relative;
+  background: hsl(var(--bg-surface));
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-line {
+  display: block;
+  padding: 0 16px;
+  line-height: 1.6;
+}
+
+.code-line:hover {
+  background: hsl(var(--bg-muted) / 0.65);
+}
+
+.code-line.number {
+  color: hsl(var(--text-muted));
+  user-select: none;
+}
+
+/* highlight.js 主题覆盖 */
+.hljs {
+  background: transparent !important;
+  color: hsl(var(--text-main));
+  padding: 1rem !important;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Shiki 渲染结果稳定化：避免流式更新时出现黑底闪烁 */
+.shiki,
+.shiki code {
+  background: transparent !important;
+}
+
+.shiki {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.shiki-container {
+  min-width: max-content;
+}
+
+.shiki-container .shiki {
+  min-width: max-content;
+  background: transparent !important;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: hsl(var(--brand-500));
+}
+
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-addition {
+  color: hsl(var(--warning-500));
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+  color: hsl(var(--success-500));
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-doctag,
+.hljs-title,
+.hljs-section,
+.hljs-type,
+.hljs-selector-id {
+  font-weight: bold;
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: hsl(var(--accent-500));
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+.hljs-number {
+  color: hsl(var(--accent-500));
+}
+
+.hljs-function {
+  color: hsl(var(--warning-400));
+}
+
+.hljs-class .hljs-title {
+  color: hsl(var(--success-400));
+}
+
+.hljs-attr {
+  color: hsl(var(--info-500));
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  color: hsl(var(--info-500));
+}
+
+/* KaTeX 样式 */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
+}
+
+.katex {
+  font-size: 1.1em;
+}
+
+/* 行内代码 */
+.inline-code {
+  background: hsl(var(--bg-muted));
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.875em;
+  color: hsl(var(--error-500));
+}
+
+/* 表格样式 */
+.markdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.markdown-table th,
+.markdown-table td {
+  border: 1px solid hsl(var(--border-subtle));
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.markdown-table th {
+  background: hsl(var(--bg-muted));
+  font-weight: 600;
+}
+
+.markdown-table tr:hover {
+  background: hsl(var(--bg-muted) / 0.7);
+}
+
+/* 引用块 */
+.blockquote {
+  border-left: 4px solid hsl(var(--brand-500));
+  padding-left: 16px;
+  margin: 16px 0;
+  color: hsl(var(--text-muted));
+  font-style: italic;
+}
+
+/* 任务列表 */
+.task-list-item {
+  list-style: none;
+  margin-left: -20px;
+}
+
+.task-list-item input {
+  margin-right: 8px;
+}

@@ -1,0 +1,235 @@
+// Prisma Schema for AI Chat 玩具
+// PostgreSQL with pgvector for vector storage
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// 1. 对话表
+// ==========================================
+model Conversation {
+  id        String    @id @default(uuid())
+  userId    String    @default("default")
+  title     String    @default("新对话")
+  metadata  Json      @default("{}")
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([updatedAt(sort: Desc)])
+  @@map("conversations")
+}
+
+// ==========================================
+// 2. 消息表
+// ==========================================
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  role           String
+  content        String
+  model          String?
+  provider       String?
+  tokensUsed     Int?
+  attachments    Json         @default("[]")
+  metadata       Json         @default("{}")
+  isDeleted      Boolean      @default(false)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+// ==========================================
+// 3. 全局记忆表
+// ==========================================
+model GlobalMemory {
+  id             String    @id @default(uuid())
+  userId         String    @default("default")
+  content        String
+  type           String    @default("general")
+  importance     String    @default("medium")
+  tags           String[]  @default([])
+  accessCount    Int       @default(0)
+  lastAccessedAt DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([importance])
+  @@map("global_memories")
+}
+
+// ==========================================
+// 4. 工作流表
+// ==========================================
+model Workflow {
+  id          String             @id @default(uuid())
+  userId      String             @default("default")
+  name        String
+  description String?
+  definition  Json               @default("{}")
+  version     Int                @default(1)
+  isActive    Boolean            @default(true)
+  executions  WorkflowExecution[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("workflows")
+}
+
+// ==========================================
+// 5. 工作流执行记录表
+// ==========================================
+model WorkflowExecution {
+  id            String    @id @default(uuid())
+  workflowId    String
+  status        String    @default("pending")
+  inputData     Json      @default("{}")
+  outputData    Json      @default("{}")
+  errorMessage  String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  workflow      Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+
+  @@index([workflowId])
+  @@index([status])
+  @@map("workflow_executions")
+}
+
+// ==========================================
+// 6. 知识库文档表
+// ==========================================
+model KbDocument {
+  id          String         @id @default(uuid())
+  userId      String         @default("default")
+  title       String
+  content     String?
+  sourceUrl   String?
+  filePath    String?
+  fileType    String?
+  chunkCount  Int            @default(0)
+  metadata    Json           @default("{}")
+  embeddings  KbEmbedding[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("kb_documents")
+}
+
+// ==========================================
+// 7. 知识库向量表 (无向量字段，使用 raw SQL)
+// ==========================================
+model KbEmbedding {
+  id          String      @id @default(uuid())
+  documentId  String
+  content     String
+  metadata    Json        @default("{}")
+  document    KbDocument  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+
+  @@index([documentId])
+  @@map("kb_embeddings")
+}
+
+// ==========================================
+// 8. Agent 配置表
+// ==========================================
+model AgentConfig {
+  id        String   @id @default(uuid())
+  userId    String   @default("default")
+  name      String
+  config    Json     @default("{}")
+  version   Int      @default(1)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isDefault])
+  @@map("agent_configs")
+}
+
+// ==========================================
+// 9. 用户设置表
+// ==========================================
+model UserSettings {
+  id        String   @id @default(uuid())
+  userId    String   @unique @default("default")
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+// ==========================================
+// 10. 文件上传记录表
+// ==========================================
+model FileUpload {
+  id            String   @id @default(uuid())
+  userId        String   @default("default")
+  filename      String
+  originalName  String
+  fileType      String?
+  fileSize      BigInt?
+  storagePath   String
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("file_uploads")
+}
+
+// ==========================================
+// 系统表
+// ==========================================
+
+// Token使用记录表
+model TokenUsage {
+  id             String   @id @default(uuid())
+  userId         String?
+  conversationId String?
+  model          String
+  provider       String
+  promptTokens   Int      @default(0)
+  completionTokens Int    @default(0)
+  totalTokens    Int      @default(0)
+  cost           Float    @default(0)
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now())
+
+  @@map("token_usage")
+}
+
+// 性能监控数据表
+model PerformanceMetric {
+  id           String   @id @default(uuid())
+  endpoint     String
+  method       String
+  statusCode   Int
+  duration     Float
+  errorMessage String?
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now())
+
+  @@map("performance_metrics")
+}

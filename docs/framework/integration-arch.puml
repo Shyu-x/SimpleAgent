@@ -1,0 +1,579 @@
+@startuml integration-architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+
+title AI Chat 玩具 - 系统集成架构图
+caption 版本 1.0 | 生成日期: 2026-03-18
+
+' ============================================
+' 第一部分：端到端请求流程（序列图）
+' ============================================
+
+participant "用户浏览器" as User
+participant "Next.js 前端\n:3000" as Frontend
+participant "Express 后端\n:30000" as Backend
+participant "ModelRouter\n路由器" as Router
+participant "TaskClassifier\n意图分类器" as Classifier
+participant "API 提供商\n(OpenAI/Anthropic/\nMiniMax/DeepSeek)" as Provider
+participant "RAG 服务\n知识库" as RAG
+participant "MCP 服务\n工具系统" as MCP
+
+autonumber
+
+== 用户发起请求 ==
+
+User -> Frontend : 发送消息
+activate Frontend
+
+Frontend -> Frontend : 更新本地状态 (Zustand)
+Frontend -> Backend : POST /api/chat\n{ messages, model, stream }
+
+activate Backend
+
+== 后端处理 ==
+
+Backend -> Router : route(context)
+activate Router
+
+Router -> Classifier : classify(context)
+activate Classifier
+
+Classifier -> Classifier : 检测多模态内容\n匹配意图关键词\n计算置信度
+
+Classifier --> Router : { intent, confidence,\ncomplexity, action }
+
+Router -> Router : selectModel()\n根据策略选择模型\n- PERFORMANCE\n- COST\n- BALANCED
+
+Router --> Backend : { model, classification }
+
+Backend -> Backend : 构建请求体\n转换消息格式
+
+== RAG 知识注入 ==
+
+alt 需要知识检索
+    Backend -> RAG : retrieve(kbId, query)
+    activate RAG
+
+    RAG -> RAG : generateEmbedding(query)
+    RAG -> RAG : cosineSimilarity()\n计算相似度
+
+    RAG --> Backend : { context, sources }
+
+    Backend -> Backend : 注入知识上下文\nto messages
+end
+
+== 调用 AI 提供商 ==
+
+Backend -> Provider : HTTP POST\n/api/chat/completions
+activate Provider
+
+Provider --> Backend : SSE 流式响应
+
+Backend --> Frontend : SSE 流式转发
+deactivate Provider
+
+== MCP 工具调用（可选）==
+
+opt 工具调用
+    Backend -> MCP : handleToolCall(name, args)
+    activate MCP
+
+    MCP -> MCP : 执行工具\n- web_search\n- code_review\n- task_breakdown
+
+    MCP --> Backend : { content, result }
+
+    Backend -> Provider : 继续对话\n附带工具结果
+    Provider --> Backend : 最终响应
+end
+
+== 返回响应 ==
+
+Frontend -> Frontend : 解析 SSE 流\n打字机效果渲染
+Frontend --> User : 显示 AI 响应
+
+deactivate Frontend
+deactivate Backend
+deactivate Router
+deactivate Classifier
+deactivate RAG
+deactivate MCP
+
+@enduml
+
+@startuml model-router-architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+
+title 多模型路由架构图
+
+' ============================================
+' 第二部分：多模型路由架构（组件图）
+' ============================================
+
+package "前端层" {
+    [用户界面] as UI
+    [API 配置\napiConfig.ts] as APIConfig
+    [状态管理\nZustand] as Store
+}
+
+package "路由层" {
+    [ModelRouter] as Router
+    [TaskClassifier] as Classifier
+    [LLM Intent\nClassifier] as LLMClassifier
+
+    package "路由策略" {
+        [PERFORMANCE\n性能优先] as PerfStrategy
+        [COST\n成本优先] as CostStrategy
+        [BALANCED\n平衡模式] as BalancedStrategy
+    }
+}
+
+package "模型池" {
+    [ModelPool] as Pool
+    [健康检查] as HealthCheck
+    [负载均衡] as LoadBalancer
+}
+
+package "提供商适配器" {
+    [OpenAI Adapter] as OpenAI
+    [Anthropic Adapter] as Anthropic
+    [MiniMax Adapter] as MiniMax
+    [DeepSeek Adapter] as DeepSeek
+    [智谱 AI Adapter] as Zhipu
+}
+
+package "外部 API" {
+    cloud "OpenAI API\napi.openai.com" as OpenAIAPI
+    cloud "Anthropic API\napi.anthropic.com" as AnthropicAPI
+    cloud "MiniMax API\napi.minimaxi.com" as MiniMaxAPI
+    cloud "DeepSeek API\napi.deepseek.com" as DeepSeekAPI
+    cloud "智谱 API\nopen.bigmodel.cn" as ZhipuAPI
+}
+
+' 连接关系
+
+UI --> APIConfig : 使用端点
+UI --> Store : 状态同步
+Store --> APIConfig : 获取配置
+
+APIConfig --> Router : 路由请求
+
+Router --> Classifier : 分类任务
+Classifier --> LLMClassifier : LLM 分类\n(可选)
+Classifier ..> PerfStrategy : 选择策略
+Classifier ..> CostStrategy
+Classifier ..> BalancedStrategy
+
+Router --> Pool : 获取可用模型
+Pool --> HealthCheck : 检查状态
+Pool --> LoadBalancer : 负载分配
+
+Router --> OpenAI : 适配请求
+Router --> Anthropic
+Router --> MiniMax
+Router --> DeepSeek
+Router --> Zhipu
+
+OpenAI --> OpenAIAPI : HTTPS
+Anthropic --> AnthropicAPI : HTTPS
+MiniMax --> MiniMaxAPI : HTTPS
+DeepSeek --> DeepSeekAPI : HTTPS
+Zhipu --> ZhipuAPI : HTTPS
+
+note right of Router
+  选择逻辑:
+  1. 任务分类
+  2. 意图识别
+  3. 复杂度评估
+  4. 模型匹配
+  5. 策略排序
+  6. 负载均衡
+end note
+
+note bottom of Classifier
+  意图类型:
+  - TOOL_USE: 工具调用
+  - CREATIVE: 创意生成
+  - TASK: 任务执行
+  - KNOWLEDGE: 知识查询
+  - CONVERSATION: 日常对话
+  - VISION: 视觉理解
+end note
+
+@enduml
+
+@startuml mcp-architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+
+title MCP 工具系统架构图
+
+' ============================================
+' 第三部分：MCP 工具系统架构（组件图）
+' ============================================
+
+package "MCP 协议层" {
+    [MCP Service\nJSON-RPC 2.0] as MCPService
+
+    package "协议方法" {
+        [initialize] as Init
+        [tools/list] as ToolsList
+        [tools/call] as ToolsCall
+        [resources/list] as ResList
+        [resources/read] as ResRead
+        [prompts/list] as PromptsList
+        [prompts/get] as PromptsGet
+    }
+}
+
+package "工具注册表" {
+    [Tools Registry] as ToolsReg
+
+    package "内置工具" {
+        [web_search\n联网搜索] as WebSearch
+        [code_review\n代码审查] as CodeReview
+        [generate_docs\n文档生成] as GenDocs
+        [task_breakdown\n任务分解] as TaskBreak
+    }
+
+    package "扩展工具" {
+        [浏览器自动化] as BrowserAuto
+        [文件操作] as FileOps
+        [数据库查询] as DBQuery
+    }
+}
+
+package "资源管理" {
+    [Resources Registry] as ResReg
+
+    [system://info\n系统信息] as SysInfo
+    [system://env\n环境变量] as SysEnv
+    [config://tools\n工具配置] as ToolConfig
+}
+
+package "提示词模板" {
+    [Prompts Registry] as PromptsReg
+
+    [代码审查模板] as CodeReviewTpl
+    [文档生成模板] as DocTpl
+    [任务分解模板] as TaskTpl
+}
+
+package "外部集成" {
+    [MiniMax MCP\n搜索服务] as MiniMaxMCP
+    [浏览器自动化引擎] as BrowserEngine
+    [Python MCP 服务器] as PythonMCP
+}
+
+package "客户端管理" {
+    [Client Registry] as ClientReg
+    [订阅管理] as SubManager
+    [通知队列] as NotifyQueue
+}
+
+' 连接关系
+
+MCPService --> Init
+MCPService --> ToolsList
+MCPService --> ToolsCall
+MCPService --> ResList
+MCPService --> ResRead
+MCPService --> PromptsList
+MCPService --> PromptsGet
+
+ToolsList --> ToolsReg
+ToolsCall --> ToolsReg
+
+ToolsReg --> WebSearch
+ToolsReg --> CodeReview
+ToolsReg --> GenDocs
+ToolsReg --> TaskBreak
+ToolsReg --> BrowserAuto
+ToolsReg --> FileOps
+ToolsReg --> DBQuery
+
+WebSearch --> MiniMaxMCP : 调用
+BrowserAuto --> BrowserEngine : 控制
+
+ResList --> ResReg
+ResRead --> ResReg
+
+ResReg --> SysInfo
+ResReg --> SysEnv
+ResReg --> ToolConfig
+
+PromptsList --> PromptsReg
+PromptsGet --> PromptsReg
+
+PromptsReg --> CodeReviewTpl
+PromptsReg --> DocTpl
+PromptsReg --> TaskTpl
+
+MCPService --> ClientReg
+MCPService --> SubManager
+MCPService --> NotifyQueue
+
+note right of MCPService
+  MCP 协议版本: 2024-11-05
+  JSON-RPC 2.0
+
+  能力声明:
+  - tools.listChanged
+  - resources.subscribe
+  - prompts.listChanged
+end note
+
+note bottom of MiniMaxMCP
+  通过 uvx 启动
+  MiniMax Coding Plan
+  提供 web_search 工具
+end note
+
+@enduml
+
+@startuml rag-architecture
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+
+title RAG 知识库架构图
+
+' ============================================
+' 第四部分：RAG 知识库架构（组件图）
+' ============================================
+
+package "文档处理" {
+    [文档上传] as Upload
+    [文件解析器] as Parser
+    [文本分块器\nchunkText()] as Chunker
+
+    package "支持格式" {
+        [TXT/MD] as Text
+        [JSON] as JSON
+        [PDF] as PDF
+        [DOC/DOCX] as Doc
+    }
+}
+
+package "向量化" {
+    [嵌入生成器] as Embedder
+
+    package "嵌入策略" {
+        [OpenAI\ntext-embedding-ada-002\n优先] as OpenAIEmbed
+        [本地嵌入\nTF-IDF 简化实现\n降级] as LocalEmbed
+    }
+}
+
+package "知识库存储" {
+    [RAG Service] as RAGService
+    [知识库管理器] as KBManager
+
+    package "存储结构" {
+        [知识库 KB] as KB
+        [文档 Document] as Doc
+        [分块 Chunk] as Chunk
+        [嵌入向量 Embedding] as Embed
+    }
+}
+
+package "检索系统" {
+    [相似度计算\ncosineSimilarity()] as Similarity
+    [混合检索\nHybridSearch] as HybridSearch
+
+    package "检索通道" {
+        [向量检索\nVector] as Vector
+        [全文检索\nFullText] as FullText
+        [意图检索\nIntent] as Intent
+    }
+
+    [重排序\nReranker] as Reranker
+}
+
+package "上下文注入" {
+    [上下文构建器] as ContextBuilder
+    [Prompt 注入] as PromptInject
+}
+
+package "文件存储" {
+    database "本地文件系统\n./data/rag/" as Storage
+}
+
+' 连接关系
+
+Upload --> Parser : 解析文件
+Parser --> Text
+Parser --> JSON
+Parser --> PDF
+Parser --> Doc
+
+Parser --> Chunker : 分块
+Chunker --> Embedder : 生成嵌入
+
+Embedder --> OpenAIEmbed : API 调用
+OpenAIEmbed ..> LocalEmbed : 降级
+
+Embedder --> RAGService : 存储向量
+
+RAGService --> KBManager : 管理知识库
+KBManager --> KB
+KB --> Doc
+Doc --> Chunk
+Chunk --> Embed
+
+RAGService --> Storage : 持久化
+
+HybridSearch --> Vector : 语义相似
+HybridSearch --> FullText : 关键词匹配
+HybridSearch --> Intent : 意图匹配
+
+Vector --> Similarity
+FullText --> Similarity
+Intent --> Similarity
+
+HybridSearch --> Reranker : 结果合并
+
+ContextBuilder --> RAGService : retrieve()
+ContextBuilder --> PromptInject : 注入对话
+
+note right of Chunker
+  分块参数:
+  - chunkSize: 500
+  - overlap: 50
+  按句子分割
+end note
+
+note right of Similarity
+  余弦相似度:
+  similarity = dot(A, B) / (||A|| * ||B||)
+
+  阈值: 0.3
+  TopK: 5
+end note
+
+note bottom of HybridSearch
+  通道权重:
+  - vector: 0.5
+  - fulltext: 0.3
+  - intent: 0.2
+end note
+
+@enduml
+
+@startuml data-flow-overview
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+
+title 数据流总图
+
+' ============================================
+' 第五部分：数据流总图（部署图）
+' ============================================
+
+node "用户设备" {
+    [浏览器] as Browser
+}
+
+node "前端服务器\nNext.js :3000" {
+    [React 组件] as React
+    [Zustand Store] as Store
+    [SSE 客户端] as SSEClient
+    [打字机渲染] as Typewriter
+}
+
+node "后端服务器\nExpress :30000" {
+    [API 网关] as Gateway
+    [路由中间件] as Middleware
+
+    package "核心服务" {
+        [模型路由器] as Router
+        [意图分类器] as Intent
+        [查询改写器] as QueryRewriter
+        [混合检索] as HybridSearch
+    }
+
+    package "功能模块" {
+        [RAG 服务] as RAG
+        [MCP 服务] as MCP
+        [Agent 引擎] as Agent
+        [浏览器自动化] as BrowserAuto
+    }
+
+    [SSE 流处理] as SSEServer
+}
+
+node "数据存储" {
+    database "知识库存储\n./data/rag/" as KBStorage
+    folder "会话存储\nsessionStorage" as SessionStorage
+}
+
+node "外部服务" {
+    cloud "OpenAI API" as OpenAI
+    cloud "Anthropic API" as Anthropic
+    cloud "MiniMax API" as MiniMax
+    cloud "DeepSeek API" as DeepSeek
+    cloud "智谱 AI API" as Zhipu
+}
+
+' 数据流连接
+
+Browser --> React : 用户交互
+React --> Store : 状态更新
+Store --> SSEClient : 发送请求
+SSEClient --> Gateway : HTTP/SSE
+
+Gateway --> Middleware : 路由分发
+
+Middleware --> Router : 聊天请求
+Router --> Intent : 意图识别
+Intent --> QueryRewriter : 查询优化
+QueryRewriter --> HybridSearch : 检索
+
+Middleware --> RAG : 知识查询
+Middleware --> MCP : 工具调用
+Middleware --> Agent : Agent 任务
+Middleware --> BrowserAuto : 自动化
+
+RAG --> KBStorage : 读写
+MCP --> KBStorage : 读取
+
+Router --> OpenAI : API 调用
+Router --> Anthropic
+Router --> MiniMax
+Router --> DeepSeek
+Router --> Zhipu
+
+OpenAI --> SSEServer : 流式响应
+Anthropic --> SSEServer
+MiniMax --> SSEServer
+DeepSeek --> SSEServer
+Zhipu --> SSEServer
+
+SSEServer --> SSEClient : SSE 流
+SSEClient --> Typewriter : 解析
+Typewriter --> React : 渲染
+
+Store --> SessionStorage : 持久化
+
+note right of Router
+  流量分发:
+  - 请求路由
+  - 负载均衡
+  - 熔断降级
+  - 重试机制
+end note
+
+note left of SSEServer
+  SSE 流格式:
+  data: {"content": "..."}
+
+  特点:
+  - 实时推送
+  - 打字机效果
+  - 低延迟
+end note
+
+@enduml

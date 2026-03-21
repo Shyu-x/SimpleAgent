@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-15-1236",
+  "baseUrl": "http://localhost:5173",
+  "summary": {
+    "pass": 5,
+    "fail": 1
+  },
+  "results": [
+    {
+      "name": "模型切换同步 baseURL",
+      "status": "pass"
+    },
+    {
+      "name": "OpenAI 模型真实请求走对应 provider",
+      "status": "pass"
+    },
+    {
+      "name": "MiniMax 模型真实请求可返回结果",
+      "status": "pass"
+    },
+    {
+      "name": "设置在刷新后保留当前会话配置",
+      "status": "pass"
+    },
+    {
+      "name": "记忆面板会话笔记与全局记忆写入会话存储",
+      "status": "fail",
+      "error": "locator.waitFor: Error: strict mode violation: getByRole('button', { name: '会话笔记' }) resolved to 3 elements:\n    1) <button class=\"relative flex-1 py-3 text-sm font-medium transition-colors text-primary\">…</button> aka getByRole('button', { name: '会话笔记', exact: true })\n    2) <button aria-label=\"编辑会话笔记\" class=\"p-1 text-muted-foreground hover:text-primary\">…</button> aka getByRole('button', { name: '编辑会话笔记' })\n    3) <button aria-label=\"删除会话笔记\" class=\"p-1 text-muted-foreground hover:text-destructive\">…</button> aka getByRole('button', { name: '删除会话笔记' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '会话笔记' }) to be visible\u001b[22m\n"
+    },
+    {
+      "name": "工具市场安装状态在当前会话内持久化",
+      "status": "pass"
+    }
+  ],
+  "screenshotPath": "C:\\Users\\Xu\\Desktop\\chat玩具\\frontend\\test-screenshots\\2026-03-15-1236-deep-function-regression.png"
+}

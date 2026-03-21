@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026/3/21 06:20:26",
+  "testResults": [
+    {
+      "name": "健康检查",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "搜索API",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "工具注册表",
+      "pass": false,
+      "status": 404
+    },
+    {
+      "name": "记忆服务",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "Agent轨迹",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "知识库列表",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "Skills列表",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "A2A Agents",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "name": "HITL状态",
+      "pass": false,
+      "status": 404
+    },
+    {
+      "name": "路由器统计",
+      "pass": true,
+      "status": 200
+    }
+  ],
+  "performanceResults": {
+    "searchLatency": 452,
+    "healthLatency": 1,
+    "kbLatency": 1
+  },
+  "searchSummary": 8
+}

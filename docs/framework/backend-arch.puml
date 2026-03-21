@@ -1,0 +1,413 @@
+@startuml AI-Chat 后端架构图
+!layout strict
+
+' 颜色定义
+skinparam rectangle {
+  BackgroundColor #f0f8ff
+  BorderColor #2e86ab
+}
+skinparam database {
+  BackgroundColor #e8f4ea
+  BorderColor #2c5f2d
+}
+skinparam queue {
+  BackgroundColor #fef0d9
+  BorderColor #b86b45
+}
+skinparam boundary {
+  BackgroundColor #f4f4f4
+  BorderColor #666666
+}
+skinparam actor {
+  BackgroundColor #fff3cd
+  BorderColor #856404
+}
+
+' 层级定义
+boundary 外部系统 as External {
+  actor 前端客户端 as Frontend
+  actor 第三方LLM API as LLM_API
+  actor 搜索引擎 as Search_APIs
+  actor PostgreSQL 数据库 as PG_DB
+  actor Redis 缓存 as Redis_DB
+}
+
+boundary Node.js 后端服务 as Backend {
+  rectangle Express 应用层 as App {
+    component 入口文件: index.js as Entry
+    rectangle 全局中间件 as Middleware {
+      component CORS 处理 as CORS
+      component JSON 解析 as JSON_Parser
+      component 全链路追踪 as Tracing
+      component 限流限速 as RateLimit
+      component 日志记录 as Logger
+      component 全局错误处理 as ErrorHandler
+    }
+  }
+
+  rectangle 路由层 (Routes) as Routes {
+    component /api/chat as Route_Chat
+    component /api/v1/proxy as Route_Proxy
+    component /api/sessions as Route_Sessions
+    component /api/router as Route_Router
+    component /api/rag as Route_RAG
+    component /api/search as Route_Search
+    component /api/mcp as Route_MCP
+    component /api/agents as Route_Agents
+    component /api/browser as Route_Browser
+    component /api/multiagent as Route_MultiAgent
+    component /api/memory as Route_Memory
+  }
+
+  rectangle 服务层 (Services) as Services {
+    rectangle AI核心服务 as AI_Services {
+      component SSE 流式响应 as SSE_Service
+      component 多模型路由器 as ModelRouter
+      component RAG 知识库 as RAG_Service
+      component MCP 工具系统 as MCPService
+      component 多Agent引擎 as AgentEngine
+    }
+
+    rectangle 工具服务 as Tool_Services {
+      component 网络搜索 as SearchService
+      component 浏览器自动化 as BrowserService
+      component 代码执行 as CodeExecutor
+      component 网络请求 as HTTPTool
+      component 网页抓取 as WebScraper
+      component 计算器 as Calculator
+    }
+
+    rectangle 基础设施服务 as Infra_Services {
+      component 全链路追踪 as TracingService
+      component 性能监控 as PerformanceMonitor
+      component 熔断保护 as CircuitBreaker
+      component 令牌计数 as TokenCounter
+      component 缓存服务 as CacheService
+      component 会话持久化 as StatePersistence
+      component 任务队列 as TaskQueue
+    }
+  }
+
+  rectangle 数据层 (Data) as Data {
+    database 内存数据存储 as InMemory
+    database 向量存储 (PG/Mock) as VectorStore
+    database 文件存储 (RAG) as FileStorage
+  }
+}
+
+' 连接关系
+Frontend --> Entry : HTTP 请求
+Entry --> Middleware : 经过
+Middleware --> Routes : 路由分发
+
+Routes --> Route_Chat
+Routes --> Route_Proxy
+Routes --> Route_Sessions
+Routes --> Route_Router
+Routes --> Route_RAG
+Routes --> Route_Search
+Routes --> Route_MCP
+Routes --> Route_Agents
+Routes --> Route_Browser
+Routes --> Route_MultiAgent
+Routes --> Route_Memory
+
+Route_Chat --> SSE_Service : 处理聊天请求
+Route_Proxy --> ModelRouter : 代理API请求
+Route_Router --> ModelRouter : 模型路由
+Route_RAG --> RAG_Service : 知识库操作
+Route_Search --> SearchService : 搜索请求
+Route_Agents --> AgentEngine : Agent执行
+Route_Sessions --> InMemory : 会话CRUD
+
+SSE_Service --> LLM_API : 转发流式请求
+ModelRouter --> LLM_API : 选择模型并调用
+RAG_Service --> VectorStore : 语义检索
+RAG_Service --> FileStorage : 持久化
+AgentEngine --> Tool_Services : 调用工具
+SearchService --> Search_APIs : 联网搜索
+MCPService --> LLM_API : MCP工具调用
+
+CacheService --> Redis_DB : 缓存读写
+StatePersistence --> PG_DB : 持久化
+
+' 颜色分组
+group #LightBlue {
+  Backend
+}
+group #LightGreen {
+  External
+}
+
+legend
+| 层级 | 颜色 |
+| 外部系统 | #LightGreen |
+| 后端服务 | #LightBlue |
+| 中间件 | #f0f8ff |
+endlegend
+
+@enduml
+
+@startuml 请求处理流程图
+!layout strict
+
+skinparam activity {
+  BackgroundColor #f0f8ff
+  BorderColor #2e86ab
+}
+skinparam arrow {
+  Color #333333
+}
+
+start
+
+:客户端发起请求
+(POST /api/chat/completions);
+
+:Express 接收请求;
+
+:全局中间件处理
+- CORS 验证
+- JSON 解析
+- 链路追踪创建Span
+- 限流检查;
+
+if(限流通过?) then (yes)
+  :路由匹配;
+else (no)
+  :返回 429 错误;
+  stop
+endif
+
+if(路由存在?) then (yes)
+  :参数验证;
+else (no)
+  :返回 404 错误;
+  stop
+endif
+
+if(参数有效?) then (yes)
+  :业务处理;
+else (no)
+  :返回 400 错误;
+  stop
+endif
+
+group 聊天请求处理
+if(流式响应?) then (yes)
+  :设置 SSE 响应头;
+  :发送 connected 事件;
+
+  if(需要RAG?) then (yes)
+  :RAG检索相关知识;
+  :将知识注入上下文;
+  endif
+
+  if(需要Agent?) then (yes)
+  :Agent 意图识别;
+  while(需要工具调用?)
+    :选择工具;
+    :执行工具;
+    :获取观察结果;
+  endwhile
+  :生成最终回答;
+  endif
+
+  :调用选定模型API;
+  :读取模型响应流;
+  while(还有数据?)
+    :格式转换 (适配OpenAI格式);
+    :通过SSE发送chunk;
+  endwhile
+
+  :发送 done 事件;
+  :关闭连接;
+
+else (no)
+  :非流式处理
+  调用API;
+  :返回完整JSON;
+endif
+endgroup
+
+:记录处理完成;
+:更新统计数据;
+
+stop
+@enduml
+
+@startuml 中间件层级图
+!layout strict
+
+skinparam rectangle {
+  BackgroundColor #f0f8ff
+  BorderColor #2e86ab
+}
+
+' 从外到内的层级
+rectangle "Level 1: CORS 跨域处理" as Layer1 {
+}
+
+rectangle "Level 2: 请求体解析" as Layer2 {
+  rectangle "express.json({ limit: 1mb })" as JsonParser
+}
+
+rectangle "Level 3: 全链路追踪" as Layer3 {
+  rectangle "创建 TraceId/SpanId" as TracingCreate
+  rectangle "设置响应头 X-Trace-Id" as TracingHeader
+  rectangle "请求结束记录统计" as TracingLog
+}
+
+rectangle "Level 4: 限流控制" as Layer4 {
+  rectangle "全局限流" as GlobalLimit
+  rectangle "聊天限流 (10 req/min)" as ChatLimit
+  rectangle "API限流 (60 req/min)" as APILimit
+}
+
+rectangle "Level 5: 请求日志" as Layer5 {
+  rectangle "非生产环境记录" as Logging
+  rectangle "[method] [path]" as LogFormat
+}
+
+rectangle "Level 6: 业务路由" as Layer6 {
+  rectangle "各业务路由处理" as Routes
+}
+
+rectangle "Level 7: 404 处理" as Layer7 {
+  rectangle "返回 JSON 错误" as NotFound
+}
+
+rectangle "Level 8: 全局错误处理" as Layer8 {
+  rectangle "捕获异常" as ErrorCatch
+  rectangle "不泄露内部详情" as ErrorSafe
+  rectangle "返回 500 JSON" as ErrorResponse
+}
+
+' 连接顺序（从外到内）
+Layer1 -down-> Layer2
+Layer2 -down-> Layer3
+Layer3 -down-> Layer4
+Layer4 -down-> Layer5
+Layer5 -down-> Layer6
+Layer6 -down-> Layer7
+Layer7 -down-> Layer8
+
+note right of Layer1
+请求进入顺序：从上到下
+响应返回顺序：从下到上
+endnote
+
+@enduml
+
+@startuml 会话管理图
+!layout strict
+
+skinparam rectangle {
+  BackgroundColor #f0f8ff
+  BorderColor #2e86ab
+}
+skinparam database {
+  BackgroundColor #e8f4ea
+  BorderColor #2c5f2d
+}
+
+package "前端 (浏览器)" as Frontend {
+  rectangle 会话状态 as FE_State {
+    text currentSessionId
+    text messages[]
+  }
+}
+
+package "后端 (Express)" as Backend {
+  rectangle 路由层 /api/sessions as SessionsRoute {
+    method GET / -> listSessions()
+    method GET /:id -> getSession()
+    method POST / -> createSession()
+    method PUT /:id -> updateSession()
+    method DELETE /:id -> deleteSession()
+    method POST /:id/messages -> addMessage()
+  }
+
+  database 内存存储 (开发环境) as InMemoryStore {
+    sessions[]
+    ' 每个会话:
+    text - id
+    text - title
+    text - createdAt
+    text - updatedAt
+    text - messages[]
+  }
+}
+
+note "当前实现: 内存存储 (开发环境)\n生产环境建议: PostgreSQL + 持久化" as NONE
+
+Frontend --> Backend : REST API CRUD
+Backend --> InMemoryStore : 读写
+
+' 会话创建流程
+legend
+新会话工作流
+====
+1. 前端发送 POST /api/sessions \{title, messages\}
+2. 后端生成唯一sessionId
+3. 存储到内存数组
+4. 返回 201 + 会话信息
+5. 前端更新currentSessionId
+endlegend
+
+@enduml
+
+@startuml SSE 流式响应流程图
+!layout strict
+
+skinparam sequence {
+  ArrowColor #2e86ab
+  ActorBorderColor #666
+  LifeLineBorderColor #2e86ab
+}
+
+actor 前端客户端 as Client
+participant 后端Express as Backend
+participant 第三方LLM API as LLM
+
+note over Client, LLM: SSE 流式响应全过程
+
+Client->Backend: POST /api/v1/chat/completions\nAccept: text/event-stream
+activate Backend
+
+Backend->Backend: 1. Provider 识别\n(model -> provider 推断)
+Backend->Backend: 2. 请求格式转换\n(适配 OpenAI/Anthropic 格式)
+
+Backend->LLM: POST 请求 (带stream=true)\n转换后的JSON
+activate LLM
+
+LLM-->Backend: 开始发送SSE流
+note left: Connection: keep-alive\nCache-Control: no-cache
+
+Backend->Client: 200 OK\nContent-Type: text/event-stream
+Backend->Client: data: {"type": "connected"}\n\n
+
+loop 读取响应流
+  LLM-->Backend: 数据块 (chunk)
+  Backend->Backend: 解析每行\n解析SSE格式\n转换为OpenAI格式
+  Backend->Client: data: {chunk}\n\n
+end
+
+LLM-->Backend: [DONE]
+deactivate LLM
+
+Backend->Client: data: {"type": "done"}\n\n
+Backend->Client: 关闭连接
+
+deactivate Backend
+
+note over
+特性:
+- 支持 OpenAI 兼容格式
+- 支持 Anthropic/Claude 格式
+- 支持 MiniMax 思考块
+- 自动超时控制 (120秒)
+- 客户端断开检测
+endnote
+
+@enduml

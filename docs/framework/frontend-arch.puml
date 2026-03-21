@@ -1,0 +1,632 @@
+@startuml 前端整体架构图
+!layout strict
+
+' 颜色定义
+skinparam rectangle {
+  BackgroundColor whitesmoke
+  BorderColor black
+}
+skinparam rectanglePresentation {
+  BackgroundColor #e1f5fe
+  BorderColor #0277bd
+}
+skinparam rectangleContainer {
+  BackgroundColor #f3e5f5
+  BorderColor #7b1fa2
+}
+skinparam rectangleComponents {
+  BackgroundColor #e8f5e9
+  BorderColor #2e7d32
+}
+skinparam rectangleState {
+  BackgroundColor #fff3e0
+  BorderColor #ef6c00
+}
+skinparam rectangleTypes {
+  BackgroundColor #eceff1
+  BorderColor #455a64
+}
+skinparam arrow {
+  Color #37474f
+}
+
+' 层级容器
+rectangle 框架层 <<framework>> {
+  rectangle NextJS [Next.js 16\n(App Router)]
+  rectangle React [React 19\n(Hooks + Suspense)]
+  rectangle FramerMotion [Framer Motion\n(动画)]
+  rectangle Tailwind [Tailwind CSS\n(样式系统)]
+  rectangle Lucide [Lucide Icons\n(图标库)]
+}
+
+rectangle 类型层 <<types>> {
+  rectangle Message [Message\n对话消息]
+  rectangle Conversation [Conversation\n对话会话]
+  rectangle Attachment [Attachment\n附件(图片/语音)]
+  rectangle APIConfig [APIConfig\nAPI配置]
+  rectangle ConfiguredModel [ConfiguredModel\n已配置模型]
+  rectangle GlobalMemory [GlobalMemory\n全局记忆]
+  rectangle Note [Note\n笔记]
+  rectangle PromptTemplate [PromptTemplate\n提示词模板]
+}
+
+rectangle 状态管理层 <<state>> {
+  rectangle chatStore [Zustand ChatStore\n(持久化存储)]
+}
+
+rectangle 工具库层 <<lib>> {
+  rectangle apiConfig [API_ENDPOINTS\nAPI端点配置]
+  rectangle sse [SSE Client\n流式响应]
+  rectangle modelConfig [Model Config\n模型配置解析]
+}
+
+rectangle 组件层 <<components>> {
+  rectangle 页面组件 {
+    rectangle Home [page.tsx\n主页面入口]
+  }
+  rectangle 核心聊天组件 {
+    rectangle ChatArea [ChatArea\n聊天区域]
+    rectangle ChatInput [ChatInput\n输入区域]
+    rectangle Message [Message\n消息气泡]
+    rectangle MultiWindowChat [MultiWindowChat\n多窗口聊天]
+  }
+  rectangle 消息渲染组件 {
+    rectangle MarkdownRenderer [MarkdownRenderer\nMarkdown渲染]
+    rectangle Typewriter [Typewriter\n打字机效果]
+  }
+  rectangle 功能面板组件 {
+    rectangle ConversationList [ConversationList\n对话列表侧边栏]
+    rectangle Settings [Settings\n设置面板]
+    rectangle KnowledgeBaseManager [KnowledgeBaseManager\n知识库管理]
+    rectangle MemoryPanel [MemoryPanel\n记忆面板]
+    rectangle MultiAgentPanel [MultiAgentPanel\n多Agent面板]
+  }
+  rectangle Agent组件 {
+    rectangle AgentConfigPanel [AgentConfigPanel\nAgent配置]
+    rectangle AgentCollaborationPanel [AgentCollaborationPanel\n协作面板]
+    rectangle ToolCallDisplay [ToolCallDisplay\n工具调用展示]
+    rectangle ToolMarketplace [ToolMarketplace\n工具市场]
+    rectangle WorkflowEditor [WorkflowEditor\n工作流编辑器]
+  }
+  rectangle 移动端组件 {
+    rectangle MobileLayout [MobileLayout\n移动端布局]
+    rectangle MobileChatArea [MobileChatArea\n移动端聊天区]
+    rectangle BottomSheet [BottomSheet\n底部弹窗]
+  }
+  rectangle 通用组件 {
+    rectangle Toast [Toast\n消息提示]
+    rectangle ContentPreview [ContentPreview\n内容预览]
+    rectangle MessageStatus [MessageStatus\n消息状态]
+    rectangle WelcomeGuide [WelcomeGuide\n欢迎向导]
+    rectangle KeyboardShortcuts [KeyboardShortcuts\n键盘快捷键]
+  }
+}
+
+' 依赖关系
+NextJS --> React
+React --> FramerMotion
+React --> Tailwind
+React --> Lucide
+
+类型层 --> 状态管理层
+类型层 --> 组件层
+
+chatStore --> apiConfig
+chatStore --> modelConfig
+
+工具库层 --> 组件层
+apiConfig --> sse
+
+Home --> ConversationList
+Home --> MultiWindowChat
+Home --> Settings
+Home --> KnowledgeBaseManager
+Home --> MemoryPanel
+Home --> MultiAgentPanel
+Home --> ToolMarketplace
+Home --> ToastProvider
+
+MultiWindowChat --> ChatArea
+ChatArea --> ChatInput
+ChatArea --> Message
+ChatArea --> ContentPreview
+ChatArea --> sse
+
+ChatInput --> Message
+ChatInput --> chatStore
+ChatInput --> useToast
+
+Message --> Typewriter
+Message --> MarkdownRenderer
+Message --> chatStore
+Message --> MessageStatus
+
+Typewriter --> MarkdownRenderer
+MarkdownRenderer --> Shiki
+MarkdownRenderer --> DOMPurify
+
+ConversationList --> chatStore
+
+Settings --> chatStore
+KnowledgeBaseManager --> chatStore
+MemoryPanel --> chatStore
+MultiAgentPanel --> AgentConfigPanel
+MultiAgentPanel --> AgentCollaborationPanel
+
+MobileLayout --> MobileChatArea
+MobileChatArea --> ChatArea
+
+@enduml
+
+@startuml 页面结构图
+!layout strict
+
+skinparam page {
+  BackgroundColor white
+}
+skinparam rectangle {
+  BackgroundColor #f8f9fa
+  BorderColor #333
+}
+skinparam rectangleMobile {
+  BackgroundColor #e3f2fd
+  BorderColor #1976d2
+}
+skinparam rectangleDesktop {
+  BackgroundColor #f3e5f5
+  BorderColor #7b1fa2
+}
+
+title 主页面布局结构 (app/page.tsx)
+
+' 响应式判断
+if (isMobile) then (yes)
+  rectangle MobileLayout [MobileLayout\n移动端布局] {
+    rectangle BottomNavigation [Bottom Navigation\n底部导航栏]
+    rectangle MobileChatArea [MobileChatArea\n自适应聊天区域]
+    rectangle BottomSheet [BottomSheet\n底部弹出面板\n(设置/历史)]
+  }
+  MobileLayout --> ToastProvider
+else (no)
+  rectangle DesktopShell [Desktop Shell\n桌面端容器] {
+    rectangle BackgroundEffects [Background Effects\n渐变模糊装饰]
+
+    rectangle LeftSidebar [左侧边栏\n(动画: AnimatePresence)] {
+      rectangle ConversationList [ConversationList\n对话列表]
+    }
+
+    rectangle MainContent [主内容区] {
+      rectangle Header [Header\n顶部导航栏] {
+        rectangle MenuButton [菜单按钮\n(打开侧边栏)]
+        rectangle ConversationInfo [对话信息\n标题+更新时间]
+        rectangle LayoutSwitcher [布局切换器\n单/水平/垂直/网格]
+        rectangle PanelTabs [功能面板标签\n设置/记忆/智能体/工具/知识库]
+      }
+
+      rectangle ChatContainer [聊天容器] {
+        rectangle MultiWindowChat [MultiWindowChat\n多窗口布局]
+      }
+    }
+
+    rectangle RightPanel [右侧弹出面板\n(Modal)] {
+      rectangle SettingsPanel [Settings\nAPI设置]
+      rectangle MemoryPanel [MemoryPanel\n记忆管理]
+      rectangle AgentsPanel [MultiAgentPanel\n多Agent]
+      rectangle ToolsPanel [ToolMarketplace\n工具市场]
+      rectangle KnowledgeBase [KnowledgeBaseManager\n知识库]
+    }
+  }
+
+  BackgroundEffects -[hidden]-> LeftSidebar
+  LeftSidebar -[hidden]-> MainContent
+  MainContent -[hidden]-> RightPanel
+endif
+
+' 全局浮层
+rectangle GlobalOverlays [全局浮层] {
+  rectangle KeyboardShortcuts [KeyboardShortcuts\n键盘快捷键]
+  rectangle PromptSelector [PromptSelector\n提示词选择器]
+  rectangle WelcomeGuide [WelcomeGuide\n欢迎向导]
+}
+
+ToastProvider --> (isMobile ? MobileLayout : DesktopShell)
+(isMobile ? MobileLayout : DesktopShell) --> GlobalOverlays
+
+legend
+| 颜色 | 含义 |
+| <color:#e3f2fd> 浅蓝色 | 移动端专用 |
+| <color:#f3e5f5> 浅紫色 | 桌面端专用 |
+| <color:#f8f9fa> 浅灰色 | 全局通用 |
+endlegend
+
+@enduml
+
+@startuml 组件依赖关系图
+!layout strict
+
+' 使用分层
+!define rectangle(x,y,w,h) rectangle x #x is {y} at (w,h)
+
+skinparam rectangle {
+  BackgroundColor #e8f5e9
+  BorderColor #2e7d32
+}
+skinparam rectangleCore {
+  BackgroundColor #e3f2fd
+  BorderColor #1565c0
+}
+skinparam rectangleAgent {
+  BackgroundColor #fff3e0
+  BorderColor #e65100
+}
+skinparam rectangleMobile {
+  BackgroundColor #fce4ec
+  BorderColor #c2185b
+}
+
+' 层级：从下到上
+
+' 一级：基础组件
+rectangle 基础UI组件 <<base>> {
+  rectangle Toast [Toast\n(+ useToast)]
+  rectangle MessageStatus [MessageStatus\n消息状态指示器]
+  rectangle ContentPreview [ContentPreview\n链接/文档预览]
+  rectangle Typewriter [Typewriter\n打字机效果]
+  rectangle MarkdownRenderer [MarkdownRenderer\n+Shiki+DOMPurify]
+}
+
+' 二级：核心聊天组件
+rectangle 核心聊天组件 <<core>> {
+  rectangle ChatInput [ChatInput\n(多模态输入)\n- 图片上传\n- 语音录制\n- 模型选择\n- 快捷设置]
+  rectangle Message [Message\n消息气泡\n- 涟漪效果\n- 操作菜单\n- 编辑/复制/删除]
+  rectangle ChatArea [ChatArea\n聊天区域管理\n- 自动滚动\n- SSE接收\n- 错误处理]
+  rectangle ConversationList [ConversationList\n对话列表\n- 拖拽排序\n- 删除/恢复]
+  rectangle MultiWindowChat [MultiWindowChat\n多窗口布局\nsingle/horizontal/vertical/grid]
+}
+
+' 三级：功能面板
+rectangle 功能面板 <<panel>> {
+  rectangle Settings [Settings\nAPI配置\n外观设置\n推理参数]
+  rectangle KnowledgeBaseManager [KnowledgeBaseManager\nRAG知识库管理]
+  rectangle MemoryPanel [MemoryPanel\n全局记忆管理]
+  rectangle MultiModelConfig [MultiModelConfig\n多模型配置]
+  rectangle PromptSelector [PromptSelector\n提示词模板选择]
+  rectangle WelcomeGuide [WelcomeGuide\n新用户向导]
+  rectangle KeyboardShortcuts [KeyboardShortcuts\n快捷键说明]
+}
+
+' 四级：Agent组件
+rectangle Agent组件 <<agent>> {
+  rectangle AgentConfigPanel [AgentConfigPanel\nAgent配置]
+  rectangle AgentCollaborationPanel [AgentCollaborationPanel\n协作面板]
+  rectangle MultiAgentPanel [MultiAgentPanel\n总面板]
+  rectangle ToolCallDisplay [ToolCallDisplay\n工具调用展示]
+  rectangle ToolMarketplace [ToolMarketplace\n工具市场]
+  rectangle WorkflowEditor [WorkflowEditor\n工作流编辑器]
+  rectangle PerformanceMonitor [PerformanceMonitor\n性能监控]
+}
+
+' 五级：移动端组件
+rectangle 移动端组件 <<mobile>> {
+  rectangle MobileLayout [MobileLayout\n移动端整体布局]
+  rectangle MobileChatArea [MobileChatArea\n移动端聊天区]
+  rectangle BottomSheet [BottomSheet\n底部滑动面板]
+  rectangle InertialScroll [InertialScroll\n惯性滚动]
+  rectangle Skeleton [Skeleton\n骨架屏]
+  rectangle PerformanceOptimization [PerformanceOptimization\n性能优化]
+}
+
+' 入口
+rectangle 入口 <<entry>> {
+  rectangle Home [Home\napp/page.tsx]
+}
+
+' 依赖连线 - 从底层到上层
+Typewriter --> MarkdownRenderer
+Message --> Typewriter
+Message --> MarkdownRenderer
+Message --> MessageStatus
+
+ChatArea --> Message
+ChatArea --> ChatInput
+ChatArea --> ContentPreview
+
+ChatInput --> chatStore
+ChatInput --> Toast
+
+MultiWindowChat --> ChatArea
+
+ConversationList --> chatStore
+
+KnowledgeBaseManager --> api
+MemoryPanel --> chatStore
+Settings --> chatStore
+MultiModelConfig --> chatStore
+
+MultiAgentPanel --> AgentConfigPanel
+MultiAgentPanel --> AgentCollaborationPanel
+AgentCollaborationPanel --> ToolCallDisplay
+
+MobileLayout --> MobileChatArea
+MobileChatArea --> ChatArea
+
+Home --> ConversationList
+Home --> MultiWindowChat
+Home --> Settings
+Home --> KnowledgeBaseManager
+Home --> MemoryPanel
+Home --> MultiAgentPanel
+Home --> ToolMarketplace
+Home --> WelcomeGuide
+Home --> KeyboardShortcuts
+Home --> PromptSelector
+Home --> MobileLayout
+
+' 定义颜色
+base *-- core : depends
+core *-- panel : depends
+panel *-- agent : depends
+core *-- agent : depends
+base *-- agent : depends
+
+@enduml
+
+@startuml 状态管理图 - Zustand ChatStore
+!layout strict
+
+skinparam interface {
+  BackgroundColor #fff3e0
+  BorderColor #ef6c00
+}
+skinparam class {
+  BackgroundColor #e8f5e9
+  BorderColor #2e7d32
+}
+skinparam rectangle {
+  BackgroundColor #e3f2fd
+  BorderColor #1976d2
+}
+
+title Zustand 状态管理架构 - ChatStore
+
+interface State [State\n状态数据] {
+  conversations: Conversation[]\n--\n
+  globalMemories: GlobalMemory[]\n--\n
+  customPrompts: PromptTemplate[]\n--\n
+  activeConversationId: string | null\n--\n
+  activeConversationIds: string[]\n(多窗口支持)\n--\n
+  apiConfig: APIConfig\n--\n
+  configuredModels: ConfiguredModel[]\n--\n
+  settings: Settings\n{theme, palette, typingSpeed, fontSize, windowLayout}\n--\n
+  showWelcomeGuide: boolean\n--\n
+  hasHydrated: boolean
+}
+
+interface Actions [Actions\n方法] {
+  对话管理:\n
+  createConversation()\n
+  deleteConversation()\n
+  restoreConversation()\n
+  setActiveConversation()\n
+  reorderConversations()\n
+  updateConversationTitle()\n--\n
+  多窗口:\n
+  addActiveWindow()\n
+  removeActiveWindow()\n--\n
+  消息管理:\n
+  addMessage()\n
+  updateLastMessage()\n
+  deleteMessage()\n
+  updateMessageContent()\n
+  finalizeMessage()\n--\n
+  笔记/记忆:\n
+  addNote()\n
+  updateNote()\n
+  deleteNote()\n
+  addGlobalMemory()\n
+  updateGlobalMemory()\n
+  deleteGlobalMemory()\n--\n
+  配置:\n
+  setApiConfig()\n
+  addConfiguredModel()\n
+  removeConfiguredModel()\n
+  setSettings()\n--\n
+  提示词:\n
+  addCustomPrompt()\n
+  updateCustomPrompt()\n
+  deleteCustomPrompt()\n--\n
+  水合:\n
+  rehydrate()\n
+  setHasHydrated()
+}
+
+rectangle Persistence [持久化配置\nsessionStorage]\n{
+  name: "ai-chat-storage"\n--\n
+  partialize 过滤:\n
+  \u2713 持久化 conversations\n
+  \u2713 持久化 globalMemories\n
+  \u2713 持久化 customPrompts\n
+  \u2713 持久化 settings\n
+  \u2713 只持久化 model/baseURL (不保存apiKey)\n
+  \u2713 configuredModels 清空apiKey再存储\n--\n
+  安全特性:\n
+  - API Key 不持久化\n
+  - sessionStorage 关闭即清除\n
+  - skipHydration 防止SSR不匹配
+}
+
+class useChatStore [useChatStore\ncreate&lt;ChatState&gt;()]
+
+State --> useChatStore
+Actions --> useChatStore
+useChatStore --> Persistence
+
+note top of Persistence
+  🔒 安全设计: API Key 不在前端持久化
+  即使XSS攻击，API Key也只存在于内存
+  关闭标签页自动清除所有数据
+end note
+
+@enduml
+
+@startuml API调用流程图 - SSE流式响应
+!layout strict
+
+skinparam activity {
+  BackgroundColor #f5f5f5
+  BorderColor #424242
+}
+skinparam arrow {
+  Color #1976d2
+}
+
+title SSE 流式API调用流程
+
+start
+
+:用户输入消息\n(可选: 图片/语音附件);
+
+:ChatArea.handleSendMessage();
+
+:创建 userMessage\n加入 conversation;
+
+:创建空 assistantMessage\n加入 conversation;
+
+:组装 messages 历史数组;
+
+:sendSSEChatMessage()\n调用后端代理;
+
+:POST /api/v1/chat/completions\nBody: {model, messages, apiKey, baseURL, provider}\n带 AbortSignal;
+
+:后端代理转发到对应厂商API\nOpenAI/Anthropic/MiniMax/...;
+
+:获取 Response.body 可读流;
+
+:创建 Reader + TextDecoder;
+
+while (done != true)
+  :reader.read();
+  :buffer += decoder.decode(value);
+  :按行分割 buffer，弹出不完整行;
+
+  for each (line in lines)
+    if (line starts with "data:") then (yes)
+      :data = JSON.parse(line.slice(5));
+
+      if (data.type == "error") then (yes)
+        :调用 onError(error);
+        stop
+      else if (data == "[DONE]" || data.type == "done") then (yes)
+        break
+      else (content exists)
+        :提取 content = json.choices[0].delta.content;
+        :onMessage(content) -> updateLastMessage();
+        ' 增量更新 Zustand 状态
+      endif
+    endif
+  end for
+end while
+
+:onComplete() -> finalizeMessage();\n标记消息已完成;
+
+:设置 isLoading = false;
+
+stop
+
+note over 前端,后端
+  安全架构: API Key 由后端代理转发
+  前端不直接调用厂商API，避免API Key泄露
+end note
+
+@enduml
+
+@startuml 前端组件树分层图
+!layout strict
+
+' 分层结构
+level 1
+rectangle Home [app/page.tsx\nHome] {
+  level 2
+  rectangle useChatStore [Zustand Store\nuseChatStore]
+
+  rectangle ResponseDetector [响应式检测\nuseMediaQuery]
+
+  rectangle ThemeManager [主题管理\nuseEffect]
+
+  if (isMobile) then (yes)
+    level 3
+    rectangle ToastProvider [ToastProvider] {
+      level 4
+      rectangle MobileExperienceProvider [MobileExperienceProvider] {
+        level 5
+        rectangle MobileLayout [MobileLayout] {
+          level 6
+          rectangle MobileChatArea [MobileChatArea] {
+            level 7
+            rectangle ChatArea [ChatArea]
+          }
+        }
+        rectangle PromptSelector [PromptSelector]
+        rectangle WelcomeGuide [WelcomeGuide]
+      }
+    }
+  else (no)
+    level 3
+    rectangle DesktopShell [Desktop Shell\ndiv] {
+      level 4
+      rectangle BackgroundDecor [Background Decorations]
+      rectangle AnimatePresence [AnimatePresence\n侧边栏动画] {
+        level 5
+        rectangle ConversationList [ConversationList\n左侧边栏]
+      }
+      rectangle motion.main [Main Content] {
+        level 5
+        rectangle Header [Header] {
+          level 6
+          rectangle MenuButton
+          rectangle ConversationInfo
+          rectangle LayoutSwitcher
+          rectangle PanelTabs [功能面板标签]
+        }
+        rectangle ChatContainer [Chat Container] {
+          level 6
+          rectangle MultiWindowChat [MultiWindowChat] {
+            level 7
+            rectangle ChatArea [ChatArea\n每个窗口]
+          }
+        }
+      }
+    }
+
+    level 4
+    rectangle AnimatePresenceModal [AnimatePresence\n右侧面板] {
+      level 5
+      rectangle Settings [Settings]
+      rectangle MemoryPanel [MemoryPanel]
+      rectangle MultiAgentPanel [MultiAgentPanel]
+      rectangle ToolMarketplace [ToolMarketplace]
+      rectangle KnowledgeBaseManager [KnowledgeBaseManager]
+    }
+
+    level 3
+    rectangle GlobalOverlays [全局浮层] {
+      level 4
+      rectangle KeyboardShortcuts [KeyboardShortcuts]
+      rectangle PromptSelector [PromptSelector]
+      rectangle WelcomeGuide [WelcomeGuide]
+    }
+  endif
+}
+
+legend
+| 层级 | 说明 |
+| 1 | 页面入口 |
+| 2 | 全局状态/hooks |
+| 3 | 布局容器 |
+| 4 | 区域容器 |
+| 5 | 面板/组件 |
+| 6 | 导航/头部 |
+| 7 | 核心聊天 |
+endlegend
+
+@enduml

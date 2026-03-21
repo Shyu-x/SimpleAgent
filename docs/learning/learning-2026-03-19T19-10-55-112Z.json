@@ -1,0 +1,412 @@
+{
+  "timestamp": "2026-03-19T19:10:09.385Z",
+  "categories": {
+    "agent_framework": {
+      "query": "langgraph OR langchain agent",
+      "projects": [
+        {
+          "name": "prasad-j155/Soulpage-genai-assignment-Prasad-J",
+          "description": "Task 1: Multi-Agent System using LangGraph or LangChain Agents",
+          "stars": 0,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "suryansh-sr-17/soulpage-genai-task1-suryanshsr",
+          "description": "Soulpage GenAI Submission | Task 1: Multi-Agent System using LangGraph or  LangChain Agents",
+          "stars": 0,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        }
+      ]
+    },
+    "react_agent": {
+      "query": "react AI agent workflow",
+      "projects": []
+    },
+    "mcp_protocol": {
+      "query": "mcp model context protocol",
+      "projects": [
+        {
+          "name": "CoplayDev/unity-mcp",
+          "description": "Unity MCP acts as a bridge, allowing AI assistants (like Claude, Cursor) to interact directly with your Unity Editor via a local MCP (Model Context Protocol) Client. Give your LLM tools to manage assets, control scenes, edit scripts, and automate tasks within Unity.",
+          "stars": 7288,
+          "topics": [
+            "ai",
+            "ai-integration",
+            "mcp",
+            "unity",
+            "anthropic",
+            "claude",
+            "copilot",
+            "cursor",
+            "game-development",
+            "gemini",
+            "llm",
+            "model-context-protocol",
+            "openai",
+            "unity3d",
+            "gamedev",
+            "videogames"
+          ],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": true,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "casibase/casibase",
+          "description": "⚡️AI Cloud OS: Open-source enterprise-level AI knowledge base and MCP (model-context-protocol)/A2A (agent-to-agent) management platform with admin UI, user management and Single-Sign-On⚡️, supports ChatGPT, Claude, Llama, Ollama, HuggingFace, etc., chat bot demo: https://ai.casibase.com, admin UI demo: https://ai-admin.casibase.com",
+          "stars": 4473,
+          "topics": [
+            "chatgpt",
+            "gpt",
+            "knowledge-base",
+            "casibase",
+            "langchain",
+            "claude",
+            "huggingface",
+            "openai",
+            "chatbot",
+            "llm",
+            "rag",
+            "llama",
+            "gemini",
+            "multi-agent",
+            "agi",
+            "agent",
+            "manus",
+            "a2a",
+            "mcp",
+            "model-context-protocol"
+          ],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": true,
+            "multiagent": false,
+            "mcp": true,
+            "langchain": true,
+            "langgraph": false,
+            "rag": true
+          }
+        },
+        {
+          "name": "microsoft/mcp",
+          "description": "Catalog of official Microsoft MCP (Model Context Protocol) server implementations for AI-powered data access and tool integration",
+          "stars": 2814,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        }
+      ]
+    },
+    "browser_agent": {
+      "query": "browser automation AI agent",
+      "projects": [
+        {
+          "name": "moossahussain/browser-use-agent",
+          "description": "browser automation AI Agent",
+          "stars": 0,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "Ashwinumbarkar20/Browser-Automation-AI-Agent",
+          "description": "",
+          "stars": 0,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "fabin-ziyad/browser-automation-ai-agent",
+          "description": "AI automation agent built in Python using GPT for intelligent task execution and conversation handling. Integrates seamlessly with workflows for smart testing, data checks, and process automation.",
+          "stars": 0,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        }
+      ]
+    },
+    "multi_agent": {
+      "query": "multi-agent collaboration",
+      "projects": [
+        {
+          "name": "lobehub/lobehub",
+          "description": "The ultimate space for work and life — to find, build, and collaborate with agent teammates that grow with you. We are taking agent harness to the next level — enabling multi-agent collaboration, effortless agent team design, and introducing agents as the unit of work interaction.",
+          "stars": 73976,
+          "topics": [
+            "chatgpt",
+            "openai",
+            "ai",
+            "gpt",
+            "claude",
+            "gemini",
+            "knowledge-base",
+            "deepseek",
+            "agent",
+            "mcp",
+            "agent-harness",
+            "agent-collaboration"
+          ],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": true,
+            "multiagent": false,
+            "mcp": true,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "OpenBMB/ChatDev",
+          "description": "ChatDev 2.0: Dev All through LLM-powered Multi-Agent Collaboration",
+          "stars": 31730,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "abhi1693/openclaw-mission-control",
+          "description": "AI Agent Orchestration Dashboard - Manage AI agents, assign tasks, and coordinate multi-agent collaboration via OpenClaw Gateway.",
+          "stars": 2753,
+          "topics": [
+            "ai-agents",
+            "automation",
+            "openclaw",
+            "orchestration"
+          ],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": true,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        }
+      ]
+    },
+    "latest_react": {
+      "query": "react-19 next.js-16",
+      "projects": [
+        {
+          "name": "sxidsvit/ai-event-maker",
+          "description": "Full Stack AI Event Management Platform SaaS in React 19 + Next JS 16 with Tailwind CSS, Convex, Clerk Authentication, Shadcn UI Tutorial",
+          "stars": 2,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "Klimpavlov/Supabase-todo-app",
+          "description": "Todo app using Supabase, React 19 & Next.js 16",
+          "stars": 0,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "Lakindu199854/authentication_fronend",
+          "description": "Role-Based Dashboard with React 19 & Next.js 16 | Authentication & Authorization",
+          "stars": 0,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        }
+      ]
+    },
+    "zustand_patterns": {
+      "query": "zustand state management",
+      "projects": [
+        {
+          "name": "koalamango/next-zustand",
+          "description": "Next.js + Zustand state management",
+          "stars": 16,
+          "topics": [
+            "hydration-error",
+            "nextjs",
+            "nextjs-example",
+            "nextjs-typescript",
+            "zustand",
+            "zustand-persist"
+          ],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "Xela-Byte/vestitus",
+          "description": "Vestitus is an Expo-based React Native mobile e-commerce app (runs on iOS, Android, Web) with TypeScript, NativeWind styling, and Zustand state management.",
+          "stars": 11,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        },
+        {
+          "name": "Naveen512/ReactJS-v18-Zustand-Crud",
+          "description": "ReactJS(v18) Crud Sample with Zustand State Management Library",
+          "stars": 10,
+          "topics": [],
+          "techStack": {
+            "framework": false,
+            "typescript": false,
+            "react": false,
+            "python": false,
+            "agent": false,
+            "multiagent": false,
+            "mcp": false,
+            "langchain": false,
+            "langgraph": false,
+            "rag": false
+          }
+        }
+      ]
+    },
+    "typescript_best": {
+      "query": "typescript best practices 2025",
+      "projects": []
+    }
+  }
+}

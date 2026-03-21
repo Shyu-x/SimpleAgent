@@ -1,0 +1,44 @@
+{
+  "id": "session_1773799076956_a23byy2nd",
+  "task": "测试搜索功能",
+  "context": {},
+  "status": "checkpoint",
+  "createdAt": 1773799076956,
+  "updatedAt": 1773799076961,
+  "checkpoints": [
+    {
+      "id": "cp_1773799076961_qtp44g",
+      "createdAt": 1773799076961,
+      "state": {
+        "iteration": 1,
+        "status": "running",
+        "context": {},
+        "toolResults": [
+          {
+            "tool": "web_search",
+            "input": {
+              "query": "测试功能"
+            },
+            "output": {
+              "success": false,
+              "error": "未配置API密钥"
+            },
+            "timestamp": 1773799076959
+          }
+        ],
+        "pendingAction": null,
+        "error": null
+      },
+      "metadata": {
+        "iteration": 1,
+        "toolCallsCount": 1
+      }
+    }
+  ],
+  "currentCheckpoint": "cp_1773799076961_qtp44g",
+  "metadata": {
+    "iterations": 1,
+    "toolCalls": 0,
+    "errors": 0
+  }
+}

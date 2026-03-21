@@ -1,0 +1,22 @@
+{
+  "default": {
+    "role": "system",
+    "content": "[历史摘要] 讨论主题: 这是一段比较长的对话内容, 历史摘要, 讨论主题, 用户最后问题；用户最后问题: 消息 3: 这是一段比较长的对话内容...",
+    "timestamp": 1774026611253,
+    "metadata": {
+      "type": "summary",
+      "originalCount": 2,
+      "originalTokens": 42
+    }
+  },
+  "test-session-456": {
+    "role": "system",
+    "content": "[历史摘要] 讨论主题: 这是一段比较长的对话内容, 历史摘要, 讨论主题, 用户最后问题；用户最后问题: 消息 2: 这是一段比较长的对话内容...",
+    "timestamp": 1774026624208,
+    "metadata": {
+      "type": "summary",
+      "originalCount": 2,
+      "originalTokens": 42
+    }
+  }
+}
