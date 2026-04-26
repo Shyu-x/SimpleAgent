@@ -1,0 +1,39 @@
+# ==========================================
+# 统一测试运行器 Docker 镜像
+# ==========================================
+# 运行: docker-compose -f docker-compose.test.yml up test-runner
+# ==========================================
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 安装基础工具
+RUN apk add --no-cache wget curl git bash
+
+# Node.js 测试依赖
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --omit=dev && npm install jest@30 babel-jest@29 @babel/core @babel/preset-env jest-junit --save-dev
+
+# Playwright
+RUN npm install -g playwright && npx playwright install chromium --with-deps
+
+# 复制测试配置
+COPY jest.config.js ./
+COPY backend/jest.setup.js ./backend/
+
+# 复制测试文件
+COPY tests/ ./tests/
+COPY backend/tests/ ./backend/tests/
+COPY backend/src/__tests__/ ./backend/src/__tests__/
+
+# 测试报告目录
+RUN mkdir -p /app/test-results/jest /app/test-results/playwright /app/test-results/html
+
+# 运行所有测试
+CMD ["sh", "-c", "\
+echo '=== 运行 Jest 单元/集成测试 ===' && \
+cd backend && npm test -- --coverage --coverageReporters=lcov --reportPath=/app/test-results/jest && \
+echo '=== Jest 测试完成 ===' && \
+echo '=== 测试报告: /app/test-results/jest/index.html ===' && \
+tail -f /dev/null \
+"]

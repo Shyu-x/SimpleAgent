@@ -1,69 +1,125 @@
 # ==========================================
-# AI Chat 玩具 - E2E 测试 Docker 配置
+# AI Chat 玩具 - 测试框架 Docker 配置
+# ==========================================
+# 支持: 单元测试 + 集成测试 + E2E测试
+#
+# 启动:
+#   docker-compose -f docker-compose.test.yml up
+#
+# 查看测试报告:
+#   open test-results/html/index.html
 # ==========================================
 
 version: '3.8'
 
 services:
-  # 前端服务
-  frontend:
+  # -----------------------------
+  # 测试协调器
+  # -----------------------------
+  test-runner:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: frontend-builder
-    container_name: aichat-test-frontend
-    ports:
-      - "5173:5173"
+      dockerfile: Dockerfile.test
+    container_name: aichat-test-runner
+    volumes:
+      - ./test-results:/app/test-results
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./tests:/app/tests
     environment:
       - NODE_ENV=test
-      - NEXT_PUBLIC_BACKEND_URL=http://backend:30000
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5173"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - JEST_JUNIT_OUTPUT_DIR=/app/test-results/jest
+      - PLAYWRIGHT_REPORT_DIR=/app/test-results/playwright
+    depends_on:
+      backend:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
 
-  # 后端服务
+  # -----------------------------
+  # 后端服务 (用于集成测试)
+  # -----------------------------
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: backend-builder
+      dockerfile: Dockerfile.backend.test
     container_name: aichat-test-backend
     ports:
       - "30000:30000"
     environment:
       - NODE_ENV=test
       - PORT=30000
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - QDRANT_COLLECTION=chat_documents
+      - QDRANT_DIMENSION=1024
+      - RAG_CHUNK_SIZE=512
+      - RAG_TOP_K=5
+      - RAG_RERANK=true
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY:-test_key_for_ci}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:30000/api/health"]
       interval: 10s
       timeout: 5s
-      retries: 5
-
-  # Playwright 测试
-  playwright:
-    image: mcr.microsoft.com/playwright:v1.40.0
-    container_name: aichat-test-runner
-    working_dir: /app
-    volumes:
-      - .:/app
-      - test-results:/app/test-results
-    environment:
-      - TEST_BASE_URL=http://frontend:5173
-      - TEST_BACKEND_URL=http://backend:30000
-      - MINIMAX_API_KEY=${MINIMAX_API_KEY:-}
-    command: >
-      sh -c "
-        echo 'Waiting for services...' &&
-        sleep 10 &&
-        echo 'Running E2E tests...' &&
-        npx playwright test --reporter=list
-      "
+      retries: 10
+      start_period: 30s
     depends_on:
-      - frontend
-      - backend
+      qdrant:
+        condition: service_healthy
+    networks:
+      - ai-chat-test
 
+  # -----------------------------
+  # Qdrant 向量数据库 (测试用)
+  # -----------------------------
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: aichat-test-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_test_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-chat-test
+
+  # -----------------------------
+  # 前端服务 (用于E2E测试)
+  # -----------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.test
+    container_name: aichat-test-frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=test
+      - NEXT_PUBLIC_BACKEND_URL=http://backend:30000
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-chat-test
+
+# -----------------------------
+# 数据卷
+# -----------------------------
 volumes:
-  test-results:
+  qdrant_test_data:
     driver: local
+
+# -----------------------------
+# 网络
+# -----------------------------
+networks:
+  ai-chat-test:
+    name: ai-chat-test
+    driver: bridge

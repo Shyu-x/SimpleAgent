@@ -1,0 +1,22 @@
+# ==========================================
+# 前端测试 Docker 镜像
+# ==========================================
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 安装依赖
+COPY frontend/package*.json ./
+RUN npm ci
+
+# 复制源代码
+COPY frontend/ ./
+
+# 构建
+ENV NODE_ENV=production
+RUN npm run build
+
+# Playwright
+RUN npx playwright install chromium --with-deps
+
+CMD ["sh", "-c", "echo 'Frontend ready for E2E tests' && tail -f /dev/null"]

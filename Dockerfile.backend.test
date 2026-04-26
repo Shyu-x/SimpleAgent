@@ -1,0 +1,16 @@
+# ==========================================
+# 后端测试 Docker 镜像
+# ==========================================
+FROM node:20-alpine
+
+WORKDIR /app
+
+# 安装测试依赖
+COPY backend/package*.json ./
+RUN npm ci --omit=dev && npm install jest@30 babel-jest@29 @babel/core @babel/preset-env
+
+# 复制源代码
+COPY backend/ ./
+
+# 测试命令
+CMD ["sh", "-c", "npm test -- --detectOpenHandles --forceExit 2>&1 | tee /app/test-results/jest output.txt"]
