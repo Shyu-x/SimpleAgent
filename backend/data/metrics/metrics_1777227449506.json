@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-26T18:21:29.532Z",
+  "timestamp": "2026-04-26T18:17:29.506Z",
   "counters": {
     "http_requests_total": {
       "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 1,
@@ -14,15 +14,7 @@
       "endpoint=\"/api/admin/tools/categories\",method=\"GET\",status=\"200\"": 1,
       "endpoint=\"/api/admin/knowledge/docs\",method=\"GET\",status=\"200\"": 1,
       "endpoint=\"/api/admin/tools/categories/list\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/tools/stats\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/models\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/traces\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/prompts\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/models/stats\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/traces/stats\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/prompts/builtin_code_review/versions\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/models/MiniMax-M2.7/circuit-breaker\",method=\"POST\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/prompts/builtin_code_review\",method=\"GET\",status=\"200\"": 1
+      "endpoint=\"/api/admin/tools/stats\",method=\"GET\",status=\"200\"": 1
     }
   },
   "gauges": {
@@ -90,21 +82,21 @@
         }
       },
       "endpoint=\"/stats\",method=\"GET\"": {
-        "count": 5,
-        "sum": 0.005,
-        "mean": 0.001,
+        "count": 3,
+        "sum": 0.004,
+        "mean": 0.0013333333333333333,
         "buckets": {
-          "1": 5,
-          "5": 5,
-          "10": 5,
-          "0.005": 5,
-          "0.01": 5,
-          "0.025": 5,
-          "0.05": 5,
-          "0.1": 5,
-          "0.25": 5,
-          "0.5": 5,
-          "2.5": 5
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
         }
       },
       "endpoint=\"/api/mission/stats\",method=\"GET\"": {
@@ -234,21 +226,21 @@
         }
       },
       "endpoint=\"/\",method=\"GET\"": {
-        "count": 6,
-        "sum": 0.059,
-        "mean": 0.009833333333333333,
+        "count": 3,
+        "sum": 0.057999999999999996,
+        "mean": 0.01933333333333333,
         "buckets": {
-          "1": 6,
-          "5": 6,
-          "10": 6,
-          "0.005": 4,
-          "0.01": 4,
-          "0.025": 4,
-          "0.05": 6,
-          "0.1": 6,
-          "0.25": 6,
-          "0.5": 6,
-          "2.5": 6
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
         }
       },
       "endpoint=\"/api/admin/stats\",method=\"GET\"": {
@@ -414,204 +406,6 @@
         }
       },
       "endpoint=\"/api/admin/tools/stats\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/models\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/traces\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/prompts\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/models/stats\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/traces/stats\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/builtin_code_review/versions\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/prompts/builtin_code_review/versions\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/MiniMax-M2.7/circuit-breaker\",method=\"POST\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/models/MiniMax-M2.7/circuit-breaker\",method=\"POST\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/builtin_code_review\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/prompts/builtin_code_review\",method=\"GET\"": {
         "count": 1,
         "sum": 0.001,
         "mean": 0.001,

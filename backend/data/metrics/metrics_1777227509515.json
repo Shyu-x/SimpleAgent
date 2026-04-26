@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-26T18:21:29.532Z",
+  "timestamp": "2026-04-26T18:18:29.515Z",
   "counters": {
     "http_requests_total": {
       "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 1,
@@ -19,10 +19,7 @@
       "endpoint=\"/api/admin/traces\",method=\"GET\",status=\"200\"": 1,
       "endpoint=\"/api/admin/prompts\",method=\"GET\",status=\"200\"": 1,
       "endpoint=\"/api/admin/models/stats\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/traces/stats\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/prompts/builtin_code_review/versions\",method=\"GET\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/models/MiniMax-M2.7/circuit-breaker\",method=\"POST\",status=\"200\"": 1,
-      "endpoint=\"/api/admin/prompts/builtin_code_review\",method=\"GET\",status=\"200\"": 1
+      "endpoint=\"/api/admin/traces/stats\",method=\"GET\",status=\"200\"": 1
     }
   },
   "gauges": {
@@ -504,114 +501,6 @@
         }
       },
       "endpoint=\"/api/admin/traces/stats\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/builtin_code_review/versions\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/prompts/builtin_code_review/versions\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/MiniMax-M2.7/circuit-breaker\",method=\"POST\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/models/MiniMax-M2.7/circuit-breaker\",method=\"POST\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/builtin_code_review\",method=\"GET\"": {
-        "count": 1,
-        "sum": 0.001,
-        "mean": 0.001,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "endpoint=\"/api/admin/prompts/builtin_code_review\",method=\"GET\"": {
         "count": 1,
         "sum": 0.001,
         "mean": 0.001,
