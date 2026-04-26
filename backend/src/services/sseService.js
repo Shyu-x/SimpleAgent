@@ -82,19 +82,37 @@ function validateChatRequest(body) {
   } else if (body.messages.length === 0) {
     errors.push('messages不能为空数组');
   } else {
-    // 检查每条消息的格式
+    // 检查每条消息的格式（支持多模态消息）
     body.messages.forEach((msg, index) => {
       if (!msg.role) {
         errors.push(`第${index + 1}条消息缺少role参数`);
       } else if (!['user', 'assistant', 'system'].includes(msg.role)) {
         errors.push(`第${index + 1}条消息role无效: ${msg.role}`);
       }
+
+      // 支持多模态内容（OpenAI格式）：content 可以是字符串或数组
       if (!msg.content) {
-        errors.push(`第${index + 1}条消息缺少content参数`);
-      } else if (typeof msg.content !== 'string') {
-        errors.push(`第${index + 1}条消息content必须为字符串`);
-      } else if (msg.content.length > 100000) {
-        errors.push(`第${index + 1}条消息内容过长(最大100000字符)`);
+        // content 为空可能是多模态消息，但attachments时需要有content
+        if (typeof msg.content !== 'string' && !Array.isArray(msg.content)) {
+          errors.push(`第${index + 1}条消息缺少content参数`);
+        }
+      } else if (typeof msg.content === 'string') {
+        if (msg.content.length > 100000) {
+          errors.push(`第${index + 1}条消息内容过长(最大100000字符)`);
+        }
+      } else if (Array.isArray(msg.content)) {
+        // 多模态数组格式：[{ type: 'text', text: '...' }, { type: 'image_url', image_url: { url: '...' } }]
+        msg.content.forEach((item, i) => {
+          if (!['text', 'image_url'].includes(item.type)) {
+            errors.push(`第${index + 1}条消息第${i + 1}个内容块类型无效: ${item.type}`);
+          }
+          if (item.type === 'image_url' && item.image_url?.url) {
+            // base64图片URL可能很长，只检查格式
+            if (!item.image_url.url.startsWith('data:') && !item.image_url.url.startsWith('http')) {
+              errors.push(`第${index + 1}条消息第${i + 1}个图片URL格式无效`);
+            }
+          }
+        });
       }
     });
   }

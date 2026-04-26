@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
-const QueryRewriteService = require('./rag/QueryRewriteService');
+const { QueryRewriteService } = require('../domain/rag/QueryRewriteService');
 const RerankerService = require('./rag/RerankerService');
 
 // 简单的文本分块
@@ -234,28 +234,69 @@ class RAGService extends EventEmitter {
     const topK = options.topK || this.topK;
     const threshold = options.similarityThreshold || this.similarityThreshold;
 
-    // 查询改写：补全、同义词扩展
-    const rewrittenQuery = await this.queryRewriteService.rewrite(query, { topic: kb.name });
-    const expandedQuery = this.queryRewriteService.expand(rewrittenQuery);
+    // 查询改写：真实调用LLM补全上下文
+    let rewrittenQuery = query;
+    let rewriteMeta = null;
+
+    if (this.queryRewriteService) {
+      try {
+        const rewriteResult = await this.queryRewriteService.rewrite(query, {
+          messages: options.messages || [],
+          topic: kb.name
+        });
+        rewrittenQuery = rewriteResult.rewritten;
+        rewriteMeta = {
+          originalQuery: query,
+          rewrittenQuery: rewriteResult.rewritten,
+          rewriteType: rewriteResult.type,
+          confidence: rewriteResult.confidence,
+          changes: rewriteResult.changes || []
+        };
+      } catch (err) {
+        console.warn('[RAGService] Query rewrite failed, using original query:', err.message);
+      }
+    }
+
+    // 语义扩展
+    let expandedQuery = rewrittenQuery;
+    if (this.queryRewriteService && options.enableExpansion) {
+      try {
+        const expandResult = await this.queryRewriteService.expand(rewrittenQuery);
+        expandedQuery = expandResult.query;
+      } catch (err) {
+        console.warn('[RAGService] Query expansion failed:', err.message);
+      }
+    }
 
     // 拆分子问题（用于多路检索）
-    const subQueries = this.queryRewriteService.decompose(expandedQuery);
+    let subQueries = [expandedQuery];
+    if (this.queryRewriteService) {
+      try {
+        const decomposeResult = this.queryRewriteService.decompose(expandedQuery);
+        if (decomposeResult && decomposeResult.length > 0) {
+          subQueries = decomposeResult;
+        }
+      } catch (err) {
+        console.warn('[RAGService] Query decomposition failed:', err.message);
+      }
+    }
 
-    // 生成查询嵌入
-    const queryEmbedding = await this.generateEmbedding(expandedQuery);
+    // 多路检索：并行执行子查询检索
+    const searchPromises = subQueries.map(async (sq) => {
+      const queryEmbedding = await this.generateEmbedding(sq);
+      return this._searchChunks(kb, queryEmbedding, threshold);
+    });
 
-    // 收集所有块并计算相似度
+    const searchResults = await Promise.all(searchPromises);
+
+    // 合并去重
     const allChunks = [];
-    for (const doc of kb.documents) {
-      for (const chunk of doc.chunks) {
-        const similarity = cosineSimilarity(queryEmbedding, chunk.embedding);
-        if (similarity >= threshold) {
-          allChunks.push({
-            ...chunk,
-            similarity,
-            documentTitle: doc.title,
-            documentId: doc.id
-          });
+    const seen = new Set();
+    for (const results of searchResults) {
+      for (const chunk of results) {
+        if (!seen.has(chunk.id)) {
+          seen.add(chunk.id);
+          allChunks.push(chunk);
         }
       }
     }
@@ -274,14 +315,40 @@ class RAGService extends EventEmitter {
     // 使用重排序服务进一步优化
     results = await this.rerankerService.rerank(query, results, { topK });
 
-    return results;
+    return {
+      results,
+      meta: rewriteMeta
+    };
+  }
+
+  /**
+   * 内部方法：搜索块
+   * @private
+   */
+  async _searchChunks(kb, queryEmbedding, threshold) {
+    const allChunks = [];
+    for (const doc of kb.documents) {
+      for (const chunk of doc.chunks) {
+        const similarity = cosineSimilarity(queryEmbedding, chunk.embedding);
+        if (similarity >= threshold) {
+          allChunks.push({
+            ...chunk,
+            similarity,
+            documentTitle: doc.title,
+            documentId: doc.id
+          });
+        }
+      }
+    }
+    return allChunks;
   }
 
   /**
    * 为对话生成上下文
    */
   async getContextForConversation(kbId, query, options = {}) {
-    const results = await this.retrieve(kbId, query, options);
+    const retrieveResult = await this.retrieve(kbId, query, options);
+    const results = retrieveResult.results || retrieveResult;
 
     if (results.length === 0) {
       return null;
