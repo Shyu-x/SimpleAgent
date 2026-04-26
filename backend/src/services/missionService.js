@@ -42,7 +42,7 @@ const AgentStatus = {
 };
 
 class MissionService {
-  constructor(storePath = 'backend/data/mission-store.json') {
+  constructor(storePath = 'data/mission-store.json') {
     this.storePath = storePath;
     this.tasks = new Map();
     this.agents = new Map();
