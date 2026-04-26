@@ -2,6 +2,7 @@
  * Qdrant 向量数据库管理 API
  *
  * 提供向量集合的 CRUD 操作接口
+ * 支持 HNSW 索引配置和 PQ 量化参数管理
  *
  * @swagger
  * tags:
@@ -12,6 +13,11 @@
 const express = require('express');
 const router = express.Router();
 const { getQdrantRouter } = require('../services/vector');
+const { apiKeyMiddleware, roleMiddleware, configurableRateLimitMiddleware } = require('../middleware/security');
+
+// 应用安全中间件
+router.use(apiKeyMiddleware);
+router.use(configurableRateLimitMiddleware);
 
 /**
  * 获取 Qdrant 路由状态
@@ -33,17 +39,34 @@ router.get('/status', async (req, res) => {
 });
 
 /**
- * 创建或更新集合
+ * 创建或更新集合 (支持生产级 HNSW + 量化参数)
  */
 router.put('/collections/:collection', async (req, res) => {
   try {
     const { collection } = req.params;
-    const { dimension = 1024, distance = 'Cosine' } = req.body;
+    const {
+      dimension = 1024,
+      distance = 'Cosine',
+      hnswM = 32,
+      hnswEfConstruction = 128,
+      hnswFullScanThreshold = 10000,
+      hnswOnDisk = false,
+      quantizationEnabled = true,
+      quantile = 0.99,
+      compression = 'compression16',
+    } = req.body;
 
     const router = getQdrantRouter({
       collection,
       dimension,
       distance,
+      hnswM,
+      hnswEfConstruction,
+      hnswFullScanThreshold,
+      hnswOnDisk,
+      quantizationEnabled,
+      quantile,
+      compression,
     });
 
     const result = await router.vectorStore.connect();
@@ -51,13 +74,170 @@ router.put('/collections/:collection', async (req, res) => {
       return res.status(500).json({ success: false, error: result.error });
     }
 
-    const createResult = await router.vectorStore.createCollection();
+    // 使用生产级参数创建集合
+    const createResult = await router.vectorStore.createCollectionWithProductionParams();
     res.json({
       success: createResult.success,
       collection,
       dimension,
       distance,
-      message: createResult.exists ? 'Collection already exists' : 'Collection created',
+      hnsw: {
+        m: hnswM,
+        efConstruction: hnswEfConstruction,
+        fullScanThreshold: hnswFullScanThreshold,
+        onDisk: hnswOnDisk,
+      },
+      quantization: {
+        enabled: quantizationEnabled,
+        quantile,
+        compression,
+      },
+      message: createResult.exists ? 'Collection already exists' : 'Collection created with production params',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 获取集合 HNSW 参数
+ */
+router.get('/collections/:collection/params', async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const router = getQdrantRouter({ collection });
+    const store = router.vectorStore;
+    store.collectionName = collection;
+
+    const params = await store.getCollectionParams();
+    if (!params.success) {
+      return res.status(404).json({ success: false, error: 'Collection not found' });
+    }
+
+    res.json({
+      success: true,
+      collection,
+      hnswConfig: params.hnswConfig,
+      quantizationConfig: params.quantizationConfig,
+      collectionInfo: params.collectionInfo,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 更新集合 HNSW 参数
+ */
+router.put('/collections/:collection/params', async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const { m, ef_construction, full_scan_threshold, on_disk } = req.body;
+
+    const router = getQdrantRouter({ collection });
+    const store = router.vectorStore;
+    store.collectionName = collection;
+
+    const result = await store.updateHNSWParams({
+      m,
+      ef_construction,
+      full_scan_threshold,
+      on_disk,
+    });
+
+    if (!result.success) {
+      return res.status(500).json({ success: false, error: result.error });
+    }
+
+    res.json({
+      success: true,
+      collection,
+      hnswConfig: result.hnswConfig,
+      message: 'HNSW 参数更新成功',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 获取集合量化配置
+ */
+router.get('/collections/:collection/quantization', async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const router = getQdrantRouter({ collection });
+    const store = router.vectorStore;
+    store.collectionName = collection;
+
+    const params = await store.getCollectionParams();
+    if (!params.success) {
+      return res.status(404).json({ success: false, error: 'Collection not found' });
+    }
+
+    res.json({
+      success: true,
+      collection,
+      quantization: params.quantizationConfig,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 更新集合量化配置
+ */
+router.put('/collections/:collection/quantization', async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const { quantile, compression, enabled } = req.body;
+
+    const router = getQdrantRouter({ collection });
+    const store = router.vectorStore;
+    store.collectionName = collection;
+
+    const result = await store.updateQuantizationParams({
+      quantile,
+      compression,
+      enabled,
+    });
+
+    if (!result.success) {
+      return res.status(500).json({ success: false, error: result.error });
+    }
+
+    res.json({
+      success: true,
+      collection,
+      quantization: result.quantization,
+      message: '量化参数更新成功',
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 获取集合优化建议
+ */
+router.get('/collections/:collection/optimize', async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const router = getQdrantRouter({ collection });
+    const store = router.vectorStore;
+    store.collectionName = collection;
+
+    const suggestions = await store.getOptimizeSuggestions();
+    if (!suggestions.success) {
+      return res.status(404).json({ success: false, error: 'Collection not found' });
+    }
+
+    res.json({
+      success: true,
+      collection,
+      pointCount: suggestions.pointCount,
+      suggestions: suggestions.suggestions,
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
