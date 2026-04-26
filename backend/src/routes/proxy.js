@@ -33,12 +33,32 @@ function getApiKey(req) {
 function transformRequest(req) {
   const { messages, model, temperature, max_tokens, stream, reasoning_split, thinking_budget } = req.body;
 
-  return {
-    model: model || PROVIDER.defaultModel,
-    messages: messages.map(m => ({
+  // 转换消息，支持多模态内容（OpenAI格式数组）
+  const transformedMessages = messages.map(m => {
+    // 如果content是数组（多模态格式），直接传递
+    if (Array.isArray(m.content)) {
+      return {
+        role: m.role === 'assistant' ? 'assistant' : m.role,
+        content: m.content.map(item => {
+          // image_url 类型保持原格式
+          if (item.type === 'image_url') {
+            return item;
+          }
+          // text 类型
+          return { type: 'text', text: item.text || item.content || '' };
+        })
+      };
+    }
+    // 字符串内容直接传递
+    return {
       role: m.role === 'assistant' ? 'assistant' : m.role,
       content: m.content
-    })),
+    };
+  });
+
+  return {
+    model: model || PROVIDER.defaultModel,
+    messages: transformedMessages,
     max_tokens: max_tokens || 8192,
     temperature: temperature !== undefined ? temperature : 0.7,
     stream: stream !== false,
