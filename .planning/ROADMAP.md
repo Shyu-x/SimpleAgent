@@ -50,9 +50,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: MCP协议集成 - 工具发现、执行、结果返回
-- [ ] 02-02: MissionControl完整化 - 任务队列、状态同步、分配功能
-- [ ] 02-03: A2A多Agent协作 - 协调模式、任务委托、SSE订阅
+- [x] 02-01-PLAN.md: MCP协议集成 - 工具发现、执行、结果返回
+- [x] 02-02-PLAN.md: MissionControl完整化 - 任务队列、状态同步、分配功能
+- [x] 02-03-PLAN.md: A2A多Agent协作 - 协调模式、任务委托、SSE订阅
 
 ### Phase 3: 管理后台集成
 **Goal**: 管理后台所有组件与后端API完成联调，使用真实数据
@@ -93,7 +93,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 完成架构收尾 | 0/4 | Not started | - |
-| 2. MCP工具市场完善 | 0/3 | Not started | - |
+| 2. MCP工具市场完善 | 3/3 | Complete    | 2026-04-26 |
 | 3. 管理后台集成 | 0/3 | Not started | - |
 | 4. 生产级能力 | 0/2 | Not started | - |
 

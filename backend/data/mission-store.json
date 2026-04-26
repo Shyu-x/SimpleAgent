@@ -1,0 +1,33 @@
+{
+  "tasks": [
+    [
+      "1777225839140-8qemof3",
+      {
+        "id": "1777225839140-8qemof3",
+        "name": "Test Task",
+        "description": "",
+        "priority": "high",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1777225839140,
+        "updatedAt": 1777225839140,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ]
+  ],
+  "agents": [],
+  "events": [
+    {
+      "id": "1777225839140-1pyggpf",
+      "type": "task_created",
+      "timestamp": 1777225839140,
+      "taskId": "1777225839140-8qemof3",
+      "agentId": null,
+      "message": "新建任务: Test Task",
+      "data": null
+    }
+  ]
+}
