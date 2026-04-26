@@ -1,0 +1,265 @@
+{
+  "timestamp": "2026-04-13T16:16:30.869Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/login\",method=\"GET\",status=\"404\"": 156,
+      "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/intent\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/tasks\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/\",method=\"GET\",status=\"404\"": 73,
+      "endpoint=\"/knowledge\",method=\"GET\",status=\"404\"": 11,
+      "endpoint=\"/doc/test-doc\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/project\",method=\"GET\",status=\"404\"": 4,
+      "endpoint=\"/meeting\",method=\"GET\",status=\"404\"": 2
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 0
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/login\",method=\"GET\"": {
+        "count": 312,
+        "sum": 0.21600000000000014,
+        "mean": 0.0006923076923076927,
+        "buckets": {
+          "1": 312,
+          "5": 312,
+          "10": 312,
+          "0.005": 311,
+          "0.01": 311,
+          "0.025": 311,
+          "0.05": 311,
+          "0.1": 312,
+          "0.25": 312,
+          "0.5": 312,
+          "2.5": 312
+        }
+      },
+      "endpoint=\"/api/health\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 148,
+        "sum": 0.06800000000000002,
+        "mean": 0.0004594594594594596,
+        "buckets": {
+          "1": 148,
+          "5": 148,
+          "10": 148,
+          "0.005": 146,
+          "0.01": 146,
+          "0.025": 147,
+          "0.05": 148,
+          "0.1": 148,
+          "0.25": 148,
+          "0.5": 148,
+          "2.5": 148
+        }
+      },
+      "endpoint=\"/api/admin/intent\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.028,
+        "mean": 0.028,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tasks\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/tasks\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/knowledge\",method=\"GET\"": {
+        "count": 22,
+        "sum": 0.010000000000000002,
+        "mean": 0.00045454545454545465,
+        "buckets": {
+          "1": 22,
+          "5": 22,
+          "10": 22,
+          "0.005": 22,
+          "0.01": 22,
+          "0.025": 22,
+          "0.05": 22,
+          "0.1": 22,
+          "0.25": 22,
+          "0.5": 22,
+          "2.5": 22
+        }
+      },
+      "endpoint=\"/doc/test-doc\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/project\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.002,
+        "mean": 0.00025,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 8,
+          "0.01": 8,
+          "0.025": 8,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/meeting\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.001,
+        "mean": 0.00025,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 0
+}

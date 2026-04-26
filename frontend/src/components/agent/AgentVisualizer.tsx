@@ -235,7 +235,7 @@ const AgentVisualizer: React.FC<AgentVisualizerProps> = ({
     if (!traceId) return;
 
     try {
-      const response = await fetch(`/api/agent/trace/${traceId}`);
+      const response = await fetch(`/api/admin/traces/${traceId}`);
       if (!response.ok) throw new Error('获取轨迹失败');
 
       const data = await response.json();

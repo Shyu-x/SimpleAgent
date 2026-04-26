@@ -3,6 +3,38 @@ const router = express.Router();
 const { memorySystem, MemoryType, MemorySource } = require('../enhancedMemory');
 
 /**
+ * 记忆系统状态
+ * GET /api/memory
+ */
+router.get('/', (req, res) => {
+  const stats = memorySystem.getStats();
+
+  res.json({
+    success: true,
+    service: 'enhanced-memory',
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      initialize: 'POST /api/memory/initialize',
+      add: 'POST /api/memory/add',
+      search: 'POST /api/memory/search',
+      session: 'POST /api/memory/session',
+      sessionById: 'GET /api/memory/session/:id',
+      addMessage: 'POST /api/memory/session/:id/message',
+      setVariable: 'POST /api/memory/session/:id/variable',
+      cleanup: 'POST /api/memory/cleanup',
+      stats: 'GET /api/memory/stats',
+      types: 'GET /api/memory/types',
+      health: 'GET /api/memory/health',
+      promote: 'POST /api/memory/:id/promote',
+      getById: 'GET /api/memory/:id',
+      delete: 'DELETE /api/memory/:id'
+    },
+    stats
+  });
+});
+
+/**
  * 初始化记忆系统
  * POST /api/memory/initialize
  */

@@ -190,18 +190,30 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
 
           updateLastMessage(activeConversationId, imageContent);
 
-          // 添加图片附件，包含下载信息
-          const conv = useChatStore.getState().conversations.find((c) => c.id === activeConversationId);
-          if (conv && conv.messages.length > 0) {
-            const lastMsg = conv.messages[conv.messages.length - 1];
-            lastMsg.attachments = [{
-              id: generateId(),
-              type: 'image' as const,
-              url: imageUrl,
-              name: fileName,
-              size: 0,
-            }];
-          }
+          // 使用 immutable 方式添加图片附件
+          useChatStore.setState((state) => ({
+            conversations: state.conversations.map((conv) =>
+              conv.id === activeConversationId
+                ? {
+                    ...conv,
+                    messages: conv.messages.map((m, idx, msgs) =>
+                      idx === msgs.length - 1
+                        ? {
+                            ...m,
+                            attachments: [{
+                              id: generateId(),
+                              type: 'image' as const,
+                              url: imageUrl,
+                              name: fileName,
+                              size: 0,
+                            }],
+                          }
+                        : m
+                    ),
+                  }
+                : conv
+            ),
+          }));
           finalizeMessage(activeConversationId, assistantMessageId);
         } else {
           throw new Error('图片生成结果无效，请稍后重试');

@@ -66,7 +66,18 @@ class Crew {
   constructor(config) {
     this.id = config.id || `crew_${Date.now()}`;
     this.agents = config.agents || [];  // Agent 列表
-    this.tasks = config.tasks || [];      // Task 列表
+    // 确保 tasks 是 Task 实例
+    this.tasks = (config.tasks || []).map(t => {
+      if (t instanceof Task) return t;
+      // 将普通对象转换为 Task 实例
+      return new Task({
+        description: t.description || t.text || '',
+        expectedOutput: t.expectedOutput,
+        agent: t.agent,
+        context: t.context || [],
+        tools: t.tools || []
+      });
+    });
     this.process = config.process || 'sequential'; // sequential | hierarchical
     this.verbose = config.verbose || false;
     this.results = new Map(); // 任务结果

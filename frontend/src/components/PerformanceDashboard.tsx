@@ -22,7 +22,7 @@ export default function PerformanceDashboard() {
   const fetchMetrics = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/monitor/stats');
+      const response = await fetch('/api/metrics/realtime');
       const data = await response.json();
       if (data.success) {
         setMetrics(prev => ({

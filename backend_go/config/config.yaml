@@ -1,0 +1,40 @@
+# AI Chat 玩具 - Go 版本配置文件
+
+server:
+  port: 30002
+  mode: debug
+
+minimax:
+  api_key: ${MINIMAX_API_KEY}
+  base_url: ${MINIMAX_BASE_URL:-https://api.minimaxi.com/anthropic}
+  model: MiniMax-M2.7
+
+agent:
+  max_iterations: 10
+  iteration_timeout: 30s
+  tool_timeout: 60s
+  enable_reasoning: true
+  enable_memory: true
+  memory_window_size: 20
+  enable_rag: true
+  rag_top_k: 5
+  max_context_tokens: 8000
+
+rag:
+  chunk_size: 512
+  top_k: 5
+  rerank: true
+  embedding_model: mxbai-embed-large
+
+circuit_breaker:
+  failure_threshold: 5
+  success_threshold: 2
+  timeout: 100ms
+
+rate_limiter:
+  window: 1s
+  max_requests: 100
+
+metrics:
+  enabled: true
+  port: 9090

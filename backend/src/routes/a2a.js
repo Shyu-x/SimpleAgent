@@ -1,6 +1,11 @@
 /**
  * A2A (Agent-to-Agent) 协议路由
  * 实现 Agent 之间的消息传递、任务委托、结果回传接口
+ *
+ * @swagger
+ * tags:
+ *   - name: a2a
+ *     description: A2A Agent协作协议
  */
 
 const express = require('express');
@@ -12,12 +17,23 @@ const {
   A2A_MESSAGE_TYPES,
   A2A_TASK_STATUS
 } = require('../services/a2aService');
+const { MultiAgentCoordinator } = require('../services/MultiAgentCoordinator');
 
 // 创建 A2A 服务单例
 const a2aService = new A2AService();
 
+// 创建协作协调器
+const multiAgentCoordinator = new MultiAgentCoordinator(a2aService);
+
 /**
- * 获取服务状态
+ * @swagger
+ * /api/a2a/status:
+ *   get:
+ *     tags: [a2a]
+ *     summary: 获取A2A服务状态
+ *     responses:
+ *       200:
+ *         description: 服务状态信息
  */
 router.get('/status', (req, res) => {
   res.json({
@@ -483,6 +499,367 @@ router.post('/ack', (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+/**
+ * 执行协作任务
+ * POST /api/a2a/collaborate
+ *
+ * 支持三种协调模式：
+ * - team_leader: 主 Agent 主导，其他执行
+ * - collaborative: 对等协作，共享职责
+ * - autonomous: 独立执行，最小协调
+ */
+router.post('/collaborate', async (req, res) => {
+  try {
+    const {
+      title,
+      tasks,           // 新格式：TaskDefinition 数组
+      subTasks,        // 兼容旧格式
+      options = {}
+    } = req.body;
+
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        error: { type: 'validation_error', message: 'title is required' }
+      });
+    }
+
+    // 兼容旧格式：转换 subTasks 为 tasks
+    const taskList = tasks || subTasks;
+
+    if (!taskList || !Array.isArray(taskList) || taskList.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: { type: 'validation_error', message: 'tasks must be a non-empty array' }
+      });
+    }
+
+    // 验证每个任务
+    for (let i = 0; i < taskList.length; i++) {
+      const task = taskList[i];
+      if (!task.task && !task.prompt && !task.description) {
+        return res.status(400).json({
+          success: false,
+          error: { type: 'validation_error', message: `Task[${i}] is missing required field: task/prompt/description` }
+        });
+      }
+    }
+
+    // 提取协调模式
+    const {
+      coordinationMode = 'collaborative',
+      useSSE = false,
+      enableHooks = true,
+      ...coordinatorOptions
+    } = options;
+
+    // 启用钩子
+    multiAgentCoordinator.setHooksEnabled(enableHooks);
+
+    // SSE 推送模式
+    if (useSSE) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      // 监听所有钩子事件
+      const hookMappings = {
+        'task:created': 'task_created',
+        'task:completed': 'task_completed',
+        'task:failed': 'task_failed',
+        'task:skipped': 'task_skipped',
+        'task:waiting': 'task_waiting',
+        'collaboration:started': 'collaboration_started',
+        'collaboration:completed': 'collaboration_completed',
+        'collaboration:failed': 'collaboration_failed',
+        'collaboration:partial': 'collaboration_partial',
+        'collaboration:cancelled': 'collaboration_cancelled',
+        'collaboration:error': 'collaboration_error'
+      };
+
+      const eventHandlers = {};
+
+      for (const [hookEvent, sseEvent] of Object.entries(hookMappings)) {
+        eventHandlers[hookEvent] = (data) => {
+          res.write(`data: ${JSON.stringify({ event: sseEvent, ...data })}\n\n`);
+        };
+        multiAgentCoordinator.onHook(hookEvent, eventHandlers[hookEvent]);
+      }
+
+      // 完成后清理
+      multiAgentCoordinator.on('collaboration:completed', () => res.end());
+      multiAgentCoordinator.on('collaboration:failed', () => res.end());
+      multiAgentCoordinator.on('collaboration:cancelled', () => res.end());
+      multiAgentCoordinator.on('collaboration:error', () => res.end());
+
+      // 初始确认
+      res.write(`data: ${JSON.stringify({
+        event: 'connected',
+        title,
+        coordinationMode,
+        taskCount: taskList.length
+      })}\n\n`);
+    }
+
+    // 执行协作任务
+    const result = await multiAgentCoordinator.executeCollaboration(
+      title,
+      taskList,
+      { ...coordinatorOptions, coordinationMode }
+    );
+
+    // 清理 SSE 钩子
+    if (useSSE) {
+      for (const [hookEvent, handler] of Object.entries(eventHandlers)) {
+        multiAgentCoordinator.offHook(hookEvent, handler);
+      }
+    }
+
+    res.json({
+      success: true,
+      collaboration: result
+    });
+
+  } catch (error) {
+    console.error('Collaboration error:', error);
+    res.status(500).json({
+      success: false,
+      error: { type: 'collaboration_error', message: error.message }
+    });
+  }
+});
+
+/**
+ * 获取协作统计
+ * GET /api/a2a/collaboration/stats
+ */
+router.get('/collaboration/stats', (req, res) => {
+  try {
+    const stats = multiAgentCoordinator.getStats();
+    res.json({
+      success: true,
+      stats
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * 获取协作任务状态
+ * GET /api/a2a/collaboration/:taskId
+ */
+router.get('/collaboration/:taskId', (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const status = multiAgentCoordinator.getCollaborationStatus(taskId);
+
+    if (!status) {
+      return res.status(404).json({
+        success: false,
+        error: 'Collaboration task not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      collaboration: status
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * 获取协作任务结果（标准化格式）
+ * GET /api/a2a/collaboration/:taskId/result
+ */
+router.get('/collaboration/:taskId/result', (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const result = multiAgentCoordinator.getCollaborationResult(taskId);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        error: 'Collaboration task not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * 取消协作任务
+ * DELETE /api/a2a/collaboration/:taskId
+ */
+router.delete('/collaboration/:taskId', (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const cancelled = multiAgentCoordinator.cancelCollaboration(taskId);
+
+    if (!cancelled) {
+      return res.status(404).json({
+        success: false,
+        error: 'Collaboration task not found or already completed'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Collaboration cancelled',
+      taskId
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * 创建任务定义
+ * POST /api/a2a/tasks/define
+ *
+ * 支持的字段：
+ * - id: 任务 ID（可选，自动生成）
+ * - agentName: Agent 名称
+ * - taskType: 任务类型 (e.g., code-review, db-implementation)
+ * - title/description/prompt: 任务描述
+ * - dependencies: 依赖的任务 ID 数组
+ * - effort: low/medium/high
+ * - maxTurns: 最大轮次
+ * - timeout: 超时时间(ms)
+ * - successCriteria: 成功标准（字符串或函数）
+ * - additionalInstructions: 额外指令
+ * - priority: 优先级
+ */
+router.post('/tasks/define', (req, res) => {
+  try {
+    const taskConfig = req.body;
+
+    if (!taskConfig.task && !taskConfig.prompt && !taskConfig.description) {
+      return res.status(400).json({
+        success: false,
+        error: { type: 'validation_error', message: 'task/prompt/description is required' }
+      });
+    }
+
+    const taskDef = multiAgentCoordinator.createTaskDefinition(taskConfig);
+
+    res.json({
+      success: true,
+      task: taskDef.toJSON()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: { type: 'task_definition_error', message: error.message }
+    });
+  }
+});
+
+/**
+ * 批量创建任务定义
+ * POST /api/a2a/tasks/define/batch
+ */
+router.post('/tasks/define/batch', (req, res) => {
+  try {
+    const { tasks } = req.body;
+
+    if (!tasks || !Array.isArray(tasks)) {
+      return res.status(400).json({
+        success: false,
+        error: { type: 'validation_error', message: 'tasks array is required' }
+      });
+    }
+
+    const taskDefs = multiAgentCoordinator.createTaskDefinitions(tasks);
+
+    res.json({
+      success: true,
+      tasks: taskDefs.map(t => t.toJSON()),
+      count: taskDefs.length
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: { type: 'task_definition_error', message: error.message }
+    });
+  }
+});
+
+/**
+ * 获取任务定义
+ * GET /api/a2a/tasks/:taskId
+ */
+router.get('/tasks/:taskId', (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const taskDef = multiAgentCoordinator.getTaskDefinition(taskId);
+
+    if (!taskDef) {
+      return res.status(404).json({
+        success: false,
+        error: 'Task definition not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      task: taskDef.toJSON()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * 获取协调模式信息
+ * GET /api/a2a/coordination/modes
+ */
+router.get('/coordination/modes', (req, res) => {
+  res.json({
+    success: true,
+    modes: {
+      TEAM_LEADER: {
+        value: 'team_leader',
+        description: 'One agent orchestrates others, typically the first task in each level',
+        useCase: 'Complex hierarchical tasks with clear delegation'
+      },
+      COLLABORATIVE: {
+        value: 'collaborative',
+        description: 'Agents share responsibilities and coordinate as peers',
+        useCase: 'Tasks requiring parallel specialized work'
+      },
+      AUTONOMOUS: {
+        value: 'autonomous',
+        description: 'Agents work independently with minimal coordination',
+        useCase: 'Independent parallel tasks with no dependencies'
+      }
+    }
+  });
 });
 
 module.exports = router;

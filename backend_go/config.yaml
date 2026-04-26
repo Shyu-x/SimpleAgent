@@ -1,0 +1,62 @@
+server:
+  host: "0.0.0.0"
+  port: 30002
+
+minimax:
+  api_key: "${MINIMAX_API_KEY}"
+  base_url: "https://api.minimaxi.com/anthropic"
+  model: "MiniMax-M2.7"
+
+# PostgreSQL 配置 (可选)
+postgres:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  database: "vectors"
+  sslmode: "disable"
+  max_connections: 20
+
+# Qdrant 向量数据库配置
+qdrant:
+  host: "localhost"
+  port: 6333
+  collection: "chat_documents"
+  dimension: 1024
+
+# Redis 缓存配置
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+
+# Embedding 服务配置 (MiniMax)
+embedding:
+  model: "embedding-multilingual"
+  batch_size: 32
+  max_retries: 3
+  timeout: 30
+  cache_enabled: true
+  cache_ttl: 604800  # 7天 (秒)
+
+# RAG 服务配置
+rag:
+  chunk_size: 512
+  top_k: 5
+  rerank_enabled: true
+  rerank_top_n: 10
+  vector_weight: 0.7
+  keyword_weight: 0.3
+  rrf_k: 60
+  dedupe_enabled: true
+  dedupe_threshold: 0.85
+  citation_enabled: true
+  max_citation_len: 200
+  vector_top_k: 20
+  keyword_top_k: 20
+  llm_rerank_enabled: false
+
+ratelimit:
+  enabled: true
+  requests_per_minute: 100

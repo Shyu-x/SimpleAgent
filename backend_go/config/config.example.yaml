@@ -1,0 +1,100 @@
+# AI Chat 玩具 - Go 版本配置文件示例
+# 复制此文件为 config.yaml 并修改实际值
+
+# 应用配置
+app:
+  env: "development"  # development, production, test
+  name: "ai-chat-backend"
+  host: "0.0.0.0"
+  port: 30000
+
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 30000
+  mode: "debug"  # debug, release, test
+
+# MiniMax API 配置
+minimax:
+  api_key: "${MINIMAX_API_KEY}"
+  base_url: "https://api.minimaxi.com/anthropic"
+  model: "MiniMax-M2.7"
+  timeout: 60
+
+# 数据库配置 (PostgreSQL)
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  name: "ai_chat"
+  ssl_mode: "disable"
+  max_connections: 20
+
+# Redis 配置
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+# 日志配置
+log:
+  level: "info"  # debug, info, warn, error
+  format: "json"  # json, text
+  output: "stdout"  # stdout, file
+
+# 限流器配置
+rate_limiter:
+  enabled: true
+  capacity: 100
+  refill_rate: 50
+  window: 1.0
+
+# 熔断器配置
+circuit_breaker:
+  enabled: true
+  failure_threshold: 5
+  success_threshold: 2
+  timeout: 60
+
+# CORS 配置
+cors:
+  enabled: true
+  allowed_origins:
+    - "http://localhost:8080"
+    - "http://localhost:3000"
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+  allowed_headers:
+    - "*"
+
+# Prometheus 监控配置
+metrics:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+
+# RAG 配置
+rag:
+  chunk_size: 512
+  chunk_overlap: 50
+  top_k: 5
+  rerank: true
+  rerank_top_k: 10
+
+# Agent 配置
+agent:
+  max_iterations: 10
+  timeout: 120
+  tools:
+    - name: "search"
+      enabled: true
+    - name: "calculator"
+      enabled: true
+    - name: "weather"
+      enabled: true

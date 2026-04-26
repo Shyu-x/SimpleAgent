@@ -7,6 +7,7 @@ const { EnhancedMemoryService, MemoryType, MemoryPriority } = require('../servic
 const { EnhancedToolRegistry, PermissionLevel } = require('../services/enhancedToolRegistry');
 const { ErrorCodes, RetryStrategy, RecoveryManager } = require('../services/errorHandler');
 const { createDefaultToolRegistry } = require('../services/tools');
+const MiniMaxChatClient = require('../services/model/clients/MiniMaxChatClient');
 
 // 存储活跃的 Crew 实例
 const crews = new Map();
@@ -151,15 +152,24 @@ router.post('/execute', async (req, res) => {
       crews.set(crew.id, crew);
     }
 
-    // 模拟 LLM 调用（实际需要集成真实的 LLM）
-    const mockLLMClient = {
+    // 使用真实的 MiniMax LLM 调用
+    const miniMaxClient = new MiniMaxChatClient();
+    const realLLMClient = {
       complete: async ({ prompt, agent, tools }) => {
-        // 模拟响应
-        return `[${agent?.role || 'Agent'}] Processed: ${prompt.substring(0, 100)}...`;
+        try {
+          const response = await miniMaxClient.chat({
+            messages: [{ role: 'user', content: prompt }],
+            options: { temperature: 0.7 }
+          });
+          return response.content || '[无内容返回]';
+        } catch (error) {
+          console.error('[multiagent] LLM 调用失败:', error.message);
+          return `[${agent?.role || 'Agent'}] 执行出错: ${error.message}`;
+        }
       }
     };
 
-    const result = await crew.execute(mockLLMClient);
+    const result = await crew.execute(realLLMClient);
 
     res.json({
       success: true,
@@ -497,7 +507,7 @@ router.post('/tools/execute', async (req, res) => {
   const registry = createDefaultToolRegistry();
 
   try {
-    const result = await registry.execute(toolName, input, options);
+    const result = await registry.executeTool(toolName, input, options);
     res.json({ success: true, result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -613,13 +623,23 @@ router.post('/crew/:crewId/execute', async (req, res) => {
   }
 
   try {
-    const mockLLMClient = {
+    const miniMaxClient = new MiniMaxChatClient();
+    const realLLMClient = {
       complete: async ({ prompt }) => {
-        return `[Crew ${crewId}] Processed: ${prompt.substring(0, 50)}...`;
+        try {
+          const response = await miniMaxClient.chat({
+            messages: [{ role: 'user', content: prompt }],
+            options: { temperature: 0.7 }
+          });
+          return response.content || '[无内容返回]';
+        } catch (error) {
+          console.error('[multiagent] LLM 调用失败:', error.message);
+          return `[Crew ${crewId}] 执行出错: ${error.message}`;
+        }
       }
     };
 
-    const result = await crew.execute(mockLLMClient);
+    const result = await crew.execute(realLLMClient);
     res.json({ success: true, result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

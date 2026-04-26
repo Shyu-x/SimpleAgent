@@ -3,8 +3,14 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 const { TracingService, tracingMiddleware } = require('./services/tracing');
 const { initializeDatabase, closeDatabase } = require('./services/database');
+const ToolRegistry = require('./services/tools/toolRegistry');
+
+// 创建全局工具注册表
+const globalToolRegistry = new ToolRegistry();
 
 // 创建追踪服务实例
 const tracingService = new TracingService({
@@ -12,9 +18,52 @@ const tracingService = new TracingService({
   enableLogging: process.env.NODE_ENV !== 'production'
 });
 
+// Swagger 配置
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'AI Chat 玩具 API',
+      version: '2.2.0',
+      description: '现代化AI对话平台 API 文档',
+      contact: { name: 'API Support', email: 'support@ai-chat.example.com' }
+    },
+    servers: [{ url: 'http://localhost:30000', description: '后端服务地址' }],
+    tags: [
+      { name: 'chat', description: '聊天接口' },
+      { name: 'admin', description: '管理后台接口' },
+      { name: 'a2a', description: 'A2A Agent协作协议' },
+      { name: 'hitl', description: 'HITL人机协作确认' },
+      { name: 'rag', description: 'RAG知识库检索' },
+      { name: 'search', description: '搜索服务' },
+      { name: 'qdrant', description: 'Qdrant向量数据库' },
+      { name: 'metrics', description: '性能指标' },
+      { name: 'memory', description: '记忆系统接口' },
+      { name: 'mission', description: '任务控制中心接口' }
+    ]
+  },
+  apis: [
+    './routes/chat.js',
+    './routes/a2a.js',
+    './routes/hitl.js',
+    './routes/rag.js',
+    './routes/search.js',
+    './routes/admin/*.js',
+    './routes/qdrant.js',
+    './routes/metrics.js',
+    './routes/memory.js',
+    './routes/missionControl.js'
+  ]
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 8081;
+  const PORT = process.env.PORT || 30000;
+
+  // 设置全局工具注册表
+  app.set('toolRegistry', globalToolRegistry);
 
   // 初始化数据库连接
   try {
@@ -26,16 +75,32 @@ async function startServer() {
   // 安全中间件：请求体大小限制
   app.use(express.json({ limit: '1mb' }));
 
-  // 安全中间件：CORS配置 - 生产环境应限制来源
+  // 安全中间件：CORS配置
   const corsOptions = {
     origin: (origin, callback) => {
       // 允许没有origin的请求（如Postman/curl）
-      // 以及localhost origins
-      if (!origin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+      if (!origin) {
         callback(null, true);
-      } else {
-        callback(null, true); // 允许所有，生产环境应该限制
+        return;
       }
+      // 生产环境只允许特定域名
+      if (process.env.NODE_ENV === 'production') {
+        const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim());
+        if (allowedOrigins.length > 0 && allowedOrigins[0] !== '') {
+          if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+          return;
+        }
+      }
+      // 开发环境允许localhost
+      if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+        callback(null, true);
+        return;
+      }
+      callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Trace-Id', 'X-Span-Id'],
@@ -46,6 +111,10 @@ async function startServer() {
 
   // 全链路追踪中间件
   app.use(tracingMiddleware(tracingService));
+
+  // 请求指标收集中间件
+  const { requestMetricsMiddleware } = require('./middleware/metricsMiddleware');
+  app.use(requestMetricsMiddleware());
 
   // 安全中间件：基本请求验证
   app.use((req, _res, next) => {
@@ -78,16 +147,36 @@ async function startServer() {
   const skillRoutes = require('./routes/skills');
   const mcpAgentRoutes = require('./routes/mcpAgent');
   const multiAgentEngineRoutes = require('./routes/multiAgentEngine');
+  const poolRoutes = require('./routes/pool');
   const conversationsRoutes = require('./routes/conversations');
   const memoriesRoutes = require('./routes/memories');
   const minimaxMcpRoutes = require('./routes/minimaxMcp');
   const a2aRoutes = require('./routes/a2a');
   const agentTraceRoutes = require('./routes/agentTrace');
   const agentTracePageRoutes = require('./routes/agentTracePage');
+  const toolsRoutes = require('./routes/tools');
+  const adminModelRoutes = require('./routes/admin/model');
+  const adminPromptRoutes = require('./routes/admin/prompt');
+  const adminTraceRoutes = require('./routes/admin/trace');
+  const adminKnowledgeRoutes = require('./routes/admin/knowledge');
+  const adminToolRoutes = require('./routes/admin/tool');
+  const adminStatsRoutes = require('./routes/admin/stats');
+  const qdrantRoutes = require('./routes/qdrant');
+  const metricsRoutes = require('./routes/metrics');
+  const memoryRoutes = require('./routes/memory');
+  const adminIntentRoutes = require('./routes/admin/intent');
+  const missionControlRoutes = require('./routes/missionControl');
 
   // Routes
   app.use('/api/chat', chatRoutes);
   app.use('/api/config', configRoutes);
+  app.use('/api/admin/models', adminModelRoutes);
+  app.use('/api/admin/prompts', adminPromptRoutes);
+  app.use('/api/admin/traces', adminTraceRoutes);
+  app.use('/api/admin/knowledge', adminKnowledgeRoutes);
+  app.use('/api/admin/tools', adminToolRoutes);
+  app.use('/api/admin/intent', adminIntentRoutes);
+  app.use('/api/admin/stats', adminStatsRoutes);
   app.use('/api/sessions', sessionsRoutes);
   app.use('/api/v1', proxyRoutes);
   app.use('/api/mcp', mcpRoutes);
@@ -109,43 +198,66 @@ async function startServer() {
   app.use('/api/minimax-agent', mcpAgentRoutes);
   app.use('/api/conversations', conversationsRoutes);
   app.use('/api/memories', memoriesRoutes);
+  app.use('/api/pool', poolRoutes);
   app.use('/api/minimax', minimaxMcpRoutes);
   app.use('/api/a2a', a2aRoutes);
   app.use('/api/agent', a2aRoutes); // 别名，与前端期望的路由兼容
   app.use('/api/agent', agentTraceRoutes); // Agent 轨迹 API
   app.use('/agent', agentTracePageRoutes); // Agent 可视化页面
+  app.use('/api/tools', toolsRoutes);
+  app.use('/api/qdrant', qdrantRoutes); // Qdrant 向量数据库服务
+  app.use('/api/metrics', metricsRoutes); // 性能指标 API
+  app.use('/api/memory', memoryRoutes); // 记忆系统 API
+  app.use('/api/mission', missionControlRoutes); // MissionControl API
+
+  // Swagger UI
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'AI Chat 玩具 API 文档'
+  }));
+
+  // Swagger JSON API
+  app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
 
   // Health check
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // 404 处理
+  // 404 处理 - 统一响应格式
   app.use((req, res) => {
     res.status(404).json({
+      success: false,
       error: {
-        message: 'Not Found',
-        type: 'not_found_error',
-        path: req.path
-      }
+        code: 'SYS-002',
+        message: `路由 ${req.method} ${req.path} 不存在`
+      },
+      timestamp: new Date().toISOString()
     });
   });
 
-  // 全局错误处理中间件
+  // 全局错误处理中间件 - 统一响应格式
   app.use((err, req, res, _next) => {
     console.error('Unhandled error:', err.message);
 
     // 避免泄露内部错误详情
     const message = process.env.NODE_ENV === 'production'
-      ? 'Internal Server Error'
+      ? '服务器内部错误'
       : err.message;
 
+    const code = err.code || 'SYS-001';
+
     res.status(err.status || 500).json({
+      success: false,
       error: {
-        message,
-        type: 'server_error',
-        requestId: req.headers['x-request-id'] || undefined
-      }
+        code,
+        message
+      },
+      timestamp: new Date().toISOString()
     });
   });
 
@@ -164,6 +276,7 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log(`AI Chat Backend running on http://localhost:${PORT}`);
+    console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
     console.log(`Database: ${process.env.DATABASE_URL ? 'PostgreSQL' : 'Not configured'}`);
   });
 }

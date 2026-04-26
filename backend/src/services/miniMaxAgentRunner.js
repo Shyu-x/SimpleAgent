@@ -357,11 +357,41 @@ class WebSearchTool extends BaseTool {
 
   async execute(input) {
     try {
-      // 简单的搜索实现，实际项目中可以接入 Jina AI 等搜索服务
-      const query = encodeURIComponent(input.query);
-      return new ToolResult(true, `[模拟搜索结果 for: ${input.query}]\n请在实际的 AI Chat 玩具 中使用联网搜索功能`);
+      // 使用后端搜索 API
+      const backendUrl = process.env.MINIMAX_BASE_URL?.replace('/anthropic', '') || 'http://localhost:30000';
+      const maxResults = input.max_results || 5;
+
+      const response = await fetch(`${backendUrl}/api/search/web`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: input.query,
+          limit: maxResults,
+          format: 'json'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Search API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const results = data.results.map((r, i) =>
+          `${i + 1}. ${r.title || '无标题'}\n   ${r.snippet || r.content || ''}\n   ${r.url || ''}`
+        ).join('\n\n');
+        return new ToolResult(true, `搜索结果 (${data.results.length}):\n\n${results}`);
+      } else if (data.markdown) {
+        return new ToolResult(true, `搜索结果:\n\n${data.markdown}`);
+      } else if (data.content) {
+        return new ToolResult(true, `搜索结果:\n\n${data.content}`);
+      }
+
+      return new ToolResult(true, `未找到与 "${input.query}" 相关的搜索结果`);
     } catch (error) {
-      return new ToolResult(false, '', error.message);
+      // 如果搜索失败，返回提示信息而非模拟数据
+      return new ToolResult(false, '', `搜索失败: ${error.message}。请检查后端搜索服务是否运行。`);
     }
   }
 }
@@ -375,7 +405,7 @@ class MiniMaxAgentRunner extends EventEmitter {
 
     this.apiKey = options.apiKey || process.env.MINIMAX_API_KEY;
     this.baseURL = options.baseURL || process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/anthropic';
-    this.model = options.model || 'MiniMax-M2.7-highspeed';
+    this.model = options.model || 'MiniMax-M2.7';
     this.workspaceDir = options.workspaceDir || './workspace';
     this.maxSteps = options.maxSteps || 50;
     this.tokenLimit = options.tokenLimit || 80000;

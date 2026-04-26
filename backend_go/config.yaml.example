@@ -1,0 +1,90 @@
+# AI Chat 玩具 - Go 版本配置文件示例
+
+# 服务配置
+app:
+  host: "0.0.0.0"
+  port: 30000
+  mode: "release"  # debug, release, test
+  name: "ai-chat-backend"
+
+# MiniMax API 配置
+minimax:
+  api_key: "${MINIMAX_API_KEY}"
+  base_url: "https://api.minimaxi.com/anthropic"
+  model: "MiniMax-M2.7"
+  timeout: 60s
+
+# Redis 配置
+redis:
+  host: "redis"
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+
+# Qdrant 向量数据库配置
+qdrant:
+  host: "qdrant"
+  port: 6333
+  collection: "chat_documents"
+  dimension: 1024
+
+# Prometheus 监控配置
+prometheus:
+  enabled: true
+  port: 9090
+  path: "/metrics"
+
+# 日志配置
+log:
+  level: "info"  # debug, info, warn, error
+  format: "json"  # json, text
+  output: "stdout"  # stdout, file
+
+# 限流器配置
+rate_limiter:
+  enabled: true
+  capacity: 100
+  refill_rate: 50
+  window: 1s
+
+# 熔断器配置
+circuit_breaker:
+  enabled: true
+  failure_threshold: 5
+  success_threshold: 2
+  timeout: 60s
+
+# CORS 配置
+cors:
+  enabled: true
+  allowed_origins:
+    - "http://localhost:8080"
+    - "http://localhost:3000"
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+  allowed_headers:
+    - "*"
+
+# RAG 配置
+rag:
+  chunk_size: 512
+  chunk_overlap: 50
+  top_k: 5
+  rerank: true
+  rerank_top_k: 10
+
+# Agent 配置
+agent:
+  max_iterations: 10
+  timeout: 120s
+  tools:
+    - name: "search"
+      enabled: true
+    - name: "calculator"
+      enabled: true
+    - name: "weather"
+      enabled: true

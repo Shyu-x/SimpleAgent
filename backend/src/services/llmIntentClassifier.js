@@ -75,7 +75,7 @@ class LLMIntentClassifier extends EventEmitter {
     super();
 
     this.modelRouter = options.modelRouter || null;
-    this.modelId = options.modelId || 'MiniMax-M2.7-highspeed';
+    this.modelId = options.modelId || 'MiniMax-M2.7';
     this.timeout = options.timeout || 10000;
     this.confidenceThreshold = options.confidenceThreshold || CONFIDENCE_THRESHOLDS.MEDIUM;
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useChatStore } from '@/store/chatStore';
 import {
   Menu,
@@ -13,7 +13,9 @@ import {
   Clock3,
   Maximize2,
   Minimize2,
+  Shield,
 } from 'lucide-react';
+import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import ConversationList from '@/components/ConversationList';
@@ -24,8 +26,11 @@ import { MemoryPanel } from '@/components/MemoryPanel';
 import MultiAgentPanel from '@/components/MultiAgentPanel';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
 import dynamic from 'next/dynamic';
-import ToolMarketplace from '@/components/agent/ToolMarketplace';
-import AgentWorkspace from '@/components/agent/AgentWorkspace';
+const ToolMarketplace = dynamic(
+  () => import('@/components/agent/ToolMarketplace'),
+  { ssr: false }
+);
+import { MissionControl } from '@/components/agent';
 import { ToastProvider } from '@/components/Toast';
 import { MobileExperienceProvider, MobileLayout } from '@/components/mobile';
 import KnowledgeBaseManager from '@/components/KnowledgeBaseManager';
@@ -84,12 +89,14 @@ export default function Home() {
     setFocusMode,
   } = useChatStore();
 
-  // 触发 Zustand 状态恢复（防止 SSR hydration mismatch）
+  // 触发 Zustand 状态恢复（使用 useRef 追踪初始状态，防止无限循环）
+  const initRef = useRef(false);
   useEffect(() => {
-    if (!hasHydrated) {
+    if (!initRef.current) {
+      initRef.current = true;
       rehydrate();
     }
-  }, [hasHydrated, rehydrate]);
+  }, []);
 
   // 响应式断点
   const isMobile = useMediaQuery('(max-width: 639px)');
@@ -99,15 +106,8 @@ export default function Home() {
   const [promptSelectorOpen, setPromptSelectorOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
-  // 人机协作确认 Hook
-  const {
-    pendingConfirmations,
-    currentConfirmation,
-    isConnected,
-    approve,
-    reject,
-    connect
-  } = useHITLSSE({
+  // 人机协作确认 Hook - 使用 useMemo 稳定 options 对象
+  const hitlOptions = useMemo(() => ({
     autoConnect: true,
     enabled: true,
     onConnected: () => console.log('[Page] HITL SSE connected'),
@@ -116,14 +116,27 @@ export default function Home() {
     onApproved: (checkpoint) => console.log('[Page] Confirmation approved:', checkpoint.id),
     onRejected: (checkpoint) => console.log('[Page] Confirmation rejected:', checkpoint.id),
     onTimeout: (checkpoint) => console.log('[Page] Confirmation timeout:', checkpoint.id)
-  });
+  }), []);
+
+  const {
+    pendingConfirmations,
+    currentConfirmation,
+    isConnected,
+    approve,
+    reject,
+    connect
+  } = useHITLSSE(hitlOptions);
 
   // 尝试连接 SSE（如果未连接）
-  useEffect(() => {
+  const stableConnect = useCallback(() => {
     if (!isConnected) {
       connect();
     }
   }, [isConnected, connect]);
+
+  useEffect(() => {
+    stableConnect();
+  }, [stableConnect]);
 
   // ESC 键关闭侧面板或退出专注模式，Ctrl+/ 打开快捷键帮助，Ctrl+K 打开知识库
   useEffect(() => {
@@ -352,6 +365,18 @@ export default function Home() {
 
                   <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
 
+                  {/* 管理后台入口 */}
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium border border-[hsl(var(--border-subtle))] text-[hsl(var(--text-muted))] hover:border-primary/40 hover:text-primary transition-all"
+                    title="管理后台"
+                  >
+                    <Shield size={14} />
+                    <span className="hidden xl:inline">管理后台</span>
+                  </Link>
+
+                  <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
+
                   <div className="flex items-center gap-1 rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/90 p-1 backdrop-blur">
                     {SIDE_PANEL_TABS.map(({ id, icon: Icon, label, colorVar }) => {
                       const isActive = sidePanelContent === id;
@@ -416,7 +441,7 @@ export default function Home() {
                         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                         className="h-full w-full"
                       >
-                        <AgentWorkspace className="h-full w-full" />
+                        <MissionControl className="h-full w-full" />
                       </motion.div>
                     ) : (
                       <motion.div
@@ -440,7 +465,7 @@ export default function Home() {
 
           </LayoutGroup>
 
-          {sidePanelContent === 'settings' && <Settings autoOpen hideTrigger />}
+          {sidePanelContent === 'settings' && <Settings hideTrigger />}
           {sidePanelContent === 'memory' && activeConversationId && (
             <MemoryPanel
               conversationId={activeConversationId}

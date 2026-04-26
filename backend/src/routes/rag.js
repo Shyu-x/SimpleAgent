@@ -5,6 +5,18 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// 导入新的节点
+const IngestionPipeline = require('../domain/rag/ingestion/IngestionPipeline');
+const UrlFetchNode = require('../domain/rag/ingestion/nodes/UrlFetchNode');
+const EnhanceNode = require('../domain/rag/ingestion/nodes/EnhanceNode');
+
+/**
+ * @swagger
+ * tags:
+ *   - name: rag
+ *     description: RAG知识库检索系统
+ */
+
 // 创建RAG服务实例
 const ragService = new RAGService({
   storagePath: process.env.RAG_STORAGE_PATH || './data/rag',
@@ -142,6 +154,14 @@ router.delete('/kb/:kbId', async (req, res) => {
   try {
     const { kbId } = req.params;
 
+    // 检查知识库是否存在
+    const kb = ragService.knowledgeBases.get(kbId);
+    if (!kb) {
+      return res.status(404).json({
+        error: { message: '知识库不存在', type: 'not_found' }
+      });
+    }
+
     await ragService.deleteKnowledgeBase(kbId);
 
     res.json({
@@ -243,6 +263,14 @@ router.post('/kb/:kbId/retrieve', async (req, res) => {
     const { kbId } = req.params;
     const { query, topK, similarityThreshold } = req.body;
 
+    // 检查知识库是否存在
+    const kb = ragService.knowledgeBases.get(kbId);
+    if (!kb) {
+      return res.status(404).json({
+        error: { message: '知识库不存在', type: 'not_found' }
+      });
+    }
+
     if (!query) {
       return res.status(400).json({
         error: { message: '查询内容不能为空', type: 'validation_error' }
@@ -276,6 +304,14 @@ router.post('/kb/:kbId/context', async (req, res) => {
     const { kbId } = req.params;
     const { query, topK, similarityThreshold } = req.body;
 
+    // 检查知识库是否存在
+    const kb = ragService.knowledgeBases.get(kbId);
+    if (!kb) {
+      return res.status(404).json({
+        error: { message: '知识库不存在', type: 'not_found' }
+      });
+    }
+
     if (!query) {
       return res.status(400).json({
         error: { message: '查询内容不能为空', type: 'validation_error' }
@@ -304,6 +340,69 @@ router.post('/kb/:kbId/context', async (req, res) => {
 });
 
 /**
+ * 全局搜索 - 搜索所有知识库
+ * POST /api/rag/search
+ */
+router.post('/search', async (req, res) => {
+  try {
+    const { query, topK = 5, similarityThreshold = 0.3 } = req.body;
+
+    if (!query) {
+      return res.status(400).json({
+        error: { message: '查询内容不能为空', type: 'validation_error' }
+      });
+    }
+
+    const allResults = [];
+    const knowledgeBases = ragService.listKnowledgeBases();
+
+    // 并行搜索所有知识库
+    const searchPromises = knowledgeBases.map(async (kb) => {
+      try {
+        const results = await ragService.retrieve(kb.id, query, {
+          topK,
+          similarityThreshold
+        });
+        return { kbId: kb.id, kbName: kb.name, results };
+      } catch (error) {
+        console.error(`Search KB ${kb.id} error:`, error.message);
+        return { kbId: kb.id, kbName: kb.name, results: [], error: error.message };
+      }
+    });
+
+    const searchResults = await Promise.all(searchPromises);
+
+    // 合并所有结果
+    for (const sr of searchResults) {
+      if (sr.results && sr.results.length > 0) {
+        allResults.push(...sr.results.map(r => ({
+          ...r,
+          kbId: sr.kbId,
+          kbName: sr.kbName
+        })));
+      }
+    }
+
+    // 按相似度排序
+    allResults.sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+
+    res.json({
+      success: true,
+      query,
+      results: allResults.slice(0, topK * knowledgeBases.length),
+      count: allResults.length,
+      knowledgeBaseCount: knowledgeBases.length,
+      searchedKBs: searchResults.map(sr => ({ id: sr.kbId, name: sr.kbName, resultCount: sr.results?.length || 0 }))
+    });
+  } catch (error) {
+    console.error('Global search error:', error);
+    res.status(500).json({
+      error: { message: error.message, type: 'server_error' }
+    });
+  }
+});
+
+/**
  * 获取RAG统计信息
  */
 router.get('/stats', (req, res) => {
@@ -318,6 +417,161 @@ router.get('/stats', (req, res) => {
     console.error('Get stats error:', error);
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
+    });
+  }
+});
+
+/**
+ * 抓取网页内容
+ * POST /api/rag/fetch
+ *
+ * Body: { url: "https://..." }
+ * 返回: { success: true, content: "...", metadata: {...} }
+ */
+router.post('/fetch', async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    if (!url) {
+      return res.status(400).json({
+        error: { message: 'URL不能为空', type: 'validation_error' }
+      });
+    }
+
+    // 创建流水线：UrlFetch -> Enhance
+    const pipeline = new IngestionPipeline({ logger: console });
+
+    pipeline.use(new UrlFetchNode({
+      timeout: 30000,
+      maxContentLength: 10 * 1024 * 1024, // 10MB
+    }));
+
+    pipeline.use(new EnhanceNode({
+      autoDetectType: true,
+      extractEntities: true,
+    }));
+
+    // 执行流水线
+    const context = await pipeline.run({ url });
+
+    // 检查是否有错误
+    if (context.errors && context.errors.length > 0) {
+      const error = context.errors[0];
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: error.message || '抓取失败',
+          type: 'fetch_error',
+          details: context.errors.map(e => e.message)
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      content: context.enhancedContent,
+      metadata: {
+        ...context.fetchMetadata,
+        ...context.enhancedMetadata,
+      },
+      images: context.images || [],
+      links: context.links || [],
+      traceId: context.traceId,
+      duration: context.duration,
+    });
+  } catch (error) {
+    console.error('Fetch URL error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message || '抓取失败',
+        type: 'fetch_error'
+      }
+    });
+  }
+});
+
+/**
+ * 抓取网页并直接添加到知识库
+ * POST /api/rag/kb/:kbId/fetch
+ *
+ * Body: { url: "https://...", title?: "自定义标题" }
+ */
+router.post('/kb/:kbId/fetch', async (req, res) => {
+  try {
+    const { kbId } = req.params;
+    const { url, title } = req.body;
+
+    if (!url) {
+      return res.status(400).json({
+        error: { message: 'URL不能为空', type: 'validation_error' }
+      });
+    }
+
+    // 检查知识库是否存在
+    const kb = ragService.knowledgeBases.get(kbId);
+    if (!kb) {
+      return res.status(404).json({
+        error: { message: '知识库不存在', type: 'not_found' }
+      });
+    }
+
+    // 创建完整流水线：UrlFetch -> Enhance -> Chunk -> Embed
+    const pipeline = new IngestionPipeline({ logger: console });
+
+    pipeline.use(new UrlFetchNode({
+      timeout: 30000,
+      maxContentLength: 10 * 1024 * 1024,
+    }));
+
+    pipeline.use(new EnhanceNode({
+      autoDetectType: true,
+      extractEntities: true,
+    }));
+
+    // 执行流水线
+    const context = await pipeline.run({ url });
+
+    if (context.errors && context.errors.length > 0) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: context.errors[0].message || '抓取失败',
+          type: 'fetch_error'
+        }
+      });
+    }
+
+    // 添加到知识库
+    const docTitle = title || context.enhancedMetadata?.title || new URL(url).hostname;
+
+    const result = await ragService.addDocument(kbId, {
+      title: docTitle,
+      content: context.enhancedContent,
+      type: context.contentType || 'article',
+      metadata: {
+        url: url,
+        ...context.fetchMetadata,
+        ...context.enhancedMetadata,
+      }
+    });
+
+    res.json({
+      success: true,
+      documentId: result.docId,
+      chunks: result.chunks,
+      title: docTitle,
+      metadata: context.enhancedMetadata,
+      traceId: context.traceId,
+    });
+  } catch (error) {
+    console.error('Fetch to KB error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message || '抓取并添加失败',
+        type: 'server_error'
+      }
     });
   }
 });

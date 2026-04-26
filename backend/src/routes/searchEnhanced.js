@@ -115,7 +115,7 @@ router.post('/fetch', async (req, res) => {
  * 搜索路由器统计
  * GET /api/search/enhanced/stats
  */
-router.get('/stats', (req, res) => {
+router.get('/enhanced/stats', (req, res) => {
   res.json({
     success: true,
     stats: searchRouter.getStats()
@@ -132,7 +132,7 @@ router.get('/stats', (req, res) => {
  *   query?: string     // 测试查询
  * }
  */
-router.post('/test', async (req, res) => {
+router.post('/enhanced/test', async (req, res) => {
   const { provider, query = 'test' } = req.body;
 
   if (!provider || !searchRouter.providerExists(provider)) {

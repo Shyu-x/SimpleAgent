@@ -89,7 +89,10 @@ class Checkpoint {
       status: this.status,
       createdAt: this.createdAt,
       respondedAt: this.respondedAt,
-      response: this.response
+      response: this.response,
+      required: this.required,
+      options: this.options,
+      context: this.context
     };
   }
 }

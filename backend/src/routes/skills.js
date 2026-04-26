@@ -11,7 +11,7 @@ const skillSystem = new SkillSystem({
 /**
  * 获取所有技能
  */
-router.get('/skills', (req, res) => {
+router.get('/', (req, res) => {
   try {
     const { type, search } = req.query;
     let skills;
@@ -43,7 +43,7 @@ router.get('/skills', (req, res) => {
 /**
  * 获取技能详情
  */
-router.get('/skills/:skillId', (req, res) => {
+router.get('/:skillId', (req, res) => {
   try {
     const { skillId } = req.params;
     const skill = skillSystem.get(skillId);
@@ -65,7 +65,7 @@ router.get('/skills/:skillId', (req, res) => {
 /**
  * 注册技能
  */
-router.post('/skills', (req, res) => {
+router.post('/', (req, res) => {
   try {
     const { name, type, description, prompt, tools, requiredContext, tokenCost, cacheable, skills } = req.body;
 
@@ -100,7 +100,7 @@ router.post('/skills', (req, res) => {
 /**
  * 批量注册技能
  */
-router.post('/skills/batch', (req, res) => {
+router.post('/batch', (req, res) => {
   try {
     const { skills } = req.body;
 
@@ -125,7 +125,7 @@ router.post('/skills/batch', (req, res) => {
 /**
  * 更新技能
  */
-router.put('/skills/:skillId', (req, res) => {
+router.put('/:skillId', (req, res) => {
   try {
     const { skillId } = req.params;
     const updates = req.body;
@@ -145,7 +145,7 @@ router.put('/skills/:skillId', (req, res) => {
 /**
  * 删除技能
  */
-router.delete('/skills/:skillId', (req, res) => {
+router.delete('/:skillId', (req, res) => {
   try {
     const { skillId } = req.params;
     const deleted = skillSystem.delete(skillId);
@@ -167,7 +167,7 @@ router.delete('/skills/:skillId', (req, res) => {
 /**
  * 执行技能
  */
-router.post('/skills/:skillId/execute', async (req, res) => {
+router.post('/:skillId/execute', async (req, res) => {
   try {
     const { skillId } = req.params;
     const context = req.body;
@@ -187,7 +187,7 @@ router.post('/skills/:skillId/execute', async (req, res) => {
 /**
  * 组合技能
  */
-router.post('/skills/compose', (req, res) => {
+router.post('/compose', (req, res) => {
   try {
     const { name, description, skillIds, options } = req.body;
 
@@ -212,7 +212,7 @@ router.post('/skills/compose', (req, res) => {
 /**
  * 导出技能
  */
-router.get('/skills/:skillId/export', (req, res) => {
+router.get('/:skillId/export', (req, res) => {
   try {
     const { skillId } = req.params;
     const exported = skillSystem.export(skillId);
@@ -234,7 +234,7 @@ router.get('/skills/:skillId/export', (req, res) => {
 /**
  * 导入技能
  */
-router.post('/skills/import', (req, res) => {
+router.post('/import', (req, res) => {
   try {
     const { skill } = req.body;
 

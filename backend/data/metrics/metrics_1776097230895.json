@@ -1,0 +1,284 @@
+{
+  "timestamp": "2026-04-13T16:20:30.894Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/login\",method=\"GET\",status=\"404\"": 159,
+      "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/intent\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/tasks\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/\",method=\"GET\",status=\"404\"": 98,
+      "endpoint=\"/knowledge\",method=\"GET\",status=\"404\"": 13,
+      "endpoint=\"/doc/test-doc\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/project\",method=\"GET\",status=\"404\"": 6,
+      "endpoint=\"/meeting\",method=\"GET\",status=\"404\"": 3,
+      "endpoint=\"/settings\",method=\"GET\",status=\"404\"": 2
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 0
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/login\",method=\"GET\"": {
+        "count": 318,
+        "sum": 0.21600000000000014,
+        "mean": 0.0006792452830188683,
+        "buckets": {
+          "1": 318,
+          "5": 318,
+          "10": 318,
+          "0.005": 317,
+          "0.01": 317,
+          "0.025": 317,
+          "0.05": 317,
+          "0.1": 318,
+          "0.25": 318,
+          "0.5": 318,
+          "2.5": 318
+        }
+      },
+      "endpoint=\"/api/health\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 198,
+        "sum": 0.07600000000000003,
+        "mean": 0.000383838383838384,
+        "buckets": {
+          "1": 198,
+          "5": 198,
+          "10": 198,
+          "0.005": 196,
+          "0.01": 196,
+          "0.025": 197,
+          "0.05": 198,
+          "0.1": 198,
+          "0.25": 198,
+          "0.5": 198,
+          "2.5": 198
+        }
+      },
+      "endpoint=\"/api/admin/intent\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.028,
+        "mean": 0.028,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tasks\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/tasks\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/knowledge\",method=\"GET\"": {
+        "count": 26,
+        "sum": 0.010000000000000002,
+        "mean": 0.00038461538461538467,
+        "buckets": {
+          "1": 26,
+          "5": 26,
+          "10": 26,
+          "0.005": 26,
+          "0.01": 26,
+          "0.025": 26,
+          "0.05": 26,
+          "0.1": 26,
+          "0.25": 26,
+          "0.5": 26,
+          "2.5": 26
+        }
+      },
+      "endpoint=\"/doc/test-doc\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/project\",method=\"GET\"": {
+        "count": 12,
+        "sum": 0.002,
+        "mean": 0.00016666666666666666,
+        "buckets": {
+          "1": 12,
+          "5": 12,
+          "10": 12,
+          "0.005": 12,
+          "0.01": 12,
+          "0.025": 12,
+          "0.05": 12,
+          "0.1": 12,
+          "0.25": 12,
+          "0.5": 12,
+          "2.5": 12
+        }
+      },
+      "endpoint=\"/meeting\",method=\"GET\"": {
+        "count": 6,
+        "sum": 0.001,
+        "mean": 0.00016666666666666666,
+        "buckets": {
+          "1": 6,
+          "5": 6,
+          "10": 6,
+          "0.005": 6,
+          "0.01": 6,
+          "0.025": 6,
+          "0.05": 6,
+          "0.1": 6,
+          "0.25": 6,
+          "0.5": 6,
+          "2.5": 6
+        }
+      },
+      "endpoint=\"/settings\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 0
+}

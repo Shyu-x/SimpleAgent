@@ -1,0 +1,87 @@
+{
+  "total": 16,
+  "passed": 14,
+  "failed": 2,
+  "tests": [
+    {
+      "name": "Backend Health Check",
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Chat API (non-stream)",
+      "passed": true,
+      "error": "Status: 200"
+    },
+    {
+      "name": "Qdrant Status API",
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "RAG Search API",
+      "passed": true,
+      "error": "Status: 200"
+    },
+    {
+      "name": "Tool Registry API",
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Admin Stats API",
+      "passed": true,
+      "error": "Status: 200"
+    },
+    {
+      "name": "Model Config API",
+      "passed": true,
+      "error": "Status: 200"
+    },
+    {
+      "name": "Prompt Template API",
+      "passed": true,
+      "error": "Status: 200"
+    },
+    {
+      "name": "Intent Tree API",
+      "passed": false,
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "name": "HITL Request API",
+      "passed": false,
+      "error": "Status: 404"
+    },
+    {
+      "name": "A2A Agents API",
+      "passed": true,
+      "error": "Status: 200"
+    },
+    {
+      "name": "MCP Status API",
+      "passed": true,
+      "error": "Status: 200"
+    },
+    {
+      "name": "Frontend Page Load",
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Frontend Chat Input Visible",
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Frontend Sidebar Visible",
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "Frontend Admin Dashboard Load",
+      "passed": true,
+      "error": null
+    }
+  ]
+}

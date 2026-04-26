@@ -719,15 +719,14 @@ class A2AService extends EventEmitter {
   }
 
   /**
-   * 创建 A2A 响应（构建标准 JSON-RPC 风格响应）
+   * 创建统一 API 响应
+   * 格式: {success, data, error: {code, message} | null, timestamp}
    */
-  createResponse(messageId, success, data, error = null) {
+  createResponse(messageId, success, data, errorCode = null, errorMessage = null) {
     return {
-      jsonrpc: '2.0',
-      id: messageId,
       success,
       data,
-      error: error ? { message: error } : null,
+      error: errorCode ? { code: errorCode, message: errorMessage } : null,
       timestamp: Date.now()
     };
   }

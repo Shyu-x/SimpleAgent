@@ -148,3 +148,45 @@ export type {
 
 // DnD 工作流画布
 export { default as DndWorkflowCanvas } from './workflow/DndWorkflowCanvas';
+
+// Mission Control
+export { default as MissionControl } from './MissionControl/MissionControl';
+
+// Agent Team Orchestrator
+export { AgentTeamOrchestrator } from './AgentTeamOrchestrator';
+export type {
+  TeamAgent,
+  TeamTask,
+  CollaborationResult,
+  TaskResult,
+  AgentRole,
+  CoordinationMode,
+  LayoutMode,
+} from './AgentTeamOrchestrator';
+export { default as AgentPool } from './MissionControl/AgentPool';
+export { default as TaskQueue } from './MissionControl/TaskQueue';
+export { default as ResultsFeed } from './MissionControl/ResultsFeed';
+export { default as TaskBroadcast } from './MissionControl/TaskBroadcast';
+export { default as AgentStatusBar } from './MissionControl/AgentStatusBar';
+export { default as ActionBar } from './MissionControl/ActionBar';
+export { default as AgentCard } from './MissionControl/AgentCard';
+export { useMission } from './MissionControl/useMissionControl';
+export type {
+  AgentStatus,
+  TaskPriority,
+  TaskStatus,
+  EventType,
+  MissionAgent,
+  MissionTask,
+  MissionEvent,
+  MissionControlState,
+  MissionControlActions,
+  MissionControlStore,
+  AgentCardProps,
+  TaskQueueProps,
+  ResultsFeedProps,
+  TaskBroadcastProps,
+  AgentStatusBarProps,
+  ActionBarProps,
+  MissionControlProps,
+} from './MissionControl/types';

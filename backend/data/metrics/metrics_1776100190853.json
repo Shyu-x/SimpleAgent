@@ -1,0 +1,5274 @@
+{
+  "timestamp": "2026-04-13T17:09:50.853Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 4,
+      "endpoint=\"/api/sessions\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/v1/chat/completions\",method=\"POST\",status=\"200\"": 12,
+      "endpoint=\"/api/chat\",method=\"POST\",status=\"200\"": 15,
+      "endpoint=\"/api/chat\",method=\"POST\",status=\"400\"": 7,
+      "endpoint=\"/api/chat/completions\",method=\"POST\",status=\"200\"": 2,
+      "endpoint=\"/api/enhanced-agent/execute\",method=\"POST\",status=\"200\"": 2,
+      "endpoint=\"/api/enhanced-agent/status/nonexistent-session-xyz\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/enhanced-agent/sessions\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/enhanced-agent/execute\",method=\"POST\",status=\"400\"": 2,
+      "endpoint=\"/api/enhanced-agent/status/nonexistent-abc123\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/enhanced-agent/resume/nonexistent-xyz\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/enhanced-agent/persistence/sessions\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/enhanced-agent/persistence/recoverable\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/enhanced-agent/persistence/cleanup\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/minimax-agent/session\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/minimax-agent/tools\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/minimax-agent/session/agent_1776100082913_cqxz9fiee\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/minimax-agent/execute\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/minimax-agent/session/agent_1776100082913_cqxz9fiee\",method=\"DELETE\",status=\"200\"": 1,
+      "endpoint=\"/api/minimax-agent/session/nonexistent-mmsession\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/multiagent/health\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/templates\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/agent-templates\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/agent\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/task\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/crew\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/crews\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/crew/crew_test-crew_1776100083009\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/crew/crew_test-crew_1776100083009/execute\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/crew/crew_test-crew_1776100083009\",method=\"DELETE\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/execute\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/memory\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/memory/search\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/pause\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/resume\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/checkpoint\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/checkpoints\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/recovery/handlers\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/tools\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/multiagent/tools/execute\",method=\"POST\",status=\"500\"": 1,
+      "endpoint=\"/api/admin/tools\",method=\"GET\",status=\"200\"": 4,
+      "endpoint=\"/api/admin/tools/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools/categories\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools/categories/list\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools/recommend\",method=\"POST\",status=\"200\"": 2,
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/register\",method=\"POST\",status=\"400\"": 5,
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"PUT\",status=\"404\"": 3,
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"PATCH\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/TestTool2_1776100082822/test\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822/test\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz/test\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz\",method=\"PUT\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/tools/TestTool2_1776100082822\",method=\"PATCH\",status=\"404\"": 1,
+      "endpoint=\"/api/mcp/status\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mcp/tools\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mcp/categories\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mcp/call\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/mcp/call\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/mcp/connect\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/mcp/disconnect\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/a2a/status\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/a2a/agents/register\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/test-agent-1776100083091\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/test-agent-1776100083091/heartbeat\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/nonexistent-agent-xyz\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/send\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/a2a/send\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/receive\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/poll\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/unread/test-agent-1776100083091\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/tasks\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/tasks/nonexistent-task-xyz\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/coordination/modes\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/tasks/define\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/tasks/define\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/a2a/tasks/define/batch\",method=\"POST\",status=\"200\"": 2,
+      "endpoint=\"/api/a2a/collaborate\",method=\"POST\",status=\"400\"": 2,
+      "endpoint=\"/api/a2a/collaboration/stats\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/collaboration/nonexistent-collab-xyz\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/collaboration/nonexistent-collab-xyz/result\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/collaboration/nonexistent-collab-xyz\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/progress/task-1776100128234\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/result/task-1776100128234\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/result/task-1776100128234\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/a2a/status/sync\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/ack\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/test-agent-1776100083091/unregister\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/tools\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/sessions/session-1\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/sessions/nonexistent\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/collaborate\",method=\"POST\",status=\"200\"": 2,
+      "endpoint=\"/api/sessions\",method=\"POST\",status=\"201\"": 2,
+      "endpoint=\"/api/sessions\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/sessions/session-1776100165009-flewq5p7i\",method=\"PUT\",status=\"200\"": 1,
+      "endpoint=\"/api/sessions/fake-id\",method=\"PUT\",status=\"404\"": 1,
+      "endpoint=\"/api/sessions/session-1776100165009-flewq5p7i/messages\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/sessions/session-1776100165009-flewq5p7i/messages\",method=\"POST\",status=\"400\"": 2,
+      "endpoint=\"/api/admin/knowledge\",method=\"GET\",status=\"404\"": 3,
+      "endpoint=\"/api/admin/knowledge\",method=\"POST\",status=\"404\"": 2,
+      "endpoint=\"/api/admin/knowledge/non-existent-test-id\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/test-id\",method=\"PUT\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/test-id\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/definitely-does-not-exist-12345\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/knowledge/collections\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/collections\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/collections/test_collection_1776100178110\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/collections/test_collection_1776100178110\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/index/rebuild\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/index/status\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/knowledge/index\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/models\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models/MiniMax-M2.7\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models/MiniMax-M2.7\",method=\"PUT\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models/NonExistentModel\",method=\"PUT\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/models/MiniMax-M2.7/circuit-breaker\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models/health\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/models/test\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/prompts\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/admin/prompts\",method=\"POST\",status=\"201\"": 1,
+      "endpoint=\"/api/admin/prompts/custom_10908781\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/prompts/custom_10908781\",method=\"PUT\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/prompts/custom_10908781\",method=\"DELETE\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/prompts/custom_10908781/versions\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/prompts/custom_10908781/versions\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/prompts/custom_10908781/active\",method=\"PUT\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/traces\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/admin/traces/trace-001\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/traces/trace-001/events\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/traces/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/traces\",method=\"DELETE\",status=\"403\"": 1,
+      "endpoint=\"/api/memory/conversations\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/memory/conversations/test-conv-id\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/memory/conversations/test-conv-id/messages\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/memory/conversations/test-conv-id/messages\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/memory/conversations/test-conv-id\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/memories\",method=\"GET\",status=\"500\"": 1,
+      "endpoint=\"/api/memories\",method=\"POST\",status=\"500\"": 1,
+      "endpoint=\"/api/memories/test-memory-id\",method=\"GET\",status=\"500\"": 1,
+      "endpoint=\"/api/memories/test-memory-id\",method=\"DELETE\",status=\"500\"": 1,
+      "endpoint=\"/api/memories/search\",method=\"GET\",status=\"500\"": 1,
+      "endpoint=\"/api/conversations\",method=\"GET\",status=\"500\"": 1,
+      "endpoint=\"/api/conversations\",method=\"POST\",status=\"500\"": 1,
+      "endpoint=\"/api/mission/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/agents\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/agents\",method=\"POST\",status=\"201\"": 1,
+      "endpoint=\"/api/mission/agents/test-agent-id\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/mission/agents/test-agent-id\",method=\"PUT\",status=\"404\"": 1,
+      "endpoint=\"/api/mission/agents/test-agent-id\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/mission/events\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/events\",method=\"POST\",status=\"400\"": 1,
+      "endpoint=\"/api/config\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/router/status\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/pool/status\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/tools/categories/list\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/intent/tree\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/intent/stats\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/requests\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/memory/search\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/metrics\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/sessions/fake-session/messages\",method=\"POST\",status=\"404\"": 1,
+      "endpoint=\"/api/sessions/session-1776100165009-flewq5p7i\",method=\"DELETE\",status=\"200\"": 1,
+      "endpoint=\"/api/sessions/fake-id-12345\",method=\"DELETE\",status=\"404\"": 1,
+      "endpoint=\"/api/sessions\",method=\"DELETE\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/kb\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/kb\",method=\"POST\",status=\"200\"": 1
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 1
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/api/health\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.005,
+        "mean": 0.000625,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 8,
+          "0.01": 8,
+          "0.025": 8,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 17,
+        "sum": 0.029,
+        "mean": 0.0017058823529411766,
+        "buckets": {
+          "1": 17,
+          "5": 17,
+          "10": 17,
+          "0.005": 15,
+          "0.01": 17,
+          "0.025": 17,
+          "0.05": 17,
+          "0.1": 17,
+          "0.25": 17,
+          "0.5": 17,
+          "2.5": 17
+        }
+      },
+      "endpoint=\"/api/sessions\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/chat/completions\",method=\"POST\"": {
+        "count": 12,
+        "sum": 56.851000000000006,
+        "mean": 4.737583333333334,
+        "buckets": {
+          "1": 0,
+          "5": 7,
+          "10": 11,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/v1/chat/completions\",method=\"POST\"": {
+        "count": 12,
+        "sum": 56.851000000000006,
+        "mean": 4.737583333333334,
+        "buckets": {
+          "1": 0,
+          "5": 7,
+          "10": 11,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/\",method=\"POST\"": {
+        "count": 28,
+        "sum": 73.74600000000002,
+        "mean": 2.633785714285715,
+        "buckets": {
+          "1": 13,
+          "5": 21,
+          "10": 27,
+          "0.005": 13,
+          "0.01": 13,
+          "0.025": 13,
+          "0.05": 13,
+          "0.1": 13,
+          "0.25": 13,
+          "0.5": 13,
+          "2.5": 18
+        }
+      },
+      "endpoint=\"/api/chat\",method=\"POST\"": {
+        "count": 22,
+        "sum": 73.73800000000001,
+        "mean": 3.3517272727272736,
+        "buckets": {
+          "1": 7,
+          "5": 15,
+          "10": 21,
+          "0.005": 7,
+          "0.01": 7,
+          "0.025": 7,
+          "0.05": 7,
+          "0.1": 7,
+          "0.25": 7,
+          "0.5": 7,
+          "2.5": 12
+        }
+      },
+      "endpoint=\"/completions\",method=\"POST\"": {
+        "count": 2,
+        "sum": 7.1690000000000005,
+        "mean": 3.5845000000000002,
+        "buckets": {
+          "1": 0,
+          "5": 2,
+          "10": 2,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/api/chat/completions\",method=\"POST\"": {
+        "count": 2,
+        "sum": 7.1690000000000005,
+        "mean": 3.5845000000000002,
+        "buckets": {
+          "1": 0,
+          "5": 2,
+          "10": 2,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/execute\",method=\"POST\"": {
+        "count": 5,
+        "sum": 0.079,
+        "mean": 0.0158,
+        "buckets": {
+          "1": 5,
+          "5": 5,
+          "10": 5,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 5,
+          "0.25": 5,
+          "0.5": 5,
+          "2.5": 5
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/execute\",method=\"POST\"": {
+        "count": 4,
+        "sum": 0.003,
+        "mean": 0.00075,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/status/nonexistent-session-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/status/nonexistent-session-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/sessions\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/sessions\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/status/nonexistent-abc123\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/status/nonexistent-abc123\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/resume/nonexistent-xyz\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/resume/nonexistent-xyz\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/persistence/sessions\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.012,
+        "mean": 0.012,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/persistence/sessions\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.012,
+        "mean": 0.012,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/persistence/recoverable\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.006,
+        "mean": 0.006,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/persistence/recoverable\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.006,
+        "mean": 0.006,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/persistence/cleanup\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/enhanced-agent/persistence/cleanup\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/session\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/minimax-agent/session\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tools\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0.002,
+        "mean": 0.0006666666666666666,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/minimax-agent/tools\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/session/agent_1776100082913_cqxz9fiee\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/minimax-agent/session/agent_1776100082913_cqxz9fiee\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/minimax-agent/execute\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.077,
+        "mean": 0.077,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/session/agent_1776100082913_cqxz9fiee\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/minimax-agent/session/agent_1776100082913_cqxz9fiee\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/session/nonexistent-mmsession\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/minimax-agent/session/nonexistent-mmsession\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/health\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/multiagent/health\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/templates\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/templates\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agent-templates\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/agent-templates\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agent\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/agent\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/task\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/task\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/crew\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/crew\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/crews\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/crews\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/crew/crew_test-crew_1776100083009\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/crew/crew_test-crew_1776100083009\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/crew/crew_test-crew_1776100083009/execute\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/crew/crew_test-crew_1776100083009/execute\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/crew/crew_test-crew_1776100083009\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/crew/crew_test-crew_1776100083009\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014/execute\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/execute\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014/memory\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/memory\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014/memory/search\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/memory/search\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014/pause\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/pause\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014/resume\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/resume\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014/checkpoint\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/checkpoint\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/engine/engine-test-1776100083014/checkpoints\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/engine/engine-test-1776100083014/checkpoints\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/recovery/handlers\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/recovery/handlers\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/tools\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tools/execute\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/multiagent/tools/execute\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/stats\",method=\"GET\"": {
+        "count": 6,
+        "sum": 0.001,
+        "mean": 0.00016666666666666666,
+        "buckets": {
+          "1": 6,
+          "5": 6,
+          "10": 6,
+          "0.005": 6,
+          "0.01": 6,
+          "0.025": 6,
+          "0.05": 6,
+          "0.1": 6,
+          "0.25": 6,
+          "0.5": 6,
+          "2.5": 6
+        }
+      },
+      "endpoint=\"/api/admin/tools/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/categories\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/tools/categories\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/categories/list\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/categories/list\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/recommend\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/tools/recommend\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/nonexistent-tool-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/register\",method=\"POST\"": {
+        "count": 5,
+        "sum": 0.002,
+        "mean": 0.0004,
+        "buckets": {
+          "1": 5,
+          "5": 5,
+          "10": 5,
+          "0.005": 5,
+          "0.01": 5,
+          "0.025": 5,
+          "0.05": 5,
+          "0.1": 5,
+          "0.25": 5,
+          "0.5": 5,
+          "2.5": 5
+        }
+      },
+      "endpoint=\"/api/admin/tools/register\",method=\"POST\"": {
+        "count": 5,
+        "sum": 0.002,
+        "mean": 0.0004,
+        "buckets": {
+          "1": 5,
+          "5": 5,
+          "10": 5,
+          "0.005": 5,
+          "0.01": 5,
+          "0.025": 5,
+          "0.05": 5,
+          "0.1": 5,
+          "0.25": 5,
+          "0.5": 5,
+          "2.5": 5
+        }
+      },
+      "endpoint=\"/TestTool_1776100082822\",method=\"PUT\"": {
+        "count": 3,
+        "sum": 0.001,
+        "mean": 0.0003333333333333333,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"PUT\"": {
+        "count": 3,
+        "sum": 0.001,
+        "mean": 0.0003333333333333333,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/TestTool_1776100082822\",method=\"PATCH\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"PATCH\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/TestTool_1776100082822\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/TestTool2_1776100082822/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/TestTool2_1776100082822/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/TestTool_1776100082822/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/nonexistent-tool-xyz/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/nonexistent-tool-xyz\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/TestTool_1776100082822\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/TestTool_1776100082822\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/nonexistent-tool-xyz\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/nonexistent-tool-xyz\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/TestTool2_1776100082822\",method=\"PATCH\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/TestTool2_1776100082822\",method=\"PATCH\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/status\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0.001,
+        "mean": 0.0003333333333333333,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/mcp/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/tools\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/categories\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/call\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/mcp/call\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/connect\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/connect\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/disconnect\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/disconnect\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0.002,
+        "mean": 0.0006666666666666666,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/a2a/agents\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/agents/register\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/register\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/test-agent-1776100083091\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/test-agent-1776100083091\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/test-agent-1776100083091/heartbeat\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/test-agent-1776100083091/heartbeat\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/nonexistent-agent-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/nonexistent-agent-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/send\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/send\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/receive\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/receive\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/poll\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/poll\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/unread/test-agent-1776100083091\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/unread/test-agent-1776100083091\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tasks\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/tasks\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tasks/nonexistent-task-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/tasks/nonexistent-task-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/coordination/modes\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/coordination/modes\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tasks/define\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/tasks/define\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/tasks/define/batch\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/tasks/define/batch\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/collaborate\",method=\"POST\"": {
+        "count": 4,
+        "sum": 120.023,
+        "mean": 30.00575,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/collaborate\",method=\"POST\"": {
+        "count": 4,
+        "sum": 120.023,
+        "mean": 30.00575,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/collaboration/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/collaboration/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/collaboration/nonexistent-collab-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/collaboration/nonexistent-collab-xyz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/collaboration/nonexistent-collab-xyz/result\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/collaboration/nonexistent-collab-xyz/result\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/collaboration/nonexistent-collab-xyz\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.004,
+        "mean": 0.004,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/collaboration/nonexistent-collab-xyz\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.006,
+        "mean": 0.006,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/progress/task-1776100128234\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/progress/task-1776100128234\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/result/task-1776100128234\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/result/task-1776100128234\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/status/sync\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/status/sync\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/ack\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/ack\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.003,
+        "mean": 0.003,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/test-agent-1776100083091/unregister\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/test-agent-1776100083091/unregister\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/tools\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/session-1\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/sessions/session-1\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/nonexistent\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions/nonexistent\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions\",method=\"POST\"": {
+        "count": 3,
+        "sum": 0.002,
+        "mean": 0.0006666666666666666,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/session-1776100165009-flewq5p7i\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions/session-1776100165009-flewq5p7i\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/fake-id\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions/fake-id\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/session-1776100165009-flewq5p7i/messages\",method=\"POST\"": {
+        "count": 3,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/sessions/session-1776100165009-flewq5p7i/messages\",method=\"POST\"": {
+        "count": 3,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/admin/knowledge\",method=\"GET\"": {
+        "count": 6,
+        "sum": 0.004,
+        "mean": 0.0006666666666666666,
+        "buckets": {
+          "1": 6,
+          "5": 6,
+          "10": 6,
+          "0.005": 6,
+          "0.01": 6,
+          "0.025": 6,
+          "0.05": 6,
+          "0.1": 6,
+          "0.25": 6,
+          "0.5": 6,
+          "2.5": 6
+        }
+      },
+      "endpoint=\"/api/admin/knowledge\",method=\"POST\"": {
+        "count": 4,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/non-existent-test-id\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/test-id\",method=\"PUT\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/test-id\",method=\"DELETE\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/definitely-does-not-exist-12345\",method=\"DELETE\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/collections\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/collections\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/collections/test_collection_1776100178110\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/collections/test_collection_1776100178110\",method=\"DELETE\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/index/rebuild\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/index/status\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/index\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/models\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/MiniMax-M2.7\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/MiniMax-M2.7\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/MiniMax-M2.7\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/MiniMax-M2.7\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/NonExistentModel\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/NonExistentModel\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/MiniMax-M2.7/circuit-breaker\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/MiniMax-M2.7/circuit-breaker\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/health\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/test\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/prompts\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/prompts\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/custom_10908781\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/prompts/custom_10908781\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/custom_10908781\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/prompts/custom_10908781\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/custom_10908781\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/prompts/custom_10908781\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/custom_10908781/versions\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/prompts/custom_10908781/versions\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/prompts/custom_10908781/versions\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/prompts/custom_10908781/active\",method=\"PUT\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/traces\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/trace-001\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/traces/trace-001\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/traces/trace-001/events\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/traces/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/\",method=\"DELETE\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/traces\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/conversations\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/memory/conversations\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/memory/conversations/test-conv-id\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/memory/conversations/test-conv-id/messages\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/memory/conversations/test-conv-id/messages\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/memory/conversations/test-conv-id\",method=\"DELETE\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/memories\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.004,
+        "mean": 0.004,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/memories\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.003,
+        "mean": 0.003,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/test-memory-id\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/memories/test-memory-id\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/test-memory-id\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/memories/test-memory-id\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/search\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/memories/search\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/conversations\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.006,
+        "mean": 0.006,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/conversations\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.004,
+        "mean": 0.004,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/agents\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/agents\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/agents/test-agent-id\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/agents/test-agent-id\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/agents/test-agent-id\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/test-agent-id\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/agents/test-agent-id\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/events\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/events\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/events\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/events\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/config\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/router/status\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/pool/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/tools/categories/list\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/tree\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.007,
+        "mean": 0.007,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/intent/tree\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.007,
+        "mean": 0.007,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/intent/stats\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/hitl/requests\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/memory/search\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/metrics\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.003,
+        "mean": 0.003,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/fake-session/messages\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions/fake-session/messages\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/session-1776100165009-flewq5p7i\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions/session-1776100165009-flewq5p7i\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/fake-id-12345\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions/fake-id-12345\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/sessions\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/kb\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/kb\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/kb\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/kb\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 1
+}

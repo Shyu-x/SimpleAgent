@@ -1,0 +1,620 @@
+package agent
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"strings"
+	"time"
+
+	"github.com/ai-chat/backend_go/internal/domain/model"
+)
+
+// ExecutorConfig 执行器配置
+type ExecutorConfig struct {
+	MaxIterations     int           // 最大迭代次数
+	IterationTimeout  time.Duration // 单次迭代超时时间
+	EnableReasoning   bool          // 启用思维链
+	ToolTimeout       time.Duration // 工具执行超时
+	EnableMemory      bool          // 启用对话记忆
+	MemoryWindowSize  int           // 记忆窗口大小
+	EnableRAG        bool          // 启用RAG
+	RAGTopK          int           // RAG检索数量
+	MaxContextTokens  int           // 最大上下文token数
+}
+
+// ToolResult 工具执行结果
+type ToolResult struct {
+	ToolName string                 `json:"tool_name"` // 工具名称
+	Args     map[string]interface{} `json:"args"`      // 参数
+	Result   interface{}            `json:"result"`   // 结果
+	Error    error                  `json:"error"`    // 错误
+	Duration  time.Duration         `json:"duration"`  // 执行时长
+	Attempts  int                   `json:"attempts"`  // 重试次数
+	Cached    bool                  `json:"cached"`    // 是否来自缓存
+}
+
+// ReActStep ReAct执行步骤
+type ReActStep struct {
+	StepNum     int                    `json:"step_num"`    // 步骤编号
+	Thought     string                 `json:"thought"`     // 思考过程
+	Action      string                 `json:"action"`      // 执行的动作
+	ActionInput map[string]interface{} `json:"action_input"` // 动作输入
+	Observed    string                 `json:"observed"`     // 观察结果
+	Finish      bool                   `json:"finish"`       // 是否完成
+	Reasoning   string                 `json:"reasoning"`    // 推理过程
+}
+
+// ToolExecutor 工具执行器接口
+type ToolExecutor interface {
+	// Execute 执行工具
+	Execute(ctx context.Context, toolName string, args map[string]interface{}) (*ToolResult, error)
+	// Register 注册工具
+	Register(definition model.ToolDefinition, handler func(ctx context.Context, args map[string]interface{}) (interface{}, error))
+	// ListTools 列出所有工具
+	ListTools() []model.ToolDefinition
+}
+
+// DefaultToolExecutor 默认工具执行器
+type DefaultToolExecutor struct {
+	tools    map[string]model.ToolDefinition
+	handlers map[string]func(ctx context.Context, args map[string]interface{}) (interface{}, error)
+	logger   *slog.Logger
+}
+
+// NewDefaultToolExecutor 创建默认工具执行器
+func NewDefaultToolExecutor(logger *slog.Logger) *DefaultToolExecutor {
+	return &DefaultToolExecutor{
+		tools:    make(map[string]model.ToolDefinition),
+		handlers: make(map[string]func(ctx context.Context, args map[string]interface{}) (interface{}, error)),
+		logger:   logger,
+	}
+}
+
+// Register 注册工具
+func (e *DefaultToolExecutor) Register(definition model.ToolDefinition, handler func(ctx context.Context, args map[string]interface{}) (interface{}, error) {
+	e.tools[definition.Name] = definition
+	e.handlers[definition.Name] = handler
+}
+
+// Execute 执行工具
+func (e *DefaultToolExecutor) Execute(ctx context.Context, toolName string, args map[string]interface{}) (*ToolResult, error) {
+	handler, ok := e.handlers[toolName]
+	if !ok {
+		return nil, fmt.Errorf("tool not found: %s", toolName)
+	}
+
+	start := time.Now()
+	result, err := handler(ctx, args)
+	duration := time.Since(start)
+
+	return &ToolResult{
+		ToolName: toolName,
+		Args:     args,
+		Result:   result,
+		Error:    err,
+		Duration: duration,
+	}, nil
+}
+
+// ListTools 列出所有工具
+func (e *DefaultToolExecutor) ListTools() []model.ToolDefinition {
+	result := make([]model.ToolDefinition, 0, len(e.tools))
+	for _, t := range e.tools {
+		result = append(result, t)
+	}
+	return result
+}
+
+// Executor Agent执行器 - 完整ReAct循环实现
+type Executor struct {
+	config        ExecutorConfig
+	model        model.Model
+	toolExecutor ToolExecutor
+	memoryService *ConversationMemoryService
+	intentResolver *IntentResolver
+	contextAssember *ContextAssember
+	logger        *slog.Logger
+	cancelChan   chan struct{}
+	resetChan    chan struct{}
+}
+
+// NewExecutor 创建执行器
+func NewExecutor(config ExecutorConfig, model model.Model, toolExecutor ToolExecutor, logger *slog.Logger) *Executor {
+	// 默认配置
+	if config.MaxIterations <= 0 {
+		config.MaxIterations = 10
+	}
+	if config.IterationTimeout <= 0 {
+		config.IterationTimeout = 30 * time.Second
+	}
+	if config.ToolTimeout <= 0 {
+		config.ToolTimeout = 60 * time.Second
+	}
+	if config.MemoryWindowSize <= 0 {
+		config.MemoryWindowSize = 20
+	}
+	if config.RAGTopK <= 0 {
+		config.RAGTopK = 5
+	}
+	if config.MaxContextTokens <= 0 {
+		config.MaxContextTokens = 8000
+	}
+
+	// 创建记忆服务
+	memoryConfig := MemoryServiceConfig{
+		WindowSize:    config.MemoryWindowSize,
+		MaxTokens:    16000,
+		EnableSummary: true,
+		SummaryThresh: 6000,
+	}
+	memoryService := NewConversationMemoryService("default", memoryConfig)
+
+	// 创建意图解析器
+	intentResolver := NewIntentResolver()
+
+	// 创建上下文组装器
+	ctxConfig := ContextConfig{
+		Scenario:         ScenarioMixed,
+		EnableReasoning:  config.EnableReasoning,
+		EnableMemory:     config.EnableMemory,
+		EnableRAG:        config.EnableRAG,
+		MaxContextTokens: config.MaxContextTokens,
+	}
+	contextAssember := NewContextAssember(ctxConfig)
+
+	return &Executor{
+		config:         config,
+		model:          model,
+		toolExecutor:   toolExecutor,
+		memoryService: memoryService,
+		intentResolver: intentResolver,
+		contextAssember: contextAssember,
+		logger:         logger,
+		cancelChan:    make(chan struct{}, 1),
+		resetChan:     make(chan struct{}, 1),
+	}
+}
+
+// NewExecutorWithDeps 创建带依赖的执行器
+func NewExecutorWithDeps(
+	config ExecutorConfig,
+	model model.Model,
+	toolExecutor ToolExecutor,
+	memoryService *ConversationMemoryService,
+	intentResolver *IntentResolver,
+	contextAssember *ContextAssember,
+	logger *slog.Logger,
+) *Executor {
+	return &Executor{
+		config:         config,
+		model:          model,
+		toolExecutor:   toolExecutor,
+		memoryService: memoryService,
+		intentResolver: intentResolver,
+		contextAssember: contextAssember,
+		logger:         logger,
+		cancelChan:    make(chan struct{}, 1),
+		resetChan:     make(chan struct{}, 1),
+	}
+}
+
+// Execute 执行ReAct循环
+func (e *Executor) Execute(ctx context.Context, input string, tools []model.ToolDefinition) (*ExecuteResult, error) {
+	// 重置取消信号
+	e.resetCancel()
+
+	// 解析意图
+	intent := e.intentResolver.Resolve(input)
+
+	// 获取记忆消息
+	var memoryMsgs []model.Message
+	if e.memoryService != nil && e.config.EnableMemory {
+		memoryMsgs = e.memoryService.GetMessages()
+	}
+
+	// 构建初始消息列表
+	messages := e.buildMessages(input, memoryMsgs, tools, intent)
+
+	// 添加用户消息到记忆
+	if e.memoryService != nil && e.config.EnableMemory {
+		e.memoryService.AddUserMessage(input)
+	}
+
+	// ReAct执行循环
+	steps := make([]ReActStep, 0)
+	startTime := time.Now()
+
+iterationLoop:
+	for i := 0; i < e.config.MaxIterations; i++ {
+		// 检查取消信号
+		select {
+		case <-e.cancelChan:
+			return &ExecuteResult{
+				Content:   "执行被取消",
+				Reasoning: "用户取消了执行",
+				ToolCalls: steps,
+				State:     "cancelled",
+			}, nil
+		case <-ctx.Done():
+			break iterationLoop
+		default:
+		}
+
+		// 检查超时
+		if time.Since(startTime) > e.config.IterationTimeout {
+			return &ExecuteResult{
+				Content:   "执行超时",
+				Reasoning: fmt.Sprintf("超过%d秒超时限制", int(e.config.IterationTimeout.Seconds())),
+				ToolCalls: steps,
+				State:     "timeout",
+			}, nil
+		}
+
+		step := ReActStep{
+			StepNum: i + 1,
+		}
+
+		// 调用模型
+		opts := e.buildModelOptions(tools)
+		resp, err := e.model.Chat(ctx, messages, opts...)
+		if err != nil {
+			return nil, fmt.Errorf("model chat error: %w", err)
+		}
+
+		step.Thought = resp.ReasoningContent
+
+		// 检查是否包含工具调用
+		if len(resp.ToolCalls) > 0 {
+			for _, tc := range resp.ToolCalls {
+				step.Action = tc.Name
+				step.ActionInput = tc.Args
+
+				// 执行工具（带超时）
+				toolCtx, cancel := context.WithTimeout(ctx, e.config.ToolTimeout)
+				defer cancel()
+
+				toolResult, err := e.toolExecutor.Execute(toolCtx, tc.Name, tc.Args)
+				if err != nil {
+					step.Observed = fmt.Sprintf("工具执行错误: %v", err)
+					messages = append(messages, model.Message{
+						Role:    "tool",
+						Content: fmt.Sprintf("Error: %v", err),
+					})
+					continue
+				}
+
+				// 格式化观察结果
+				if toolResult.Error != nil {
+					step.Observed = fmt.Sprintf("工具执行失败: %v", toolResult.Error)
+				} else {
+					step.Observed = e.formatToolResult(toolResult)
+				}
+
+				step.Finish = false
+				steps = append(steps, step)
+
+				// 添加工具结果到消息历史
+				messages = append(messages, model.Message{
+					Role:    "tool",
+					Content: step.Observed,
+				})
+
+				// 添加工具消息到记忆
+				if e.memoryService != nil && e.config.EnableMemory {
+					e.memoryService.AddToolMessage(fmt.Sprintf("[%s] %s", tc.Name, step.Observed))
+				}
+
+				// 记录日志
+				if e.logger != nil {
+					e.logger.Info("tool executed",
+						"tool", tc.Name,
+						"success", toolResult.Error == nil,
+						"duration", toolResult.Duration,
+					)
+				}
+			}
+		} else {
+			// 没有工具调用，任务完成
+			step.Action = "final"
+			step.Observed = resp.Content
+			step.Finish = true
+			step.Reasoning = e.summarizeReasoning(resp.ReasoningContent)
+			steps = append(steps, step)
+
+			// 添加助手回复到记忆
+			if e.memoryService != nil && e.config.EnableMemory {
+				e.memoryService.AddAssistantMessage(resp.Content)
+			}
+
+			return &ExecuteResult{
+				Content:    resp.Content,
+				Reasoning:  step.Reasoning,
+				ToolCalls:  steps,
+				TokenUsage: &resp.Usage,
+				Intent:     &intent,
+				State:      "completed",
+			}, nil
+		}
+	}
+
+	// 达到最大迭代次数
+	return &ExecuteResult{
+		Content:   "达到最大迭代次数",
+		Reasoning: fmt.Sprintf("在%d次迭代内未完成任务", e.config.MaxIterations),
+		ToolCalls: steps,
+		State:     "max_iterations",
+	}, nil
+}
+
+// StreamExecute 流式执行ReAct循环
+func (e *Executor) StreamExecute(ctx context.Context, input string, tools []model.ToolDefinition, callback func(*ExecuteResult) error) error {
+	// 重置取消信号
+	e.resetCancel()
+
+	// 解析意图
+	intent := e.intentResolver.Resolve(input)
+
+	// 获取记忆消息
+	var memoryMsgs []model.Message
+	if e.memoryService != nil && e.config.EnableMemory {
+		memoryMsgs = e.memoryService.GetMessages()
+	}
+
+	// 构建初始消息列表
+	messages := e.buildMessages(input, memoryMsgs, tools, intent)
+
+	// 添加用户消息到记忆
+	if e.memoryService != nil && e.config.EnableMemory {
+		e.memoryService.AddUserMessage(input)
+	}
+
+	// ReAct执行循环
+	steps := make([]ReActStep, 0)
+	startTime := time.Now()
+
+iterationLoop:
+	for i := 0; i < e.config.MaxIterations; i++ {
+		// 检查取消信号
+		select {
+		case <-e.cancelChan:
+			callback(&ExecuteResult{
+				Content:   "执行被取消",
+				Reasoning: "用户取消了执行",
+				ToolCalls: steps,
+				State:     "cancelled",
+			})
+			return nil
+		case <-ctx.Done():
+			break iterationLoop
+		default:
+		}
+
+		// 检查超时
+		if time.Since(startTime) > e.config.IterationTimeout {
+			callback(&ExecuteResult{
+				Content:   "执行超时",
+				Reasoning: fmt.Sprintf("超过%d秒超时限制", int(e.config.IterationTimeout.Seconds())),
+				ToolCalls: steps,
+				State:     "timeout",
+			})
+			return nil
+		}
+
+		step := ReActStep{
+			StepNum: i + 1,
+		}
+
+		// 流式调用模型 - 收集完整响应和工具调用
+		var fullContent string
+		var collectedToolCalls []model.ToolCall
+		err := e.model.Stream(ctx, messages, func(resp *model.Response) {
+			fullContent += resp.Content
+			step.Thought = resp.ReasoningContent
+			if len(resp.ToolCalls) > 0 {
+				collectedToolCalls = resp.ToolCalls
+			}
+			// 流式回调
+			callback(&ExecuteResult{
+				Content:   resp.Content,
+				Reasoning: resp.ReasoningContent,
+				State:     "streaming",
+			})
+		})
+
+		if err != nil {
+			return fmt.Errorf("model stream error: %w", err)
+		}
+
+		// 检查是否有工具调用
+		if len(collectedToolCalls) > 0 {
+			// 执行工具
+			for _, tc := range collectedToolCalls {
+				step.Action = tc.Name
+				step.ActionInput = tc.Args
+
+				toolCtx, cancel := context.WithTimeout(ctx, e.config.ToolTimeout)
+				toolResult, err := e.toolExecutor.Execute(toolCtx, tc.Name, tc.Args)
+				cancel()
+
+				if err != nil {
+					step.Observed = fmt.Sprintf("工具执行错误: %v", err)
+				} else {
+					step.Observed = e.formatToolResult(toolResult)
+				}
+
+				step.Finish = false
+				steps = append(steps, step)
+
+				messages = append(messages, model.Message{
+					Role:    "tool",
+					Content: step.Observed,
+				})
+
+				if e.memoryService != nil && e.config.EnableMemory {
+					e.memoryService.AddToolMessage(fmt.Sprintf("[%s] %s", tc.Name, step.Observed))
+				}
+			}
+		} else {
+			// 任务完成
+			step.Action = "final"
+			step.Observed = fullContent
+			step.Finish = true
+			step.Reasoning = e.summarizeReasoning(step.Thought)
+			steps = append(steps, step)
+
+			if e.memoryService != nil && e.config.EnableMemory {
+				e.memoryService.AddAssistantMessage(fullContent)
+			}
+
+			callback(&ExecuteResult{
+				Content:    fullContent,
+				Reasoning:  step.Reasoning,
+				ToolCalls:  steps,
+				TokenUsage: nil,
+				Intent:     &intent,
+				State:      "completed",
+			})
+			return nil
+		}
+	}
+
+	// 达到最大迭代次数
+	callback(&ExecuteResult{
+		Content:   "达到最大迭代次数",
+		Reasoning: fmt.Sprintf("在%d次迭代内未完成任务", e.config.MaxIterations),
+		ToolCalls: steps,
+		State:     "max_iterations",
+	})
+	return nil
+}
+
+// buildMessages 构建消息列表
+func (e *Executor) buildMessages(input string, memoryMsgs []model.Message, tools []model.ToolDefinition, intent ResolvedIntent) []model.Message {
+	var messages []model.Message
+
+	// 系统提示
+	systemPrompt := e.buildSystemPrompt(tools, intent)
+	messages = append(messages, model.Message{
+		Role:    "system",
+		Content: systemPrompt,
+	})
+
+	// 记忆消息
+	for _, msg := range memoryMsgs {
+		messages = append(messages, msg)
+	}
+
+	// 用户输入
+	messages = append(messages, model.Message{
+		Role:    "user",
+		Content: input,
+	})
+
+	return messages
+}
+
+// buildSystemPrompt 构建系统提示
+func (e *Executor) buildSystemPrompt(tools []model.ToolDefinition, intent ResolvedIntent) string {
+	var sb strings.Builder
+
+	sb.WriteString("你是一个智能AI助手，采用Thought→Action→Observation的思考模式。\n\n")
+
+	if len(tools) > 0 {
+		sb.WriteString("【可用工具】\n")
+		for _, tool := range tools {
+			sb.WriteString(fmt.Sprintf("- %s: %s\n", tool.Name, tool.Description))
+		}
+		sb.WriteString("\n")
+	}
+
+	if intent.Confidence > 0.7 {
+		sb.WriteString(fmt.Sprintf("【识别意图】%s - %s (置信度: %.2f)\n",
+			intent.Domain, intent.Category, intent.Confidence))
+	}
+
+	sb.WriteString("\n请先思考(Thought)，如果需要执行操作请使用工具(Action)，然后观察结果(Observation)。")
+	return sb.String()
+}
+
+// buildModelOptions 构建模型选项
+func (e *Executor) buildModelOptions(tools []model.ToolDefinition) []model.Option {
+	opts := []model.Option{
+		model.WithTools(tools),
+	}
+	if e.config.EnableReasoning {
+		opts = append(opts, model.WithTemperature(0.7))
+	}
+	return opts
+}
+
+// formatToolResult 格式化工具结果
+func (e *Executor) formatToolResult(result *ToolResult) string {
+	if result.Error != nil {
+		return fmt.Sprintf("Error: %v", result.Error)
+	}
+	if result.Result == nil {
+		return "Success: (no output)"
+	}
+	switch v := result.Result.(type) {
+	case string:
+		return fmt.Sprintf("Success: %s", v)
+	default:
+		return fmt.Sprintf("Success: %v", v)
+	}
+}
+
+// summarizeReasoning 总结推理过程
+func (e *Executor) summarizeReasoning(reasoning string) string {
+	if reasoning == "" {
+		return ""
+	}
+	// 取前200字符作为总结
+	if len(reasoning) > 200 {
+		return reasoning[:200] + "..."
+	}
+	return reasoning
+}
+
+// Cancel 取消执行
+func (e *Executor) Cancel() {
+	select {
+	case e.cancelChan <- struct{}{}:
+	default:
+	}
+}
+
+// resetCancel 重置取消信号
+func (e *Executor) resetCancel() {
+	e.cancelChan = make(chan struct{}, 1)
+}
+
+// IsCancelled 检查是否已取消
+func (e *Executor) IsCancelled() bool {
+	select {
+	case <-e.cancelChan:
+		return true
+	default:
+		return false
+	}
+}
+
+// GetMemoryService 获取记忆服务
+func (e *Executor) GetMemoryService() *ConversationMemoryService {
+	return e.memoryService
+}
+
+// SetMemoryService 设置记忆服务
+func (e *Executor) SetMemoryService(memoryService *ConversationMemoryService) {
+	e.memoryService = memoryService
+}
+
+// ExecuteResult 执行结果
+type ExecuteResult struct {
+	Content    string           `json:"content"`
+	Reasoning  string           `json:"reasoning"`
+	ToolCalls  []ReActStep      `json:"tool_calls"`
+	TokenUsage *model.Usage     `json:"token_usage,omitempty"`
+	Intent     *ResolvedIntent  `json:"intent,omitempty"`
+	State      string           `json:"state"` // running, streaming, completed, cancelled, timeout, max_iterations
+}

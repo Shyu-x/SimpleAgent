@@ -11,9 +11,39 @@ const taskQueue = new DistributedTaskQueue({
 });
 
 /**
+ * 辅助函数：将字符串优先级转换为枚举值
+ */
+function normalizePriority(priority) {
+  if (priority === undefined || priority === null) {
+    return TaskPriority.NORMAL;
+  }
+  if (typeof priority === 'number') {
+    return priority;
+  }
+  if (typeof priority === 'string') {
+    // 尝试解析为数字（支持 "0"、"2" 等字符串）
+    const num = Number(priority);
+    if (!isNaN(num) && Number.isInteger(num)) {
+      return num;
+    }
+    const lower = priority.toLowerCase();
+    if (lower === 'low' || lower === 'lowest') {
+      return TaskPriority.LOW;
+    }
+    if (lower === 'high' || lower === 'highest') {
+      return TaskPriority.HIGH;
+    }
+    if (lower === 'normal' || lower === 'medium') {
+      return TaskPriority.NORMAL;
+    }
+  }
+  return TaskPriority.NORMAL;
+}
+
+/**
  * 提交任务
  */
-router.post('/tasks', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { type, payload, priority, timeout, metadata, waitResult } = req.body;
 
@@ -26,7 +56,7 @@ router.post('/tasks', async (req, res) => {
     const taskId = await taskQueue.enqueue({
       type,
       payload,
-      priority: priority || TaskPriority.NORMAL,
+      priority: normalizePriority(priority),
       timeout,
       metadata
     });
@@ -60,9 +90,28 @@ router.post('/tasks', async (req, res) => {
 });
 
 /**
+ * 获取队列统计
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = await taskQueue.getStats();
+
+    res.json({
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.error('Get stats error:', error);
+    res.status(500).json({
+      error: { message: error.message, type: 'server_error' }
+    });
+  }
+});
+
+/**
  * 获取任务状态
  */
-router.get('/tasks/:taskId', async (req, res) => {
+router.get('/:taskId', async (req, res) => {
   try {
     const { taskId } = req.params;
     const task = await taskQueue.getTaskStatus(taskId);
@@ -88,7 +137,7 @@ router.get('/tasks/:taskId', async (req, res) => {
 /**
  * 取消任务
  */
-router.delete('/tasks/:taskId', async (req, res) => {
+router.delete('/:taskId', async (req, res) => {
   try {
     const { taskId } = req.params;
     await taskQueue.cancel(taskId);
@@ -99,25 +148,6 @@ router.delete('/tasks/:taskId', async (req, res) => {
     });
   } catch (error) {
     console.error('Cancel task error:', error);
-    res.status(500).json({
-      error: { message: error.message, type: 'server_error' }
-    });
-  }
-});
-
-/**
- * 获取队列统计
- */
-router.get('/stats', async (req, res) => {
-  try {
-    const stats = await taskQueue.getStats();
-
-    res.json({
-      success: true,
-      stats
-    });
-  } catch (error) {
-    console.error('Get stats error:', error);
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });

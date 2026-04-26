@@ -97,7 +97,7 @@ async function runFullSystemTest() {
     { name: '知识库列表', test: () => request('GET', '/api/rag/kb') },
     { name: 'Skills列表', test: () => request('GET', '/api/skills/skills') },
     { name: 'A2A Agents', test: () => request('GET', '/api/a2a/agents') },
-    { name: 'HITL状态', test: () => request('GET', '/api/hitl/status') },
+    { name: 'HITL状态', test: () => request('GET', '/api/hitl/health') },
     { name: '路由器统计', test: () => request('GET', '/api/router/stats') }
   ];
 

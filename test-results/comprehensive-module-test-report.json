@@ -1,0 +1,565 @@
+{
+  "timestamp": "2026-04-13T17:10:25.130Z",
+  "baseUrl": "http://localhost:30002",
+  "total": 93,
+  "passed": 69,
+  "failed": 24,
+  "rate": "74.2%",
+  "duration": "127693ms",
+  "results": [
+    {
+      "test": "HITL-01 GET /api/hitl/health",
+      "status": "PASS",
+      "detail": "status=ok, pending=0"
+    },
+    {
+      "test": "HITL-02 GET /api/hitl/status (alias)",
+      "status": "PASS",
+      "detail": "status=ok"
+    },
+    {
+      "test": "HITL-03 GET /api/hitl/types",
+      "status": "PASS",
+      "detail": "types=decision,action,data_access,high_risk,cost_limit"
+    },
+    {
+      "test": "HITL-04 GET /api/hitl/stats",
+      "status": "PASS",
+      "detail": "{\"total\":1,\"pending\":0,\"approved\":0,\"rejected\":0,\"timeout\":1"
+    },
+    {
+      "test": "HITL-05 GET /api/hitl/pending",
+      "status": "PASS",
+      "detail": "count=0"
+    },
+    {
+      "test": "HITL-06 GET /api/hitl/history",
+      "status": "PASS",
+      "detail": "count=1"
+    },
+    {
+      "test": "HITL-07 POST /api/hitl/checkpoint basic",
+      "status": "PASS",
+      "detail": "id=cp_1776100097524"
+    },
+    {
+      "test": "HITL-08 POST /api/hitl/checkpoint with timeout",
+      "status": "PASS",
+      "detail": "timeout=undefined"
+    },
+    {
+      "test": "HITL-09 POST /api/hitl/checkpoint required=true",
+      "status": "FAIL",
+      "detail": "status=200",
+      "response": {
+        "success": true,
+        "checkpoint": {
+          "id": "cp_1776100097528",
+          "type": "decision",
+          "title": "Required Checkpoint",
+          "status": "pending",
+          "createdAt": 1776100097528,
+          "respondedAt": null,
+          "response": null
+        }
+      }
+    },
+    {
+      "test": "HITL-10 POST /api/hitl/checkpoint with options",
+      "status": "FAIL",
+      "detail": "status=200",
+      "response": {
+        "success": true,
+        "checkpoint": {
+          "id": "cp_1776100097530",
+          "type": "decision",
+          "title": "Checkpoint with Options",
+          "status": "pending",
+          "createdAt": 1776100097530,
+          "respondedAt": null,
+          "response": null
+        }
+      }
+    },
+    {
+      "test": "HITL-11 POST /api/hitl/checkpoint with context",
+      "status": "FAIL",
+      "detail": "status=200",
+      "response": {
+        "success": true,
+        "checkpoint": {
+          "id": "cp_1776100097532",
+          "type": "decision",
+          "title": "Checkpoint with Context",
+          "status": "pending",
+          "createdAt": 1776100097532,
+          "respondedAt": null,
+          "response": null
+        }
+      }
+    },
+    {
+      "test": "HITL-12 POST /api/hitl/checkpoint type=high_risk",
+      "status": "PASS",
+      "detail": "type=high_risk"
+    },
+    {
+      "test": "HITL-13 POST /api/hitl/checkpoint missing title (400)",
+      "status": "PASS",
+      "detail": "error=Missing title"
+    },
+    {
+      "test": "HITL-14 POST /api/hitl/request basic",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "HITL-15 POST /api/hitl/request with options+timeout",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "HITL-16 POST /api/hitl/request missing title (400)",
+      "status": "PASS",
+      "detail": "error=Missing title"
+    },
+    {
+      "test": "HITL-17 GET /api/hitl/checkpoint/:id",
+      "status": "PASS",
+      "detail": "id=cp_1776100117563"
+    },
+    {
+      "test": "HITL-18 GET /api/hitl/checkpoint/:id non-existent (404)",
+      "status": "PASS",
+      "detail": "404"
+    },
+    {
+      "test": "HITL-19 POST /api/hitl/checkpoint/:id/approve",
+      "status": "PASS",
+      "detail": "success=true"
+    },
+    {
+      "test": "HITL-20 POST /api/hitl/checkpoint/:id/reject",
+      "status": "PASS",
+      "detail": "success=true"
+    },
+    {
+      "test": "HITL-21 POST /api/hitl/checkpoint/:id/approve non-existent",
+      "status": "PASS",
+      "detail": "rejected=Checkpoint not found"
+    },
+    {
+      "test": "HITL-22 POST /api/hitl/checkpoint/:id/wait",
+      "status": "PASS",
+      "detail": "200 OK"
+    },
+    {
+      "test": "HITL-23 POST /api/hitl/confirm basic",
+      "status": "PASS",
+      "detail": "200 OK"
+    },
+    {
+      "test": "HITL-24 POST /api/hitl/confirm missing title (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "HITL-25 POST /api/hitl/clear",
+      "status": "PASS",
+      "detail": "cleared"
+    },
+    {
+      "test": "HITL-26 GET /api/hitl/sse/clients",
+      "status": "PASS",
+      "detail": "count=0"
+    },
+    {
+      "test": "HITL-27 POST /api/hitl/sse/broadcast",
+      "status": "PASS",
+      "detail": "clients=0"
+    },
+    {
+      "test": "HITL-28 POST /api/hitl/sse/broadcast missing type (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "HITL-29 GET /api/hitl/stats post-ops",
+      "status": "PASS",
+      "detail": "total=14, approved=1, rejected=1"
+    },
+    {
+      "test": "HITL-30 GET /api/hitl/history populated",
+      "status": "PASS",
+      "detail": "count=14"
+    },
+    {
+      "test": "QD-31 GET /api/qdrant/status",
+      "status": "PASS",
+      "detail": "healthy=false, collection=chat_documents"
+    },
+    {
+      "test": "QD-32 GET /api/qdrant/collections",
+      "status": "PASS",
+      "detail": "count=0"
+    },
+    {
+      "test": "QD-33 PUT /api/qdrant/collections/:collection create",
+      "status": "FAIL",
+      "detail": "status=500",
+      "response": {
+        "success": false,
+        "error": "fetch failed"
+      }
+    },
+    {
+      "test": "QD-34 GET /api/qdrant/collections/:collection info",
+      "status": "FAIL",
+      "detail": "status=404",
+      "response": {
+        "success": false,
+        "error": "Collection not found"
+      }
+    },
+    {
+      "test": "QD-35 PUT /api/qdrant/collections/:collection update",
+      "status": "FAIL",
+      "detail": "status=500",
+      "response": {
+        "success": false,
+        "error": "fetch failed"
+      }
+    },
+    {
+      "test": "QD-36 POST /api/qdrant/documents insert",
+      "status": "PASS",
+      "detail": "success=false, chunks="
+    },
+    {
+      "test": "QD-37 POST /api/qdrant/documents/batch",
+      "status": "PASS",
+      "detail": "totalInserted=0, count=3"
+    },
+    {
+      "test": "QD-38 POST /api/qdrant/documents missing doc (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "QD-39 POST /api/qdrant/documents/batch bad input (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "QD-40 POST /api/qdrant/search basic",
+      "status": "PASS",
+      "detail": "results=0, success=false"
+    },
+    {
+      "test": "QD-41 POST /api/qdrant/search missing query (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "QD-42 POST /api/qdrant/search with topK=3",
+      "status": "PASS",
+      "detail": "topK=3"
+    },
+    {
+      "test": "QD-43 GET /api/qdrant/stats/:collection",
+      "status": "PASS",
+      "detail": "ok"
+    },
+    {
+      "test": "QD-44 DELETE /api/qdrant/collections/:collection",
+      "status": "FAIL",
+      "detail": "status=200",
+      "response": {
+        "success": false,
+        "collection": "test_1776100122702",
+        "message": "Collection deleted"
+      }
+    },
+    {
+      "test": "QD-45 GET /api/qdrant/collections/:collection after delete (404)",
+      "status": "PASS",
+      "detail": "404"
+    },
+    {
+      "test": "QD-46 DELETE /api/qdrant/documents missing ids (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "SR-47 GET /api/search/ basic",
+      "status": "PASS",
+      "detail": "status=ok, providers=duckduckgo,jina,tavily,perplexity,brave,minimax"
+    },
+    {
+      "test": "SR-48 GET /api/search/health",
+      "status": "PASS",
+      "detail": "status=ok"
+    },
+    {
+      "test": "SR-49 GET /api/search/config",
+      "status": "PASS",
+      "detail": "enabled=duckduckgo,jina,tavily,perplexity,brave,minimax, free=duckduckgo,jina"
+    },
+    {
+      "test": "SR-50 GET /api/search/providers",
+      "status": "PASS",
+      "detail": "count=8"
+    },
+    {
+      "test": "SR-51 POST /api/search/test source=jina",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SR-52 POST /api/search/test custom query",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SR-53 POST /api/search/test invalid source (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "SR-54 POST /api/search/web basic",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SR-55 POST /api/search/web missing query (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "SR-56 POST /api/search/web markdown format",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SR-57 POST /api/search/web with limit=5",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SR-58 POST /api/search/web jina no-key",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SR-59 POST /api/search/web tavily no-key (401)",
+      "status": "PASS",
+      "detail": "401"
+    },
+    {
+      "test": "SE-60 POST /api/search/enhanced basic",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SE-61 POST /api/search/enhanced missing query (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "SE-62 POST /api/search/enhanced multi-source",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SE-63 GET /api/search/enhanced/stats",
+      "status": "FAIL",
+      "detail": "status=404",
+      "response": {
+        "success": false,
+        "error": {
+          "code": "SYS-002",
+          "message": "路由 GET /api/search/enhanced/stats 不存在"
+        },
+        "timestamp": "2026-04-13T17:10:03.434Z"
+      }
+    },
+    {
+      "test": "SE-64 POST /api/search/enhanced/test valid provider",
+      "status": "FAIL",
+      "detail": "status=404",
+      "response": {
+        "success": false,
+        "error": {
+          "code": "SYS-002",
+          "message": "路由 POST /api/search/enhanced/test 不存在"
+        },
+        "timestamp": "2026-04-13T17:10:03.438Z"
+      }
+    },
+    {
+      "test": "SE-65 POST /api/search/enhanced/test invalid provider",
+      "status": "FAIL",
+      "detail": "expected 400, got 404",
+      "response": {
+        "success": false,
+        "error": {
+          "code": "SYS-002",
+          "message": "路由 POST /api/search/enhanced/test 不存在"
+        },
+        "timestamp": "2026-04-13T17:10:03.441Z"
+      }
+    },
+    {
+      "test": "SE-66 POST /api/search/fetch basic",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "SE-67 POST /api/search/fetch missing url (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "SE-68 POST /api/search/fetch with query",
+      "status": "FAIL",
+      "detail": "status=0"
+    },
+    {
+      "test": "BR-69 GET /api/browser/status",
+      "status": "PASS",
+      "detail": "initialized=false, browser=undefined"
+    },
+    {
+      "test": "BR-70 POST /api/browser/init",
+      "status": "PASS",
+      "detail": "success=true"
+    },
+    {
+      "test": "BR-71 POST /api/browser/session",
+      "status": "PASS",
+      "detail": "success=true"
+    },
+    {
+      "test": "BR-72 POST /api/browser/session auto-ID",
+      "status": "PASS",
+      "detail": "200 OK"
+    },
+    {
+      "test": "BR-73 POST /api/browser/navigate missing params (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-74 POST /api/browser/screenshot missing sessionId (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-75 POST /api/browser/evaluate missing script (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-76 POST /api/browser/click missing selector (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-77 POST /api/browser/type missing params (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-78 POST /api/browser/content missing sessionId (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-79 POST /api/browser/extract missing selector (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-80 POST /api/browser/wait time",
+      "status": "PASS",
+      "detail": "success=true"
+    },
+    {
+      "test": "BR-81 POST /api/browser/scroll missing sessionId (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-82 POST /api/browser/element missing selector (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "BR-83 POST /api/browser/close missing sessionId (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "TK-84 GET /api/tasks/stats",
+      "status": "FAIL",
+      "detail": "status=404",
+      "response": {
+        "error": {
+          "message": "Task not found",
+          "type": "not_found"
+        }
+      }
+    },
+    {
+      "test": "TK-85 POST /api/tasks/ basic",
+      "status": "PASS",
+      "detail": "taskId=task_1776100224796_ojthk6gt7"
+    },
+    {
+      "test": "TK-86 POST /api/tasks/ with priority",
+      "status": "FAIL",
+      "detail": "status=500",
+      "response": {
+        "error": {
+          "message": "Cannot read properties of undefined (reading 'push')",
+          "type": "server_error"
+        }
+      }
+    },
+    {
+      "test": "TK-87 POST /api/tasks/ missing type (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "TK-88 POST /api/tasks/ missing payload (400)",
+      "status": "PASS",
+      "detail": "400"
+    },
+    {
+      "test": "TK-89 POST /api/tasks/ with waitResult",
+      "status": "PASS",
+      "detail": "status=200"
+    },
+    {
+      "test": "TK-90 GET /api/tasks/:id non-existent (404)",
+      "status": "PASS",
+      "detail": "404"
+    },
+    {
+      "test": "TK-91 DELETE /api/tasks/:id non-existent",
+      "status": "PASS",
+      "detail": "status=200"
+    },
+    {
+      "test": "TK-92 POST /api/tasks/cleanup",
+      "status": "PASS",
+      "detail": "success=true"
+    },
+    {
+      "test": "TK-93 POST /api/tasks/handlers/:taskType",
+      "status": "PASS",
+      "detail": "message=Handler registered for custom_handler"
+    }
+  ]
+}

@@ -52,7 +52,7 @@ export default function MiniMaxAgent() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081';
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,7 +75,7 @@ export default function MiniMaxAgent() {
         body: JSON.stringify({
           apiKey: apiConfig.apiKey,
           baseURL: apiConfig.baseURL || 'https://api.minimaxi.com/anthropic',
-          model: apiConfig.model || 'MiniMax-M2.7-highspeed',
+          model: apiConfig.model || 'MiniMax-M2.7',
           reasoningSplit: apiConfig.reasoningSplit !== false,
           thinkingBudget: apiConfig.thinkingBudget || 8000,
           showThinking: apiConfig.showThinking || false

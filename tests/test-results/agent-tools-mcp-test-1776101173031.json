@@ -1,0 +1,3048 @@
+{
+  "timestamp": "2026-04-13T17:26:13.032Z",
+  "summary": {
+    "total": 93,
+    "passed": 93,
+    "failed": 0,
+    "rate": "100.0%"
+  },
+  "results": [
+    {
+      "id": "01",
+      "name": "POST /enhanced-agent/execute - 创建会话并执行简单任务",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "result": {
+          "success": true,
+          "finalResult": "我理解了您的任务：Hello, reply with \"hi\" only。请告诉我更多细节以便更好地帮助您。",
+          "iterations": 1,
+          "toolCalls": [],
+          "checkpoints": [],
+          "humanConfirmations": [],
+          "error": null
+        }
+      }
+    },
+    {
+      "id": "02",
+      "name": "GET /enhanced-agent/sessions - 列出所有会话",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "sessions": [
+          {
+            "id": "session_1776100933683",
+            "createdAt": 1776100933683,
+            "lastAccess": 1776100933683,
+            "status": "completed"
+          },
+          {
+            "id": "session_1776100933693",
+            "createdAt": 1776100933693,
+            "lastAccess": 1776100933693,
+            "status": "completed"
+          },
+          {
+            "id": "session_1776101034458",
+            "createdAt": 1776101034458,
+            "lastAccess": 1776101034458,
+            "status": "completed"
+          },
+          {
+            "id": "session_1776101034468",
+            "createdAt": 1776101034468,
+            "lastAccess": 1776101034468,
+            "status": "completed"
+          },
+          {
+            "id": "session_1776101165397",
+            "createdAt": 1776101165397,
+            "lastAccess": 1776101165397,
+            "status": "completed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "03",
+      "name": "POST /enhanced-agent/execute - 空 task 应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Task is required"
+      }
+    },
+    {
+      "id": "04",
+      "name": "POST /enhanced-agent/execute - 缺少 task 应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Task is required"
+      }
+    },
+    {
+      "id": "05",
+      "name": "POST /enhanced-agent/execute - 带 context 参数",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "result": {
+          "success": true,
+          "finalResult": "我理解了您的任务：What is 2+2?。请告诉我更多细节以便更好地帮助您。",
+          "iterations": 1,
+          "toolCalls": [],
+          "checkpoints": [],
+          "humanConfirmations": [],
+          "error": null
+        }
+      }
+    },
+    {
+      "id": "06",
+      "name": "POST /enhanced-agent/pause/:sessionId - 不存在的会话应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Session not found"
+      }
+    },
+    {
+      "id": "07",
+      "name": "GET /enhanced-agent/status/nonexistent - 不存在的会话应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Session not found"
+      }
+    },
+    {
+      "id": "08",
+      "name": "POST /enhanced-agent/resume/nonexistent - 恢复不存在的会话应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Session not found"
+      }
+    },
+    {
+      "id": "09",
+      "name": "GET /enhanced-agent/persistence/sessions - 列出持久化会话",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "sessions": []
+      }
+    },
+    {
+      "id": "10",
+      "name": "GET /enhanced-agent/persistence/recoverable - 获取可恢复会话",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "recoverableSessions": []
+      }
+    },
+    {
+      "id": "11",
+      "name": "POST /enhanced-agent/persistence/cleanup - 清理过期会话",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "cleanedCount": 0,
+        "message": "Cleaned 0 expired sessions"
+      }
+    },
+    {
+      "id": "12",
+      "name": "POST /minimax-agent/session - 创建 MiniMax 会话",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "sessionId": "agent_1776101165419_wzjromkgi",
+        "tools": [
+          {
+            "name": "file_read",
+            "description": "读取文件内容"
+          },
+          {
+            "name": "file_write",
+            "description": "写入内容到文件"
+          },
+          {
+            "name": "file_list",
+            "description": "列出目录中的文件"
+          },
+          {
+            "name": "shell",
+            "description": "执行 Shell 命令"
+          },
+          {
+            "name": "web_search",
+            "description": "搜索网络信息"
+          }
+        ]
+      }
+    },
+    {
+      "id": "13",
+      "name": "GET /minimax-agent/tools - 列出可用工具",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "tools": [
+          {
+            "name": "file_read",
+            "description": "读取文件内容",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "lines": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          {
+            "name": "file_write",
+            "description": "写入内容到文件",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "append": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ]
+            }
+          },
+          {
+            "name": "file_list",
+            "description": "列出目录中的文件",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "recursive": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          {
+            "name": "shell",
+            "description": "执行 Shell 命令",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "type": "string"
+                },
+                "timeout": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "command"
+              ]
+            }
+          },
+          {
+            "name": "web_search",
+            "description": "搜索网络信息",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "max_results": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "query"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "14",
+      "name": "GET /minimax-agent/session/:sessionId - 获取会话状态",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "sessionId": "agent_1776101165419_wzjromkgi",
+        "createdAt": 1776101165419,
+        "lastActivity": 1776101165419,
+        "stats": {
+          "totalTokens": 0,
+          "thinkingTokens": 0,
+          "completionTokens": 0,
+          "apiCalls": 0,
+          "messageCount": 0,
+          "estimatedTokens": 0
+        }
+      }
+    },
+    {
+      "id": "15",
+      "name": "DELETE /minimax-agent/session/:sessionId - 删除会话",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "message": "会话已关闭"
+      }
+    },
+    {
+      "id": "16",
+      "name": "GET /minimax-agent/session/nonexistent - 不存在会话应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "会话不存在"
+      }
+    },
+    {
+      "id": "17",
+      "name": "GET /multiagent/health - 健康检查",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "status": "ok",
+        "service": "multiagent",
+        "crews": 0,
+        "engines": 0,
+        "enhancedEngines": 2,
+        "timestamp": "2026-04-13T17:26:05.423Z"
+      }
+    },
+    {
+      "id": "18",
+      "name": "GET /multiagent/templates - 获取模板列表",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "agentTemplates": {
+          "researcher": {
+            "role": "Research Analyst",
+            "goal": "Research and gather information on the given topic",
+            "backstory": "You are a veteran researcher with keen eye for detail and emerging trends."
+          },
+          "writer": {
+            "role": "Content Writer",
+            "goal": "Create engaging content based on research",
+            "backstory": "You are an experienced writer known for clear and compelling prose."
+          },
+          "editor": {
+            "role": "Editor",
+            "goal": "Review and refine content for publication",
+            "backstory": "You are a meticulous editor with years of publishing experience."
+          },
+          "coder": {
+            "role": "Software Developer",
+            "goal": "Write clean, efficient code",
+            "backstory": "You are a skilled developer focused on best practices and maintainability."
+          },
+          "reviewer": {
+            "role": "Code Reviewer",
+            "goal": "Review code for bugs and improvements",
+            "backstory": "You are a senior developer focused on code quality and security."
+          }
+        },
+        "taskTemplates": {
+          "research": {
+            "expectedOutput": "Comprehensive research report with key findings"
+          },
+          "write": {
+            "expectedOutput": "Polished article or content piece"
+          },
+          "review": {
+            "expectedOutput": "Detailed review with actionable feedback"
+          },
+          "code": {
+            "expectedOutput": "Working code implementation"
+          }
+        }
+      }
+    },
+    {
+      "id": "19",
+      "name": "GET /multiagent/agent-templates - 获取 Agent 模板",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "templates": {
+          "researcher": {
+            "role": "Research Analyst",
+            "goal": "Research and gather information on the given topic",
+            "backstory": "You are a veteran researcher with keen eye for detail and emerging trends."
+          },
+          "writer": {
+            "role": "Content Writer",
+            "goal": "Create engaging content based on research",
+            "backstory": "You are an experienced writer known for clear and compelling prose."
+          },
+          "editor": {
+            "role": "Editor",
+            "goal": "Review and refine content for publication",
+            "backstory": "You are a meticulous editor with years of publishing experience."
+          },
+          "coder": {
+            "role": "Software Developer",
+            "goal": "Write clean, efficient code",
+            "backstory": "You are a skilled developer focused on best practices and maintainability."
+          },
+          "reviewer": {
+            "role": "Code Reviewer",
+            "goal": "Review code for bugs and improvements",
+            "backstory": "You are a senior developer focused on code quality and security."
+          }
+        }
+      }
+    },
+    {
+      "id": "20",
+      "name": "POST /multiagent/agent - 创建 Agent",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "agent": {
+          "id": "agent_1776101165426",
+          "role": "test-agent",
+          "goal": "testing role and goal",
+          "backstory": "",
+          "tools": []
+        }
+      }
+    },
+    {
+      "id": "21",
+      "name": "POST /multiagent/task - 创建 Task",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "task": {
+          "id": "task_1776101165427",
+          "description": "test task description",
+          "expectedOutput": "test output"
+        }
+      }
+    },
+    {
+      "id": "22",
+      "name": "POST /multiagent/crew - 创建 Crew",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "crew": {
+          "id": "crew_test-crew_1776101165428",
+          "agentCount": 0,
+          "taskCount": 0,
+          "process": "sequential",
+          "completedTasks": 0
+        }
+      }
+    },
+    {
+      "id": "23",
+      "name": "GET /multiagent/crews - 列出所有 Crew",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "crews": [
+          {
+            "id": "crew_test-crew_1776101165428",
+            "agentCount": 0,
+            "taskCount": 0,
+            "process": "sequential",
+            "completedTasks": 0
+          }
+        ],
+        "count": 1
+      }
+    },
+    {
+      "id": "24",
+      "name": "GET /multiagent/crew/:id - 获取 Crew 状态",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "crew": {
+          "id": "crew_test-crew_1776101165428",
+          "agentCount": 0,
+          "taskCount": 0,
+          "process": "sequential",
+          "completedTasks": 0
+        }
+      }
+    },
+    {
+      "id": "25",
+      "name": "POST /multiagent/crew/:crewId/execute - 执行 Crew",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "result": {
+          "crewId": "crew_test-crew_1776101165428",
+          "results": [],
+          "taskCount": 0,
+          "agentCount": 0
+        }
+      }
+    },
+    {
+      "id": "26",
+      "name": "DELETE /multiagent/crew/:id - 删除 Crew",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "message": "Crew deleted"
+      }
+    },
+    {
+      "id": "27",
+      "name": "POST /multiagent/engine - 创建增强引擎",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "engine": {
+          "sessionId": "engine-test-1776101165431",
+          "state": {
+            "status": "idle",
+            "iteration": 0,
+            "tools": [],
+            "history": [],
+            "currentCheckpoint": null,
+            "humanLoopRequired": false,
+            "sessionId": "engine-test-1776101165431",
+            "memory": {
+              "shortTerm": {
+                "count": 0,
+                "max": 50
+              },
+              "longTerm": {
+                "count": 0,
+                "max": 1000
+              }
+            },
+            "checkpoints": 0,
+            "pendingConfirmations": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "28",
+      "name": "GET /multiagent/engine/:sessionId - 获取引擎状态",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "state": {
+          "status": "idle",
+          "iteration": 0,
+          "tools": [],
+          "history": [],
+          "currentCheckpoint": null,
+          "humanLoopRequired": false,
+          "sessionId": "engine-test-1776101165431",
+          "memory": {
+            "shortTerm": {
+              "count": 0,
+              "max": 50
+            },
+            "longTerm": {
+              "count": 0,
+              "max": 1000
+            }
+          },
+          "checkpoints": 0,
+          "pendingConfirmations": 0
+        }
+      }
+    },
+    {
+      "id": "29",
+      "name": "POST /multiagent/engine/:sessionId/execute - 执行引擎任务",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "result": {
+          "success": true,
+          "finalResult": "我理解了您的任务：test task。请告诉我更多细节以便更好地帮助您。",
+          "iterations": 1,
+          "toolCalls": [],
+          "checkpoints": [],
+          "humanConfirmations": [],
+          "error": null
+        }
+      }
+    },
+    {
+      "id": "30",
+      "name": "GET /multiagent/engine/:sessionId/memory - 获取记忆统计",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "memory": {
+          "shortTerm": {
+            "count": 1,
+            "max": 50
+          },
+          "longTerm": {
+            "count": 1,
+            "max": 1000
+          }
+        }
+      }
+    },
+    {
+      "id": "31",
+      "name": "POST /multiagent/engine/:sessionId/memory/search - 搜索记忆",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "results": [
+          {
+            "type": "task",
+            "role": "user",
+            "content": "test task",
+            "id": "stm_1776101165434",
+            "timestamp": 1776101165434,
+            "score": 0.8728715609439697,
+            "source": "short_term"
+          },
+          {
+            "type": "result",
+            "content": "我理解了您的任务：test task。请告诉我更多细节以便更好地帮助您。",
+            "importance": "high",
+            "id": "ltm_1776101165434",
+            "timestamp": 1776101165434,
+            "accessCount": 0,
+            "score": 0.44038550605054433,
+            "source": "long_term"
+          }
+        ]
+      }
+    },
+    {
+      "id": "32",
+      "name": "POST /multiagent/engine/:sessionId/pause - 暂停引擎",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "message": "Engine paused"
+      }
+    },
+    {
+      "id": "33",
+      "name": "POST /multiagent/engine/:sessionId/resume - 恢复引擎",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "message": "Engine resumed"
+      }
+    },
+    {
+      "id": "34",
+      "name": "POST /multiagent/engine/:sessionId/checkpoint - 创建检查点",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "checkpointId": "cp_1776101165439",
+        "message": "Checkpoint created successfully"
+      }
+    },
+    {
+      "id": "35",
+      "name": "GET /multiagent/engine/:sessionId/checkpoints - 列出检查点",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "checkpoints": [
+          {
+            "id": "cp_1776101165437",
+            "sessionId": "engine-test-1776101165431",
+            "state": {
+              "status": "paused",
+              "iteration": 1,
+              "tools": [],
+              "history": [],
+              "currentCheckpoint": null,
+              "humanLoopRequired": false
+            },
+            "timestamp": 1776101165437,
+            "status": "paused"
+          },
+          {
+            "id": "cp_1776101165439",
+            "sessionId": "engine-test-1776101165431",
+            "state": {
+              "status": "running",
+              "iteration": 1,
+              "tools": [],
+              "history": [],
+              "currentCheckpoint": null,
+              "humanLoopRequired": false,
+              "sessionId": "engine-test-1776101165431",
+              "memory": {
+                "shortTerm": {
+                  "count": 1,
+                  "max": 50
+                },
+                "longTerm": {
+                  "count": 1,
+                  "max": 1000
+                }
+              },
+              "checkpoints": 1,
+              "pendingConfirmations": 0
+            },
+            "timestamp": 1776101165439,
+            "status": "running"
+          }
+        ]
+      }
+    },
+    {
+      "id": "36",
+      "name": "GET /multiagent/recovery/handlers - 获取恢复处理器",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "handlers": [
+          "TOOL_EXECUTION_FAILED",
+          "EXECUTION_TIMEOUT",
+          "LLM_RATE_LIMIT"
+        ]
+      }
+    },
+    {
+      "id": "37",
+      "name": "GET /multiagent/tools - 获取可用工具",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "tools": [
+          {
+            "name": "file_operations",
+            "description": "执行文件操作：读取、写入、列出、删除文件",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "read",
+                    "write",
+                    "delete",
+                    "list",
+                    "exists",
+                    "mkdir"
+                  ],
+                  "description": "操作类型"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "文件路径"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "写入内容（write操作需要）"
+                },
+                "options": {
+                  "type": "object",
+                  "description": "额外选项"
+                }
+              },
+              "required": [
+                "operation",
+                "path"
+              ]
+            },
+            "category": "filesystem",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "shell",
+            "description": "执行Shell命令（注意：生产环境需谨慎使用）",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "command": {
+                  "type": "string",
+                  "description": "要执行的命令"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "cwd": {
+                      "type": "string",
+                      "description": "工作目录"
+                    },
+                    "env": {
+                      "type": "object",
+                      "description": "环境变量"
+                    },
+                    "timeout": {
+                      "type": "number",
+                      "description": "超时时间(ms)"
+                    },
+                    "shell": {
+                      "type": "boolean",
+                      "description": "是否使用shell"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "command"
+              ]
+            },
+            "category": "system",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "web_search",
+            "description": "搜索网络信息",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "搜索查询词"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "maxResults": {
+                      "type": "number",
+                      "description": "最大结果数"
+                    },
+                    "language": {
+                      "type": "string",
+                      "description": "语言代码 (zh, en等)"
+                    },
+                    "timeRange": {
+                      "type": "string",
+                      "enum": [
+                        "day",
+                        "week",
+                        "month",
+                        "year",
+                        "all"
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "query"
+              ]
+            },
+            "category": "internet",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "http_request",
+            "description": "发送 HTTP 请求获取网络资源",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "请求 URL"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "DELETE",
+                    "PATCH",
+                    "HEAD"
+                  ],
+                  "description": "HTTP 方法"
+                },
+                "headers": {
+                  "type": "object",
+                  "description": "请求头"
+                },
+                "body": {
+                  "type": "string",
+                  "description": "请求体"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "timeout": {
+                      "type": "number",
+                      "description": "超时时间(ms)"
+                    },
+                    "followRedirects": {
+                      "type": "boolean",
+                      "description": "是否跟随重定向"
+                    },
+                    "responseType": {
+                      "type": "string",
+                      "enum": [
+                        "json",
+                        "text",
+                        "binary"
+                      ],
+                      "description": "响应类型"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "category": "internet",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "data_processing",
+            "description": "处理和转换数据格式：JSON、CSV、文本处理",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "json_parse",
+                    "json_stringify",
+                    "json_query",
+                    "csv_parse",
+                    "csv_stringify",
+                    "text_split",
+                    "text_join",
+                    "text_replace",
+                    "text_extract",
+                    "data_filter",
+                    "data_map",
+                    "data_sort",
+                    "data_group",
+                    "base64_encode",
+                    "base64_decode",
+                    "hash"
+                  ],
+                  "description": "操作类型"
+                },
+                "data": {
+                  "type": "string",
+                  "description": "输入数据"
+                },
+                "options": {
+                  "type": "object",
+                  "description": "操作选项"
+                }
+              },
+              "required": [
+                "operation",
+                "data"
+              ]
+            },
+            "category": "data",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "calculator",
+            "description": "执行数学计算、表达式求值",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "expression": {
+                  "type": "string",
+                  "description": "数学表达式"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "precision": {
+                      "type": "number",
+                      "description": "小数精度"
+                    },
+                    "angleMode": {
+                      "type": "string",
+                      "enum": [
+                        "deg",
+                        "rad"
+                      ],
+                      "description": "角度模式"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "expression"
+              ]
+            },
+            "category": "compute",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "datetime",
+            "description": "处理日期时间：获取、格式化、计算、转换",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "now",
+                    "format",
+                    "parse",
+                    "add",
+                    "subtract",
+                    "diff",
+                    "start_of",
+                    "end_of",
+                    "is_before",
+                    "is_after",
+                    "to_timezone",
+                    "to_timestamp",
+                    "from_timestamp"
+                  ],
+                  "description": "操作类型"
+                },
+                "datetime": {
+                  "type": "string",
+                  "description": "日期时间字符串（某些操作需要）"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "type": "string",
+                      "description": "格式化模式"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "enum": [
+                        "year",
+                        "month",
+                        "week",
+                        "day",
+                        "hour",
+                        "minute",
+                        "second"
+                      ],
+                      "description": "时间单位"
+                    },
+                    "value": {
+                      "type": "number",
+                      "description": "数值（加减操作）"
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "description": "时区"
+                    },
+                    "targetTimezone": {
+                      "type": "string",
+                      "description": "目标时区"
+                    },
+                    "targetDatetime": {
+                      "type": "string",
+                      "description": "目标日期时间（比较操作）"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "operation"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "web_scraper",
+            "description": "抓取网页内容并提取文本信息",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "要抓取的网页URL"
+                },
+                "selector": {
+                  "type": "string",
+                  "description": "CSS选择器，用于提取特定元素（可选）"
+                },
+                "extract": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "html",
+                    "links",
+                    "images",
+                    "metadata"
+                  ],
+                  "description": "提取类型"
+                },
+                "timeout": {
+                  "type": "number",
+                  "description": "超时时间(ms)"
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "category": "web",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "code_execution",
+            "description": "执行 JavaScript 代码并返回结果",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "description": "要执行的 JavaScript 代码"
+                },
+                "language": {
+                  "type": "string",
+                  "enum": [
+                    "javascript",
+                    "js"
+                  ],
+                  "description": "编程语言（目前仅支持 JavaScript）"
+                },
+                "context": {
+                  "type": "object",
+                  "description": "执行上下文变量"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "timeout": {
+                      "type": "number",
+                      "description": "超时时间(ms)"
+                    },
+                    "silent": {
+                      "type": "boolean",
+                      "description": "是否静默模式"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "code"
+              ]
+            },
+            "category": "compute",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "github",
+            "description": "与 GitHub 交互 - 搜索项目、获取仓库信息、文件内容等",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "search_repos",
+                    "repo_info",
+                    "repo_content",
+                    "user_info",
+                    "trending",
+                    "issues",
+                    "commits"
+                  ],
+                  "description": "操作类型"
+                },
+                "query": {
+                  "type": "string",
+                  "description": "搜索查询 (search_repos 时使用)"
+                },
+                "owner": {
+                  "type": "string",
+                  "description": "仓库所有者 (repo_info, repo_content 时使用)"
+                },
+                "repo": {
+                  "type": "string",
+                  "description": "仓库名称 (repo_info, repo_content 时使用)"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "文件路径 (repo_content 时使用)"
+                },
+                "user": {
+                  "type": "string",
+                  "description": "用户名 (user_info 时使用)"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "编程语言筛选 (search_repos 时使用)"
+                },
+                "limit": {
+                  "type": "number",
+                  "description": "结果数量限制 (默认 10)"
+                },
+                "options": {
+                  "type": "object",
+                  "description": "额外选项"
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "category": "internet",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "weather",
+            "description": "查询天气预报 - 支持城市名称或位置",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "description": "城市名称 (如：北京、上海、Beijing)"
+                },
+                "location": {
+                  "type": "string",
+                  "description": "位置/地址 (如：北京市朝阳区)"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "type": "string",
+                      "enum": [
+                        "json",
+                        "text"
+                      ],
+                      "default": "json"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "city"
+              ]
+            },
+            "category": "information",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "translation",
+            "description": "翻译工具 - 支持多种语言互译",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "description": "要翻译的文本"
+                },
+                "from": {
+                  "type": "string",
+                  "description": "源语言 (如: zh, en, auto)",
+                  "default": "auto"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "目标语言 (如: en, zh, ja)"
+                }
+              },
+              "required": [
+                "text",
+                "to"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "code_review",
+            "description": "代码审查 - 检查代码质量、安全漏洞、最佳实践",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "description": "要审查的代码"
+                },
+                "language": {
+                  "type": "string",
+                  "description": "编程语言 (javascript, python, java, go, rust, cpp, c, typescript)"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "checkSecurity": {
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "checkBestPractices": {
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "checkPerformance": {
+                      "type": "boolean",
+                      "default": true
+                    }
+                  }
+                }
+              },
+              "required": [
+                "code",
+                "language"
+              ]
+            },
+            "category": "developer",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "image_generation",
+            "description": "图片生成 - 使用AI生成图片，支持中文描述",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "description": "图片生成描述，支持中文"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "type": "string",
+                      "enum": [
+                        "1024x1024",
+                        "1536x1024",
+                        "1024x1536"
+                      ],
+                      "default": "1024x1024"
+                    },
+                    "quality": {
+                      "type": "string",
+                      "enum": [
+                        "standard",
+                        "high"
+                      ],
+                      "default": "standard"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "prompt"
+              ]
+            },
+            "category": "multimodal",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "qrcode",
+            "description": "二维码生成 - 生成URL、文本、WiFi等二维码",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "description": "二维码内容 (URL、文本等)"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "url",
+                    "text",
+                    "wifi",
+                    "vcard",
+                    "email"
+                  ],
+                  "default": "text",
+                  "description": "二维码类型"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "size": {
+                      "type": "number",
+                      "default": 300,
+                      "description": "二维码大小(px)"
+                    },
+                    "margin": {
+                      "type": "number",
+                      "default": 4,
+                      "description": "白色边距模块数"
+                    },
+                    "errorCorrectionLevel": {
+                      "type": "string",
+                      "enum": [
+                        "L",
+                        "M",
+                        "Q",
+                        "H"
+                      ],
+                      "default": "M",
+                      "description": "纠错级别"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "content"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "currency_converter",
+            "description": "货币转换 - 法定货币和加密货币实时转换",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "description": "要转换的金额"
+                },
+                "from": {
+                  "type": "string",
+                  "description": "源货币代码 (如: USD, CNY, BTC)"
+                },
+                "to": {
+                  "type": "string",
+                  "description": "目标货币代码 (如: USD, CNY, ETH)"
+                }
+              },
+              "required": [
+                "amount",
+                "from",
+                "to"
+              ]
+            },
+            "category": "finance",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "url_shortener",
+            "description": "URL缩短 - 将长URL转换为短链接",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "description": "要缩短的长URL"
+                },
+                "service": {
+                  "type": "string",
+                  "enum": [
+                    "tinyurl",
+                    "isgd",
+                    "clcku"
+                  ],
+                  "default": "tinyurl",
+                  "description": "URL缩短服务"
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "timezone_converter",
+            "description": "时区转换 - 全球时区之间的时间转换",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "time": {
+                  "type": "string",
+                  "description": "时间 (格式: YYYY-MM-DD HH:mm 或 HH:mm，默认为当前时间)"
+                },
+                "fromTimezone": {
+                  "type": "string",
+                  "description": "源时区 (如: 北京, UTC, America/New_York)"
+                },
+                "toTimezone": {
+                  "type": "string",
+                  "description": "目标时区 (如: 伦敦, Tokyo)"
+                }
+              },
+              "required": [
+                "fromTimezone",
+                "toTimezone"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "text_summary",
+            "description": "文本摘要 - 对长文本进行自动摘要，支持关键信息提取",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "description": "要摘要的文本"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "maxLength": {
+                      "type": "number",
+                      "default": 200,
+                      "description": "摘要最大长度（字符）"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "extractive",
+                        "abstractive"
+                      ],
+                      "default": "extractive",
+                      "description": "摘要类型"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "text"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "error_tracking",
+            "description": "错误跟踪 - 报告和查询错误，支持Sentry集成",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "report",
+                    "query",
+                    "list"
+                  ],
+                  "description": "操作类型"
+                },
+                "error": {
+                  "type": "object",
+                  "description": "错误对象 {message, stack, level}"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "project": {
+                      "type": "string",
+                      "description": "项目名称"
+                    },
+                    "level": {
+                      "type": "string",
+                      "enum": [
+                        "error",
+                        "warning",
+                        "info"
+                      ],
+                      "default": "error"
+                    },
+                    "query": {
+                      "type": "string",
+                      "description": "查询条件"
+                    },
+                    "limit": {
+                      "type": "number",
+                      "default": 10,
+                      "description": "返回数量"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "category": "developer",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "note",
+            "description": "笔记 - 创建和管理个人笔记，支持分类和搜索",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "create",
+                    "get",
+                    "search",
+                    "list",
+                    "delete",
+                    "update"
+                  ],
+                  "description": "操作类型"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "笔记ID"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "笔记标题"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "笔记内容"
+                },
+                "category": {
+                  "type": "string",
+                  "description": "笔记分类: general, work, idea, todo, meeting, study"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "标签列表"
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "prompt_template",
+            "description": "提示词模板 - 管理和使用提示词模板，支持变量替换",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "render",
+                    "list",
+                    "create",
+                    "get"
+                  ],
+                  "description": "操作类型"
+                },
+                "template": {
+                  "type": "string",
+                  "description": "模板名称或模板内容"
+                },
+                "variables": {
+                  "type": "object",
+                  "description": "模板变量 {variableName: value}"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "模板名称"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "模板描述"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "category": "developer",
+            "keywords": [],
+            "examples": []
+          },
+          {
+            "name": "meeting",
+            "description": "日程管理 - 创建会议、设置提醒、时间规划",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "create",
+                    "get",
+                    "list",
+                    "delete",
+                    "remind",
+                    "today",
+                    "conflict"
+                  ],
+                  "description": "操作类型"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "日程ID"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "日程标题"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "日程描述"
+                },
+                "startTime": {
+                  "type": "string",
+                  "description": "开始时间 (ISO 8601格式)"
+                },
+                "endTime": {
+                  "type": "string",
+                  "description": "结束时间 (ISO 8601格式)"
+                },
+                "attendees": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "参与者邮箱"
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "reminder": {
+                      "type": "number",
+                      "description": "提前提醒分钟数"
+                    },
+                    "location": {
+                      "type": "string",
+                      "description": "地点"
+                    }
+                  }
+                }
+              },
+              "required": [
+                "action"
+              ]
+            },
+            "category": "utility",
+            "keywords": [],
+            "examples": []
+          }
+        ],
+        "count": 23
+      }
+    },
+    {
+      "id": "38",
+      "name": "POST /multiagent/tools/execute - 工具不存在时返回优雅错误",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "result": {
+          "success": false,
+          "tool": "nonexistent-tool-xyz",
+          "error": "Tool not found: nonexistent-tool-xyz"
+        }
+      }
+    },
+    {
+      "id": "39",
+      "name": "GET /api/admin/tools - 列出所有工具",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "tools": [],
+          "total": 0,
+          "categories": []
+        }
+      }
+    },
+    {
+      "id": "40",
+      "name": "GET /api/admin/tools/stats - 获取工具统计",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "summary": {
+            "total": 0,
+            "byCategory": {}
+          },
+          "tools": {}
+        }
+      }
+    },
+    {
+      "id": "41",
+      "name": "GET /api/admin/tools?category=web - 按分类过滤",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "tools": [],
+          "total": 0,
+          "categories": []
+        }
+      }
+    },
+    {
+      "id": "42",
+      "name": "GET /api/admin/tools?keyword=search - 按关键词搜索",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "tools": [],
+          "total": 0,
+          "categories": []
+        }
+      }
+    },
+    {
+      "id": "43",
+      "name": "GET /api/admin/tools/categories - 获取分类列表",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "categories": []
+        }
+      }
+    },
+    {
+      "id": "44",
+      "name": "GET /api/admin/tools/categories/list - 按分类获取工具",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "categories": [],
+          "byCategory": {}
+        }
+      }
+    },
+    {
+      "id": "45",
+      "name": "POST /api/admin/tools/recommend - 工具推荐(query)",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "query": "search the web",
+          "recommendations": []
+        }
+      }
+    },
+    {
+      "id": "46",
+      "name": "POST /api/admin/tools/recommend - 工具推荐(intent)",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "data": {
+          "intent": "search",
+          "recommendations": []
+        }
+      }
+    },
+    {
+      "id": "47",
+      "name": "GET /api/admin/tools/nonexistent-tool-xyz - 获取不存在的工具应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "工具 nonexistent-tool-xyz 不存在"
+      }
+    },
+    {
+      "id": "48",
+      "name": "POST /api/admin/tools/register - 缺少名称应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "工具名称不能为空"
+      }
+    },
+    {
+      "id": "49",
+      "name": "PUT /api/admin/tools/nonexistent - 更新不存在的工具应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "工具 nonexistent-tool-xyz 不存在"
+      }
+    },
+    {
+      "id": "50",
+      "name": "PATCH /api/admin/tools/nonexistent - 禁用不存在的工具应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "工具 nonexistent-tool-xyz 不存在"
+      }
+    },
+    {
+      "id": "51",
+      "name": "DELETE /api/admin/tools/nonexistent - 删除不存在的工具应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "工具 nonexistent-tool-xyz 不存在"
+      }
+    },
+    {
+      "id": "52",
+      "name": "POST /api/admin/tools/nonexistent/test - 测试不存在的工具应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "工具 nonexistent-tool-xyz 不存在"
+      }
+    },
+    {
+      "id": "53",
+      "name": "GET /api/mcp/status - 获取 MCP 状态",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "connectedServers": [],
+        "toolsCount": 5,
+        "tools": [
+          {
+            "name": "filesystem_read_file",
+            "description": "读取文件内容",
+            "category": "filesystem",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "文件路径"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          {
+            "name": "filesystem_write_file",
+            "description": "写入文件内容",
+            "category": "filesystem",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "文件路径"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "文件内容"
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ]
+            }
+          },
+          {
+            "name": "filesystem_list_directory",
+            "description": "列出目录内容",
+            "category": "filesystem",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "目录路径"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          {
+            "name": "websearch_search",
+            "description": "搜索网络",
+            "category": "websearch",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "搜索关键词"
+                },
+                "limit": {
+                  "type": "number",
+                  "description": "返回结果数量",
+                  "default": 5
+                }
+              },
+              "required": [
+                "query"
+              ]
+            }
+          },
+          {
+            "name": "calculator_calculate",
+            "description": "执行数学计算",
+            "category": "calculator",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "expression": {
+                  "type": "string",
+                  "description": "数学表达式"
+                }
+              },
+              "required": [
+                "expression"
+              ]
+            }
+          }
+        ],
+        "builtinTools": [
+          "filesystem",
+          "websearch",
+          "calculator"
+        ]
+      }
+    },
+    {
+      "id": "54",
+      "name": "GET /api/mcp/tools - 列出 MCP 工具",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "tools": [
+          {
+            "name": "filesystem_read_file",
+            "description": "读取文件内容",
+            "category": "filesystem",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "文件路径"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          {
+            "name": "filesystem_write_file",
+            "description": "写入文件内容",
+            "category": "filesystem",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "文件路径"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "文件内容"
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ]
+            }
+          },
+          {
+            "name": "filesystem_list_directory",
+            "description": "列出目录内容",
+            "category": "filesystem",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "目录路径"
+                }
+              },
+              "required": [
+                "path"
+              ]
+            }
+          },
+          {
+            "name": "websearch_search",
+            "description": "搜索网络",
+            "category": "websearch",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "搜索关键词"
+                },
+                "limit": {
+                  "type": "number",
+                  "description": "返回结果数量",
+                  "default": 5
+                }
+              },
+              "required": [
+                "query"
+              ]
+            }
+          },
+          {
+            "name": "calculator_calculate",
+            "description": "执行数学计算",
+            "category": "calculator",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "expression": {
+                  "type": "string",
+                  "description": "数学表达式"
+                }
+              },
+              "required": [
+                "expression"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "55",
+      "name": "GET /api/mcp/categories - 获取 MCP 工具分类",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "categories": [
+          {
+            "id": "filesystem",
+            "name": "filesystem",
+            "description": "读取和写入文件系统",
+            "toolsCount": 3
+          },
+          {
+            "id": "websearch",
+            "name": "websearch",
+            "description": "搜索网络信息",
+            "toolsCount": 1
+          },
+          {
+            "id": "calculator",
+            "name": "calculator",
+            "description": "数学计算",
+            "toolsCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "56",
+      "name": "POST /api/mcp/call - 缺少工具名称应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "缺少工具名称"
+      }
+    },
+    {
+      "id": "57",
+      "name": "POST /api/mcp/call - 工具不存在时返回优雅错误",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "result": {
+          "success": false,
+          "error": "工具 nonexistent-mcp-tool 不存在"
+        }
+      }
+    },
+    {
+      "id": "58",
+      "name": "POST /api/mcp/connect - 缺少参数应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "缺少服务器名称或命令"
+      }
+    },
+    {
+      "id": "59",
+      "name": "POST /api/mcp/disconnect - 缺少服务器名称应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "缺少服务器名称"
+      }
+    },
+    {
+      "id": "60",
+      "name": "GET /api/a2a/status - 获取 A2A 服务状态",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "onlineAgents": 0,
+        "totalAgents": 0,
+        "pendingTasks": 5,
+        "messageInboxSize": 5,
+        "processedMessages": 7
+      }
+    },
+    {
+      "id": "61",
+      "name": "GET /api/a2a/agents - 列出所有 Agent",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "agents": [],
+        "count": 0
+      }
+    },
+    {
+      "id": "62",
+      "name": "POST /api/a2a/agents/register - 注册 Agent",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "agent": {
+          "id": "test-agent-1776101165473",
+          "name": "Test Agent",
+          "type": "test",
+          "status": "online",
+          "metadata": {},
+          "registeredAt": 1776101165474,
+          "lastSeen": 1776101165474,
+          "capabilities": [
+            "chat"
+          ]
+        }
+      }
+    },
+    {
+      "id": "63",
+      "name": "GET /api/a2a/agents/:agentId - 获取 Agent 详情",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "agent": {
+          "id": "test-agent-1776101165473",
+          "name": "Test Agent",
+          "type": "test",
+          "status": "online",
+          "metadata": {},
+          "registeredAt": 1776101165474,
+          "lastSeen": 1776101165474,
+          "capabilities": [
+            "chat"
+          ]
+        }
+      }
+    },
+    {
+      "id": "64",
+      "name": "POST /api/a2a/agents/:agentId/heartbeat - Agent 心跳",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "timestamp": 1776101165476
+      }
+    },
+    {
+      "id": "65",
+      "name": "GET /api/a2a/agents/nonexistent - 获取不存在的 Agent 应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Agent not found"
+      }
+    },
+    {
+      "id": "66",
+      "name": "POST /api/a2a/send - 缺少 from/to 应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "from and to are required"
+      }
+    },
+    {
+      "id": "67",
+      "name": "POST /api/a2a/send - 发送消息",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "messageId": "msg_1776101165479_hxd9s3tul",
+        "message": {
+          "jsonrpc": "2.0",
+          "id": "msg_1776101165479_hxd9s3tul",
+          "type": "message.send",
+          "from": "test-agent-1776101165473",
+          "to": "test-agent-1776101165473",
+          "payload": {
+            "content": "test message"
+          },
+          "status": "pending",
+          "timestamp": 1776101165479,
+          "expiresAt": 1776102965479,
+          "replyTo": null,
+          "metadata": {}
+        }
+      }
+    },
+    {
+      "id": "68",
+      "name": "GET /api/a2a/receive - 接收消息",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "messages": [
+          {
+            "jsonrpc": "2.0",
+            "id": "msg_1776101165479_hxd9s3tul",
+            "type": "message.send",
+            "from": "test-agent-1776101165473",
+            "to": "test-agent-1776101165473",
+            "payload": {
+              "content": "test message"
+            },
+            "status": "pending",
+            "timestamp": 1776101165479,
+            "expiresAt": 1776102965479,
+            "replyTo": null,
+            "metadata": {}
+          }
+        ],
+        "count": 1,
+        "unreadCount": 1
+      }
+    },
+    {
+      "id": "69",
+      "name": "GET /api/a2a/poll - 轮询消息(短超时)",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "messages": [
+          {
+            "jsonrpc": "2.0",
+            "id": "msg_1776101165479_hxd9s3tul",
+            "type": "message.send",
+            "from": "test-agent-1776101165473",
+            "to": "test-agent-1776101165473",
+            "payload": {
+              "content": "test message"
+            },
+            "status": "pending",
+            "timestamp": 1776101165479,
+            "expiresAt": 1776102965479,
+            "replyTo": null,
+            "metadata": {}
+          }
+        ],
+        "count": 1,
+        "waited": 0,
+        "timeout": false
+      }
+    },
+    {
+      "id": "70",
+      "name": "GET /api/a2a/unread/:agentId - 获取未读消息数",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "unreadCount": 0
+      }
+    },
+    {
+      "id": "71",
+      "name": "GET /api/a2a/subscribe/:agentId - SSE 订阅连接测试",
+      "status": 200,
+      "ok": true,
+      "streaming": true,
+      "data": {
+        "event": "connected",
+        "received": "data: {\"event\":\"connected\",\"agentId\":\"test-agent-1776101165473\"}\n\n"
+      }
+    },
+    {
+      "id": "72",
+      "name": "GET /api/a2a/tasks - 列出任务",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "tasks": [
+          {
+            "id": "task_1776100935294_fqu6azay1",
+            "type": "task.delegate",
+            "title": "Untitled Task",
+            "description": "",
+            "from": "coordinator",
+            "to": null,
+            "input": {
+              "prompt": "",
+              "taskType": "general"
+            },
+            "output": null,
+            "status": "pending",
+            "progress": 0,
+            "result": null,
+            "error": null,
+            "createdAt": 1776100935294,
+            "startedAt": null,
+            "completedAt": null,
+            "subTasks": [],
+            "parentTaskId": null,
+            "metadata": {},
+            "tags": [],
+            "priority": 0
+          },
+          {
+            "id": "task_1776100938305_hsyakkoxg",
+            "type": "task.delegate",
+            "title": "Untitled Task",
+            "description": "",
+            "from": "coordinator",
+            "to": null,
+            "input": {
+              "prompt": "",
+              "taskType": "general"
+            },
+            "output": null,
+            "status": "pending",
+            "progress": 0,
+            "result": null,
+            "error": null,
+            "createdAt": 1776100938305,
+            "startedAt": null,
+            "completedAt": null,
+            "subTasks": [],
+            "parentTaskId": null,
+            "metadata": {},
+            "tags": [],
+            "priority": 0
+          },
+          {
+            "id": "task_1776101036069_ntw9sbpu1",
+            "type": "task.delegate",
+            "title": "Untitled Task",
+            "description": "",
+            "from": "coordinator",
+            "to": null,
+            "input": {
+              "prompt": "",
+              "taskType": "general"
+            },
+            "output": null,
+            "status": "pending",
+            "progress": 0,
+            "result": null,
+            "error": null,
+            "createdAt": 1776101036069,
+            "startedAt": null,
+            "completedAt": null,
+            "subTasks": [],
+            "parentTaskId": null,
+            "metadata": {},
+            "tags": [],
+            "priority": 0
+          },
+          {
+            "id": "task_1776101051088_hx5rw7bha",
+            "type": "task.delegate",
+            "title": "Untitled Task",
+            "description": "",
+            "from": "coordinator",
+            "to": null,
+            "input": {
+              "prompt": "",
+              "taskType": "general"
+            },
+            "output": null,
+            "status": "pending",
+            "progress": 0,
+            "result": null,
+            "error": null,
+            "createdAt": 1776101051088,
+            "startedAt": null,
+            "completedAt": null,
+            "subTasks": [],
+            "parentTaskId": null,
+            "metadata": {},
+            "tags": [],
+            "priority": 0
+          },
+          {
+            "id": "task_1776101077100_zbrxm4ze8",
+            "type": "task.delegate",
+            "title": "Untitled Task",
+            "description": "",
+            "from": "coordinator",
+            "to": null,
+            "input": {
+              "prompt": "",
+              "taskType": "general"
+            },
+            "output": null,
+            "status": "pending",
+            "progress": 0,
+            "result": null,
+            "error": null,
+            "createdAt": 1776101077100,
+            "startedAt": null,
+            "completedAt": null,
+            "subTasks": [],
+            "parentTaskId": null,
+            "metadata": {},
+            "tags": [],
+            "priority": 0
+          }
+        ],
+        "count": 5
+      }
+    },
+    {
+      "id": "73",
+      "name": "GET /api/a2a/tasks/nonexistent - 获取不存在的任务应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Task not found"
+      }
+    },
+    {
+      "id": "74",
+      "name": "GET /api/a2a/coordination/modes - 获取协调模式",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "modes": {
+          "TEAM_LEADER": {
+            "value": "team_leader",
+            "description": "One agent orchestrates others, typically the first task in each level",
+            "useCase": "Complex hierarchical tasks with clear delegation"
+          },
+          "COLLABORATIVE": {
+            "value": "collaborative",
+            "description": "Agents share responsibilities and coordinate as peers",
+            "useCase": "Tasks requiring parallel specialized work"
+          },
+          "AUTONOMOUS": {
+            "value": "autonomous",
+            "description": "Agents work independently with minimal coordination",
+            "useCase": "Independent parallel tasks with no dependencies"
+          }
+        }
+      }
+    },
+    {
+      "id": "75",
+      "name": "POST /api/a2a/tasks/define - 创建任务定义",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "task": {
+          "id": "3ff4a4b9-8558-43f7-ac00-919fc86cbbc6",
+          "agentName": "test-agent",
+          "taskType": "test",
+          "title": "Untitled Task",
+          "description": "",
+          "prompt": "",
+          "dependencies": [],
+          "effort": "medium",
+          "maxTurns": 50,
+          "timeout": 60000,
+          "successCriteria": null,
+          "coordinatorSession": null,
+          "additionalInstructions": null,
+          "priority": 0,
+          "status": "pending"
+        }
+      }
+    },
+    {
+      "id": "76",
+      "name": "POST /api/a2a/tasks/define - 缺少 task 字段应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": {
+          "type": "validation_error",
+          "message": "task/prompt/description is required"
+        }
+      }
+    },
+    {
+      "id": "77",
+      "name": "POST /api/a2a/tasks/define/batch - 批量创建任务",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "tasks": [
+          {
+            "id": "3ca41af4-96e3-4330-8c49-3fff19b0256f",
+            "agentName": "agent1",
+            "taskType": "general",
+            "title": "Untitled Task",
+            "description": "",
+            "prompt": "",
+            "dependencies": [],
+            "effort": "medium",
+            "maxTurns": 50,
+            "timeout": 60000,
+            "successCriteria": null,
+            "coordinatorSession": null,
+            "additionalInstructions": null,
+            "priority": 0,
+            "status": "pending"
+          },
+          {
+            "id": "891d3b1c-0b29-49b5-99ad-ddc9486a4d89",
+            "agentName": "agent2",
+            "taskType": "general",
+            "title": "Untitled Task",
+            "description": "",
+            "prompt": "",
+            "dependencies": [],
+            "effort": "medium",
+            "maxTurns": 50,
+            "timeout": 60000,
+            "successCriteria": null,
+            "coordinatorSession": null,
+            "additionalInstructions": null,
+            "priority": 0,
+            "status": "pending"
+          }
+        ],
+        "count": 2
+      }
+    },
+    {
+      "id": "78",
+      "name": "POST /api/a2a/tasks/define/batch - 空数组返回空结果（建议增加长度校验）",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "tasks": [],
+        "count": 0
+      }
+    },
+    {
+      "id": "79",
+      "name": "POST /api/a2a/collaborate - 协作任务(team_leader模式)",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "collaboration": {
+          "id": "2c8f2ddd-ea83-4cb3-8ed4-b38c7a627391",
+          "title": "Test Collaboration",
+          "status": "failed",
+          "summary": {
+            "totalTasks": 2,
+            "completed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "successRate": 0
+          },
+          "results": [
+            {
+              "taskId": "2c8f2ddd-ea83-4cb3-8ed4-b38c7a627391-1",
+              "taskType": "general",
+              "agentId": null,
+              "status": "failed",
+              "result": null,
+              "error": "Task task_1776101167007_m22h0guq6 timeout after 3000ms",
+              "duration": 3003,
+              "validation": null,
+              "metadata": {}
+            }
+          ],
+          "dependencyGraph": {
+            "nodes": [
+              {
+                "id": "2c8f2ddd-ea83-4cb3-8ed4-b38c7a627391-0",
+                "taskType": "general",
+                "title": "Untitled Task",
+                "dependencies": [],
+                "dependents": []
+              },
+              {
+                "id": "2c8f2ddd-ea83-4cb3-8ed4-b38c7a627391-1",
+                "taskType": "general",
+                "title": "Untitled Task",
+                "dependencies": [],
+                "dependents": []
+              }
+            ],
+            "edges": []
+          },
+          "validation": {
+            "passed": false,
+            "criteria": 0.5
+          },
+          "performance": {
+            "duration": -1776101167007,
+            "startedAt": 1776101167007,
+            "completedAt": null
+          },
+          "raw": {
+            "coordinationMode": "team_leader",
+            "options": {
+              "timeout": 60000,
+              "coordinationMode": "team_leader",
+              "minSuccessRate": 0.5,
+              "onProgress": null,
+              "enableHooks": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "80",
+      "name": "POST /api/a2a/collaborate - 协作任务(collaborative模式)",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "collaboration": {
+          "id": "85cb3068-ac5a-4ff1-92f1-2c3db8c2c465",
+          "title": "Test Collaboration 2",
+          "status": "failed",
+          "summary": {
+            "totalTasks": 1,
+            "completed": 0,
+            "failed": 1,
+            "skipped": 0,
+            "successRate": 0
+          },
+          "results": [
+            {
+              "taskId": "85cb3068-ac5a-4ff1-92f1-2c3db8c2c465-0",
+              "taskType": "general",
+              "agentId": null,
+              "status": "failed",
+              "result": null,
+              "error": "Task task_1776101170013_wtumtds3r timeout after 3000ms",
+              "duration": 3003,
+              "validation": null,
+              "metadata": {}
+            }
+          ],
+          "dependencyGraph": {
+            "nodes": [
+              {
+                "id": "85cb3068-ac5a-4ff1-92f1-2c3db8c2c465-0",
+                "taskType": "general",
+                "title": "Untitled Task",
+                "dependencies": [],
+                "dependents": []
+              }
+            ],
+            "edges": []
+          },
+          "validation": {
+            "passed": false,
+            "criteria": 0.5
+          },
+          "performance": {
+            "duration": 3004,
+            "startedAt": 1776101170013,
+            "completedAt": 1776101173017
+          },
+          "raw": {
+            "coordinationMode": "collaborative",
+            "options": {
+              "timeout": 60000,
+              "coordinationMode": "collaborative",
+              "minSuccessRate": 0.5,
+              "onProgress": null,
+              "enableHooks": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "81",
+      "name": "POST /api/a2a/collaborate - 缺少 title 应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": {
+          "type": "validation_error",
+          "message": "title is required"
+        }
+      }
+    },
+    {
+      "id": "82",
+      "name": "POST /api/a2a/collaborate - 空 tasks 应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": {
+          "type": "validation_error",
+          "message": "tasks must be a non-empty array"
+        }
+      }
+    },
+    {
+      "id": "83",
+      "name": "GET /api/a2a/collaboration/stats - 获取协作统计(修复后)",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "stats": {
+          "activeCollaborations": 0,
+          "totalCollaborations": 7,
+          "completedCollaborations": 0,
+          "failedCollaborations": 7,
+          "agentPoolSize": 0,
+          "agents": [],
+          "coordinationModes": {
+            "teamLeader": 4,
+            "collaborative": 3,
+            "autonomous": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "84",
+      "name": "GET /api/a2a/collaboration/nonexistent - 不存在的协作应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Collaboration task not found"
+      }
+    },
+    {
+      "id": "85",
+      "name": "GET /api/a2a/collaboration/nonexistent/result - 不存在的结果应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Collaboration task not found"
+      }
+    },
+    {
+      "id": "86",
+      "name": "DELETE /api/a2a/collaboration/nonexistent - 取消不存在的协作应返回 404",
+      "status": 404,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Collaboration task not found or already completed"
+      }
+    },
+    {
+      "id": "87",
+      "name": "POST /api/a2a/progress/:taskId - 发送进度更新",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Task not found"
+      }
+    },
+    {
+      "id": "88",
+      "name": "POST /api/a2a/result/:taskId - 返回任务结果",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "Task not found"
+      }
+    },
+    {
+      "id": "89",
+      "name": "POST /api/a2a/result/:taskId - 缺少 result 字段应返回 400",
+      "status": 400,
+      "ok": true,
+      "data": {
+        "success": false,
+        "error": "result is required"
+      }
+    },
+    {
+      "id": "90",
+      "name": "POST /api/a2a/status/sync - 状态同步",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "broadcastCount": 0
+      }
+    },
+    {
+      "id": "91",
+      "name": "POST /api/a2a/ack - 消息确认",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "ackedCount": 0,
+        "ackedIds": []
+      }
+    },
+    {
+      "id": "92",
+      "name": "POST /api/a2a/agents/:agentId/unregister - 注销 Agent",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "message": "Agent unregistered"
+      }
+    },
+    {
+      "id": "93",
+      "name": "GET /api/tools - 列出所有工具(全局端点)",
+      "status": 200,
+      "ok": true,
+      "data": {
+        "success": true,
+        "tools": [],
+        "total": 0
+      }
+    }
+  ]
+}

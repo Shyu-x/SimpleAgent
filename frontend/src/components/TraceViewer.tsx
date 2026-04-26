@@ -19,7 +19,7 @@ export default function TraceViewer() {
   const fetchTraces = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/router/trace/stats');
+      const response = await fetch('/api/admin/traces/stats');
       const data = await response.json();
       if (data.success) {
         setStats(data);

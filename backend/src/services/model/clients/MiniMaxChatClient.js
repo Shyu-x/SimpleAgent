@@ -11,16 +11,11 @@ class MiniMaxChatClient extends ChatModelClient {
     super();
     this.apiKey = options.apiKey || process.env.MINIMAX_API_KEY;
     this.baseUrl = options.baseUrl || process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/anthropic';
-    this.defaultModel = options.defaultModel || 'MiniMax-M2.7-highspeed';
+    this.defaultModel = options.defaultModel || 'MiniMax-M2.7';
     this.timeout = options.timeout || ModelOptions.TIMEOUT_DEFAULT;
 
     // 模型配置
     this.modelConfig = {
-      'MiniMax-M2.7-highspeed': {
-        name: 'MiniMax M2.7 高速',
-        capabilities: ['text', 'vision', 'code', 'reasoning'],
-        maxTokens: 100000
-      },
       'MiniMax-M2.7': {
         name: 'MiniMax M2.7 旗舰编程',
         capabilities: ['text', 'vision', 'code', 'reasoning'],

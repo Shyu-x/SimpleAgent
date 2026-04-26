@@ -23,7 +23,7 @@ const DEFAULT_CONFIG = {
    */
   model: {
     provider: process.env.MINIMAX_PROVIDER || 'minimax',
-    defaultModel: process.env.MINIMAX_DEFAULT_MODEL || 'MiniMax-M2.7-highspeed',
+    defaultModel: process.env.MINIMAX_DEFAULT_MODEL || 'MiniMax-M2.7',
     timeout: parseInt(process.env.MODEL_TIMEOUT, 10) || 120000,
     retries: parseInt(process.env.MODEL_RETRIES, 10) || 3,
     maxTokens: parseInt(process.env.MODEL_MAX_TOKENS, 10) || 100000,

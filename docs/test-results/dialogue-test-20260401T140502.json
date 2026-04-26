@@ -1,0 +1,343 @@
+{
+  "timestamp": "2026-04-01T14:05:02.786Z",
+  "scenarios": [
+    {
+      "name": "技术问答 - 渐进式深入",
+      "description": "连续3轮技术问答，后续问题承接前文上下文",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "什么是JavaScript的闭包？请用简单的话解释。",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "那它和普通函数有什么区别？",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "能给我一个实际的开发场景例子吗？",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        }
+      ],
+      "totalTokens": 0,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "什么是JavaScript的闭包？请用简单的话解释。"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "那它和普通函数有什么区别？"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "能给我一个实际的开发场景例子吗？"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "name": "代码调试 - 错误定位",
+      "description": "提供一个有问题的代码，Agent需要分析并给出解决方案",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "这段代码报错：TypeError: Cannot read property \"map\" of undefined",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "这是出错的部分：const data = fetchData(); data.map(x => x.id)",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 0,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "怎么修改才能避免这个错误？",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 0,
+          "estimatedTokens": 0
+        }
+      ],
+      "totalTokens": 0,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "这段代码报错：TypeError: Cannot read property \"map\" of undefined"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "这是出错的部分：const data = fetchData(); data.map(x => x.id)"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "怎么修改才能避免这个错误？"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "name": "多步骤任务执行",
+      "description": "需要多个工具协作完成的复杂任务",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "帮我搜索今天的科技新闻，然后用中文总结要点。",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "把刚才的新闻保存到我的笔记里，标签是\"科技\"",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "列出我所有标签为\"科技\"的笔记",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 0,
+          "estimatedTokens": 0
+        }
+      ],
+      "totalTokens": 0,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "帮我搜索今天的科技新闻，然后用中文总结要点。"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "把刚才的新闻保存到我的笔记里，标签是\"科技\""
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "列出我所有标签为\"科技\"的笔记"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "name": "知识库检索 - RAG应用",
+      "description": "测试RAG知识库检索与生成",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "请问公司关于年假的政策是什么？",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 0,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "那我探亲假有多少天？",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "申请流程是怎样的？",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        }
+      ],
+      "totalTokens": 0,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "请问公司关于年假的政策是什么？"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "那我探亲假有多少天？"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "申请流程是怎样的？"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        }
+      ]
+    },
+    {
+      "name": "创意生成 - 思维发散",
+      "description": "测试Agent创意能力与上下文保持",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "帮我想3个APP产品名称，要求简洁、有趣、容易记住",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "第一个名字的logo用什么颜色比较好？",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 0,
+          "estimatedTokens": 0
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "用这个颜色设计一个简单的logo描述",
+          "assistantResponse": "",
+          "chunksCount": 0,
+          "intent": null,
+          "toolsUsed": [],
+          "retrievalResults": 0,
+          "latency": 1,
+          "estimatedTokens": 0
+        }
+      ],
+      "totalTokens": 0,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "帮我想3个APP产品名称，要求简洁、有趣、容易记住"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "第一个名字的logo用什么颜色比较好？"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        },
+        {
+          "role": "user",
+          "content": "用这个颜色设计一个简单的logo描述"
+        },
+        {
+          "role": "assistant",
+          "content": ""
+        }
+      ]
+    }
+  ],
+  "totalConversations": 5,
+  "totalTurns": 15,
+  "totalTokens": 0
+}

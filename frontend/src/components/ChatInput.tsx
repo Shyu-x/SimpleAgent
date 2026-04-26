@@ -40,8 +40,10 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
   const controlsRef = useRef<HTMLDivElement>(null);
+  // 缓存消息历史，避免每次 keydown 都解析 sessionStorage
+  const historyCacheRef = useRef<string[]>([]);
   const { showToast } = useToast();
-  const { apiConfig, setApiConfig, configuredModels, addConfiguredModel, settings, setSettings, customPrompts } = useChatStore();
+  const { apiConfig, setApiConfig, configuredModels, addConfiguredModel, settings, setSettings, customPrompts, setAppMode } = useChatStore();
 
   // Get current model name
   const currentModel = AVAILABLE_MODELS.find(m => m.id === apiConfig.model) || {
@@ -255,8 +257,13 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
     };
   }, []);
 
-  // Get message history from store
+  // Get message history from store (使用缓存避免重复解析)
   const getMessageHistory = useCallback((): string[] => {
+    return historyCacheRef.current;
+  }, []);
+
+  // 更新历史缓存（仅在组件挂载时调用一次）
+  useEffect(() => {
     try {
       const stored = window.sessionStorage.getItem('ai-chat-storage');
       if (stored && typeof stored === 'string') {
@@ -271,12 +278,11 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
             }
           }
         }
-        return history.reverse();
+        historyCacheRef.current = history.reverse();
       }
     } catch (e) {
       console.warn('Failed to parse message history:', e);
     }
-    return [];
   }, []);
 
   const handleSend = useCallback(() => {
@@ -508,7 +514,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
           <IntentSuggestionBanner
             intent={detectedIntent}
             onAccept={() => {
-              // 接受意图切换（可扩展为实际切换Agent模式）
+              // 接受意图切换到Agent模式
+              setAppMode('agent');
               setShowIntentBanner(false);
             }}
             onDismiss={() => {
@@ -943,6 +950,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
 
           {/* 发送按钮 */}
           <motion.button
+            data-testid="send-button"
             onClick={handleSend}
             disabled={(!input.trim() && attachments.length === 0) || disabled}
             className={`

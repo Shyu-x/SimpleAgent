@@ -47,8 +47,17 @@ export default function ThinkingChain({ chain, isStreaming, onStepClick }: Think
   useEffect(() => {
     if (isStreaming && chain.steps.length > 0) {
       const latestStep = chain.steps[chain.steps.length - 1];
-      if (!visibleSteps.find(s => s.id === latestStep.id)) {
+      const existingIndex = visibleSteps.findIndex(s => s.id === latestStep.id);
+      if (existingIndex === -1) {
+        // 新步骤，添加到列表
         setVisibleSteps(prev => [...prev, latestStep]);
+      } else {
+        // 现有步骤，更新内容/状态
+        setVisibleSteps(prev => {
+          const updated = [...prev];
+          updated[existingIndex] = latestStep;
+          return updated;
+        });
       }
     } else {
       setVisibleSteps(chain.steps);

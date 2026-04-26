@@ -25,6 +25,7 @@ import {
   Coins,
   X,
 } from 'lucide-react';
+import { API_ENDPOINTS } from '@/lib/apiConfig';
 
 // ============ 类型定义 ============
 
@@ -689,44 +690,40 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
   }, []);
 
   // 刷新数据
-  const refreshData = useCallback(() => {
+  const refreshData = useCallback(async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      const memDelta = (Math.random() - 0.5) * 6;
-      const newMemory = Math.min(100, Math.max(30, metrics.memoryUsage + memDelta));
+    try {
+      const response = await fetch(API_ENDPOINTS.metrics.realtime);
+      if (!response.ok) throw new Error('Failed to fetch metrics');
+      const data = await response.json();
 
-      setMetrics(prev => ({
-        ...prev,
-        avgResponseTime: Math.max(200, prev.avgResponseTime + (Math.random() - 0.5) * 150),
-        requestsPerMinute: Math.max(0, prev.requestsPerMinute + (Math.random() - 0.5) * 3),
-        successRate: Math.min(100, Math.max(80, prev.successRate + (Math.random() - 0.5) * 2)),
-        cpuUsage: Math.min(100, Math.max(10, prev.cpuUsage + (Math.random() - 0.5) * 8)),
-        memoryUsage: newMemory,
-        avgIterations: Math.max(1, Math.min(12, prev.avgIterations + (Math.random() - 0.5) * 0.8)),
-        avgToolCalls: Math.max(1, Math.min(15, prev.avgToolCalls + (Math.random() - 0.5) * 1.2)),
-      }));
-
-      // 模拟 Agent 执行指标变化
-      setAgentMetrics(prev => {
-        const newAgent = {
+      // 更新性能指标
+      setMetrics(prev => {
+        const newMemory = data.system?.memoryUsage ?? prev.memoryUsage;
+        return {
           ...prev,
-          currentIteration: prev.currentIteration + (Math.random() > 0.7 ? 1 : 0),
-          toolCallCount: Math.max(0, prev.toolCallCount + Math.floor((Math.random() - 0.3) * 3)),
-          totalTokens: Math.max(100, prev.totalTokens + Math.floor((Math.random() - 0.3) * 500)),
-          inputTokens: Math.max(50, prev.inputTokens + Math.floor((Math.random() - 0.4) * 200)),
-          outputTokens: Math.max(100, prev.outputTokens + Math.floor((Math.random() - 0.3) * 300)),
-          estimatedMemoryMB: Math.max(50, prev.estimatedMemoryMB + (Math.random() - 0.5) * 30),
-          executionDuration: prev.executionDuration + Math.floor(Math.random() * 3000 + 1000),
-          thinkingSteps: Math.max(0, Math.min(10, prev.thinkingSteps + Math.floor((Math.random() - 0.5) * 2))),
+          avgResponseTime: data.performance?.avgResponseTime ?? prev.avgResponseTime,
+          minResponseTime: data.performance?.minResponseTime ?? prev.minResponseTime,
+          maxResponseTime: data.performance?.maxResponseTime ?? prev.maxResponseTime,
+          p95ResponseTime: data.performance?.p95ResponseTime ?? prev.p95ResponseTime,
+          requestsPerMinute: data.throughput?.requestsPerMinute ?? prev.requestsPerMinute,
+          tokensPerMinute: data.tokens?.tokensPerMinute ?? prev.tokensPerMinute,
+          successRate: data.success?.successRate ?? prev.successRate,
+          errorRate: data.success?.errorRate ?? prev.errorRate,
+          cpuUsage: data.system?.cpuUsage ?? prev.cpuUsage,
+          memoryUsage: newMemory,
+          avgIterations: data.iterations?.avgIterations ?? prev.avgIterations,
+          avgToolCalls: data.iterations?.avgToolCalls ?? prev.avgToolCalls,
+          totalCost: data.cost?.totalCost ?? prev.totalCost,
+          costPerRequest: data.cost?.costPerRequest ?? prev.costPerRequest,
         };
-        return newAgent;
       });
 
       // 更新时间序列
       setResponseTimeData(prev => {
         const newPoint: TimeSeriesPoint = {
           timestamp: Date.now(),
-          value: metrics.avgResponseTime + (Math.random() - 0.5) * 600,
+          value: data.performance?.avgResponseTime ?? metrics.avgResponseTime,
         };
         return [...prev.slice(-59), newPoint];
       });
@@ -734,7 +731,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
       setThroughputData(prev => {
         const newPoint: TimeSeriesPoint = {
           timestamp: Date.now(),
-          value: metrics.requestsPerMinute + (Math.random() - 0.5) * 6,
+          value: data.throughput?.requestsPerMinute ?? metrics.requestsPerMinute,
         };
         return [...prev.slice(-59), newPoint];
       });
@@ -742,87 +739,105 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
       setTokenData(prev => {
         const newPoint: TimeSeriesPoint = {
           timestamp: Date.now(),
-          value: agentMetrics.totalTokens,
+          value: data.tokens?.totalTokens ?? agentMetrics.totalTokens,
         };
         return [...prev.slice(-59), newPoint];
       });
 
+      // 更新实时状态
+      setRealTimeStatus(prev => ({
+        ...prev,
+        activeAgents: data.agents?.activeAgents ?? prev.activeAgents,
+        runningTasks: data.agents?.runningTasks ?? prev.runningTasks,
+        queuedTasks: data.agents?.queuedTasks ?? prev.queuedTasks,
+        status: data.alerts?.length > 0 ? 'degraded' : 'healthy',
+        lastUpdated: Date.now(),
+      }));
+
+      // 使用 API 返回的真实数据更新 Agent 执行指标
+      setAgentMetrics(prev => ({
+        ...prev,
+        currentIteration: data.iterations?.avgIterations ?? prev.currentIteration,
+        toolCallCount: data.iterations?.avgToolCalls ?? prev.toolCallCount,
+        totalTokens: data.tokens?.totalTokens ?? prev.totalTokens,
+        estimatedMemoryMB: data.system?.memoryUsage ?? prev.estimatedMemoryMB,
+        executionDuration: data.performance?.avgResponseTime ?? prev.executionDuration,
+      }));
+
       setToolCallHistory(prev => {
-        const newCount = agentMetrics.toolCallCount;
+        const newCount = data.iterations?.avgToolCalls ?? agentMetrics.toolCallCount;
         return [...prev.slice(-19), newCount];
       });
 
       setIterationHistory(prev => {
-        const newCount = agentMetrics.currentIteration;
+        const newCount = data.iterations?.avgIterations ?? agentMetrics.currentIteration;
         return [...prev.slice(-19), newCount];
       });
 
-      // 更新执行历史
+      // 使用真实 API 数据更新执行历史
       setExecutionHistory(prev => {
         const newRecord: ExecutionRecord = {
           id: `exec-${Date.now()}`,
           timestamp: Date.now(),
-          duration: metrics.avgResponseTime * 3 + Math.random() * 20000,
-          iterations: Math.floor(metrics.avgIterations + (Math.random() - 0.5) * 3),
-          toolCalls: Math.floor(metrics.avgToolCalls + (Math.random() - 0.5) * 4),
-          inputTokens: Math.floor(metrics.tokensPerMinute * 0.3 * Math.random()),
-          outputTokens: Math.floor(metrics.tokensPerMinute * 0.7 * Math.random()),
-          memoryMB: metrics.memoryUsage * 2 + Math.random() * 50,
-          success: Math.random() > metrics.errorRate / 100,
+          duration: data.performance?.avgResponseTime ?? metrics.avgResponseTime,
+          iterations: data.iterations?.avgIterations ?? metrics.avgIterations,
+          toolCalls: data.iterations?.avgToolCalls ?? metrics.avgToolCalls,
+          inputTokens: Math.floor((data.tokens?.totalTokens ?? 0) * 0.3),
+          outputTokens: Math.floor((data.tokens?.totalTokens ?? 0) * 0.7),
+          memoryMB: data.system?.memoryUsage ?? 50,
+          success: (data.success?.successRate ?? 100) > 90,
         };
         return [...prev.slice(-49), newRecord];
       });
-
-      setRealTimeStatus(prev => ({
-        ...prev,
-        activeAgents: Math.max(1, Math.floor(Math.random() * 6)),
-        runningTasks: Math.max(0, Math.floor(Math.random() * 5)),
-        lastUpdated: Date.now(),
-      }));
-
+    } catch (error) {
+      console.error('Failed to fetch metrics:', error);
+      // API 失败时保持当前值不做变化，避免误导性模拟数据
+      // 用户会看到数据停止更新而不是看到虚假的波动
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   }, [metrics, agentMetrics]);
 
   // 初始化数据
   useEffect(() => {
     const now = Date.now();
+    // 使用初始状态值创建历史数据（等待 API 真实数据）
     setResponseTimeData(
       Array.from({ length: 30 }, (_, i) => ({
         timestamp: now - (30 - i - 1) * 60000,
-        value: metrics.avgResponseTime + (Math.random() - 0.5) * 600,
+        value: metrics.avgResponseTime,
       }))
     );
     setThroughputData(
       Array.from({ length: 30 }, (_, i) => ({
         timestamp: now - (30 - i - 1) * 60000,
-        value: metrics.requestsPerMinute + (Math.random() - 0.5) * 6,
+        value: metrics.requestsPerMinute,
       }))
     );
     setTokenData(
       Array.from({ length: 20 }, (_, i) => ({
         timestamp: now - (20 - i - 1) * 30000,
-        value: 2000 + Math.random() * 3000,
+        value: metrics.tokensPerMinute,
       }))
     );
     setIterationHistory(
-      Array.from({ length: 10 }, () => Math.floor(Math.random() * 8 + 2))
+      Array.from({ length: 10 }, () => Math.floor(metrics.avgIterations))
     );
     setToolCallHistory(
-      Array.from({ length: 10 }, () => Math.floor(Math.random() * 10 + 2))
+      Array.from({ length: 10 }, () => Math.floor(metrics.avgToolCalls))
     );
     // 初始化历史记录
     setExecutionHistory(
       Array.from({ length: 10 }, (_, i) => ({
         id: `init-${i}`,
         timestamp: now - (10 - i) * 60000,
-        duration: 15000 + Math.random() * 40000,
-        iterations: Math.floor(Math.random() * 7 + 2),
-        toolCalls: Math.floor(Math.random() * 10 + 2),
-        inputTokens: Math.floor(Math.random() * 3000 + 500),
-        outputTokens: Math.floor(Math.random() * 5000 + 1000),
-        memoryMB: Math.floor(Math.random() * 150 + 60),
-        success: Math.random() > 0.1,
+        duration: metrics.avgResponseTime * 3,
+        iterations: Math.floor(metrics.avgIterations),
+        toolCalls: Math.floor(metrics.avgToolCalls),
+        inputTokens: Math.floor(metrics.tokensPerMinute * 0.3),
+        outputTokens: Math.floor(metrics.tokensPerMinute * 0.7),
+        memoryMB: metrics.memoryUsage,
+        success: metrics.successRate > 90,
       }))
     );
   }, []);

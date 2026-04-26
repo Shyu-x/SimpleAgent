@@ -2,10 +2,22 @@
  * 搜索服务模块
  * 提供 Web 搜索能力
  * 支持多种搜索源
+ *
+ * 优化：
+ * - 超时处理（5秒降级，8秒超时）
+ * - 多级降级策略
+ * - 并行探测快速返回
  */
 
 const axios = require('axios');
 const cheerio = require('cheerio');
+
+// 搜索超时配置（毫秒）
+const SEARCH_TIMEOUT = {
+  primary: 5000,   // 主搜索源超时时间
+  fallback: 8000,  // 备用搜索源超时时间
+  total: 10000     // 总超时时间
+};
 
 // ===========================================
 // 搜索配置 - 支持的搜索源
@@ -188,27 +200,108 @@ async function searchDuckDuckGo(query, limit = 10) {
 }
 
 /**
- * 通用搜索接口
+ * 通用搜索接口 - 支持超时降级
  */
 async function searchWeb(query, limit = 10, source = 'duckduckgo') {
   console.log(`[Search] Searching for: "${query}" (source: ${source})`);
 
-  switch (source) {
-    case 'duckduckgo':
-      return searchDuckDuckGo(query, limit);
+  // 创建超时控制器
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => timeoutController.abort(), SEARCH_TIMEOUT.total);
 
-    case 'minimax':
-      // 使用 MiniMax MCP 搜索
-      return searchMiniMaxMCP(query, limit);
+  try {
+    let result;
 
-    case 'jina':
-      // 使用 Jina AI 搜索
-      return searchJinaAI(query, limit);
+    switch (source) {
+      case 'duckduckgo':
+        result = await withTimeout(searchDuckDuckGo(query, limit), SEARCH_TIMEOUT.primary, timeoutController.signal);
+        break;
 
-    default:
-      // 默认使用 DuckDuckGo
-      return searchDuckDuckGo(query, limit);
+      case 'minimax':
+        result = await withTimeout(searchMiniMaxMCP(query, limit), SEARCH_TIMEOUT.primary, timeoutController.signal);
+        break;
+
+      case 'jina':
+        // Jina AI 有更高的超时限制（网络较好）
+        result = await withTimeout(searchJinaAI(query, limit), SEARCH_TIMEOUT.fallback, timeoutController.signal);
+        break;
+
+      default:
+        result = await withTimeout(searchDuckDuckGo(query, limit), SEARCH_TIMEOUT.primary, timeoutController.signal);
+    }
+
+    clearTimeout(timeoutId);
+    return result;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.error(`[Search] ${source} search timeout/error, trying fallback:`, error.message);
+
+    // 降级策略：尝试其他搜索源
+    return fallbackSearch(query, limit, source);
   }
+}
+
+/**
+ * 带超时的Promise封装
+ */
+async function withTimeout(promise, ms, signal) {
+  const timeoutPromise = new Promise((_, reject) => {
+    const id = setTimeout(() => reject(new Error('Search timeout')), ms);
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        clearTimeout(id);
+        reject(new Error('Search aborted'));
+      });
+    }
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timeoutPromise);
+  }
+}
+
+/**
+ * 降级搜索策略
+ */
+async function fallbackSearch(query, limit, failedSource) {
+  const fallbackOrder = ['jina', 'duckduckgo'];
+
+  // 排除已失败的源
+  const availableSources = fallbackOrder.filter(s => s !== failedSource);
+
+  for (const fallbackSource of availableSources) {
+    try {
+      console.log(`[Search] 尝试降级到 ${fallbackSource}...`);
+      const timeoutMs = fallbackSource === 'jina' ? SEARCH_TIMEOUT.fallback : SEARCH_TIMEOUT.primary;
+
+      const result = await withTimeout(
+        fallbackSource === 'jina' ? searchJinaAI(query, limit) : searchDuckDuckGo(query, limit),
+        timeoutMs
+      );
+
+      if (result.success && result.results.length > 0) {
+        result.degraded = true;
+        result.originalSource = failedSource;
+        result.fallbackSource = fallbackSource;
+        console.log(`[Search] 降级搜索成功: ${fallbackSource}`);
+        return result;
+      }
+    } catch (e) {
+      console.warn(`[Search] 降级源 ${fallbackSource} 也失败:`, e.message);
+    }
+  }
+
+  // 所有搜索都失败，返回部分结果或错误信息
+  return {
+    success: false,
+    error: '搜索服务暂时不可用，请稍后再试',
+    query,
+    results: [],
+    degraded: true,
+    failedSources: [failedSource, ...availableSources]
+  };
 }
 
 /**

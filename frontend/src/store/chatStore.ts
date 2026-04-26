@@ -154,8 +154,8 @@ export const useChatStore = create<ChatState>()(
       // 默认配置仅包含 model 和 baseURL (用于推断 provider)
       apiConfig: {
         apiKey: '', // 空字符串 - API Key 由后端代理安全存储
-        baseURL: getBaseURLForModel('MiniMax-M2.7-highspeed'),
-        model: 'MiniMax-M2.7-highspeed'
+        baseURL: getBaseURLForModel('MiniMax-M2.7'),
+        model: 'MiniMax-M2.7'
       },
       settings: {
         theme: 'system',

@@ -6,6 +6,8 @@
 const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
+const QueryRewriteService = require('./rag/QueryRewriteService');
+const RerankerService = require('./rag/RerankerService');
 
 // 简单的文本分块
 function chunkText(text, chunkSize = 500, overlap = 50) {
@@ -73,8 +75,12 @@ function cosineSimilarity(vec1, vec2) {
     norm2 += vec2[i] * vec2[i];
   }
 
-  if (norm1 === 0 || norm2 === 0) return 0;
-  return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+  // 修复: 防止除零和浮点精度问题导致 NaN
+  const denominator = Math.sqrt(norm1) * Math.sqrt(norm2);
+  if (denominator === 0 || !Number.isFinite(denominator)) return 0;
+  if (!Number.isFinite(dotProduct)) return 0;
+
+  return dotProduct / denominator;
 }
 
 class RAGService extends EventEmitter {
@@ -88,6 +94,19 @@ class RAGService extends EventEmitter {
 
     // 知识库存储
     this.knowledgeBases = new Map();
+
+    // 查询改写服务
+    this.queryRewriteService = new QueryRewriteService({
+      enabled: options.enableQueryRewrite !== false,
+      llmClient: options.llmClient
+    });
+
+    // 重排序服务
+    this.rerankerService = new RerankerService({
+      enabled: options.enableRerank !== false,
+      llmClient: options.llmClient,
+      topK: options.topK || 10
+    });
 
     // 确保存储目录存在
     this.ensureStoragePath();
@@ -114,7 +133,7 @@ class RAGService extends EventEmitter {
     };
 
     this.knowledgeBases.set(id, kb);
-    this.saveKnowledgeBase(kb);
+    await this.saveKnowledgeBase(kb);
 
     this.emit('kb:created', kb);
     return kb;
@@ -163,7 +182,7 @@ class RAGService extends EventEmitter {
     kb.documents.push(doc);
     kb.updatedAt = Date.now();
 
-    this.saveKnowledgeBase(kb);
+    await this.saveKnowledgeBase(kb);
 
     this.emit('document:added', { kbId, docId, chunks: chunks.length });
     return { docId, chunks: chunks.length };
@@ -173,7 +192,7 @@ class RAGService extends EventEmitter {
    * 生成文本嵌入
    */
   async generateEmbedding(text) {
-    // 优先使用 OpenAI 嵌入API
+    // 尝试 OpenAI 嵌入API
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (apiKey) {
@@ -199,7 +218,7 @@ class RAGService extends EventEmitter {
       }
     }
 
-    // 回退到简单嵌入
+    // 最终回退到简单嵌入
     return simpleEmbed(text);
   }
 
@@ -215,8 +234,15 @@ class RAGService extends EventEmitter {
     const topK = options.topK || this.topK;
     const threshold = options.similarityThreshold || this.similarityThreshold;
 
+    // 查询改写：补全、同义词扩展
+    const rewrittenQuery = await this.queryRewriteService.rewrite(query, { topic: kb.name });
+    const expandedQuery = this.queryRewriteService.expand(rewrittenQuery);
+
+    // 拆分子问题（用于多路检索）
+    const subQueries = this.queryRewriteService.decompose(expandedQuery);
+
     // 生成查询嵌入
-    const queryEmbedding = await this.generateEmbedding(query);
+    const queryEmbedding = await this.generateEmbedding(expandedQuery);
 
     // 收集所有块并计算相似度
     const allChunks = [];
@@ -238,12 +264,15 @@ class RAGService extends EventEmitter {
     allChunks.sort((a, b) => b.similarity - a.similarity);
 
     // 返回topK结果
-    const results = allChunks.slice(0, topK).map(chunk => ({
+    let results = allChunks.slice(0, topK).map(chunk => ({
       content: chunk.content,
       similarity: chunk.similarity,
       documentTitle: chunk.documentTitle,
       documentId: chunk.documentId
     }));
+
+    // 使用重排序服务进一步优化
+    results = await this.rerankerService.rerank(query, results, { topK });
 
     return results;
   }
@@ -332,22 +361,30 @@ class RAGService extends EventEmitter {
   /**
    * 保存知识库到文件
    */
-  saveKnowledgeBase(kb) {
+  async saveKnowledgeBase(kb) {
     const filePath = path.join(this.storagePath, `${kb.id}.json`);
 
-    // 保存精简版（不保存嵌入以节省空间）
+    // 保存知识库（嵌入向量不持久化，加载时重新生成以保证一致性）
     const saveData = {
-      ...kb,
+      id: kb.id,
+      name: kb.name,
+      description: kb.description,
       documents: kb.documents.map(doc => ({
-        ...doc,
+        id: doc.id,
+        title: doc.title,
+        type: doc.type,
+        metadata: doc.metadata,
+        createdAt: doc.createdAt,
         chunks: doc.chunks.map(chunk => ({
           id: chunk.id,
           content: chunk.content,
           index: chunk.index,
           metadata: chunk.metadata
-          // 嵌入向量不持久化，重新生成
+          // 嵌入向量不持久化，加载时使用 generateEmbedding 重新生成
         }))
-      }))
+      })),
+      createdAt: kb.createdAt,
+      updatedAt: kb.updatedAt
     };
 
     fs.writeFileSync(filePath, JSON.stringify(saveData, null, 2));
@@ -356,7 +393,7 @@ class RAGService extends EventEmitter {
   /**
    * 从文件加载知识库
    */
-  loadKnowledgeBase(kbId) {
+  async loadKnowledgeBase(kbId) {
     const filePath = path.join(this.storagePath, `${kbId}.json`);
 
     if (!fs.existsSync(filePath)) {
@@ -365,10 +402,10 @@ class RAGService extends EventEmitter {
 
     const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
 
-    // 重新生成嵌入
+    // 使用 generateEmbedding 重新生成嵌入（支持 OpenAI/简单嵌入）
     for (const doc of data.documents) {
       for (const chunk of doc.chunks) {
-        chunk.embedding = simpleEmbed(chunk.content);
+        chunk.embedding = await this.generateEmbedding(chunk.content);
       }
     }
 

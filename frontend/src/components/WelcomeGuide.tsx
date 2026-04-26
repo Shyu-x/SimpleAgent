@@ -206,6 +206,23 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
   const { setApiConfig, addConfiguredModel, settings } = useChatStore();
   const [enableReasoning, setEnableReasoning] = useState(true);
 
+  const handleSkip = useCallback(() => {
+    localStorage.setItem('onboarding-completed', 'true');
+    onComplete();
+  }, [onComplete]);
+
+  // ESC 键跳过引导
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleSkip();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleSkip]);
+
   // 打字机效果
   useEffect(() => {
     if (currentStep === 'demo') {
@@ -227,7 +244,7 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
 
       return () => clearInterval(timer);
     }
-  }, [currentStep, activeDemo]);
+  }, [currentStep, activeDemo, DEMO_CONVERSATIONS]);
 
   const animationsEnabled = settings.animationsEnabled;
   const currentStepIndex = STEPS.indexOf(currentStep);
@@ -262,25 +279,19 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
     onComplete();
   }, [localApiKey, localBaseURL, localModel, enableReasoning, setApiConfig, addConfiguredModel, onComplete]);
 
-  const handleSkip = useCallback(() => {
-    localStorage.setItem('onboarding-completed', 'true');
-    onComplete();
-  }, [onComplete]);
-
   const validateKey = useCallback(() => {
     if (!localApiKey.trim()) {
       setApiKeyError('请输入 API Key');
       return false;
     }
-    const provider = getProviderFromModel(localModel);
-    const result = validateApiKey(localApiKey, provider);
+    const result = validateApiKey(localApiKey);
     if (!result.valid) {
       setApiKeyError(result.error || 'API Key 格式不正确');
       return false;
     }
     setApiKeyError(null);
     return true;
-  }, [localApiKey, localModel]);
+  }, [localApiKey]);
 
   const handleModelChange = (modelId: string) => {
     setLocalModel(modelId);
@@ -878,11 +889,11 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
         <div className="px-6 sm:px-8 pb-6 sm:pb-8 flex items-center justify-between border-t pt-4">
           <motion.button
             onClick={currentStep === 'welcome' ? handleSkip : handlePrev}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="text-sm rounded-lg border border-[hsl(var(--border-strong))] text-muted-foreground hover:text-foreground hover:border-[hsl(var(--border-subtle))] hover:bg-[hsl(var(--bg-muted))]/50 transition-all px-4 py-2"
           >
-            {currentStep === 'welcome' ? '跳过引导' : '← 上一步'}
+            {currentStep === 'welcome' ? '跳过引导 (ESC)' : '← 上一步'}
           </motion.button>
 
           <div className="flex items-center gap-3">

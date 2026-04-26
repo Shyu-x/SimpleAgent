@@ -19,8 +19,9 @@ interface UseAgentSSEOptions {
 /**
  * SSE Hook - 实时接收工作流执行事件
  *
- * 由于后端目前使用轮询模式，我们模拟 SSE 行为
- * 实际项目中可以改为真正的 SSE 连接
+ * 支持两种模式：
+ * 1. useAgentSSE - 轮询模式（向后兼容）
+ * 2. useRealAgentSSE - 真实 SSE 连接（推荐）
  */
 export function useAgentSSE(options: UseAgentSSEOptions) {
   const {
@@ -176,6 +177,28 @@ export function useRealAgentSSE(options: UseRealAgentSSEOptions) {
   const eventSourceRef = useRef<EventSource | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  // 使用 ref 存储回调，避免 effect 频繁重连
+  const callbacksRef = useRef({
+    onTaskStart,
+    onTaskComplete,
+    onTaskError,
+    onWorkflowComplete,
+    onWorkflowError,
+    onConfirmation,
+    onError,
+  });
+  useEffect(() => {
+    callbacksRef.current = {
+      onTaskStart,
+      onTaskComplete,
+      onTaskError,
+      onWorkflowComplete,
+      onWorkflowError,
+      onConfirmation,
+      onError,
+    };
+  });
+
   useEffect(() => {
     if (!sessionId) return;
 
@@ -183,43 +206,46 @@ export function useRealAgentSSE(options: UseRealAgentSSEOptions) {
 
     const eventSource = new EventSource(sseUrl);
     eventSourceRef.current = eventSource;
-    setIsConnected(true);
 
-    // 监听各种事件
+    eventSource.onopen = () => {
+      setIsConnected(true);
+    };
+
+    // 监听各种事件（使用 ref 获取最新回调）
     eventSource.addEventListener('task_start', (e) => {
       const data = JSON.parse(e.data);
       store.handleSSEEvent({ type: 'task_start', taskId: data.taskId, agentId: data.agentId });
-      onTaskStart?.(data.taskId, data.agentId);
+      callbacksRef.current.onTaskStart?.(data.taskId, data.agentId);
     });
 
     eventSource.addEventListener('task_complete', (e) => {
       const data = JSON.parse(e.data);
       store.handleSSEEvent({ type: 'task_complete', taskId: data.taskId, result: data.result });
-      onTaskComplete?.(data.taskId, data.result);
+      callbacksRef.current.onTaskComplete?.(data.taskId, data.result);
     });
 
     eventSource.addEventListener('task_error', (e) => {
       const data = JSON.parse(e.data);
       store.handleSSEEvent({ type: 'task_error', taskId: data.taskId, error: data.error });
-      onTaskError?.(data.taskId, data.error);
+      callbacksRef.current.onTaskError?.(data.taskId, data.error);
     });
 
     eventSource.addEventListener('workflow_complete', (e) => {
       const data = JSON.parse(e.data);
       store.handleSSEEvent({ type: 'workflow_complete', result: data.result });
-      onWorkflowComplete?.(data.result);
+      callbacksRef.current.onWorkflowComplete?.(data.result);
     });
 
     eventSource.addEventListener('workflow_error', (e) => {
       const data = JSON.parse(e.data);
       store.handleSSEEvent({ type: 'workflow_error', error: data.error });
-      onWorkflowError?.(data.error);
+      callbacksRef.current.onWorkflowError?.(data.error);
     });
 
     eventSource.addEventListener('confirmation', (e) => {
       const data = JSON.parse(e.data);
       store.handleSSEEvent({ type: 'confirmation', request: data });
-      onConfirmation?.(data);
+      callbacksRef.current.onConfirmation?.(data);
     });
 
     eventSource.addEventListener('progress', (e) => {
@@ -233,7 +259,7 @@ export function useRealAgentSSE(options: UseRealAgentSSEOptions) {
     });
 
     eventSource.onerror = (error) => {
-      onError?.(new Error('SSE connection error'));
+      callbacksRef.current.onError?.(new Error('SSE connection error'));
       eventSource.close();
     };
 
@@ -242,7 +268,7 @@ export function useRealAgentSSE(options: UseRealAgentSSEOptions) {
       eventSourceRef.current = null;
       setIsConnected(false);
     };
-  }, [sessionId, url, store, onTaskStart, onTaskComplete, onTaskError, onWorkflowComplete, onWorkflowError, onConfirmation, onError]);
+  }, [sessionId, url, store]);
 
   return {
     disconnect: () => eventSourceRef.current?.close(),

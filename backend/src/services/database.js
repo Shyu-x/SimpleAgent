@@ -12,6 +12,36 @@ const pool = new Pool({
   connectionTimeoutMillis: 5000,
 });
 
+// 列存在性缓存 { tableName: { columnName: boolean } }
+const columnCache = {};
+
+// 检查表中是否存在指定列
+async function checkColumnExists(tableName, columnName) {
+  // 先检查缓存
+  if (columnCache[tableName] && columnCache[tableName][columnName] !== undefined) {
+    return columnCache[tableName][columnName];
+  }
+
+  try {
+    const result = await pool.query(
+      `SELECT 1 FROM information_schema.columns WHERE table_name = $1 AND column_name = $2`,
+      [tableName, columnName]
+    );
+    const exists = result.rows.length > 0;
+
+    // 缓存结果
+    if (!columnCache[tableName]) {
+      columnCache[tableName] = {};
+    }
+    columnCache[tableName][columnName] = exists;
+
+    return exists;
+  } catch (error) {
+    console.warn(`检查列存在性失败: ${tableName}.${columnName}`, error.message);
+    return false;
+  }
+}
+
 // 测试连接
 async function initializeDatabase() {
   try {
@@ -72,8 +102,12 @@ const prisma = {
         params.push(where.userId);
         query += ` AND user_id = $${params.length}`;
       }
+      // 仅当 is_deleted 列存在时才添加过滤条件
       if (where.isDeleted !== undefined) {
-        query += ' AND is_deleted = ' + (where.isDeleted ? 'TRUE' : 'FALSE');
+        const hasIsDeleted = await checkColumnExists('conversations', 'is_deleted');
+        if (hasIsDeleted) {
+          query += ' AND is_deleted = ' + (where.isDeleted ? 'TRUE' : 'FALSE');
+        }
       }
 
       query += ` ORDER BY updated_at DESC LIMIT ${take} OFFSET ${skip}`;
@@ -129,10 +163,28 @@ const prisma = {
         updates.push(`metadata = $${params.length}`);
       }
       if (data.isDeleted !== undefined) {
-        updates.push(`is_deleted = ${data.isDeleted}`);
-        if (data.isDeleted) {
-          updates.push(`deleted_at = NOW()`);
+        const hasIsDeleted = await checkColumnExists('conversations', 'is_deleted');
+        if (hasIsDeleted) {
+          updates.push(`is_deleted = ${data.isDeleted}`);
+          if (data.isDeleted) {
+            updates.push(`deleted_at = NOW()`);
+          }
         }
+      }
+
+      // 如果没有更新字段，直接返回
+      if (updates.length === 0) {
+        const result = await pool.query('SELECT * FROM conversations WHERE id = $1', [where.id]);
+        if (result.rows.length === 0) return null;
+        const row = result.rows[0];
+        return {
+          id: row.id,
+          userId: row.user_id,
+          title: row.title,
+          metadata: row.metadata,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        };
       }
 
       params.push(where.id);
@@ -162,8 +214,12 @@ const prisma = {
         params.push(where.conversationId);
         query += ` AND conversation_id = $${params.length}`;
       }
+      // 仅当 is_deleted 列存在时才添加过滤条件
       if (where.isDeleted !== undefined) {
-        query += ' AND is_deleted = ' + (where.isDeleted ? 'TRUE' : 'FALSE');
+        const hasIsDeleted = await checkColumnExists('messages', 'is_deleted');
+        if (hasIsDeleted) {
+          query += ' AND is_deleted = ' + (where.isDeleted ? 'TRUE' : 'FALSE');
+        }
       }
 
       query += ` ORDER BY created_at ASC LIMIT ${take} OFFSET ${skip}`;
@@ -274,4 +330,5 @@ module.exports = {
   query,
   initializeDatabase,
   closeDatabase,
+  checkColumnExists,
 };

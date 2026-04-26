@@ -12,6 +12,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { fetchApi } from '@/lib/apiClient';
 
 interface SystemStats {
   totalRequests: number;
@@ -47,10 +48,12 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('/api/admin/stats');
-      if (!res.ok) throw new Error('Failed to fetch stats');
-      const data = await res.json();
-      setStats(data);
+      const { data, error: fetchError } = await fetchApi<{ success: boolean; data: SystemStats }>('/api/admin/stats');
+      if (fetchError) throw new Error(fetchError.message);
+      // 后端返回 { success: true, data: {...} }
+      if (data?.data) {
+        setStats(data.data);
+      }
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');

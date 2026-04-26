@@ -1,7 +1,7 @@
 # Agent 工具与团队协作
 
 > 文档版本: v2.1.0
-> 更新日期: 2026-03-21
+> 更新日期: 2026-04-01
 
 ---
 
@@ -23,6 +23,7 @@
 | `record_note` | SessionNoteTool | memory | 记录笔记 |
 | `recall_notes` | SessionNoteTool | memory | 回忆笔记 |
 | `minimax_search` | MiniMaxSearchTool | internet | MiniMax 搜索服务 |
+| `enhanced_search` | EnhancedSearchTool | internet | 增强搜索(多源/批量/技术文档) |
 | `github` | GitHubTool | developer | GitHub API 操作 |
 | `weather` | WeatherTool | information | 天气查询 |
 | `translation` | TranslationTool | content | 多语言翻译 |
@@ -37,6 +38,7 @@
 | `note` | NoteTool | content | 个人笔记管理 |
 | `prompt_template` | PromptTemplateTool | developer | 提示词模板 |
 | `meeting` | MeetingTool | communication | 日程管理 |
+| `readme` | ReadmeTool | developer | README 生成 |
 
 ### 1.2 工具详细说明
 
@@ -301,7 +303,100 @@
 
 ---
 
-#### 1.2.12 GitHub 工具 (GitHubTool)
+#### 1.2.12 增强搜索工具 (EnhancedSearchTool)
+
+```javascript
+{
+  name: 'enhanced_search',
+  category: 'internet',
+  actions: ['search', 'multi_search', 'batch_search', 'search_history', 'tech_search', 'news_search', 'clear_history']
+}
+```
+
+**参数**:
+- `action`: 操作类型
+  - `search`: 单源搜索
+  - `multi_search`: 多源并行搜索 (MCP + Jina + DuckDuckGo)
+  - `batch_search`: 批量搜索（最多20个查询）
+  - `search_history`: 获取搜索历史
+  - `tech_search`: 技术文档搜索 (GitHub/NPM/PyPI/MDN等)
+  - `news_search`: 新闻搜索
+  - `clear_history`: 清除搜索历史
+- `query`: 搜索关键词
+- `queries`: 批量查询列表
+- `sources`: 搜索源数组 `['mcp', 'jina', 'duckduckgo', 'all']`
+- `options`: 可选参数
+  - `maxResults`: 最大结果数
+  - `language`: 语言 (zh/en)
+  - `timeRange`: 时间范围
+  - `category`: 搜索分类
+- `domain`: 技术文档域名 (github, npm, pypi, stackoverflow, devdocs, mdndocs, react, vue, nextjs, typescript, rust, python, deno, bun)
+
+**API 调用**:
+```javascript
+// 单源搜索
+{
+  name: 'enhanced_search',
+  params: {
+    action: 'search',
+    query: 'React 19 新特性',
+    sources: ['mcp'],
+    options: { maxResults: 5, language: 'zh' }
+  }
+}
+
+// 多源搜索
+{
+  name: 'enhanced_search',
+  params: {
+    action: 'multi_search',
+    query: 'Zustand 5 状态管理',
+    sources: ['all'],
+    options: { maxResults: 3 }
+  }
+}
+
+// 批量搜索
+{
+  name: 'enhanced_search',
+  params: {
+    action: 'batch_search',
+    queries: ['React 19', 'Next.js 16', 'MiniMax API'],
+    options: { maxResults: 5 }
+  }
+}
+
+// 技术文档搜索
+{
+  name: 'enhanced_search',
+  params: {
+    action: 'tech_search',
+    query: 'useState hook',
+    domain: 'react',
+    options: { maxResults: 5 }
+  }
+}
+
+// 新闻搜索
+{
+  name: 'enhanced_search',
+  params: {
+    action: 'news_search',
+    query: 'AI Agent 最新进展',
+    options: { timeRange: 'week' }
+  }
+}
+```
+
+**实现**:
+- 优先使用 MCP 搜索服务
+- 多源并行搜索自动聚合
+- 搜索历史本地记录（最多100条）
+- 技术文档搜索支持 12+ 常用域名
+
+---
+
+#### 1.2.13 GitHub 工具 (GitHubTool)
 
 ```javascript
 {
@@ -420,7 +515,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        工具分类 (13类 27个工具)                   │
+│                        工具分类 (13类 29个工具)                   │
 ├─────────────────────────────────────────────────────────────────┤
 │  filesystem                                                     │
 │  └── file_operations (文件读写删除列表)                         │
@@ -959,4 +1054,4 @@ agent.registerTool({
 
 ---
 
-**文档更新**: 2026-03-21 (v2.1.0)
+**文档更新**: 2026-04-01 (v2.1.0 - 新增 EnhancedSearchTool, ReadmeTool)

@@ -151,7 +151,7 @@ class IntentClassifier extends EventEmitter {
   /**
    * @param {Object} options
    * @param {Object} options.modelClient - ChatModelClient 实例（可选，默认创建 MiniMaxChatClient）
-   * @param {string} options.defaultModel - 默认模型（默认 MiniMax-M2.7-highspeed）
+   * @param {string} options.defaultModel - 默认模型（默认 MiniMax-M2.7）
    * @param {number} options.confidenceThreshold - 置信度阈值（默认 0.5）
    * @param {boolean} options.enableLLM - 启用LLM分类（默认 true）
    * @param {boolean} options.enableKeywordFallback - 启用关键词后备（默认 true）
@@ -167,11 +167,11 @@ class IntentClassifier extends EventEmitter {
       this.modelClient = new MiniMaxChatClient({
         apiKey: options.apiKey || process.env.MINIMAX_API_KEY,
         baseUrl: options.baseUrl || process.env.MINIMAX_BASE_URL,
-        defaultModel: options.defaultModel || 'MiniMax-M2.7-highspeed'
+        defaultModel: options.defaultModel || 'MiniMax-M2.7'
       });
     }
 
-    this.defaultModel = options.defaultModel || 'MiniMax-M2.7-highspeed';
+    this.defaultModel = options.defaultModel || 'MiniMax-M2.7';
     this.confidenceThreshold = options.confidenceThreshold || CONFIDENCE_THRESHOLDS.MEDIUM;
     this.enableLLM = options.enableLLM !== false;
     this.enableKeywordFallback = options.enableKeywordFallback !== false;

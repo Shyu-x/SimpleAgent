@@ -29,6 +29,10 @@ async function getHighlighter(): Promise<Highlighter> {
     highlighterInitPromise = createHighlighter({
       themes: ['github-dark', 'github-light'],
       langs: ['javascript', 'typescript', 'python', 'java', 'cpp', 'c', 'go', 'rust', 'ruby', 'php', 'html', 'css', 'json', 'yaml', 'markdown', 'bash', 'shell', 'sql', 'xml', 'swift', 'kotlin', 'scala', 'r', 'matlab', 'julia', 'lua', 'perl', 'haskell', 'elixir', 'erlang', 'clojure', 'fsharp', 'ocaml', 'dart', 'vue', 'svelte', 'jsx', 'tsx', 'jsx', 'tsx'],
+    }).catch((err) => {
+      // 重置 promise 以便重试
+      highlighterInitPromise = null;
+      throw err;
     });
   }
 

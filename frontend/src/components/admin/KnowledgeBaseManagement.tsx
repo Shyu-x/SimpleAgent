@@ -38,9 +38,11 @@ export default function KnowledgeBaseManagement() {
 
   const fetchKBs = async () => {
     try {
-      const res = await fetch('/api/admin/knowledge-bases');
+      // 获取统计信息，包含知识库列表
+      const res = await fetch('/api/admin/knowledge/stats');
       const data = await res.json();
-      setKbs(data.knowledgeBases || []);
+      // 从 stats 响应中提取 knowledgeBases
+      setKbs(data.data?.knowledgeBases || []);
     } catch (err) {
       console.error('Failed to fetch knowledge bases:', err);
     } finally {
@@ -70,7 +72,7 @@ export default function KnowledgeBaseManagement() {
           else reject(new Error('Upload failed'));
         };
         xhr.onerror = () => reject(new Error('Upload failed'));
-        xhr.open('POST', `/api/admin/knowledge-bases/${kbId}/documents`);
+        xhr.open('POST', `/api/admin/knowledge/docs?kbId=${kbId}`);
         xhr.send(formData);
       });
 
@@ -85,10 +87,17 @@ export default function KnowledgeBaseManagement() {
 
   const createKB = async (name: string, description: string) => {
     try {
-      await fetch('/api/admin/knowledge-bases', {
+      // 后端没有独立的创建知识库API，先创建默认知识库
+      // 这里通过创建一个占位文档来触发知识库创建
+      await fetch('/api/admin/knowledge/docs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description })
+        body: JSON.stringify({
+          kbName: name,
+          title: `知识库初始化: ${name}`,
+          content: `这是知识库 "${name}" 的初始化文档。${description}`,
+          type: 'text'
+        })
       });
       setShowCreate(false);
       fetchKBs();

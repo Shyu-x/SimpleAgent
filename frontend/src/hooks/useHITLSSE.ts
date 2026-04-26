@@ -209,6 +209,18 @@ export function useHITLSSE(options: UseHITLSSEOptions = {}) {
   const [pendingConfirmations, setPendingConfirmations] = useState<HITLCheckpoint[]>([]);
   const clientRef = useRef<HITLSSEClient | null>(null);
 
+  // 使用 ref 存储选项值，避免对象引用变化导致重复连接
+  const optionsRef = useRef(options);
+  const autoConnectRef = useRef(options.autoConnect ?? true);
+  const enabledRef = useRef(options.enabled ?? true);
+
+  // 更新 ref（仅当值实际变化时）
+  useEffect(() => {
+    optionsRef.current = options;
+    if (options.autoConnect !== undefined) autoConnectRef.current = options.autoConnect;
+    if (options.enabled !== undefined) enabledRef.current = options.enabled;
+  });
+
   // 初始化 SSE 客户端
   const initClient = useCallback(() => {
     if (clientRef.current) {
@@ -353,16 +365,16 @@ export function useHITLSSE(options: UseHITLSSEOptions = {}) {
     }
   }, []);
 
-  // 自动连接
+  // 自动连接（使用 ref 避免对象引用变化导致重复连接）
   useEffect(() => {
-    if (options.autoConnect !== false && options.enabled !== false) {
+    if (autoConnectRef.current !== false && enabledRef.current !== false) {
       connect();
     }
 
     return () => {
       disconnect();
     };
-  }, [options.autoConnect, options.enabled, connect, disconnect]);
+  }, [connect, disconnect]);
 
   return {
     // 连接状态

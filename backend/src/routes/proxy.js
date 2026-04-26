@@ -15,7 +15,7 @@ const PROVIDER = {
   name: 'MiniMax',
   baseUrl: process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/anthropic',
   chatEndpoint: '/v1/messages',
-  defaultModel: 'MiniMax-M2.7-highspeed',
+  defaultModel: 'MiniMax-M2.7',
   supportsReasoning: true,
 };
 
@@ -58,11 +58,13 @@ function transformStreamChunk(data) {
     return { choices: [{ delta: { content: data.delta.text } }] };
   }
 
-  // 思考内容处理
+  // 思考内容处理 - 单独发送thinking事件
   if (data.type === 'content_block_delta' && data.delta?.type === 'thinking_delta') {
-    // 替换思考标记，便于前端检测
-    const thinkingContent = `<think>${data.delta.thinking || ''}[/THINK]`;
-    return { choices: [{ delta: { content: thinkingContent } }] };
+    // 发送 thinking 事件，前端可单独处理
+    return {
+      type: 'thinking',
+      content: data.delta.thinking || ''
+    };
   }
 
   if (data.type === 'message_stop' || data.event === 'message_stop') {
@@ -117,52 +119,152 @@ router.post('/chat/completions', async (req, res) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let errorData = {};
+      let errorText = '';
+
+      // 尝试解析错误响应
+      try {
+        errorText = await response.text();
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        // 无法解析，使用状态码和原始文本
+        errorData = {
+          error: {
+            message: errorText || `MiniMax API 错误: ${response.status}`,
+            type: response.status >= 500 ? 'server_error' : 'api_error'
+          }
+        };
+      }
+
+      // 根据状态码分类错误类型
+      let errorType = 'api_error';
+      if (response.status === 401 || response.status === 403) {
+        errorType = 'authentication_error';
+      } else if (response.status === 429) {
+        errorType = 'rate_limit_error';
+      } else if (response.status >= 500) {
+        errorType = 'server_error';
+      } else if (response.status === 400) {
+        errorType = 'validation_error';
+      }
+
       return res.status(response.status).json({
         error: {
           message: errorData.error?.message || `MiniMax API 错误: ${response.status}`,
-          type: errorData.error?.type || 'api_error',
+          type: errorData.error?.type || errorType,
           code: errorData.error?.code
         }
       });
     }
 
     if (stream) {
-      // 流式响应
+      // 流式响应 - 使用 Node.js 18+ ReadableStream
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
-      response.body.on('data', (chunk) => {
-        const lines = chunk.toString().split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === '[DONE]') {
-              res.write('data: [DONE]\n\n');
-              continue;
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let accumulatedThinking = ''; // 累积思维链内容
+      let thinkingBlockCount = 0;   // 思维块计数
+
+      const readChunk = async () => {
+        try {
+          const { done, value } = await reader.read();
+          if (done) {
+            // 发送思维链摘要（如果有）
+            if (accumulatedThinking) {
+              res.write(`data: ${JSON.stringify({
+                type: 'thinking_complete',
+                thinkingCount: thinkingBlockCount,
+                thinkingPreview: accumulatedThinking.substring(0, 500)
+              })}\n\n`);
             }
-            try {
-              const data = JSON.parse(jsonStr);
-              const transformed = transformStreamChunk(data);
-              if (transformed) {
-                res.write(`data: ${JSON.stringify(transformed)}\n\n`);
+            // 处理缓冲区中剩余的数据
+            if (buffer.trim()) {
+              const lines = buffer.split('\n');
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const jsonStr = line.slice(6).trim();
+                  if (jsonStr === '[DONE]') {
+                    res.write('data: [DONE]\n\n');
+                    continue;
+                  }
+                  try {
+                    const data = JSON.parse(jsonStr);
+                    const transformed = transformStreamChunk(data);
+                    if (transformed) {
+                      // 如果是thinking事件，累积内容
+                      if (transformed.type === 'thinking') {
+                        accumulatedThinking += transformed.content;
+                        thinkingBlockCount++;
+                        // 发送thinking事件
+                        res.write(`data: ${JSON.stringify({
+                          type: 'thinking_delta',
+                          content: transformed.content,
+                          blockIndex: thinkingBlockCount
+                        })}\n\n`);
+                      } else {
+                        res.write(`data: ${JSON.stringify(transformed)}\n\n`);
+                      }
+                    }
+                  } catch (e) {
+                    // 忽略解析错误
+                  }
+                }
               }
-            } catch (e) {
-              // 忽略解析错误
+            }
+            res.end();
+            return;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+
+          // 处理完整行
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === '[DONE]') {
+                res.write('data: [DONE]\n\n');
+                continue;
+              }
+              try {
+                const data = JSON.parse(jsonStr);
+                const transformed = transformStreamChunk(data);
+                if (transformed) {
+                  // 如果是thinking事件，累积内容并发送
+                  if (transformed.type === 'thinking') {
+                    accumulatedThinking += transformed.content;
+                    thinkingBlockCount++;
+                    // 发送thinking事件
+                    res.write(`data: ${JSON.stringify({
+                      type: 'thinking_delta',
+                      content: transformed.content,
+                      blockIndex: thinkingBlockCount
+                    })}\n\n`);
+                  } else {
+                    res.write(`data: ${JSON.stringify(transformed)}\n\n`);
+                  }
+                }
+              } catch (e) {
+                // 忽略解析错误
+              }
             }
           }
+
+          // 继续读取
+          readChunk();
+        } catch (err) {
+          console.error('Stream read error:', err);
+          res.end();
         }
-      });
+      };
 
-      response.body.on('end', () => {
-        res.end();
-      });
-
-      response.body.on('error', (err) => {
-        console.error('Stream error:', err);
-        res.end();
-      });
+      readChunk();
     } else {
       // 非流式响应
       const data = await response.json();

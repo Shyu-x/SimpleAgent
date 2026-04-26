@@ -1,0 +1,256 @@
+{
+  "timestamp": "2026-04-06T11:45:49.450Z",
+  "total": 29,
+  "passed": 28,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "results": [
+    {
+      "category": "core",
+      "name": "健康检查 - GET /api/health",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.502Z",
+      "response": true
+    },
+    {
+      "category": "core",
+      "name": "会话列表 - GET /api/sessions",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.503Z",
+      "response": true
+    },
+    {
+      "category": "core",
+      "name": "Agent类型 - GET /api/agents/types",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.505Z",
+      "response": true
+    },
+    {
+      "category": "core",
+      "name": "配置信息 - GET /api/config",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.507Z",
+      "response": true
+    },
+    {
+      "category": "admin",
+      "name": "模型列表 - GET /api/admin/models",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.511Z",
+      "response": true
+    },
+    {
+      "category": "admin",
+      "name": "工具列表 - GET /api/admin/tools",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.513Z",
+      "response": true
+    },
+    {
+      "category": "admin",
+      "name": "知识库统计 - GET /api/admin/knowledge/stats",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.515Z",
+      "response": true
+    },
+    {
+      "category": "admin",
+      "name": "Prompt模板 - GET /api/admin/prompts",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.516Z",
+      "response": true
+    },
+    {
+      "category": "admin",
+      "name": "链路追踪 - GET /api/admin/traces",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.518Z",
+      "response": true
+    },
+    {
+      "category": "rag",
+      "name": "RAG统计 - GET /api/rag/stats",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.520Z",
+      "response": true
+    },
+    {
+      "category": "rag",
+      "name": "知识库列表 - GET /api/rag/kb",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.520Z",
+      "response": true
+    },
+    {
+      "category": "rag",
+      "name": "创建知识库 - POST /api/rag/kb",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.534Z",
+      "response": true
+    },
+    {
+      "category": "rag",
+      "name": "全局搜索 - POST /api/rag/search",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.638Z",
+      "response": true
+    },
+    {
+      "category": "rag",
+      "name": "URL抓取 - POST /api/rag/fetch",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.640Z",
+      "response": true
+    },
+    {
+      "category": "search",
+      "name": "搜索状态 - GET /api/search",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.641Z",
+      "response": true
+    },
+    {
+      "category": "search",
+      "name": "搜索配置 - GET /api/search/config",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.643Z",
+      "response": true
+    },
+    {
+      "category": "search",
+      "name": "搜索源列表 - GET /api/search/providers",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.643Z",
+      "response": true
+    },
+    {
+      "category": "search",
+      "name": "搜索健康检查 - GET /api/search/health",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:45:49.645Z",
+      "response": true
+    },
+    {
+      "category": "search",
+      "name": "Web搜索 - POST /api/search/web",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:02.668Z",
+      "response": true
+    },
+    {
+      "category": "search",
+      "name": "增强搜索 - POST /api/search/enhanced",
+      "status": "SKIP",
+      "timestamp": "2026-04-06T11:46:17.683Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "agent",
+      "name": "MCP状态 - GET /api/mcp/status",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.688Z",
+      "response": true
+    },
+    {
+      "category": "agent",
+      "name": "Agent类型 - GET /api/agents/types",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.689Z",
+      "response": true
+    },
+    {
+      "category": "agent",
+      "name": "工具列表 - GET /api/tools",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.689Z",
+      "response": true
+    },
+    {
+      "category": "ollama",
+      "name": "Ollama状态 - GET /api/ollama/status",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.820Z",
+      "response": true
+    },
+    {
+      "category": "ollama",
+      "name": "Ollama模型 - GET /api/ollama/models",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.825Z",
+      "response": true
+    },
+    {
+      "category": "ollama",
+      "name": "嵌入测试 - POST /api/ollama/embed",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.947Z",
+      "response": true
+    },
+    {
+      "category": "hitl",
+      "name": "HITL健康检查 - GET /api/hitl/health",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.949Z",
+      "response": true
+    },
+    {
+      "category": "hitl",
+      "name": "待确认请求 - GET /api/hitl/pending",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.949Z",
+      "response": true
+    },
+    {
+      "category": "a2a",
+      "name": "Agent列表 - GET /api/a2a/agents",
+      "status": "PASS",
+      "timestamp": "2026-04-06T11:46:17.950Z",
+      "response": true
+    }
+  ],
+  "summary": {
+    "core": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0
+    },
+    "admin": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "rag": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "search": {
+      "total": 6,
+      "passed": 5,
+      "failed": 0
+    },
+    "agent": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "ollama": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0
+    },
+    "hitl": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0
+    },
+    "a2a": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "knownIssues": []
+}

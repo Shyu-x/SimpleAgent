@@ -1,0 +1,328 @@
+{
+  "timestamp": "2026-04-01T14:22:08.278Z",
+  "scenarios": [
+    {
+      "name": "技术问答 - 渐进式深入",
+      "description": "连续3轮技术问答，后续问题承接前文上下文",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "什么是JavaScript的闭包？请用简单的话解释。",
+          "assistantResponse": "AI对话平台的后端服务具有以下特点：\n\n1. **SSE流式响应**\n   - 支持实时流式输出\n   - 实现打字机效果\n   - 提升用户体验\n\n2. **多平台支持**\n   - OpenAI\n   - Claude\n   - 智谱AI\n   - Minimax\n\n3. **统一API格式**\n   - 参考One API设计\n   - OpenAI兼容接口\n   - 便于扩展和集成",
+          "chunksCount": 196,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 5959,
+          "estimatedTokens": 66
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "那它和普通函数有什么区别？",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14348,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "能给我一个实际的开发场景例子吗？",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14263,
+          "estimatedTokens": 124
+        }
+      ],
+      "totalTokens": 314,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "什么是JavaScript的闭包？请用简单的话解释。"
+        },
+        {
+          "role": "assistant",
+          "content": "AI对话平台的后端服务具有以下特点：\n\n1. **SSE流式响应**\n   - 支持实时流式输出\n   - 实现打字机效果\n   - 提升用户体验\n\n2. **多平台支持**\n   - OpenAI\n   - Claude\n   - 智谱AI\n   - Minimax\n\n3. **统一API格式**\n   - 参考One API设计\n   - OpenAI兼容接口\n   - 便于扩展和集成"
+        },
+        {
+          "role": "user",
+          "content": "那它和普通函数有什么区别？"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "能给我一个实际的开发场景例子吗？"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        }
+      ]
+    },
+    {
+      "name": "代码调试 - 错误定位",
+      "description": "提供一个有问题的代码，Agent需要分析并给出解决方案",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "这段代码报错：TypeError: Cannot read property \"map\" of undefined",
+          "assistantResponse": "这是一个简单的JavaScript函数示例：\n\n```javascript\nfunction greet(name) {\n  return `你好, ${name}!`;\n}\n\nconsole.log(greet('世界'));\n```\n\n这段代码会输出: 你好, 世界!",
+          "chunksCount": 136,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 4127,
+          "estimatedTokens": 41
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "这是出错的部分：const data = fetchData(); data.map(x => x.id)",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14306,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "怎么修改才能避免这个错误？",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14337,
+          "estimatedTokens": 124
+        }
+      ],
+      "totalTokens": 289,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "这段代码报错：TypeError: Cannot read property \"map\" of undefined"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一个简单的JavaScript函数示例：\n\n```javascript\nfunction greet(name) {\n  return `你好, ${name}!`;\n}\n\nconsole.log(greet('世界'));\n```\n\n这段代码会输出: 你好, 世界!"
+        },
+        {
+          "role": "user",
+          "content": "这是出错的部分：const data = fetchData(); data.map(x => x.id)"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "怎么修改才能避免这个错误？"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        }
+      ]
+    },
+    {
+      "name": "多步骤任务执行",
+      "description": "需要多个工具协作完成的复杂任务",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "帮我搜索今天的科技新闻，然后用中文总结要点。",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14346,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "把刚才的新闻保存到我的笔记里，标签是\"科技\"",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14245,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "列出我所有标签为\"科技\"的笔记",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14329,
+          "estimatedTokens": 124
+        }
+      ],
+      "totalTokens": 372,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "帮我搜索今天的科技新闻，然后用中文总结要点。"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "把刚才的新闻保存到我的笔记里，标签是\"科技\""
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "列出我所有标签为\"科技\"的笔记"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        }
+      ]
+    },
+    {
+      "name": "知识库检索 - RAG应用",
+      "description": "测试RAG知识库检索与生成",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "请问公司关于年假的政策是什么？",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14315,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "那我探亲假有多少天？",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14348,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "申请流程是怎样的？",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14343,
+          "estimatedTokens": 124
+        }
+      ],
+      "totalTokens": 372,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "请问公司关于年假的政策是什么？"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "那我探亲假有多少天？"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "申请流程是怎样的？"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        }
+      ]
+    },
+    {
+      "name": "创意生成 - 思维发散",
+      "description": "测试Agent创意能力与上下文保持",
+      "turns": [
+        {
+          "turnNumber": 1,
+          "userMessage": "帮我想3个APP产品名称，要求简洁、有趣、容易记住",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14267,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 2,
+          "userMessage": "第一个名字的logo用什么颜色比较好？",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14324,
+          "estimatedTokens": 124
+        },
+        {
+          "turnNumber": 3,
+          "userMessage": "用这个颜色设计一个简单的logo描述",
+          "assistantResponse": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          "chunksCount": 472,
+          "intent": null,
+          "toolsUsed": [],
+          "latency": 14342,
+          "estimatedTokens": 124
+        }
+      ],
+      "totalTokens": 372,
+      "success": true,
+      "context": [
+        {
+          "role": "user",
+          "content": "帮我想3个APP产品名称，要求简洁、有趣、容易记住"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "第一个名字的logo用什么颜色比较好？"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "role": "user",
+          "content": "用这个颜色设计一个简单的logo描述"
+        },
+        {
+          "role": "assistant",
+          "content": "这是一段较长的模拟回复，用于测试流式输出的效果。\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        }
+      ]
+    }
+  ],
+  "总场景数": 5,
+  "总对话轮次": 15,
+  "总Token数": 1719
+}

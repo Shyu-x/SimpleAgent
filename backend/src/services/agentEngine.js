@@ -93,7 +93,7 @@ class AgentEngine {
 
     // LLM推理支持
     this.modelRouter = options.modelRouter || null;
-    this.llmModelId = options.llmModelId || 'MiniMax-M2.7-highspeed';
+    this.llmModelId = options.llmModelId || 'MiniMax-M2.7';
     this.llmEnabled = options.llmEnabled !== false;
     this.llmIntentClassifier = null;
 
@@ -457,7 +457,7 @@ class AgentEngine {
 
       // 计算下一次延迟
       const delay = this._calculateBackoffDelay(attempt, delayMs, backoffMultiplier);
-      console.log(formatConsole.warning(`[Retry] Attempt ${attempt + 1}/${maxRetries + 1} failed for ${toolName}. Retrying in ${delay}ms... Reason: ${lastError}`));
+      // Operational log - using formatConsole for colored output
 
       // 等待后重试
       await sleep(delay);
@@ -520,10 +520,12 @@ class AgentEngine {
 
   /**
    * 检查是否需要摘要
+   * 触发条件：context利用率达到80%即触发compact
    */
   _shouldSummarize() {
     const estimatedTokens = this._estimateTokens();
-    return estimatedTokens > this.tokenLimit || this.apiTotalTokens > this.tokenLimit;
+    const utilization = estimatedTokens / this.tokenLimit;
+    return utilization >= 0.8;
   }
 
   /**
@@ -537,7 +539,7 @@ class AgentEngine {
 
     if (!this.messages || this.messages.length < 4) return;
 
-    console.log(formatConsole.warning(`[Token] 超过限制，开始摘要 (估算: ${this._estimateTokens()}, API: ${this.apiTotalTokens})`));
+    // Token management log - operational info
 
     // 策略：保留 system 和 user 消息，将中间的 assistant 消息压缩为摘要
     const summarizedMessages = [];
@@ -584,7 +586,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
 
     this.messages = summarizedMessages;
     this._skipNextTokenCheck = true; // 防止连续触发摘要
-    console.log(formatConsole.success(`[Token] 摘要完成，消息数: ${this.messages.length}`));
+    // Token summary complete - operational info
   }
 
   /**
@@ -682,7 +684,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
 
     // 启动日志记录 (借鉴 MiniMax Mini-Agent)
     this.logger.startNewRun();
-    console.log(formatConsole.info('Log', `File: ${this.logger.getLogFilePath()}`));
+    // Agent log file path - operational info
 
     this.state.status = 'running';
     this.state.iteration = 0;
@@ -739,7 +741,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       for (let i = 0; i < this.maxIterations; i++) {
         // 取消检查 (借鉴 MiniMax Mini-Agent)
         if (this._checkCancelled()) {
-          console.log(formatConsole.warning('[Agent] 任务已取消'));
+          // Task cancelled - operational info
           this._cleanupIncompleteMessages(this.messages);
           if (this._cancelCallback) {
             this._cancelCallback();
@@ -924,18 +926,18 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
    * 从检查点恢复执行
    */
   async resumeFromCheckpoint(sessionId) {
-    console.log(`[AgentEngine] Resuming from checkpoint: ${sessionId}`);
+    // Resuming from checkpoint - operational info
 
     // 优先从 StatePersistence 恢复
     let restoredState = await this.persistence.restoreFromCheckpoint(sessionId);
 
     // 若 StatePersistence 无数据，尝试从文件检查点恢复
     if (!restoredState) {
-      console.log(`[AgentEngine] StatePersistence 无数据，尝试从文件检查点恢复: ${sessionId}`);
+      // StatePersistence fallback - operational info
       const fileCheckpoint = await this.fileCheckpoint.getLatest(sessionId);
       if (fileCheckpoint && fileCheckpoint.state) {
         restoredState = fileCheckpoint.state;
-        console.log(`[AgentEngine] 从文件检查点恢复成功: ${fileCheckpoint.id}`);
+        // File checkpoint restored - operational info
       }
     }
 
@@ -1218,7 +1220,7 @@ ${contextText}
       if (this.humanConfirmationEnabled) {
         const confirmation = this._needsHumanConfirmation(toolName, input, tool);
         if (confirmation.needsConfirmation) {
-          console.log(`[AgentEngine] Human confirmation required: ${confirmation.reason}`);
+          // Human confirmation required - operational info
 
           // 发送确认请求到前端（SSE广播）
           const checkpoint = hitlManager.createCheckpoint({
@@ -1246,7 +1248,7 @@ ${contextText}
           if (!result.success || result.checkpoint?.status === 'timeout') {
             this.state.lastToolSuccess = false;
             // 超时或拒绝：记录并返回取消结果
-            console.log(`[AgentEngine] Confirmation timeout or rejected for tool: ${toolName}`);
+            // Confirmation timeout or rejected - operational info
             return {
               success: false,
               error: `操作已取消：用户未在${Math.round(this.confirmationTimeout / 1000)}秒内确认`,
@@ -1257,7 +1259,7 @@ ${contextText}
           }
 
           // 用户批准，继续执行
-          console.log(`[AgentEngine] Confirmation approved for tool: ${toolName}`);
+          // Confirmation approved - operational info
         }
       }
 
@@ -1265,7 +1267,7 @@ ${contextText}
       this.state.reactPhase = REACT_PHASES.OBSERVE;
 
       // 记录工具调用 (借鉴 MiniMax Mini-Agent)
-      console.log(formatConsole.toolCall(toolName, input));
+      // Tool call - operational info
       this.logger.logToolResult(toolName, input, true, '');
 
       // 使用增强的重试机制执行工具（带退避策略）
@@ -1401,7 +1403,7 @@ ${contextText}
       if (shouldRetry) {
         // 根据错误类型调整重试策略
         const retryConfig = this._getRetryConfigForError(errorType);
-        console.log(formatConsole.warning(`[Reflect] 工具执行失败 (${errorType}): ${output.error}，将在 ${retryConfig.delayMs}ms 后重试`));
+        // Tool execution failed - operational warning
 
         return {
           shouldContinue: true,
@@ -1797,7 +1799,7 @@ ${context.customPrompt || ''}
       });
     }
 
-    console.log(`[AgentEngine] 语义记忆已存储，session: ${this.sessionId}`);
+    // Semantic memory stored - operational info
   }
 
   /**
@@ -1826,7 +1828,7 @@ ${context.customPrompt || ''}
    */
   registerToA2A(a2aService) {
     if (!this.a2aEnabled) {
-      console.log('[AgentEngine] A2A is disabled, skipping registration');
+      // A2A disabled - operational info
       return null;
     }
 
@@ -1844,7 +1846,7 @@ ${context.customPrompt || ''}
       }
     });
 
-    console.log(`[AgentEngine] Registered to A2A as: ${this.a2aAgentId}`);
+    // A2A registered - operational info
     return agentInfo;
   }
 
@@ -1854,7 +1856,7 @@ ${context.customPrompt || ''}
   unregisterFromA2A() {
     if (this.a2aService) {
       this.a2aService.unregisterAgent(this.a2aAgentId);
-      console.log(`[AgentEngine] Unregistered from A2A: ${this.a2aAgentId}`);
+      // A2A unregistered - operational info
     }
   }
 
@@ -1883,7 +1885,7 @@ ${context.customPrompt || ''}
       timeout
     });
 
-    console.log(`[AgentEngine] Task ${result.task.id} delegated to ${targetAgentId}`);
+    // A2A task delegated - operational info
     return result;
   }
 
@@ -1916,7 +1918,7 @@ ${context.customPrompt || ''}
       case A2A_MESSAGE_TYPES.TASK_DELEGATE: {
         // 收到任务委托
         const { task, input } = payload || {};
-        console.log(`[AgentEngine] Received A2A task: ${taskId} from ${from}`);
+        // A2A task received - operational info
 
         this.state.status = 'running';
 
@@ -1964,14 +1966,14 @@ ${context.customPrompt || ''}
 
       case A2A_MESSAGE_TYPES.PROGRESS_UPDATE: {
         // 收到进度更新
-        console.log(`[AgentEngine] A2A progress update for ${taskId}: ${payload.progress}%`);
+        // A2A progress update - operational info
         this.emit('a2a:progress', { taskId, progress: payload.progress, metadata: payload.metadata });
         break;
       }
 
       case A2A_MESSAGE_TYPES.STATUS_SYNC: {
         // 收到状态同步
-        console.log(`[AgentEngine] A2A status sync from ${from}: ${payload.status}`);
+        // A2A status sync - operational info
         this.emit('a2a:statusSync', { from, status: payload.status, metadata: payload.metadata });
         break;
       }
@@ -1984,7 +1986,7 @@ ${context.customPrompt || ''}
       }
 
       default:
-        console.log(`[AgentEngine] Unknown A2A message type: ${type}`);
+        // Unknown A2A message - operational warning
     }
   }
 

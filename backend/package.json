@@ -27,12 +27,16 @@
     "opossum": "^5.0.1",
     "pg": "^8.20.0",
     "playwright": "^1.40.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
     "uuid": "^9.0.1",
     "vm2": "^3.10.5"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "autocannon": "^8.0.0",
     "jest": "^30.3.0",
+    "loadtest": "^8.2.1",
     "prisma": "^7.5.0",
     "ts-jest": "^29.4.6"
   }

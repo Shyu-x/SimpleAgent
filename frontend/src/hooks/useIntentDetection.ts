@@ -154,14 +154,13 @@ export function detectIntent(text: string): IntentResult | null {
   }
 
   const top = scores[0];
-  const totalScore = scores.reduce((sum, s) => sum + s.score, 0);
-  const confidence = totalScore > 0 ? Math.min(top.score / totalScore, 1) : 0;
+  const confidence = top.score;
 
   // 获取备选类型
   const alternativeTypes = scores
     .slice(1, 3)
     .filter(s => s.score > 0)
-    .map(s => ({ type: s.type, confidence: s.score / totalScore }));
+    .map(s => ({ type: s.type, confidence: s.score }));
 
   return {
     type: top.type,

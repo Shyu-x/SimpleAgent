@@ -1,0 +1,27 @@
+{
+  "id": "kb_1776100273795",
+  "name": "Second KB",
+  "description": "",
+  "documents": [
+    {
+      "id": "doc_1776100292843",
+      "title": "Unicode Doc",
+      "type": "text",
+      "metadata": {},
+      "createdAt": 1776100292843,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100292843_0",
+          "content": "This is a Chinese document with emoji and special chars。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100292843",
+            "documentTitle": "Unicode Doc"
+          }
+        }
+      ]
+    }
+  ],
+  "createdAt": 1776100273795,
+  "updatedAt": 1776100292843
+}

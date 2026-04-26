@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useChatStore } from '@/store/chatStore';
 import { Plus, Trash2, MessageSquare, AlertTriangle, Search, MoreHorizontal, X, GripVertical } from 'lucide-react';
 import type { Conversation } from '@/types';
@@ -72,7 +72,20 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [draggedConversationId, setDraggedConversationId] = useState<string | null>(null);
+
+  // 防抖搜索
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery]);
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{
@@ -82,7 +95,7 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
     conversation: Conversation;
   } | null>(null);
 
-  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const normalizedQuery = debouncedQuery.trim().toLowerCase();
 
   const filteredConversations = useMemo(() => {
     if (!hasHydrated) return [];
@@ -443,7 +456,23 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
             conversation={contextMenu.conversation}
             onRename={(title) => updateConversationTitle(contextMenu.conversationId, title)}
             onDelete={() => setDeleteConfirmId(contextMenu.conversationId)}
-            onExport={() => {/* 实现导出逻辑 */}}
+            onExport={() => {
+              if (!contextMenu?.conversation) return;
+              const { conversation } = contextMenu;
+              const exportData = {
+                title: conversation.title,
+                messages: conversation.messages,
+                createdAt: new Date(conversation.createdAt).toISOString(),
+                exportedAt: new Date().toISOString(),
+              };
+              const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${conversation.title || '对话'}_${Date.now()}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
             onOpenInNewWindow={() => addActiveWindow(contextMenu.conversationId)}
           />
         )}

@@ -1,0 +1,219 @@
+{
+  "id": "kb_1776100311169",
+  "name": "TestKB",
+  "description": "自动创建的知识库",
+  "documents": [
+    {
+      "id": "doc_1776100311169",
+      "title": "Test Document",
+      "type": "text",
+      "metadata": {},
+      "createdAt": 1776100311169,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100311169_0",
+          "content": "This is a test document content。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100311169",
+            "documentTitle": "Test Document"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100311171",
+      "title": "Metadata Test",
+      "type": "text",
+      "metadata": {
+        "tags": [
+          "test",
+          "admin"
+        ],
+        "priority": 1
+      },
+      "createdAt": 1776100311171,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100311171_0",
+          "content": "Content with complex metadata。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100311171",
+            "documentTitle": "Metadata Test"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100444018",
+      "title": "Test Document",
+      "type": "text",
+      "metadata": {},
+      "createdAt": 1776100444018,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100444018_0",
+          "content": "This is a test document content。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100444018",
+            "documentTitle": "Test Document"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100444020",
+      "title": "Metadata Test",
+      "type": "text",
+      "metadata": {
+        "tags": [
+          "test",
+          "admin"
+        ],
+        "priority": 1
+      },
+      "createdAt": 1776100444020,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100444020_0",
+          "content": "Content with complex metadata。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100444020",
+            "documentTitle": "Metadata Test"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100467786",
+      "title": "Test Document",
+      "type": "text",
+      "metadata": {},
+      "createdAt": 1776100467786,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100467786_0",
+          "content": "This is a test document content。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100467786",
+            "documentTitle": "Test Document"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100467789",
+      "title": "Metadata Test",
+      "type": "text",
+      "metadata": {
+        "tags": [
+          "test",
+          "admin"
+        ],
+        "priority": 1
+      },
+      "createdAt": 1776100467789,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100467789_0",
+          "content": "Content with complex metadata。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100467789",
+            "documentTitle": "Metadata Test"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100483730",
+      "title": "Test Document",
+      "type": "text",
+      "metadata": {},
+      "createdAt": 1776100483730,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100483730_0",
+          "content": "This is a test document content。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100483730",
+            "documentTitle": "Test Document"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100483733",
+      "title": "Metadata Test",
+      "type": "text",
+      "metadata": {
+        "tags": [
+          "test",
+          "admin"
+        ],
+        "priority": 1
+      },
+      "createdAt": 1776100483733,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100483733_0",
+          "content": "Content with complex metadata。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100483733",
+            "documentTitle": "Metadata Test"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100510660",
+      "title": "Test Document",
+      "type": "text",
+      "metadata": {},
+      "createdAt": 1776100510660,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100510660_0",
+          "content": "This is a test document content。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100510660",
+            "documentTitle": "Test Document"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1776100510662",
+      "title": "Metadata Test",
+      "type": "text",
+      "metadata": {
+        "tags": [
+          "test",
+          "admin"
+        ],
+        "priority": 1
+      },
+      "createdAt": 1776100510662,
+      "chunks": [
+        {
+          "id": "chunk_doc_1776100510662_0",
+          "content": "Content with complex metadata。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1776100510662",
+            "documentTitle": "Metadata Test"
+          }
+        }
+      ]
+    }
+  ],
+  "createdAt": 1776100311169,
+  "updatedAt": 1776100510662
+}

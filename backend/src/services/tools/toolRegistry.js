@@ -3,7 +3,50 @@
  * 管理所有可用工具的注册和调用
  * 支持关键词匹配 + LLM语义匹配
  * 参考 ragent 的 MCP 工具集成设计
+ *
+ * @author AI Chat 玩具团队
+ * @date 2026-04-01 (添加超时控制和参数验证)
  */
+
+// 默认超时配置（毫秒）
+const DEFAULT_TIMEOUT = 30000; // 30秒
+const TOOL_TIMEOUTS = {
+  web_search: 15000,
+  http_request: 10000,
+  code_execution: 30000,
+  file_operations: 5000,
+  calculator: 1000,
+  default: DEFAULT_TIMEOUT
+};
+
+// 工具执行错误
+class ToolExecutionError extends Error {
+  constructor(message, toolName, originalError = null) {
+    super(message);
+    this.name = 'ToolExecutionError';
+    this.toolName = toolName;
+    this.originalError = originalError;
+    this.timestamp = Date.now();
+  }
+}
+
+// 工具超时错误
+class ToolTimeoutError extends ToolExecutionError {
+  constructor(toolName, timeout) {
+    super(`Tool "${toolName}" execution timeout after ${timeout}ms`, toolName);
+    this.name = 'ToolTimeoutError';
+    this.timeout = timeout;
+  }
+}
+
+// 工具参数验证错误
+class ToolValidationError extends ToolExecutionError {
+  constructor(message, toolName, validationErrors = []) {
+    super(message, toolName);
+    this.name = 'ToolValidationError';
+    this.validationErrors = validationErrors;
+  }
+}
 
 class ToolRegistry {
   constructor(options = {}) {
@@ -14,6 +57,12 @@ class ToolRegistry {
     this.llmClassifier = null;
     // 语义匹配阈值
     this.semanticThreshold = options.semanticThreshold || 0.6;
+    // 全局默认超时
+    this.defaultTimeout = options.defaultTimeout || DEFAULT_TIMEOUT;
+    // 工具超时配置
+    this.toolTimeouts = new Map(Object.entries(TOOL_TIMEOUTS));
+    // 工具执行统计
+    this.executionStats = new Map();
     this._initIntentMapping();
   }
 
@@ -232,12 +281,130 @@ class ToolRegistry {
   }
 
   /**
-   * 执行工具（带参数提取）
+   * 获取工具超时时间
+   */
+  _getToolTimeout(toolName) {
+    // 优先使用工具特定配置
+    if (this.toolTimeouts.has(toolName)) {
+      return this.toolTimeouts.get(toolName);
+    }
+    // 使用分类默认值
+    const tool = this.tools.get(toolName);
+    if (tool && this.toolTimeouts.has(tool.category)) {
+      return this.toolTimeouts.get(tool.category);
+    }
+    // 使用全局默认值
+    return this.defaultTimeout;
+  }
+
+  /**
+   * 带超时的执行包装
+   */
+  async _executeWithTimeout(fn, timeout, toolName) {
+    return new Promise(async (resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new ToolTimeoutError(toolName, timeout));
+      }, timeout);
+
+      try {
+        const result = await fn();
+        clearTimeout(timer);
+        resolve(result);
+      } catch (error) {
+        clearTimeout(timer);
+        reject(error);
+      }
+    });
+  }
+
+  /**
+   * 验证工具参数
+   */
+  _validateParameters(tool, params) {
+    const errors = [];
+    const { parameters } = tool;
+
+    if (!parameters || !parameters.properties) {
+      return { valid: true, errors: [] };
+    }
+
+    const required = parameters.required || [];
+    const properties = parameters.properties;
+
+    // 检查必需参数
+    for (const field of required) {
+      if (params[field] === undefined || params[field] === null) {
+        errors.push({
+          field,
+          message: `Missing required parameter: ${field}`
+        });
+      }
+    }
+
+    // 检查参数类型
+    for (const [key, value] of Object.entries(params)) {
+      if (properties[key]) {
+        const expectedType = properties[key].type;
+        const actualType = typeof value;
+
+        // 类型检查（排除null和undefined）
+        if (value !== null && value !== undefined) {
+          if (expectedType === 'number' && actualType !== 'number') {
+            errors.push({
+              field: key,
+              message: `Parameter "${key}" should be number, got ${actualType}`
+            });
+          } else if (expectedType === 'string' && actualType !== 'string') {
+            errors.push({
+              field: key,
+              message: `Parameter "${key}" should be string, got ${actualType}`
+            });
+          } else if (expectedType === 'boolean' && actualType !== 'boolean') {
+            errors.push({
+              field: key,
+              message: `Parameter "${key}" should be boolean, got ${actualType}`
+            });
+          } else if (expectedType === 'array' && !Array.isArray(value)) {
+            errors.push({
+              field: key,
+              message: `Parameter "${key}" should be array, got ${actualType}`
+            });
+          }
+        }
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * 更新工具超时配置
+   */
+  setToolTimeout(toolNameOrCategory, timeout) {
+    this.toolTimeouts.set(toolNameOrCategory, timeout);
+  }
+
+  /**
+   * 设置全局默认超时
+   */
+  setDefaultTimeout(timeout) {
+    this.defaultTimeout = timeout;
+    this.toolTimeouts.set('default', timeout);
+  }
+
+  /**
+   * 执行工具（带参数提取和超时控制）
    * @param {string} toolName - 工具名称
    * @param {Object} params - 参数
+   * @param {Object} options - 执行选项
+   * @param {number} options.timeout - 超时时间（毫秒）
+   * @param {boolean} options.skipValidation - 跳过参数验证
    * @returns {Promise} 执行结果
    */
-  async executeTool(toolName, params = {}) {
+  async executeTool(toolName, params = {}, options = {}) {
     const tool = this.tools.get(toolName);
     if (!tool) {
       return {
@@ -247,21 +414,157 @@ class ToolRegistry {
       };
     }
 
+    // 参数验证
+    if (options.skipValidation !== true) {
+      const validation = this._validateParameters(tool, params);
+      if (!validation.valid) {
+        return {
+          success: false,
+          tool: toolName,
+          error: 'Parameter validation failed',
+          validationErrors: validation.errors
+        };
+      }
+    }
+
+    // 获取超时时间
+    const timeout = options.timeout || this._getToolTimeout(toolName);
+
+    // 记录执行统计
+    this._recordExecutionStart(toolName);
+
     try {
-      const result = await tool.execute(params);
+      // 带超时的执行
+      const result = await this._executeWithTimeout(
+        () => tool.execute(params),
+        timeout,
+        toolName
+      );
+
+      // 记录成功
+      this._recordExecutionEnd(toolName, true);
+
       return {
         success: true,
         tool: toolName,
-        result
+        result,
+        executionTime: Date.now() - (this.executionStats.get(toolName)?.lastStartTime || Date.now())
       };
     } catch (error) {
+      // 记录失败
+      this._recordExecutionEnd(toolName, false, error.message);
+
+      // 分类错误类型
+      let errorType = 'unknown';
+      if (error instanceof ToolTimeoutError) {
+        errorType = 'timeout';
+      } else if (error instanceof ToolValidationError) {
+        errorType = 'validation';
+      }
+
       return {
         success: false,
         tool: toolName,
-        error: error.message
+        error: error.message,
+        errorType,
+        ...(error instanceof ToolTimeoutError && { timeout: error.timeout })
       };
     }
   }
+
+  /**
+   * 并行执行多个工具（结果合并）
+   */
+  async executeTools(toolCalls) {
+    const results = await Promise.allSettled(
+      toolCalls.map(({ name, params, options }) =>
+        this.executeTool(name, params, options)
+      )
+    );
+
+    return results.map((result, index) => {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      } else {
+        return {
+          success: false,
+          tool: toolCalls[index].name,
+          error: result.reason?.message || 'Unknown error'
+        };
+      }
+    });
+  }
+
+  /**
+   * 记录执行开始
+   */
+  _recordExecutionStart(toolName) {
+    if (!this.executionStats.has(toolName)) {
+      this.executionStats.set(toolName, {
+        totalCalls: 0,
+        successCalls: 0,
+        failureCalls: 0,
+        totalTime: 0,
+        lastStartTime: null,
+        lastError: null
+      });
+    }
+    const stats = this.executionStats.get(toolName);
+    stats.totalCalls++;
+    stats.lastStartTime = Date.now();
+  }
+
+  /**
+   * 记录执行结束
+   */
+  _recordExecutionEnd(toolName, success, errorMessage = null) {
+    const stats = this.executionStats.get(toolName);
+    if (stats && stats.lastStartTime) {
+      const duration = Date.now() - stats.lastStartTime;
+      stats.totalTime += duration;
+      if (success) {
+        stats.successCalls++;
+      } else {
+        stats.failureCalls++;
+        stats.lastError = errorMessage;
+      }
+    }
+  }
+
+  /**
+   * 获取工具执行统计
+   */
+  getToolStats(toolName) {
+    const stats = this.executionStats.get(toolName);
+    if (!stats) return null;
+
+    return {
+      toolName,
+      totalCalls: stats.totalCalls,
+      successCalls: stats.successCalls,
+      failureCalls: stats.failureCalls,
+      successRate: stats.totalCalls > 0
+        ? ((stats.successCalls / stats.totalCalls) * 100).toFixed(2) + '%'
+        : 'N/A',
+      avgExecutionTime: stats.totalCalls > 0
+        ? (stats.totalTime / stats.totalCalls).toFixed(2) + 'ms'
+        : 'N/A',
+      lastError: stats.lastError
+    };
+  }
+
+  /**
+   * 获取所有工具统计
+   */
+  getAllStats() {
+    const stats = {};
+    for (const toolName of this.tools.keys()) {
+      stats[toolName] = this.getToolStats(toolName);
+    }
+    return stats;
+  }
+
+  // ==================== 原有方法保持兼容 ====================
 
   /**
    * 智能选择工具（支持LLM语义匹配）

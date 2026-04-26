@@ -1,0 +1,8 @@
+{
+  "id": "kb_1775479441121",
+  "name": "<script>alert(\"xss\")</script>",
+  "description": "",
+  "documents": [],
+  "createdAt": 1775479441121,
+  "updatedAt": 1775479441121
+}
