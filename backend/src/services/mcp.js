@@ -19,13 +19,19 @@ const JsonRpcErrors = {
   METHOD_NOT_FOUND: { code: -32601, message: 'Method not found' },
   INVALID_PARAMS: { code: -32602, message: 'Invalid params' },
   INTERNAL_ERROR: { code: -32603, message: 'Internal error' },
-  SERVER_ERROR: { code: -32603, message: 'Server error' }
+  SERVER_ERROR: { code: -32603, message: 'Server error' },
+  TIMEOUT: { code: -32001, message: 'Execution timeout' }
 };
 
 /**
  * MCP 协议版本
  */
 const MCP_VERSION = '2024-11-05';
+
+/**
+ * 默认超时时间 (30秒)
+ */
+const DEFAULT_TIMEOUT_MS = 30000;
 
 class MCPService extends EventEmitter {
   constructor(options = {}) {
@@ -46,6 +52,14 @@ class MCPService extends EventEmitter {
 
     // 通知队列
     this.notificationQueue = [];
+
+    // 工具执行统计
+    this.executionStats = {
+      total: 0,
+      success: 0,
+      failed: 0,
+      timeouts: 0
+    };
 
     // 注册内置资源和提示词
     this.registerBuiltinResources();
@@ -173,6 +187,283 @@ class MCPService extends EventEmitter {
     this.emit('toolRegistered', tool);
 
     return this;
+  }
+
+  /**
+   * 执行工具
+   * @param {string} toolName - 工具名称
+   * @param {object} args - 工具参数
+   * @param {object} context - 执行上下文（可选）
+   * @returns {Promise<object>} MCP格式的执行结果
+   */
+  async executeTool(toolName, args = {}, context = {}) {
+    const startTime = Date.now();
+    this.executionStats.total++;
+
+    // 验证工具是否存在
+    const tool = this.tools.get(toolName);
+    if (!tool) {
+      const errorResult = this.formatToolResult(toolName, {
+        success: false,
+        error: { code: 'TOOL_NOT_FOUND', message: `工具 ${toolName} 不存在` }
+      }, startTime);
+      this.executionStats.failed++;
+      return errorResult;
+    }
+
+    // 参数验证
+    if (tool.inputSchema && tool.inputSchema.properties) {
+      const validation = this.validateArgs(toolName, args);
+      if (!validation.valid) {
+        const errorResult = this.formatToolResult(toolName, {
+          success: false,
+          error: { code: 'INVALID_PARAMS', message: validation.errors.join('; ') }
+        }, startTime);
+        this.executionStats.failed++;
+        return errorResult;
+      }
+    }
+
+    try {
+      // 执行工具
+      const result = await tool.handler(args);
+
+      // 记录日志
+      this.logToolExecution(toolName, args, true, result, Date.now() - startTime);
+
+      this.executionStats.success++;
+
+      return this.formatToolResult(toolName, {
+        success: true,
+        result
+      }, startTime);
+    } catch (error) {
+      // 记录错误日志
+      this.logToolExecution(toolName, args, false, error.message, Date.now() - startTime);
+
+      this.executionStats.failed++;
+
+      return this.formatToolResult(toolName, {
+        success: false,
+        error: { code: 'EXECUTION_ERROR', message: error.message }
+      }, startTime);
+    }
+  }
+
+  /**
+   * 带超时保护的工具执行
+   * @param {string} toolName - 工具名称
+   * @param {object} args - 工具参数
+   * @param {number} timeoutMs - 超时时间（毫秒），默认30秒
+   * @param {object} context - 执行上下文
+   * @returns {Promise<object>} MCP格式的执行结果
+   */
+  async executeWithTimeout(toolName, args = {}, timeoutMs = DEFAULT_TIMEOUT_MS, context = {}) {
+    const startTime = Date.now();
+    this.executionStats.total++;
+
+    return new Promise((resolve) => {
+      // 设置超时定时器
+      const timeoutId = setTimeout(() => {
+        this.executionStats.timeouts++;
+        this.executionStats.failed++;
+
+        const timeoutResult = this.formatToolResult(toolName, {
+          success: false,
+          error: {
+            code: 'TIMEOUT',
+            message: `工具执行超时 (${timeoutMs}ms)`,
+            timeout: timeoutMs
+          }
+        }, startTime);
+
+        this.logToolExecution(toolName, args, false, `Timeout after ${timeoutMs}ms`, timeoutMs);
+
+        resolve(timeoutResult);
+      }, timeoutMs);
+
+      // 执行工具
+      this.executeTool(toolName, args, context)
+        .then(result => {
+          clearTimeout(timeoutId);
+          resolve(result);
+        })
+        .catch(error => {
+          clearTimeout(timeoutId);
+          this.executionStats.failed++;
+
+          const errorResult = this.formatToolResult(toolName, {
+            success: false,
+            error: { code: 'EXECUTION_ERROR', message: error.message }
+          }, startTime);
+
+          resolve(errorResult);
+        });
+    });
+  }
+
+  /**
+   * 格式化工具执行结果为 MCP 协议格式
+   * @param {string} toolName - 工具名称
+   * @param {object} result - 执行结果
+   * @param {number} startTime - 开始时间戳
+   * @returns {object} MCP 协议格式结果
+   */
+  formatToolResult(toolName, result, startTime = Date.now()) {
+    const executionTime = Date.now() - startTime;
+
+    if (result.success) {
+      return {
+        success: true,
+        tool: toolName,
+        result: result.result,
+        executionTime,
+        timestamp: new Date().toISOString()
+      };
+    } else {
+      return {
+        success: false,
+        tool: toolName,
+        error: result.error,
+        executionTime,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  /**
+   * 验证工具参数
+   * @param {string} toolName - 工具名称
+   * @param {object} args - 要验证的参数
+   * @returns {{valid: boolean, errors: string[]}}
+   */
+  validateArgs(toolName, args) {
+    const tool = this.tools.get(toolName);
+    if (!tool) {
+      return { valid: false, errors: [`工具 ${toolName} 不存在`] };
+    }
+
+    const schema = tool.inputSchema;
+    if (!schema || !schema.properties) {
+      return { valid: true, errors: [] };
+    }
+
+    const errors = [];
+    const requiredFields = schema.required || [];
+
+    // 检查必填字段
+    for (const field of requiredFields) {
+      if (args[field] === undefined || args[field] === null || args[field] === '') {
+        errors.push(`缺少必填参数: ${field}`);
+      }
+    }
+
+    // 类型和约束检查
+    for (const [key, value] of Object.entries(args)) {
+      if (schema.properties[key]) {
+        const propSchema = schema.properties[key];
+
+        // 类型检查
+        if (propSchema.type) {
+          const expectedType = propSchema.type;
+          const actualType = typeof value;
+
+          if (expectedType === 'integer' && !Number.isInteger(value)) {
+            errors.push(`参数 ${key} 必须是整数`);
+          } else if (expectedType === 'number' && typeof value !== 'number') {
+            errors.push(`参数 ${key} 必须是数字`);
+          } else if (expectedType === 'string' && typeof value !== 'string') {
+            errors.push(`参数 ${key} 必须是字符串`);
+          } else if (expectedType === 'boolean' && typeof value !== 'boolean') {
+            errors.push(`参数 ${key} 必须是布尔值`);
+          } else if (expectedType === 'array' && !Array.isArray(value)) {
+            errors.push(`参数 ${key} 必须是数组`);
+          } else if (expectedType === 'object' && (typeof value !== 'object' || Array.isArray(value))) {
+            errors.push(`参数 ${key} 必须是对象`);
+          }
+        }
+
+        // 枚举检查
+        if (propSchema.enum && !propSchema.enum.includes(value)) {
+          errors.push(`参数 ${key} 值必须在允许范围内: ${JSON.stringify(propSchema.enum)}`);
+        }
+
+        // 数值范围检查
+        if (typeof value === 'number') {
+          if (propSchema.minimum !== undefined && value < propSchema.minimum) {
+            errors.push(`参数 ${key} 不能小于 ${propSchema.minimum}`);
+          }
+          if (propSchema.maximum !== undefined && value > propSchema.maximum) {
+            errors.push(`参数 ${key} 不能大于 ${propSchema.maximum}`);
+          }
+        }
+
+        // 字符串长度检查
+        if (typeof value === 'string') {
+          if (propSchema.minLength !== undefined && value.length < propSchema.minLength) {
+            errors.push(`参数 ${key} 长度不能小于 ${propSchema.minLength}`);
+          }
+          if (propSchema.maxLength !== undefined && value.length > propSchema.maxLength) {
+            errors.push(`参数 ${key} 长度不能大于 ${propSchema.maxLength}`);
+          }
+        }
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  }
+
+  /**
+   * 记录工具执行日志
+   */
+  logToolExecution(toolName, args, success, result, executionTime) {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      tool: toolName,
+      args: this.sanitizeArgs(args),
+      success,
+      executionTime,
+      result: success ? undefined : result
+    };
+
+    // 发送通知
+    this.sendNotification('notifications/tools/executed', logEntry);
+
+    // 触发事件
+    this.emit('toolExecuted', logEntry);
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[MCP Tool] ${toolName} ${success ? 'SUCCESS' : 'FAILED'} (${executionTime}ms)`);
+    }
+  }
+
+  /**
+   * 清理敏感参数
+   */
+  sanitizeArgs(args) {
+    const sanitized = { ...args };
+    const sensitiveKeys = ['key', 'secret', 'password', 'token', 'api_key'];
+    for (const key of Object.keys(sanitized)) {
+      if (sensitiveKeys.some(k => key.toLowerCase().includes(k))) {
+        sanitized[key] = '***REDACTED***';
+      }
+    }
+    return sanitized;
+  }
+
+  /**
+   * 获取执行统计
+   */
+  getExecutionStats() {
+    return {
+      ...this.executionStats,
+      successRate: this.executionStats.total > 0
+        ? (this.executionStats.success / this.executionStats.total * 100).toFixed(2) + '%'
+        : '0%'
+    };
   }
 
   /**
