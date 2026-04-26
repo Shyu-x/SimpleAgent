@@ -68,7 +68,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md: 管理仪表盘集成 - Stats API联调
+- [x] 03-01-PLAN.md: 管理仪表盘集成 - Stats API联调
 - [ ] 03-02-PLAN.md: 知识库与工具管理集成 - CRUD真实API
 - [ ] 03-03-PLAN.md: 模型配置与链路追踪集成 - 熔断状态、Trace数据
 
