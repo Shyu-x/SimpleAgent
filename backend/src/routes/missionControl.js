@@ -8,69 +8,7 @@
 const express = require('express');
 const router = express.Router();
 
-// 任务状态枚举
-const TaskStatus = {
-  PENDING: 'pending',
-  RUNNING: 'running',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
-  CANCELLED: 'cancelled'
-};
-
-// 任务优先级枚举
-const TaskPriority = {
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high',
-  URGENT: 'urgent'
-};
-
-// Agent 角色枚举
-const AgentRole = {
-  PLANNER: 'planner',
-  EXECUTOR: 'executor',
-  REVIEWER: 'reviewer',
-  COORDINATOR: 'coordinator'
-};
-
-// Agent 状态枚举
-const AgentStatus = {
-  IDLE: 'idle',
-  THINKING: 'thinking',
-  WORKING: 'working',
-  WAITING: 'waiting',
-  COMPLETED: 'completed',
-  ERROR: 'error'
-};
-
-// 内存存储
-const store = {
-  tasks: new Map(),
-  agents: new Map(),
-  events: []
-};
-
-// 生成唯一ID
-function generateId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-// 分页辅助函数
-function paginate(items, page = 1, limit = 20) {
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
-  const paginatedItems = items.slice(startIndex, endIndex);
-  return {
-    items: paginatedItems,
-    pagination: {
-      page,
-      limit,
-      total: items.length,
-      totalPages: Math.ceil(items.length / limit),
-      hasMore: endIndex < items.length
-    }
-  };
-}
+const { missionService, TaskStatus, TaskPriority, AgentRole, AgentStatus } = require('../services/missionService');
 
 /**
  * POST /api/mission/tasks - 创建任务
@@ -85,33 +23,7 @@ router.post('/tasks', async (req, res) => {
       });
     }
 
-    const now = Date.now();
-    const task = {
-      id: generateId(),
-      name,
-      description: description || '',
-      priority: priority || TaskPriority.MEDIUM,
-      status: TaskStatus.PENDING,
-      assignedAgent: assignedAgent || null,
-      createdAt: now,
-      updatedAt: now,
-      startedAt: null,
-      completedAt: null,
-      result: null,
-      error: null
-    };
-
-    store.tasks.set(task.id, task);
-
-    // 添加事件
-    const event = {
-      id: generateId(),
-      type: 'task_created',
-      timestamp: now,
-      taskId: task.id,
-      message: `新建任务: ${task.name}`
-    };
-    store.events.unshift(event);
+    const task = missionService.createTask({ name, description, priority, assignedAgent });
 
     res.status(201).json({
       success: true,
@@ -132,33 +44,17 @@ router.get('/tasks', async (req, res) => {
   try {
     const { page = 1, limit = 20, status, priority, agentId } = req.query;
 
-    let tasks = Array.from(store.tasks.values());
-
-    // 状态过滤
-    if (status) {
-      const statuses = status.split(',');
-      tasks = tasks.filter(t => statuses.includes(t.status));
-    }
-
-    // 优先级过滤
-    if (priority) {
-      const priorities = priority.split(',');
-      tasks = tasks.filter(t => priorities.includes(t.priority));
-    }
-
-    // Agent过滤
-    if (agentId) {
-      tasks = tasks.filter(t => t.assignedAgent === agentId);
-    }
-
-    // 按创建时间倒序
-    tasks.sort((a, b) => b.createdAt - a.createdAt);
-
-    const result = paginate(tasks, parseInt(page), parseInt(limit));
+    const result = missionService.listTasks({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      status,
+      priority,
+      agentId
+    });
 
     res.json({
       success: true,
-      tasks: result.items,
+      tasks: result.tasks,
       pagination: result.pagination
     });
   } catch (error) {
@@ -175,7 +71,7 @@ router.get('/tasks', async (req, res) => {
 router.get('/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const task = store.tasks.get(id);
+    const task = missionService.getTask(id);
 
     if (!task) {
       return res.status(404).json({
@@ -203,52 +99,26 @@ router.put('/tasks/:id', async (req, res) => {
     const { id } = req.params;
     const { name, description, priority, status, assignedAgent, result, error } = req.body;
 
-    const task = store.tasks.get(id);
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (priority !== undefined) updates.priority = priority;
+    if (status !== undefined) updates.status = status;
+    if (assignedAgent !== undefined) updates.assignedAgent = assignedAgent;
+    if (result !== undefined) updates.result = result;
+    if (error !== undefined) updates.error = error;
+
+    const task = missionService.updateTask(id, updates);
+
     if (!task) {
       return res.status(404).json({
         error: { message: 'Task not found', type: 'not_found' }
       });
     }
 
-    const now = Date.now();
-    const updates = { updatedAt: now };
-
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description;
-    if (priority !== undefined) updates.priority = priority;
-    if (status !== undefined) {
-      updates.status = status;
-      if (status === TaskStatus.RUNNING && !task.startedAt) {
-        updates.startedAt = now;
-      }
-      if (status === TaskStatus.COMPLETED || status === TaskStatus.FAILED) {
-        updates.completedAt = now;
-      }
-    }
-    if (assignedAgent !== undefined) updates.assignedAgent = assignedAgent;
-    if (result !== undefined) updates.result = result;
-    if (error !== undefined) updates.error = error;
-
-    const updatedTask = { ...task, ...updates };
-    store.tasks.set(id, updatedTask);
-
-    // 添加事件
-    const event = {
-      id: generateId(),
-      type: status === TaskStatus.RUNNING ? 'task_started' :
-            status === TaskStatus.COMPLETED ? 'task_completed' :
-            status === TaskStatus.FAILED ? 'task_failed' :
-            status === TaskStatus.CANCELLED ? 'task_cancelled' : 'task_updated',
-      timestamp: now,
-      taskId: id,
-      agentId: assignedAgent,
-      message: getStatusMessage(status, task.name)
-    };
-    store.events.unshift(event);
-
     res.json({
       success: true,
-      task: updatedTask
+      task
     });
   } catch (error) {
     console.error('Update task error:', error);
@@ -258,35 +128,19 @@ router.put('/tasks/:id', async (req, res) => {
   }
 });
 
-function getStatusMessage(status, name) {
-  switch (status) {
-    case TaskStatus.RUNNING:
-      return `任务开始执行: ${name}`;
-    case TaskStatus.COMPLETED:
-      return `任务完成: ${name}`;
-    case TaskStatus.FAILED:
-      return `任务失败: ${name}`;
-    case TaskStatus.CANCELLED:
-      return `任务已取消: ${name}`;
-    default:
-      return `任务更新: ${name}`;
-  }
-}
-
 /**
  * DELETE /api/mission/tasks/:id - 删除任务
  */
 router.delete('/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const deleted = missionService.deleteTask(id);
 
-    if (!store.tasks.has(id)) {
+    if (!deleted) {
       return res.status(404).json({
         error: { message: 'Task not found', type: 'not_found' }
       });
     }
-
-    store.tasks.delete(id);
 
     res.json({
       success: true,
@@ -306,42 +160,18 @@ router.delete('/tasks/:id', async (req, res) => {
 router.post('/tasks/:id/execute', async (req, res) => {
   try {
     const { id } = req.params;
-    const task = store.tasks.get(id);
+    const result = missionService.executeTask(id);
 
-    if (!task) {
-      return res.status(404).json({
-        error: { message: 'Task not found', type: 'not_found' }
+    if (!result.success) {
+      const statusCode = result.error === 'Task not found' ? 404 : 400;
+      return res.status(statusCode).json({
+        error: { message: result.error, type: 'invalid_state' }
       });
     }
-
-    if (task.status === TaskStatus.COMPLETED || task.status === TaskStatus.FAILED) {
-      return res.status(400).json({
-        error: { message: 'Task already finished', type: 'invalid_state' }
-      });
-    }
-
-    const now = Date.now();
-    const updatedTask = {
-      ...task,
-      status: TaskStatus.RUNNING,
-      startedAt: task.startedAt || now,
-      updatedAt: now
-    };
-    store.tasks.set(id, updatedTask);
-
-    // 添加事件
-    const event = {
-      id: generateId(),
-      type: 'task_started',
-      timestamp: now,
-      taskId: id,
-      message: `任务开始执行: ${task.name}`
-    };
-    store.events.unshift(event);
 
     res.json({
       success: true,
-      task: updatedTask
+      task: result.task
     });
   } catch (error) {
     console.error('Execute task error:', error);
@@ -357,41 +187,18 @@ router.post('/tasks/:id/execute', async (req, res) => {
 router.post('/tasks/:id/cancel', async (req, res) => {
   try {
     const { id } = req.params;
-    const task = store.tasks.get(id);
+    const result = missionService.cancelTask(id);
 
-    if (!task) {
-      return res.status(404).json({
-        error: { message: 'Task not found', type: 'not_found' }
+    if (!result.success) {
+      const statusCode = result.error === 'Task not found' ? 404 : 400;
+      return res.status(statusCode).json({
+        error: { message: result.error, type: 'invalid_state' }
       });
     }
-
-    if (task.status === TaskStatus.COMPLETED) {
-      return res.status(400).json({
-        error: { message: 'Cannot cancel completed task', type: 'invalid_state' }
-      });
-    }
-
-    const now = Date.now();
-    const updatedTask = {
-      ...task,
-      status: TaskStatus.CANCELLED,
-      updatedAt: now
-    };
-    store.tasks.set(id, updatedTask);
-
-    // 添加事件
-    const event = {
-      id: generateId(),
-      type: 'task_cancelled',
-      timestamp: now,
-      taskId: id,
-      message: `任务已取消: ${task.name}`
-    };
-    store.events.unshift(event);
 
     res.json({
       success: true,
-      task: updatedTask
+      task: result.task
     });
   } catch (error) {
     console.error('Cancel task error:', error);
@@ -408,19 +215,7 @@ router.get('/agents', async (req, res) => {
   try {
     const { status, role } = req.query;
 
-    let agents = Array.from(store.agents.values());
-
-    if (status) {
-      const statuses = status.split(',');
-      agents = agents.filter(a => statuses.includes(a.status));
-    }
-
-    if (role) {
-      agents = agents.filter(a => a.role === role);
-    }
-
-    // 按名称排序
-    agents.sort((a, b) => a.name.localeCompare(b.name));
+    const agents = missionService.listAgents({ status, role });
 
     res.json({
       success: true,
@@ -447,30 +242,7 @@ router.post('/agents', async (req, res) => {
       });
     }
 
-    const now = Date.now();
-    const agent = {
-      id: generateId(),
-      name,
-      role: role || AgentRole.EXECUTOR,
-      avatar: avatar || null,
-      status: AgentStatus.IDLE,
-      currentTask: null,
-      progress: 0,
-      capabilities: capabilities || [],
-      lastHeartbeat: now
-    };
-
-    store.agents.set(agent.id, agent);
-
-    // 添加事件
-    const event = {
-      id: generateId(),
-      type: 'agent_status_change',
-      timestamp: now,
-      agentId: agent.id,
-      message: `Agent 注册: ${agent.name}`
-    };
-    store.events.unshift(event);
+    const agent = missionService.registerAgent({ name, role, avatar, capabilities });
 
     res.status(201).json({
       success: true,
@@ -485,6 +257,32 @@ router.post('/agents', async (req, res) => {
 });
 
 /**
+ * GET /api/mission/agents/:id - 获取单个Agent
+ */
+router.get('/agents/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const agent = missionService.getAgent(id);
+
+    if (!agent) {
+      return res.status(404).json({
+        error: { message: 'Agent not found', type: 'not_found' }
+      });
+    }
+
+    res.json({
+      success: true,
+      agent
+    });
+  } catch (error) {
+    console.error('Get agent error:', error);
+    res.status(500).json({
+      error: { message: error.message, type: 'server_error' }
+    });
+  }
+});
+
+/**
  * PUT /api/mission/agents/:id - 更新 Agent 状态
  */
 router.put('/agents/:id', async (req, res) => {
@@ -492,39 +290,23 @@ router.put('/agents/:id', async (req, res) => {
     const { id } = req.params;
     const { status, currentTask, progress, capabilities } = req.body;
 
-    const agent = store.agents.get(id);
+    const updates = {};
+    if (status !== undefined) updates.status = status;
+    if (currentTask !== undefined) updates.currentTask = currentTask;
+    if (progress !== undefined) updates.progress = progress;
+    if (capabilities !== undefined) updates.capabilities = capabilities;
+
+    const agent = missionService.updateAgent(id, updates);
+
     if (!agent) {
       return res.status(404).json({
         error: { message: 'Agent not found', type: 'not_found' }
       });
     }
 
-    const now = Date.now();
-    const updates = { lastHeartbeat: now };
-
-    if (status !== undefined) updates.status = status;
-    if (currentTask !== undefined) updates.currentTask = currentTask;
-    if (progress !== undefined) updates.progress = progress;
-    if (capabilities !== undefined) updates.capabilities = capabilities;
-
-    const updatedAgent = { ...agent, ...updates };
-    store.agents.set(id, updatedAgent);
-
-    // 添加事件
-    if (status) {
-      const event = {
-        id: generateId(),
-        type: 'agent_status_change',
-        timestamp: now,
-        agentId: id,
-        message: `Agent ${agent.name} 状态: ${status}`
-      };
-      store.events.unshift(event);
-    }
-
     res.json({
       success: true,
-      agent: updatedAgent
+      agent
     });
   } catch (error) {
     console.error('Update agent error:', error);
@@ -540,14 +322,13 @@ router.put('/agents/:id', async (req, res) => {
 router.delete('/agents/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const deleted = missionService.deleteAgent(id);
 
-    if (!store.agents.has(id)) {
+    if (!deleted) {
       return res.status(404).json({
         error: { message: 'Agent not found', type: 'not_found' }
       });
     }
-
-    store.agents.delete(id);
 
     res.json({
       success: true,
@@ -566,23 +347,7 @@ router.delete('/agents/:id', async (req, res) => {
  */
 router.get('/stats', async (req, res) => {
   try {
-    const tasks = Array.from(store.tasks.values());
-    const agents = Array.from(store.agents.values());
-
-    const stats = {
-      totalTasks: tasks.length,
-      pendingTasks: tasks.filter(t => t.status === TaskStatus.PENDING).length,
-      runningTasks: tasks.filter(t => t.status === TaskStatus.RUNNING).length,
-      completedTasks: tasks.filter(t => t.status === TaskStatus.COMPLETED).length,
-      failedTasks: tasks.filter(t => t.status === TaskStatus.FAILED).length,
-      cancelledTasks: tasks.filter(t => t.status === TaskStatus.CANCELLED).length,
-      totalAgents: agents.length,
-      idleAgents: agents.filter(a => a.status === AgentStatus.IDLE).length,
-      workingAgents: agents.filter(a => a.status === AgentStatus.WORKING).length,
-      waitingAgents: agents.filter(a => a.status === AgentStatus.WAITING).length,
-      errorAgents: agents.filter(a => a.status === AgentStatus.ERROR).length,
-      recentEvents: store.events.slice(0, 20)
-    };
+    const stats = missionService.getStats();
 
     res.json({
       success: true,
@@ -602,7 +367,7 @@ router.get('/stats', async (req, res) => {
 router.get('/events', async (req, res) => {
   try {
     const { limit = 50 } = req.query;
-    const events = store.events.slice(0, parseInt(limit));
+    const events = missionService.getEvents(parseInt(limit));
 
     res.json({
       success: true,
@@ -629,18 +394,7 @@ router.post('/events', async (req, res) => {
       });
     }
 
-    const now = Date.now();
-    const event = {
-      id: generateId(),
-      type: type || 'system',
-      timestamp: now,
-      taskId,
-      agentId,
-      message,
-      data
-    };
-
-    store.events.unshift(event);
+    const event = missionService.addEvent(type, { message, taskId, agentId, data });
 
     res.status(201).json({
       success: true,
@@ -667,16 +421,7 @@ router.post('/broadcast', async (req, res) => {
       });
     }
 
-    const now = Date.now();
-    const event = {
-      id: generateId(),
-      type: 'broadcast',
-      timestamp: now,
-      message,
-      data
-    };
-
-    store.events.unshift(event);
+    const event = missionService.addEvent('broadcast', { message, data });
 
     res.status(201).json({
       success: true,
