@@ -75,9 +75,42 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| CORE-01 | 待规划 | ⬜ |
-| CORE-02 | 待规划 | ⬜ |
-| ... | ... | ... |
+| CORE-01 | Phase 1 | ⬜ |
+| CORE-02 | Phase 1 | ⬜ |
+| CORE-03 | Phase 1 | ⬜ |
+| CORE-04 | Phase 4 | ⬜ |
+| CORE-05 | Phase 4 | ⬜ |
+| RAG-01 | Phase 3 | ⬜ |
+| RAG-02 | Phase 3 | ⬜ |
+| RAG-03 | Phase 4 | ⬜ |
+| RAG-04 | Phase 4 | ⬜ |
+| RAG-05 | Phase 4 | ⬜ |
+| TOOL-01 | Phase 2 | ⬜ |
+| TOOL-02 | Phase 2 | ⬜ |
+| TOOL-03 | Phase 1 | ⬜ |
+| TOOL-04 | Phase 1 | ⬜ |
+| AGENT-01 | Phase 2 | ⬜ |
+| AGENT-02 | Phase 2 | ⬜ |
+| AGENT-03 | Phase 2 | ⬜ |
+| AGENT-04 | Phase 2 | ⬜ |
+| HITL-01 | Phase 1 | ✅ 已实现 |
+| HITL-02 | Phase 1 | ✅ 已实现 |
+| HITL-03 | Phase 1 | ✅ 已实现 |
+| HITL-04 | Phase 1 | ✅ 已实现 |
+| ADMIN-01 | Phase 3 | ⬜ |
+| ADMIN-02 | Phase 3 | ⬜ |
+| ADMIN-03 | Phase 3 | ⬜ |
+| ADMIN-04 | Phase 3 | ⬜ |
+| ADMIN-05 | Phase 3 | ⬜ |
+| ADMIN-06 | Phase 3 | ⬜ |
+| INFRA-01 | Phase 1 | ⬜ |
+| INFRA-02 | Phase 1 | ⬜ |
+| INFRA-03 | Phase 1 | ⬜ |
+| INFRA-04 | Phase 1 | ⬜ |
+| INFRA-05 | Phase 1 | ⬜ |
+| INFRA-06 | Phase 1 | ⬜ |
+
+**覆盖率**: 33/37 v1需求已映射 (HITL-01~04已实现)
 
 ---
-*Last updated: 2026-04-27 after requirements definition*
+*Last updated: 2026-04-27 after roadmap creation*
