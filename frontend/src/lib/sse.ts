@@ -92,6 +92,18 @@ export async function sendSSEChatMessage(
             return;
           }
 
+          // 处理思维链独立事件（来自 reasoning_split 的 thinking_delta）
+          if (json.type === 'thinking_delta' && json.content) {
+            onThinking?.(json.content, false);
+            return;
+          }
+
+          // 处理思维链完成事件
+          if (json.type === 'thinking_complete') {
+            onThinking?.('', true);
+            return;
+          }
+
           // OpenAI 格式响应
           const content = json.choices?.[0]?.delta?.content;
           if (content) {
