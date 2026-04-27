@@ -1,7 +1,17 @@
 // API适配层 - 参考One API设计
 // 统一多平台调用格式，支持OpenAI兼容接口
 
-const { channels } = require('../data/mockData');
+// MiniMax 渠道配置 - MiniMax 单一架构
+const channels = [
+  {
+    id: 'minimax',
+    name: 'Minimax',
+    baseUrl: process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com',
+    models: ['MiniMax-M2.7', 'MiniMax-M2.5', 'MiniMax-VL-01', 'MiniMax-Text-01'],
+    defaultModel: 'MiniMax-M2.7',
+    enabled: true
+  }
+];
 
 // 渠道管理服务
 class ChannelService {

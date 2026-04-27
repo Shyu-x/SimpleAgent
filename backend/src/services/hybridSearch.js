@@ -124,65 +124,24 @@ class HybridSearch {
   }
 
   /**
-   * 模拟向量检索 (实际使用时替换为真实实现)
+   * 向量检索 (当未配置向量搜索服务时抛出错误)
    */
   mockVectorSearch(query, knowledgeBaseId, filters) {
-    // 返回模拟结果
-    return [
-      {
-        id: `vec_${Date.now()}_1`,
-        content: `[向量检索] ${query} - 相关文档内容1`,
-        score: 0.92,
-        channel: 'vector',
-        metadata: { source: 'vector_db', chunkId: 'chunk_1' }
-      },
-      {
-        id: `vec_${Date.now()}_2`,
-        content: `[向量检索] ${query} - 相关文档内容2`,
-        score: 0.88,
-        channel: 'vector',
-        metadata: { source: 'vector_db', chunkId: 'chunk_2' }
-      }
-    ];
+    throw new Error('向量搜索服务未配置，请配置 QdrantVectorStore 或其他向量搜索服务');
   }
 
   /**
-   * 模拟全文检索 (实际使用时替换为真实实现)
+   * 全文检索 (当未配置全文搜索服务时抛出错误)
    */
   mockFullTextSearch(query, knowledgeBaseId, filters) {
-    return [
-      {
-        id: `ft_${Date.now()}_1`,
-        content: `[全文检索] ${query} - 精确匹配内容1`,
-        score: 0.95,
-        channel: 'fulltext',
-        metadata: { source: 'flexsearch', chunkId: 'chunk_ft_1' }
-      },
-      {
-        id: `ft_${Date.now()}_2`,
-        content: `[全文检索] ${query} - 精确匹配内容2`,
-        score: 0.85,
-        channel: 'fulltext',
-        metadata: { source: 'flexsearch', chunkId: 'chunk_ft_2' }
-      }
-    ];
+    throw new Error('全文搜索服务未配置，请配置全文搜索引擎');
   }
 
   /**
-   * 模拟意图检索
+   * 意图检索 (当未配置意图搜索服务时抛出错误)
    */
   mockIntentSearch(query, knowledgeBaseId, intent) {
-    if (!intent) return [];
-
-    return [
-      {
-        id: `intent_${Date.now()}_1`,
-        content: `[意图检索] ${query} - 基于${intent}的内容`,
-        score: 0.90,
-        channel: 'intent',
-        metadata: { source: 'intent_based', intent: intent }
-      }
-    ];
+    throw new Error('意图搜索服务未配置，请配置意图分类服务');
   }
 
   /**

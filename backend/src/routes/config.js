@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const { ChannelService, APIAdapter } = require('../services/apiAdapter');
-const { channels } = require('../data/mockData');
 
 // 存储配置（内存中，实际项目可持久化）
 let apiConfig = {

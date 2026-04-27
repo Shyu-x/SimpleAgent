@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { sessions } = require('../data/mockData');
+
+// 内存会话存储 - 独立的会话管理
+let sessions = [];
 
 // 生成唯一ID
 function generateId() {

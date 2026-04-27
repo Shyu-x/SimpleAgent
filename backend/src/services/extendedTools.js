@@ -296,36 +296,42 @@ class WeatherTool {
     const { city } = args;
 
     try {
-      // 模拟天气数据（实际应该调用天气API）
-      const weatherData = this._getMockWeather(city);
+      // 使用 wttr.in 获取真实天气数据
+      const url = `https://wttr.in/${encodeURIComponent(city)}?format=j1`;
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        signal: AbortSignal.timeout(15000)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const current = data.current_condition[0];
 
       return {
         success: true,
         city,
-        ...weatherData
+        condition: current.weatherDesc[0].value,
+        temperature: current.temp_C + '°C',
+        feelsLike: current.FeelsLikeC + '°C',
+        humidity: current.humidity + '%',
+        wind: current.windspeedKm + ' km/h ' + current.winddir16Point,
+        uvIndex: current.UVIndex,
+        visibility: current.visibility + ' km',
+        pressure: current.pressure + ' mb',
+        forecast: data.weather.slice(0, 3).map((w, i) => ({
+          day: ['今天', '明天', '后天'][i],
+          condition: w.weatherDesc[0].value,
+          high: w.maxtempC,
+          low: w.mintempC
+        })),
+        updateTime: new Date().toISOString()
       };
     } catch (error) {
       return { success: false, error: error.message };
     }
-  }
-
-  _getMockWeather(city) {
-    const conditions = ['晴', '多云', '阴', '小雨', '大雨', '雪'];
-    const randomCondition = conditions[Math.floor(Math.random() * conditions.length)];
-
-    return {
-      condition: randomCondition,
-      temperature: Math.floor(Math.random() * 30) + 5,
-      humidity: Math.floor(Math.random() * 40) + 40,
-      wind: `${Math.floor(Math.random() * 10) + 1}级`,
-      aqi: Math.floor(Math.random() * 100) + 20,
-      forecast: [
-        { day: '今天', condition: randomCondition, high: 25, low: 18 },
-        { day: '明天', condition: conditions[Math.floor(Math.random() * conditions.length)], high: 26, low: 19 },
-        { day: '后天', condition: conditions[Math.floor(Math.random() * conditions.length)], high: 24, low: 17 }
-      ],
-      updateTime: new Date().toISOString()
-    };
   }
 }
 

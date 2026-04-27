@@ -6,6 +6,7 @@
 
 const { Client } = require('@modelcontextprotocol/sdk/client/index.js');
 const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio.js');
+const EnhancedSearchTool = require('./services/tools/enhancedSearchTool');
 
 /**
  * MCP 工具定义
@@ -619,25 +620,57 @@ class MCPClientManager {
       },
       websearch: {
         search: async ({ query, limit = 5, engine = 'bing' }) => {
-          // 模拟搜索结果 - 实际可集成真实搜索API
-          const mockResults = [
-            { title: `${query} - 官方文档`, url: `https://example.com/docs?q=${encodeURIComponent(query)}`, snippet: `关于${query}的官方文档和指南...` },
-            { title: `${query} - 相关文章`, url: `https://example.com/article?q=${encodeURIComponent(query)}`, snippet: `深入了解${query}的相关文章...` },
-            { title: `${query} - 社区讨论`, url: `https://example.com/forum?q=${encodeURIComponent(query)}`, snippet: `开发者社区关于${query}的讨论...` },
-            { title: `${query} - 视频教程`, url: `https://example.com/video?q=${encodeURIComponent(query)}`, snippet: `学习${query}的视频教程...` },
-            { title: `${query} - 最新资讯`, url: `https://example.com/news?q=${encodeURIComponent(query)}`, snippet: `关于${query}的最新资讯和更新...` },
-          ];
-          return { success: true, query, engine, results: mockResults.slice(0, limit) };
+          try {
+            const searchTool = new EnhancedSearchTool({ maxResults: limit });
+            let result;
+
+            // 根据引擎选择搜索源
+            if (engine === 'duckduckgo') {
+              result = await searchTool.duckduckgoSearch(query, { maxResults: limit });
+            } else if (engine === 'jina') {
+              result = await searchTool.jinaSearch(query, { maxResults: limit });
+            } else {
+              // 默认使用 MCP 搜索
+              result = await searchTool.mcpSearch(query, { maxResults: limit });
+            }
+
+            return {
+              success: true,
+              query,
+              engine,
+              results: result.results || []
+            };
+          } catch (error) {
+            return { success: false, error: error.message, query, engine };
+          }
         },
         get_page: async ({ url, maxLength = 5000 }) => {
-          // 模拟网页内容 - 实际可使用cheerio或puppeteer
-          return {
-            success: true,
-            url,
-            title: 'Example Page',
-            content: `这是从 ${url} 获取的网页内容（模拟）...`,
-            truncated: false
-          };
+          try {
+            // 使用 Jina AI 获取网页内容
+            const jinaUrl = `https://r.jina.ai/${encodeURIComponent(url)}`;
+            const response = await fetch(jinaUrl, {
+              signal: AbortSignal.timeout(30000)
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+
+            const text = await response.text();
+            const lines = text.split('\n');
+            const title = lines[0]?.replace(/^##\s*/, '').trim() || url;
+            const content = lines.slice(1).join('\n').substring(0, maxLength);
+
+            return {
+              success: true,
+              url,
+              title,
+              content,
+              truncated: text.length > maxLength
+            };
+          } catch (error) {
+            return { success: false, error: error.message, url };
+          }
         }
       },
       calculator: {
