@@ -745,6 +745,56 @@ class A2AService extends EventEmitter {
   }
 
   /**
+   * SSE 实时消息订阅
+   * @param {string} agentId - Agent ID
+   * @param {object} req - Express Request 对象
+   * @param {object} res - Express Response 对象
+   */
+  subscribeAgent(agentId, req, res) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    // 更新心跳
+    this.agentHeartbeat(agentId);
+
+    // 定期发送心跳
+    const heartbeatInterval = setInterval(() => {
+      this.agentHeartbeat(agentId);
+      res.write(`: heartbeat\n\n`);
+    }, 30 * 1000);
+
+    // 监听新消息
+    const onMessage = (message) => {
+      if (message.to === agentId) {
+        res.write(`data: ${JSON.stringify({ event: 'message', data: message.toJSON() })}\n\n`);
+      }
+    };
+
+    this.broker.on('message:sent', onMessage);
+
+    // 定期检查新消息
+    const pollInterval = setInterval(() => {
+      const messages = this.receiveMessages(agentId, { limit: 10, clearReceived: true });
+      for (const message of messages) {
+        res.write(`data: ${JSON.stringify({ event: 'message', data: message.toJSON() })}\n\n`);
+      }
+    }, 2000);
+
+    // 客户端断开连接
+    if (req && req.on) {
+      req.on('close', () => {
+        clearInterval(heartbeatInterval);
+        clearInterval(pollInterval);
+        this.broker.removeListener('message:sent', onMessage);
+      });
+    }
+
+    // 初始连接确认
+    res.write(`data: ${JSON.stringify({ event: 'connected', agentId })}\n\n`);
+  }
+
+  /**
    * 销毁服务
    */
   destroy() {
