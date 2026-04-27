@@ -9,6 +9,9 @@
  * @module services/vector/QdrantVectorStore
  */
 
+const { createLogger } = require('../../infra/logger/AgentLogger');
+const logger = createLogger('QdrantVectorStore');
+
 class QdrantVectorStore {
   constructor(options = {}) {
     this.host = options.host || process.env.QDRANT_HOST || 'localhost';
@@ -85,7 +88,7 @@ class QdrantVectorStore {
       if (response.ok) {
         const data = await response.json();
         if (data.result) {
-          console.log(`[QdrantVectorStore] 集合已存在: ${this.collectionName}`);
+          logger.info(`集合已存在: ${this.collectionName}`);
           return { success: true, exists: true };
         }
       }
@@ -120,9 +123,10 @@ class QdrantVectorStore {
         };
       }
 
-      console.log(`[QdrantVectorStore] 创建生产级集合: ${this.collectionName}`);
-      console.log(`  HNSW: m=${this.hnswConfig.m}, ef_construction=${this.hnswConfig.efConstruction}`);
-      console.log(`  量化: quantile=${this.quantizationConfig.quantile}, compression=${this.quantizationConfig.compression}`);
+      logger.info(`创建生产级集合: ${this.collectionName}`, {
+        hnsw: { m: this.hnswConfig.m, efConstruction: this.hnswConfig.efConstruction },
+        quantization: { quantile: this.quantizationConfig.quantile, compression: this.quantizationConfig.compression }
+      });
 
       // 创建集合
       const createResponse = await fetch(`${this.url}/collections/${this.collectionName}`, {
@@ -136,10 +140,10 @@ class QdrantVectorStore {
         throw new Error(error);
       }
 
-      console.log(`[QdrantVectorStore] 生产级集合创建成功: ${this.collectionName}`);
+      logger.info(`生产级集合创建成功: ${this.collectionName}`);
       return { success: true, created: true, config: collectionConfig };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 创建生产级集合失败: ${error.message}`);
+      logger.error(`创建生产级集合失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -177,10 +181,10 @@ class QdrantVectorStore {
       if (full_scan_threshold !== undefined) this.hnswConfig.fullScanThreshold = full_scan_threshold;
       if (on_disk !== undefined) this.hnswConfig.onDisk = on_disk;
 
-      console.log(`[QdrantVectorStore] HNSW 参数更新成功: m=${this.hnswConfig.m}, ef=${this.hnswConfig.efConstruction}`);
+      logger.info(`HNSW 参数更新成功: m=${this.hnswConfig.m}, ef=${this.hnswConfig.efConstruction}`);
       return { success: true, hnswConfig: this.hnswConfig };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 更新 HNSW 参数失败: ${error.message}`);
+      logger.error(`更新 HNSW 参数失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -235,10 +239,10 @@ class QdrantVectorStore {
       if (quantile !== undefined) this.quantizationConfig.quantile = quantile;
       if (compression !== undefined) this.quantizationConfig.compression = compression;
 
-      console.log(`[QdrantVectorStore] 量化参数更新成功: quantile=${this.quantizationConfig.quantile}`);
+      logger.info(`量化参数更新成功: quantile=${this.quantizationConfig.quantile}`);
       return { success: true, quantization: this.quantizationConfig };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 更新量化参数失败: ${error.message}`);
+      logger.error(`更新量化参数失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -260,7 +264,7 @@ class QdrantVectorStore {
         collectionInfo: info.info,
       };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 获取集合参数失败: ${error.message}`);
+      logger.error(`获取集合参数失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -318,7 +322,7 @@ class QdrantVectorStore {
         suggestions,
       };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 获取优化建议失败: ${error.message}`);
+      logger.error(`获取优化建议失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -335,13 +339,13 @@ class QdrantVectorStore {
 
       if (response.ok) {
         this.connected = true;
-        console.log(`[QdrantVectorStore] 连接成功: ${this.url}`);
+        logger.info(`连接成功: ${this.url}`);
         return { success: true };
       } else {
         throw new Error(`HTTP ${response.status}`);
       }
     } catch (error) {
-      console.error(`[QdrantVectorStore] 连接失败: ${error.message}`);
+      logger.error(`连接失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -360,7 +364,7 @@ class QdrantVectorStore {
       if (response.ok) {
         const data = await response.json();
         if (data.result) {
-          console.log(`[QdrantVectorStore] 集合已存在: ${this.collectionName}`);
+          logger.info(`集合已存在: ${this.collectionName}`);
           return { success: true, exists: true };
         }
       }
@@ -382,10 +386,10 @@ class QdrantVectorStore {
         throw new Error(error);
       }
 
-      console.log(`[QdrantVectorStore] 集合创建成功: ${this.collectionName}`);
+      logger.info(`集合创建成功: ${this.collectionName}`);
       return { success: true, created: true };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 创建集合失败: ${error.message}`);
+      logger.error(`创建集合失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -395,7 +399,7 @@ class QdrantVectorStore {
    */
   async createIndex(field = 'vector', indexType = null, metricType = null) {
     // Qdrant 不需要手动创建索引，自动处理
-    console.log(`[QdrantVectorStore] 索引管理: Qdrant 自动处理`);
+    logger.debug(`索引管理: Qdrant 自动处理`);
     return { success: true };
   }
 
@@ -443,7 +447,7 @@ class QdrantVectorStore {
         id: id,
       };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 插入失败: ${error.message}`);
+      logger.error(`插入失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -482,7 +486,7 @@ class QdrantVectorStore {
         ids,
       };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 批量插入失败: ${error.message}`);
+      logger.error(`批量插入失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -532,7 +536,7 @@ class QdrantVectorStore {
 
       return { success: true, results };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 搜索失败: ${error.message}`);
+      logger.error(`搜索失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -557,7 +561,7 @@ class QdrantVectorStore {
 
       return { success: true, deletedCount: ids.length };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 删除失败: ${error.message}`);
+      logger.error(`删除失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -577,10 +581,10 @@ class QdrantVectorStore {
         throw new Error(error);
       }
 
-      console.log(`[QdrantVectorStore] 集合已删除: ${this.collectionName}`);
+      logger.info(`集合已删除: ${this.collectionName}`);
       return { success: true };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 删除集合失败: ${error.message}`);
+      logger.error(`删除集合失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -605,7 +609,7 @@ class QdrantVectorStore {
         info: data.result || {},
       };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 获取集合信息失败: ${error.message}`);
+      logger.error(`获取集合信息失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -628,7 +632,7 @@ class QdrantVectorStore {
         distance: this.distance,
       };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 获取统计失败: ${error.message}`);
+      logger.error(`获取统计失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -690,7 +694,7 @@ class QdrantVectorStore {
         collections: collections.map((c) => c.name),
       };
     } catch (error) {
-      console.error(`[QdrantVectorStore] 列出集合失败: ${error.message}`);
+      logger.error(`列出集合失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -701,7 +705,7 @@ class QdrantVectorStore {
   async disconnect() {
     this.connected = false;
     this.connectionPool = [];
-    console.log('[QdrantVectorStore] 已断开连接');
+    logger.info('已断开连接');
   }
 
   /**
@@ -719,7 +723,7 @@ class QdrantVectorStore {
         return await requestFn();
       } catch (error) {
         lastError = error;
-        console.warn(`[QdrantVectorStore] 请求失败 (${attempt}/${maxAttempts}): ${error.message}`);
+        logger.warn(`请求失败 (${attempt}/${maxAttempts}): ${error.message}`);
 
         if (attempt < maxAttempts) {
           // 指数退避

@@ -5,6 +5,8 @@
 const express = require('express');
 const router = express.Router();
 const { prisma } = require('../services/database');
+const { createLogger } = require('../infra/logger/AgentLogger');
+const logger = createLogger('conversations');
 
 // ==========================================
 // 对话接口
@@ -50,7 +52,7 @@ router.get('/', async (req, res) => {
       })),
     });
   } catch (error) {
-    console.error('获取对话列表失败:', error);
+    logger.error('获取对话列表失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -91,7 +93,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({ success: true, data: conversation });
   } catch (error) {
-    console.error('获取对话失败:', error);
+    logger.error('获取对话失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -114,7 +116,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ success: true, data: conversation });
   } catch (error) {
-    console.error('创建对话失败:', error);
+    logger.error('创建对话失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -138,7 +140,7 @@ router.put('/:id', async (req, res) => {
 
     res.json({ success: true, data: conversation });
   } catch (error) {
-    console.error('更新对话失败:', error);
+    logger.error('更新对话失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -161,7 +163,7 @@ router.delete('/:id', async (req, res) => {
 
     res.json({ success: true, data: conversation });
   } catch (error) {
-    console.error('删除对话失败:', error);
+    logger.error('删除对话失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -202,7 +204,7 @@ router.get('/:conversationId/messages', async (req, res) => {
 
     res.json({ success: true, data: messages });
   } catch (error) {
-    console.error('获取消息失败:', error);
+    logger.error('获取消息失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -247,7 +249,7 @@ router.post('/:conversationId/messages', async (req, res) => {
 
     res.status(201).json({ success: true, data: message });
   } catch (error) {
-    console.error('添加消息失败:', error);
+    logger.error('添加消息失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -294,7 +296,7 @@ router.post('/:conversationId/messages/batch', async (req, res) => {
       data: { count: createdMessages.count },
     });
   } catch (error) {
-    console.error('批量添加消息失败:', error);
+    logger.error('批量添加消息失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -318,7 +320,7 @@ router.put('/:conversationId/messages/:id', async (req, res) => {
 
     res.json({ success: true, data: message });
   } catch (error) {
-    console.error('更新消息失败:', error);
+    logger.error('更新消息失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -338,7 +340,7 @@ router.delete('/:conversationId/messages/:id', async (req, res) => {
 
     res.json({ success: true, data: message });
   } catch (error) {
-    console.error('删除消息失败:', error);
+    logger.error('删除消息失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -387,7 +389,7 @@ router.get('/:id/export', async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('导出对话失败:', error);
+    logger.error('导出对话失败:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });

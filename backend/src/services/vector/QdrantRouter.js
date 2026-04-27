@@ -10,6 +10,8 @@
  */
 
 const QdrantVectorStore = require('./QdrantVectorStore');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+const logger = createLogger('QdrantRouter');
 
 class QdrantRouter {
   constructor(options = {}) {
@@ -50,10 +52,10 @@ class QdrantRouter {
       await this.vectorStore.createCollection();
 
       this.initialized = true;
-      console.log('[QdrantRouter] 初始化成功');
+      logger.info('初始化成功');
       return { success: true };
     } catch (error) {
-      console.error(`[QdrantRouter] 初始化失败: ${error.message}`);
+      logger.error(`初始化失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -123,7 +125,7 @@ class QdrantRouter {
         dimension: data.data?.[0]?.embedding?.length || data.embedding?.length || 0,
       };
     } catch (error) {
-      console.error(`[QdrantRouter] Embedding failed: ${error.message}`);
+      logger.error(`Embedding failed: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -173,7 +175,7 @@ class QdrantRouter {
           });
         }
       } catch (error) {
-        console.error(`[QdrantRouter] Batch embedding failed: ${error.message}`);
+        logger.error(`Batch embedding failed: ${error.message}`);
         for (let j = 0; j < batch.length; j++) {
           results.push({
             index: i + j,
@@ -282,7 +284,7 @@ class QdrantRouter {
         topK,
       };
     } catch (error) {
-      console.error(`[QdrantRouter] Search failed: ${error.message}`);
+      logger.error(`Search failed: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -364,7 +366,7 @@ function getQdrantRouter(options = {}) {
     // 异步初始化（不阻塞路由创建）
     setImmediate(() => {
       instance.initialize().catch((err) => {
-        console.warn(`[QdrantRouter] Initial initialization failed: ${err.message}`);
+        logger.warn(`Initial initialization failed: ${err.message}`);
       });
     });
   }

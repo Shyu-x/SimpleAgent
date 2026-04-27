@@ -3,6 +3,8 @@
  * 使用 pgvector 进行向量相似度检索
  */
 const { prisma } = require('./database');
+const { createLogger } = require('../infra/logger/AgentLogger');
+const logger = createLogger('pgVectorStore');
 
 // 向量维度配置
 const EMBEDDING_DIMENSIONS = {
@@ -21,7 +23,7 @@ async function initializeVectorStore() {
   try {
     // 启用 pgvector 扩展
     await prisma.$executeRaw`CREATE EXTENSION IF NOT EXISTS vector;`;
-    console.log('✅ pgvector 扩展已启用');
+    logger.info('pgvector 扩展已启用');
 
     // 创建向量索引 (如果不存在)
     try {
@@ -31,14 +33,14 @@ async function initializeVectorStore() {
         USING ivfflat (embedding vector_cosine_ops)
         WITH (lists = 100);
       `;
-      console.log('✅ 向量索引已创建');
+      logger.info('向量索引已创建');
     } catch (e) {
-      console.log('⚠️ 向量索引创建失败:', e.message);
+      logger.warn(`向量索引创建失败: ${e.message}`);
     }
 
     return true;
   } catch (error) {
-    console.error('❌ 向量存储初始化失败:', error.message);
+    logger.error(`向量存储初始化失败: ${error.message}`);
     return false;
   }
 }
@@ -79,7 +81,7 @@ async function storeChunk(knowledgeBaseId, content, embedding, metadata = {}) {
     `;
     return result[0];
   } catch (error) {
-    console.error('存储知识块失败:', error);
+    logger.error('存储知识块失败:', { error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -123,7 +125,7 @@ async function similaritySearch(knowledgeBaseId, queryEmbedding, topK = 5) {
       similarity: parseFloat(row.similarity),
     }));
   } catch (error) {
-    console.error('向量搜索失败:', error);
+    logger.error('向量搜索失败:', { error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -157,7 +159,7 @@ async function hybridSearch(knowledgeBaseId, queryEmbedding, keywordQuery, topK 
 
     return vectorResults.slice(0, topK);
   } catch (error) {
-    console.error('混合搜索失败:', error);
+    logger.error('混合搜索失败:', { error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -172,7 +174,7 @@ async function deleteKnowledgeBaseChunks(knowledgeBaseId) {
     `;
     return result;
   } catch (error) {
-    console.error('删除知识块失败:', error);
+    logger.error('删除知识块失败:', { error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -187,7 +189,7 @@ async function deleteChunk(chunkId) {
     `;
     return true;
   } catch (error) {
-    console.error('删除知识块失败:', error);
+    logger.error('删除知识块失败:', { error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -205,7 +207,7 @@ async function getKnowledgeBaseStats(knowledgeBaseId) {
       chunkCount: parseInt(countResult[0].count, 10),
     };
   } catch (error) {
-    console.error('获取统计信息失败:', error);
+    logger.error('获取统计信息失败:', { error: error.message, stack: error.stack });
     throw error;
   }
 }
@@ -224,7 +226,7 @@ async function updateChunk(chunkId, content, embedding, metadata = {}) {
     `;
     return true;
   } catch (error) {
-    console.error('更新知识块失败:', error);
+    logger.error('更新知识块失败:', { error: error.message, stack: error.stack });
     throw error;
   }
 }

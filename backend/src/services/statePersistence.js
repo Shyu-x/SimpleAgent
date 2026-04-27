@@ -6,6 +6,8 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { createLogger } = require('../infra/logger/AgentLogger');
+const logger = createLogger('StatePersistence');
 
 // 默认存储路径
 const DEFAULT_STORAGE_PATH = path.join(__dirname, '../../data/agent-states');
@@ -44,9 +46,9 @@ class StatePersistence {
     try {
       await fs.mkdir(this.storagePath, { recursive: true });
       this.initialized = true;
-      console.log('[StatePersistence] Initialized at:', this.storagePath);
+      logger.info(`Initialized at: ${this.storagePath}`);
     } catch (error) {
-      console.error('[StatePersistence] Init failed:', error);
+      logger.error('Init failed:', { error: error.message, stack: error.stack });
       throw error;
     }
   }
@@ -77,7 +79,7 @@ class StatePersistence {
     this.currentSession = session;
     await this.saveSession(session);
 
-    console.log('[StatePersistence] Session created:', sessionId);
+    logger.info(`Session created: ${sessionId}`);
     return session;
   }
 
@@ -94,7 +96,7 @@ class StatePersistence {
       await fs.writeFile(filePath, JSON.stringify(session, null, 2));
       return true;
     } catch (error) {
-      console.error('[StatePersistence] Save session failed:', error);
+      logger.error('Save session failed:', { error: error.message, stack: error.stack });
       return false;
     }
   }
@@ -113,7 +115,7 @@ class StatePersistence {
       this.currentSession = session;
       return session;
     } catch (error) {
-      console.error('[StatePersistence] Load session failed:', error);
+      logger.error('Load session failed:', { error: error.message, stack: error.stack });
       return null;
     }
   }
@@ -159,7 +161,7 @@ class StatePersistence {
 
     await this.saveSession(session);
 
-    console.log('[StatePersistence] Checkpoint created:', checkpointId);
+    logger.info(`Checkpoint created: ${checkpointId}`);
     return checkpoint;
   }
 
@@ -190,7 +192,7 @@ class StatePersistence {
     session.currentCheckpoint = checkpoint.id;
     await this.saveSession(session);
 
-    console.log('[StatePersistence] Restored from checkpoint:', checkpoint.id);
+    logger.info(`Restored from checkpoint: ${checkpoint.id}`);
 
     return {
       sessionId: session.id,
@@ -215,7 +217,7 @@ class StatePersistence {
       }
     }, this.checkpointInterval);
 
-    console.log('[StatePersistence] Auto-save started');
+    logger.info('Auto-save started');
   }
 
   /**
@@ -225,7 +227,7 @@ class StatePersistence {
     if (this.autoSaveTimer) {
       clearInterval(this.autoSaveTimer);
       this.autoSaveTimer = null;
-      console.log('[StatePersistence] Auto-save stopped');
+      logger.info('Auto-save stopped');
     }
   }
 
@@ -257,7 +259,7 @@ class StatePersistence {
 
       return sessions.sort((a, b) => b.updatedAt - a.updatedAt);
     } catch (error) {
-      console.error('[StatePersistence] List sessions failed:', error);
+      logger.error('List sessions failed:', { error: error.message, stack: error.stack });
       return [];
     }
   }
@@ -275,7 +277,7 @@ class StatePersistence {
       }
       return true;
     } catch (error) {
-      console.error('[StatePersistence] Delete session failed:', error);
+      logger.error('Delete session failed:', { error: error.message, stack: error.stack });
       return false;
     }
   }
@@ -314,7 +316,7 @@ class StatePersistence {
       }
     }
 
-    console.log(`[StatePersistence] Cleaned ${cleaned} expired sessions`);
+    logger.info(`Cleaned ${cleaned} expired sessions`);
     return cleaned;
   }
 }

@@ -4,6 +4,8 @@ const RAGService = require('../services/ragService');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { createLogger } = require('../infra/logger/AgentLogger');
+const logger = createLogger('rag');
 
 // 导入新的节点
 const IngestionPipeline = require('../domain/rag/ingestion/IngestionPipeline');
@@ -80,7 +82,7 @@ router.post('/kb', async (req, res) => {
       knowledgeBase: kb
     });
   } catch (error) {
-    console.error('Create KB error:', error);
+    logger.error('Create KB error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -99,7 +101,7 @@ router.get('/kb', (req, res) => {
       knowledgeBases
     });
   } catch (error) {
-    console.error('List KBs error:', error);
+    logger.error('List KBs error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -140,7 +142,7 @@ router.get('/kb/:kbId', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get KB error:', error);
+    logger.error('Get KB error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -169,7 +171,7 @@ router.delete('/kb/:kbId', async (req, res) => {
       message: '知识库已删除'
     });
   } catch (error) {
-    console.error('Delete KB error:', error);
+    logger.error('Delete KB error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -203,7 +205,7 @@ router.post('/kb/:kbId/documents', async (req, res) => {
       chunks: result.chunks
     });
   } catch (error) {
-    console.error('Add document error:', error);
+    logger.error('Add document error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -248,7 +250,7 @@ router.post('/kb/:kbId/upload', upload.single('file'), async (req, res) => {
       title: path.basename(file.originalname)
     });
   } catch (error) {
-    console.error('Upload document error:', error);
+    logger.error('Upload document error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -289,7 +291,7 @@ router.post('/kb/:kbId/retrieve', async (req, res) => {
       count: results.length
     });
   } catch (error) {
-    console.error('Retrieve error:', error);
+    logger.error('Retrieve error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -332,7 +334,7 @@ router.post('/kb/:kbId/context', async (req, res) => {
       count: context ? context.count : 0
     });
   } catch (error) {
-    console.error('Get context error:', error);
+    logger.error('Get context error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -365,7 +367,7 @@ router.post('/search', async (req, res) => {
         });
         return { kbId: kb.id, kbName: kb.name, results };
       } catch (error) {
-        console.error(`Search KB ${kb.id} error:`, error.message);
+        logger.error(`Search KB ${kb.id} error:`, { error: error.message });
         return { kbId: kb.id, kbName: kb.name, results: [], error: error.message };
       }
     });
@@ -395,7 +397,7 @@ router.post('/search', async (req, res) => {
       searchedKBs: searchResults.map(sr => ({ id: sr.kbId, name: sr.kbName, resultCount: sr.results?.length || 0 }))
     });
   } catch (error) {
-    console.error('Global search error:', error);
+    logger.error('Global search error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -414,7 +416,7 @@ router.get('/stats', (req, res) => {
       stats
     });
   } catch (error) {
-    console.error('Get stats error:', error);
+    logger.error('Get stats error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -480,7 +482,7 @@ router.post('/fetch', async (req, res) => {
       duration: context.duration,
     });
   } catch (error) {
-    console.error('Fetch URL error:', error);
+    logger.error('Fetch URL error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       success: false,
       error: {
@@ -565,7 +567,7 @@ router.post('/kb/:kbId/fetch', async (req, res) => {
       traceId: context.traceId,
     });
   } catch (error) {
-    console.error('Fetch to KB error:', error);
+    logger.error('Fetch to KB error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       success: false,
       error: {

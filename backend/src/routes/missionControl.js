@@ -7,6 +7,8 @@
 
 const express = require('express');
 const router = express.Router();
+const { createLogger } = require('../infra/logger/AgentLogger');
+const logger = createLogger('missionControl');
 
 const { missionService, TaskStatus, TaskPriority, AgentRole, AgentStatus } = require('../services/missionService');
 
@@ -30,7 +32,7 @@ router.post('/tasks', async (req, res) => {
       task
     });
   } catch (error) {
-    console.error('Create task error:', error);
+    logger.error('Create task error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -58,7 +60,7 @@ router.get('/tasks', async (req, res) => {
       pagination: result.pagination
     });
   } catch (error) {
-    console.error('Get tasks error:', error);
+    logger.error('Get tasks error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -84,7 +86,7 @@ router.get('/tasks/:id', async (req, res) => {
       task
     });
   } catch (error) {
-    console.error('Get task error:', error);
+    logger.error('Get task error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -121,7 +123,7 @@ router.put('/tasks/:id', async (req, res) => {
       task
     });
   } catch (error) {
-    console.error('Update task error:', error);
+    logger.error('Update task error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -147,7 +149,7 @@ router.delete('/tasks/:id', async (req, res) => {
       message: 'Task deleted'
     });
   } catch (error) {
-    console.error('Delete task error:', error);
+    logger.error('Delete task error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -174,7 +176,7 @@ router.post('/tasks/:id/execute', async (req, res) => {
       task: result.task
     });
   } catch (error) {
-    console.error('Execute task error:', error);
+    logger.error('Execute task error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -201,7 +203,7 @@ router.post('/tasks/:id/cancel', async (req, res) => {
       task: result.task
     });
   } catch (error) {
-    console.error('Cancel task error:', error);
+    logger.error('Cancel task error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -222,7 +224,7 @@ router.get('/agents', async (req, res) => {
       agents
     });
   } catch (error) {
-    console.error('Get agents error:', error);
+    logger.error('Get agents error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -249,7 +251,7 @@ router.post('/agents', async (req, res) => {
       agent
     });
   } catch (error) {
-    console.error('Create agent error:', error);
+    logger.error('Create agent error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -275,7 +277,7 @@ router.get('/agents/:id', async (req, res) => {
       agent
     });
   } catch (error) {
-    console.error('Get agent error:', error);
+    logger.error('Get agent error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -309,7 +311,7 @@ router.put('/agents/:id', async (req, res) => {
       agent
     });
   } catch (error) {
-    console.error('Update agent error:', error);
+    logger.error('Update agent error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -335,7 +337,7 @@ router.delete('/agents/:id', async (req, res) => {
       message: 'Agent deleted'
     });
   } catch (error) {
-    console.error('Delete agent error:', error);
+    logger.error('Delete agent error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -354,7 +356,7 @@ router.get('/stats', async (req, res) => {
       stats
     });
   } catch (error) {
-    console.error('Get stats error:', error);
+    logger.error('Get stats error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -374,7 +376,7 @@ router.get('/events', async (req, res) => {
       events
     });
   } catch (error) {
-    console.error('Get events error:', error);
+    logger.error('Get events error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -401,7 +403,7 @@ router.post('/events', async (req, res) => {
       event
     });
   } catch (error) {
-    console.error('Create event error:', error);
+    logger.error('Create event error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -428,7 +430,7 @@ router.post('/broadcast', async (req, res) => {
       event
     });
   } catch (error) {
-    console.error('Broadcast error:', error);
+    logger.error('Broadcast error:', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });

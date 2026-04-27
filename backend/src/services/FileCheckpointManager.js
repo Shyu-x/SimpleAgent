@@ -5,6 +5,8 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { createLogger } = require('../infra/logger/AgentLogger');
+const logger = createLogger('FileCheckpointManager');
 
 class FileCheckpointManager {
   constructor(options = {}) {
@@ -21,7 +23,7 @@ class FileCheckpointManager {
       await fs.mkdir(this.checkpointDir, { recursive: true });
     } catch (error) {
       if (error.code !== 'EEXIST') {
-        console.error('[CheckpointManager] 创建目录失败:', error);
+        logger.error('创建目录失败:', { error: error.message });
       }
     }
   }
@@ -81,11 +83,11 @@ class FileCheckpointManager {
       // 保存检查点数据
       await fs.writeFile(filePath, JSON.stringify(checkpoint, null, 2));
 
-      console.log(`[CheckpointManager] 保存检查点: ${checkpoint.id} (session: ${sessionId})`);
+      logger.info(`保存检查点: ${checkpoint.id} (session: ${sessionId})`);
 
       return checkpoint;
     } catch (error) {
-      console.error('[CheckpointManager] 保存检查点失败:', error);
+      logger.error('保存检查点失败:', { error: error.message, stack: error.stack });
       throw error;
     }
   }
@@ -116,7 +118,7 @@ class FileCheckpointManager {
       return JSON.parse(data);
     } catch (error) {
       if (error.code !== 'ENOENT') {
-        console.error(`[CheckpointManager] 读取检查点失败 (${sessionId}):`, error);
+        logger.error(`读取检查点失败 (${sessionId}):`, { error: error.message });
       }
       return null;
     }
@@ -156,7 +158,7 @@ class FileCheckpointManager {
         throw new Error(`Checkpoint ID mismatch: expected ${checkpointId}, got ${checkpoint.id}`);
       }
 
-      console.log(`[CheckpointManager] 恢复检查点: ${checkpoint.id}`);
+      logger.info(`恢复检查点: ${checkpoint.id}`);
       return checkpoint;
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -183,11 +185,11 @@ class FileCheckpointManager {
         await fs.writeFile(metaPath, JSON.stringify(checkpoints, null, 2));
       } catch {}
 
-      console.log(`[CheckpointManager] 删除检查点: ${sessionId}`);
+      logger.info(`删除检查点: ${sessionId}`);
       return true;
     } catch (error) {
       if (error.code !== 'ENOENT') {
-        console.error(`[CheckpointManager] 删除检查点失败:`, error);
+        logger.error(`删除检查点失败:`, { error: error.message });
       }
       return false;
     }
@@ -205,7 +207,7 @@ class FileCheckpointManager {
       for (const checkpoint of expired) {
         try {
           await fs.unlink(path.join(this.checkpointDir, checkpoint.filePath));
-          console.log(`[CheckpointManager] 清理过期检查点: ${checkpoint.sessionId}`);
+          logger.info(`清理过期检查点: ${checkpoint.sessionId}`);
         } catch {}
       }
 
@@ -216,7 +218,7 @@ class FileCheckpointManager {
 
       return expired.length;
     } catch (error) {
-      console.error('[CheckpointManager] 清理过期检查点失败:', error);
+      logger.error('清理过期检查点失败:', { error: error.message, stack: error.stack });
       return 0;
     }
   }
@@ -237,10 +239,10 @@ class FileCheckpointManager {
       const metaPath = path.join(this.checkpointDir, '_meta.json');
       await fs.writeFile(metaPath, JSON.stringify([], null, 2));
 
-      console.log('[CheckpointManager] 清理所有检查点');
+      logger.info('清理所有检查点');
       return true;
     } catch (error) {
-      console.error('[CheckpointManager] 清理所有检查点失败:', error);
+      logger.error('清理所有检查点失败:', { error: error.message, stack: error.stack });
       return false;
     }
   }

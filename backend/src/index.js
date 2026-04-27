@@ -8,6 +8,8 @@ const swaggerUi = require('swagger-ui-express');
 const { TracingService, tracingMiddleware } = require('./services/tracing');
 const { initializeDatabase, closeDatabase } = require('./services/database');
 const ToolRegistry = require('./services/tools/toolRegistry');
+const { createLogger } = require('./infra/logger/AgentLogger');
+const logger = createLogger('index');
 
 // 创建全局工具注册表
 const globalToolRegistry = new ToolRegistry();
@@ -69,7 +71,7 @@ async function startServer() {
   try {
     await initializeDatabase();
   } catch (error) {
-    console.warn('数据库初始化失败，继续启动服务:', error.message);
+    logger.warn(`数据库初始化失败，继续启动服务: ${error.message}`);
   }
 
   // 安全中间件：请求体大小限制
@@ -120,7 +122,7 @@ async function startServer() {
   app.use((req, _res, next) => {
     // 记录请求 - 仅在非生产环境
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+      logger.debug(`${req.method} ${req.path}`);
     }
     next();
   });
@@ -242,7 +244,7 @@ async function startServer() {
 
   // 全局错误处理中间件 - 统一响应格式
   app.use((err, req, res, _next) => {
-    console.error('Unhandled error:', err.message);
+    logger.error('Unhandled error:', { error: err.message, stack: err.stack });
 
     // 避免泄露内部错误详情
     const message = process.env.NODE_ENV === 'production'
@@ -263,26 +265,26 @@ async function startServer() {
 
   // 优雅关闭
   process.on('SIGTERM', async () => {
-    console.log('SIGTERM received, shutting down gracefully');
+    logger.info('SIGTERM received, shutting down gracefully');
     await closeDatabase();
     process.exit(0);
   });
 
   process.on('SIGINT', async () => {
-    console.log('SIGINT received, shutting down gracefully');
+    logger.info('SIGINT received, shutting down gracefully');
     await closeDatabase();
     process.exit(0);
   });
 
   app.listen(PORT, () => {
-    console.log(`AI Chat Backend running on http://localhost:${PORT}`);
-    console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
-    console.log(`Database: ${process.env.DATABASE_URL ? 'PostgreSQL' : 'Not configured'}`);
+    logger.info(`AI Chat Backend running on http://localhost:${PORT}`);
+    logger.info(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+    logger.info(`Database: ${process.env.DATABASE_URL ? 'PostgreSQL' : 'Not configured'}`);
   });
 }
 
 // 启动服务器
 startServer().catch(error => {
-  console.error('Failed to start server:', error);
+  logger.error('Failed to start server:', { error: error.message, stack: error.stack });
   process.exit(1);
 });
