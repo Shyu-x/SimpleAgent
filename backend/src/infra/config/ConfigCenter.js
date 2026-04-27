@@ -159,7 +159,7 @@ class ConfigCenter extends EventEmitter {
 
     // 设置嵌套值
     if (path.length === 0) {
-      config = value;
+      this.configs.set(configType, value);
     } else {
       let target = config;
       for (let i = 0; i < path.length - 1; i++) {
@@ -169,9 +169,8 @@ class ConfigCenter extends EventEmitter {
         target = target[path[i]];
       }
       target[path[path.length - 1]] = value;
+      this.configs.set(configType, config);
     }
-
-    this.configs.set(configType, config);
     this.emit('configChanged', { key, value, type: configType });
   }
 

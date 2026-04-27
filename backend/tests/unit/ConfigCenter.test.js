@@ -29,9 +29,10 @@ function describe(name, fn) {
   fn();
 }
 
+const { ConfigCenter } = require('../../src/infra/config/ConfigCenter');
+
 describe('ConfigCenter 初始化', () => {
   test('默认配置应该包含 model/rag/agent/rateLimit', () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     assert.ok(config.defaults.model);
@@ -41,7 +42,6 @@ describe('ConfigCenter 初始化', () => {
   });
 
   test('model 默认配置应该正确', () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     assert.strictEqual(config.defaults.model.provider, 'minimax');
@@ -52,7 +52,6 @@ describe('ConfigCenter 初始化', () => {
   });
 
   test('rag 默认配置应该正确', () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     assert.strictEqual(config.defaults.rag.chunkSize, 512);
@@ -62,7 +61,6 @@ describe('ConfigCenter 初始化', () => {
   });
 
   test('agent 默认配置应该正确', () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     assert.strictEqual(config.defaults.agent.maxIterations, 10);
@@ -72,7 +70,6 @@ describe('ConfigCenter 初始化', () => {
   });
 
   test('rateLimit 默认配置应该正确', () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     assert.strictEqual(config.defaults.rateLimit.global, 100);
@@ -83,7 +80,6 @@ describe('ConfigCenter 初始化', () => {
 
 describe('ConfigCenter get 和 set', () => {
   test('get 应该返回已加载的配置', async () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     await config.loadAll();
@@ -94,7 +90,6 @@ describe('ConfigCenter get 和 set', () => {
   });
 
   test('get 不存在的配置应该返回 undefined', async () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     await config.loadAll();
@@ -104,7 +99,6 @@ describe('ConfigCenter get 和 set', () => {
   });
 
   test('set 应该更新配置', async () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     await config.loadAll();
@@ -116,12 +110,11 @@ describe('ConfigCenter get 和 set', () => {
     assert.strictEqual(modelConfig.defaultModel, 'Custom-Model');
   });
 
-  test('set 应该触发 change 事件', async () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
+  test('set 应该触发 configChanged 事件', async () => {
     const config = new ConfigCenter({ enableHotReload: false });
     let eventFired = false;
 
-    config.on('change', (type, newConfig) => {
+    config.on('configChanged', (change) => {
       eventFired = true;
     });
 
@@ -134,7 +127,6 @@ describe('ConfigCenter get 和 set', () => {
 
 describe('ConfigCenter _mergeDefaults', () => {
   test('应该正确合并配置和默认值', () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const configCenter = new ConfigCenter({ enableHotReload: false });
 
     const userConfig = { timeout: 60000, retries: 5 };
@@ -148,7 +140,6 @@ describe('ConfigCenter _mergeDefaults', () => {
   });
 
   test('空用户配置应该使用全部默认值', () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const configCenter = new ConfigCenter({ enableHotReload: false });
 
     const merged = configCenter._mergeDefaults({}, { key: 'value' });
@@ -159,7 +150,6 @@ describe('ConfigCenter _mergeDefaults', () => {
 
 describe('ConfigCenter getAll', () => {
   test('getAll 应该返回所有配置', async () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     await config.loadAll();
@@ -174,7 +164,6 @@ describe('ConfigCenter getAll', () => {
 
 describe('ConfigCenter reload', () => {
   test('reload 应该重新加载配置', async () => {
-    const ConfigCenter = require('../../src/infra/config/ConfigCenter');
     const config = new ConfigCenter({ enableHotReload: false });
 
     await config.loadAll();

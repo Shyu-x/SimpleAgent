@@ -24,6 +24,8 @@ module.exports = {
     'src/utils/**/*.js',
     'src/middleware/**/*.js',
     'src/routes/**/*.js',
+    'src/infra/**/*.js',
+    'src/common/**/*.js',
     '!src/**/*.test.js',
     '!src/**/__tests__/**',
   ],
@@ -53,6 +55,7 @@ module.exports = {
   // 模块映射
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^redis$': '<rootDir>/src/infra/rateLimiter/__mocks__/redis.js',
   },
 
   // 转换器

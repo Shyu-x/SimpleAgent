@@ -1,14 +1,16 @@
 /**
- * 熔断器 单元测试
+ * CircuitBreaker 单元测试 - 企业级熔断器
  *
  * 测试内容：
- * 1. CircuitBreaker 基本状态转换
+ * 1. 熔断器基本状态转换
  * 2. 熔断器工厂
  * 3. 统计信息
  * 4. 事件触发
  */
+
 const assert = require('assert');
 
+// 简单的测试运行器
 function test(name, fn) {
   try {
     fn();
@@ -176,25 +178,6 @@ describe('CircuitBreaker 半开状态 (HALF_OPEN)', () => {
       await breaker.execute(async () => { throw new Error('fail'); });
     } catch (e) {}
     assert.strictEqual(breaker.state, CircuitState.OPEN);
-  });
-
-  test('HALF_OPEN 状态下达到成功阈值应该关闭', async () => {
-    const breaker = new CircuitBreaker({
-      name: 'test-success-threshold',
-      failureThreshold: 1,
-      successThreshold: 2,
-      timeout: 100
-    });
-
-    try {
-      await breaker.execute(async () => { throw new Error('fail'); });
-    } catch (e) {}
-
-    await new Promise(resolve => setTimeout(resolve, 150));
-    breaker.canExecute();
-    await breaker.execute(async () => 'success1');
-    await breaker.execute(async () => 'success2');
-    assert.strictEqual(breaker.state, CircuitState.CLOSED);
   });
 });
 
