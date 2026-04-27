@@ -3,6 +3,10 @@
  * 无需 API Key，无限制搜索
  */
 
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('DuckDuckGoSearchTool');
+
 class DuckDuckGoSearchTool {
   constructor(options = {}) {
     this.name = 'duckduckgo_search';
@@ -65,7 +69,7 @@ class DuckDuckGoSearchTool {
           return { success: false, error: `Unknown action: ${action}` };
       }
     } catch (error) {
-      console.error('[DuckDuckGoSearch] 执行失败:', error.message);
+      logger.error('执行失败', { error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -106,11 +110,11 @@ class DuckDuckGoSearchTool {
     const results = [];
     const errors = [];
 
-    console.log(`[DuckDuckGoSearch] 批量搜索: ${limitedQueries.length} 个查询`);
+    logger.info(`批量搜索: ${limitedQueries.length} 个查询`);
 
     for (let i = 0; i < limitedQueries.length; i++) {
       const q = limitedQueries[i];
-      console.log(`[DuckDuckGoSearch] [${i + 1}/${limitedQueries.length}] ${q}`);
+      logger.debug(`[${i + 1}/${limitedQueries.length}] ${q}`);
 
       try {
         const result = await this.search(q, options);
@@ -125,7 +129,7 @@ class DuckDuckGoSearchTool {
       }
     }
 
-    console.log(`[DuckDuckGoSearch] 完成: 成功 ${results.length}, 失败 ${errors.length}`);
+    logger.info(`完成: 成功 ${results.length}, 失败 ${errors.length}`);
 
     return {
       success: results.length > 0,
@@ -195,7 +199,7 @@ class DuckDuckGoSearchTool {
         return this.parseHTML(html);
       } catch (error) {
         lastError = error;
-        console.log(`[DuckDuckGoSearch] 第 ${attempt} 次尝试失败: ${error.message}`);
+        logger.debug(`第 ${attempt} 次尝试失败: ${error.message}`);
 
         if (attempt < maxRetries) {
           // 指数退避: 1s, 2s, 4s
