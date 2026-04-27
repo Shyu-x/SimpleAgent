@@ -6,6 +6,9 @@
 const express = require('express');
 const router = express.Router();
 const { hitlManager } = require('../hitl');
+const AgentLogger = require('../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('hitlSSE');
 
 // 存储所有 SSE 连接
 const sseClients = new Map();
@@ -26,7 +29,7 @@ function broadcast(data) {
     try {
       res.write(message);
     } catch (error) {
-      console.error(`[HITL SSE] Failed to send to client ${clientId}:`, error.message);
+      logger.error(`Failed to send to client ${clientId}`, { error: error.message });
       // 移除断开的客户端
       sseClients.delete(clientId);
     }
@@ -54,7 +57,7 @@ router.get('/sse', (req, res) => {
   // 存储客户端
   sseClients.set(clientId, res);
 
-  console.log(`[HITL SSE] Client connected: ${clientId} (total: ${sseClients.size})`);
+  logger.info(`Client connected`, { clientId, totalClients: sseClients.size });
 
   // 发送当前待处理的检查点
   const pending = hitlManager.getPendingCheckpoints();
@@ -69,7 +72,7 @@ router.get('/sse', (req, res) => {
     } catch (error) {
       clearInterval(heartbeatInterval);
       sseClients.delete(clientId);
-      console.log(`[HITL SSE] Client disconnected (heartbeat failed): ${clientId}`);
+      logger.info(`Client disconnected (heartbeat failed)`, { clientId });
     }
   }, 30000);
 
@@ -82,7 +85,7 @@ router.get('/sse', (req, res) => {
         checkpoint: checkpoint.getSummary ? checkpoint.getSummary() : checkpoint
       })}\n\n`);
     } catch (error) {
-      console.error(`[HITL SSE] Failed to send checkpoint event to ${clientId}:`, error.message);
+      logger.error(`Failed to send checkpoint event`, { clientId, error: error.message });
     }
   };
 
@@ -94,7 +97,7 @@ router.get('/sse', (req, res) => {
         checkpoint: checkpoint.getSummary ? checkpoint.getSummary() : checkpoint
       })}\n\n`);
     } catch (error) {
-      console.error(`[HITL SSE] Failed to send approved event to ${clientId}:`, error.message);
+      logger.error(`Failed to send approved event`, { clientId, error: error.message });
     }
   };
 
@@ -106,7 +109,7 @@ router.get('/sse', (req, res) => {
         checkpoint: checkpoint.getSummary ? checkpoint.getSummary() : checkpoint
       })}\n\n`);
     } catch (error) {
-      console.error(`[HITL SSE] Failed to send rejected event to ${clientId}:`, error.message);
+      logger.error(`Failed to send rejected event`, { clientId, error: error.message });
     }
   };
 
@@ -118,7 +121,7 @@ router.get('/sse', (req, res) => {
         checkpoint: checkpoint.getSummary ? checkpoint.getSummary() : checkpoint
       })}\n\n`);
     } catch (error) {
-      console.error(`[HITL SSE] Failed to send timeout event to ${clientId}:`, error.message);
+      logger.error(`Failed to send timeout event`, { clientId, error: error.message });
     }
   };
 
@@ -136,7 +139,7 @@ router.get('/sse', (req, res) => {
     hitlManager.off('checkpoint:approved', handleCheckpointApproved);
     hitlManager.off('checkpoint:rejected', handleCheckpointRejected);
     hitlManager.off('checkpoint:timeout', handleCheckpointTimeout);
-    console.log(`[HITL SSE] Client disconnected: ${clientId} (remaining: ${sseClients.size})`);
+    logger.info(`Client disconnected`, { clientId, remainingClients: sseClients.size });
   });
 
   req.on('error', (error) => {
@@ -146,7 +149,7 @@ router.get('/sse', (req, res) => {
     hitlManager.off('checkpoint:approved', handleCheckpointApproved);
     hitlManager.off('checkpoint:rejected', handleCheckpointRejected);
     hitlManager.off('checkpoint:timeout', handleCheckpointTimeout);
-    console.error(`[HITL SSE] Client error: ${clientId}`, error.message);
+    logger.error(`Client error`, { clientId, error: error.message });
   });
 });
 
