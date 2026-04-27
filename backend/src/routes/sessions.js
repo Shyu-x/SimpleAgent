@@ -1,93 +1,44 @@
 const express = require('express');
 const router = express.Router();
-
-// 内存会话存储 - 独立的会话管理
 let sessions = [];
 
-// 生成唯一ID
-function generateId() {
-  return 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-}
+const generateId = () => 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 
-// 输入验证辅助函数
-function validateSessionInput(title, messages) {
-  const errors = [];
-
-  if (title !== undefined && typeof title !== 'string') {
-    errors.push('title must be a string');
+const validate = {
+  session: (title, messages) => {
+    const errors = [];
+    if (title !== undefined && (typeof title !== 'string' || title.length > 200)) errors.push('title must be string ≤200');
+    if (messages !== undefined && (!Array.isArray(messages) || messages.length > 1000)) errors.push('messages must be array ≤1000');
+    return errors;
+  },
+  message: (role, content) => {
+    const errors = [];
+    if (!role || !['user', 'assistant', 'system'].includes(role)) errors.push('role required: user|assistant|system');
+    if (!content || typeof content !== 'string' || content.length > 100000) errors.push('content required: string ≤100000');
+    return errors;
   }
-  if (title !== undefined && title.length > 200) {
-    errors.push('title must be less than 200 characters');
-  }
+};
 
-  if (messages !== undefined && !Array.isArray(messages)) {
-    errors.push('messages must be an array');
-  }
-  if (messages !== undefined && messages.length > 1000) {
-    errors.push('messages array too large (max 1000)');
-  }
-
-  return errors;
-}
-
-function validateMessageInput(role, content) {
-  const errors = [];
-
-  if (!role) {
-    errors.push('role is required');
-  } else if (!['user', 'assistant', 'system'].includes(role)) {
-    errors.push('role must be user, assistant, or system');
-  }
-
-  if (!content) {
-    errors.push('content is required');
-  } else if (typeof content !== 'string') {
-    errors.push('content must be a string');
-  } else if (content.length > 100000) {
-    errors.push('content too large (max 100000 characters)');
-  }
-
-  return errors;
-}
-
-// 获取所有会话
+// GET / - 列表(不含消息)
 router.get('/', (req, res) => {
-  // 返回会话列表（不含消息内容）
-  const sessionList = sessions.map(s => ({
-    id: s.id,
-    title: s.title,
-    createdAt: s.createdAt,
-    updatedAt: s.updatedAt,
-    messageCount: s.messages.length
-  }));
-
-  // 按更新时间倒序
-  sessionList.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-
-  res.json(sessionList);
+  const list = sessions.map(s => ({
+    id: s.id, title: s.title, createdAt: s.createdAt, updatedAt: s.updatedAt, messageCount: s.messages.length
+  })).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  res.json(list);
 });
 
-// 获取指定会话
+// GET /:id - 单个
 router.get('/:id', (req, res) => {
   const session = sessions.find(s => s.id === req.params.id);
-
-  if (!session) {
-    return res.status(404).json({ error: 'Session not found' });
-  }
-
+  if (!session) return res.status(404).json({ error: 'Session not found' });
   res.json(session);
 });
 
-// 创建新会话
+// POST / - 创建
 router.post('/', (req, res) => {
   const { title, messages } = req.body;
-
-  // 输入验证
-  const errors = validateSessionInput(title, messages);
-  if (errors.length > 0) {
-    return res.status(400).json({ error: 'Validation failed', details: errors });
-  }
-
+  const errors = validate.session(title, messages);
+  if (errors.length) return res.status(400).json({ error: 'Validation failed', details: errors });
   const newSession = {
     id: generateId(),
     title: title ? String(title).substring(0, 200) : '新对话',
@@ -95,86 +46,47 @@ router.post('/', (req, res) => {
     updatedAt: new Date().toISOString(),
     messages: messages || []
   };
-
   sessions.unshift(newSession);
   res.status(201).json(newSession);
 });
 
-// 更新会话
+// PUT /:id - 更新
 router.put('/:id', (req, res) => {
-  const sessionIndex = sessions.findIndex(s => s.id === req.params.id);
-
-  if (sessionIndex === -1) {
-    return res.status(404).json({ error: 'Session not found' });
-  }
-
+  const idx = sessions.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Session not found' });
   const { title, messages } = req.body;
-
-  // 输入验证
-  const errors = validateSessionInput(title, messages);
-  if (errors.length > 0) {
-    return res.status(400).json({ error: 'Validation failed', details: errors });
-  }
-
-  if (title) {
-    sessions[sessionIndex].title = String(title).substring(0, 200);
-  }
-
-  if (messages) {
-    sessions[sessionIndex].messages = messages;
-  }
-
-  sessions[sessionIndex].updatedAt = new Date().toISOString();
-
-  res.json(sessions[sessionIndex]);
+  const errors = validate.session(title, messages);
+  if (errors.length) return res.status(400).json({ error: 'Validation failed', details: errors });
+  if (title) sessions[idx].title = String(title).substring(0, 200);
+  if (messages) sessions[idx].messages = messages;
+  sessions[idx].updatedAt = new Date().toISOString();
+  res.json(sessions[idx]);
 });
 
-// 添加消息到会话
+// POST /:id/messages - 添加消息
 router.post('/:id/messages', (req, res) => {
   const session = sessions.find(s => s.id === req.params.id);
-
-  if (!session) {
-    return res.status(404).json({ error: 'Session not found' });
-  }
-
+  if (!session) return res.status(404).json({ error: 'Session not found' });
   const { role, content } = req.body;
-
-  // 输入验证
-  const errors = validateMessageInput(role, content);
-  if (errors.length > 0) {
-    return res.status(400).json({ error: 'Validation failed', details: errors });
-  }
-
-  const message = {
-    role,
-    content: String(content).substring(0, 100000),
-    timestamp: new Date().toISOString()
-  };
-
+  const errors = validate.message(role, content);
+  if (errors.length) return res.status(400).json({ error: 'Validation failed', details: errors });
+  const message = { role, content: String(content).substring(0, 100000), timestamp: new Date().toISOString() };
   session.messages.push(message);
   session.updatedAt = new Date().toISOString();
-
-  // 如果是第一条消息，更新会话标题
   if (session.messages.length === 1 && role === 'user') {
     session.title = content.substring(0, 50) + (content.length > 50 ? '...' : '');
   }
-
   res.json(message);
 });
 
-// 删除会话
+// DELETE /:id - 删除
 router.delete('/:id', (req, res) => {
-  const sessionIndex = sessions.findIndex(s => s.id === req.params.id);
-
-  if (sessionIndex === -1) {
-    return res.status(404).json({ error: 'Session not found' });
-  }
-
-  const deleted = sessions.splice(sessionIndex, 1)[0];
-  res.json({ success: true, deleted });
+  const idx = sessions.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Session not found' });
+  res.json({ success: true, deleted: sessions.splice(idx, 1)[0] });
 });
 
-// 清除所有会话
+// DELETE / - 清除全部
 router.delete('/', (req, res) => {
   sessions.length = 0;
   res.json({ success: true, message: 'All sessions cleared' });
