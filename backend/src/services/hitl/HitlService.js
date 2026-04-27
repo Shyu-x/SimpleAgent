@@ -276,6 +276,85 @@ function createSSEHandlers(emitter) {
   };
 }
 
+/**
+ * 设置SSE连接
+ * 将HTTP响应对象转换为SSE流，自动处理事件推送和清理
+ * @param {Object} req - Express request
+ * @param {Object} res - Express response
+ * @returns {Object} { clientId, cleanup } - 客户端ID和清理函数
+ */
+function setupSSEConnection(req, res) {
+  const hitlManager = require('../../hitl').hitlManager;
+  const handlers = createSSEHandlers(hitlManager);
+
+  // 设置 SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.flushHeaders();
+
+  const clientId = `client_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  console.log(`[HITL SSE] Client connected: ${clientId}`);
+
+  // 发送连接成功事件
+  res.write(`data: ${JSON.stringify(handlers.createConnectedEvent(clientId))}\n\n`);
+
+  // 发送待处理检查点
+  const pending = hitlManager.getPendingCheckpoints();
+  if (pending.length > 0) {
+    res.write(`data: ${JSON.stringify(handlers.createPendingCheckpointsEvent(pending))}\n\n`);
+  }
+
+  // 注册事件处理器，实时推送检查点变化
+  const handleCreated = (checkpoint) => {
+    res.write(`data: ${JSON.stringify(handlers.handleCreated(checkpoint))}\n\n`);
+  };
+
+  const handleApproved = (checkpoint) => {
+    res.write(`data: ${JSON.stringify(handlers.handleApproved(checkpoint))}\n\n`);
+  };
+
+  const handleRejected = (checkpoint) => {
+    res.write(`data: ${JSON.stringify(handlers.handleRejected(checkpoint))}\n\n`);
+  };
+
+  const handleTimeout = (checkpoint) => {
+    res.write(`data: ${JSON.stringify(handlers.handleTimeout(checkpoint))}\n\n`);
+  };
+
+  hitlManager.on('checkpoint:created', handleCreated);
+  hitlManager.on('checkpoint:approved', handleApproved);
+  hitlManager.on('checkpoint:rejected', handleRejected);
+  hitlManager.on('checkpoint:timeout', handleTimeout);
+
+  // 心跳保活
+  const heartbeat = setInterval(() => {
+    res.write(`: heartbeat\n\n`);
+  }, 30000);
+
+  // 客户端断开连接
+  req.on('close', () => {
+    console.log(`[HITL SSE] Client disconnected: ${clientId}`);
+    clearInterval(heartbeat);
+    hitlManager.off('checkpoint:created', handleCreated);
+    hitlManager.off('checkpoint:approved', handleApproved);
+    hitlManager.off('checkpoint:rejected', handleRejected);
+    hitlManager.off('checkpoint:timeout', handleTimeout);
+  });
+
+  return {
+    clientId,
+    cleanup: () => {
+      clearInterval(heartbeat);
+      hitlManager.off('checkpoint:created', handleCreated);
+      hitlManager.off('checkpoint:approved', handleApproved);
+      hitlManager.off('checkpoint:rejected', handleRejected);
+      hitlManager.off('checkpoint:timeout', handleTimeout);
+    }
+  };
+}
+
 module.exports = {
   createCheckpoint,
   getPendingCheckpoints,
@@ -290,5 +369,6 @@ module.exports = {
   clearPending,
   getTypes,
   healthCheck,
-  createSSEHandlers
+  createSSEHandlers,
+  setupSSEConnection
 };

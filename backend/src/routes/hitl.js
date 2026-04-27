@@ -1,307 +1,127 @@
+/**
+ * HITL 人机协作确认路由
+ * 业务逻辑已迁移至 services/hitl/HitlService.js
+ */
+
 const express = require('express');
 const router = express.Router();
 const hitlService = require('../services/hitl/HitlService');
-const { CheckpointType } = require('../hitl');
+const { validateBody, validateParams, validateQuery } = require('../common/middleware/validate');
+const {
+  createCheckpointSchema,
+  getCheckpointSchema,
+  approveCheckpointSchema,
+  rejectCheckpointSchema,
+  waitCheckpointSchema,
+  historySchema
+} = require('../schemas/hitl');
 
-/**
- * @swagger
- * tags:
- *   - name: hitl
- *     description: HITL人机协作确认系统
- */
-
-/**
- * @swagger
- * /api/hitl/checkpoint:
- *   post:
- *     tags: [hitl]
- *     summary: 创建检查点
- *     description: 创建人机协作确认检查点
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - title
- *             properties:
- *               type:
- *                 type: string
- *                 enum: [DECISION, APPROVAL, REJECTION, CONFIRMATION]
- *                 description: 检查点类型
- *               title:
- *                 type: string
- *                 description: 检查点标题
- *               description:
- *                 type: string
- *                 description: 检查点描述
- *               context:
- *                 type: object
- *                 description: 上下文数据
- *               options:
- *                 type: array
- *                 items:
- *                   type: object
- *                 description: 可选项列表
- *               timeout:
- *                 type: number
- *                 description: 超时时间(毫秒)
- *               required:
- *                 type: boolean
- *     responses:
- *       200:
- *         description: 检查点创建成功
- *       400:
- *         description: 参数错误
- */
-router.post('/checkpoint', (req, res) => {
-  const { type, title, description, context, options, timeout, required } = req.body;
-
-  const result = hitlService.createCheckpoint({
-    type,
-    title,
-    description,
-    context,
-    options,
-    timeout,
-    required
-  });
-
-  if (!result.success) {
-    return res.status(400).json(result);
-  }
-
-  res.json(result);
+// POST /api/hitl/checkpoint - 创建检查点
+router.post('/checkpoint', validateBody(createCheckpointSchema), (req, res) => {
+  const result = hitlService.createCheckpoint(req.body);
+  res.status(result.success ? 200 : 400).json(result);
 });
 
-/**
- * 获取待处理检查点列表
- * GET /api/hitl/pending
- */
+// GET /api/hitl/pending - 获取待处理检查点列表
 router.get('/pending', (_req, res) => {
   res.json(hitlService.getPendingCheckpoints());
 });
 
-/**
- * 获取检查点详情
- * GET /api/hitl/checkpoint/:id
- */
-router.get('/checkpoint/:id', (req, res) => {
+// GET /api/hitl/checkpoint/:id - 获取检查点详情
+router.get('/checkpoint/:id', validateParams(getCheckpointSchema), (req, res) => {
   const result = hitlService.getCheckpoint(req.params.id);
-
-  if (!result.success) {
-    return res.status(404).json(result);
-  }
-
-  res.json(result);
+  res.status(result.success ? 200 : 404).json(result);
 });
 
-/**
- * 批准检查点
- * POST /api/hitl/checkpoint/:id/approve
- */
-router.post('/checkpoint/:id/approve', (req, res) => {
-  const { option, comment, userId } = req.body;
-  const result = hitlService.approveCheckpoint(req.params.id, option, userId, comment);
-
-  if (!result.success) {
-    return res.status(500).json(result);
+// POST /api/hitl/checkpoint/:id/approve - 批准检查点
+router.post('/checkpoint/:id/approve',
+  validateParams(getCheckpointSchema),
+  validateBody(approveCheckpointSchema),
+  (req, res) => {
+    const { option, comment, userId } = req.body;
+    const result = hitlService.approveCheckpoint(req.params.id, option, userId, comment);
+    res.status(result.success ? 200 : 500).json(result);
   }
+);
 
-  res.json(result);
-});
-
-/**
- * 拒绝检查点
- * POST /api/hitl/checkpoint/:id/reject
- */
-router.post('/checkpoint/:id/reject', (req, res) => {
-  const { reason, userId } = req.body;
-  const result = hitlService.rejectCheckpoint(req.params.id, reason, userId);
-
-  if (!result.success) {
-    return res.status(500).json(result);
+// POST /api/hitl/checkpoint/:id/reject - 拒绝检查点
+router.post('/checkpoint/:id/reject',
+  validateParams(getCheckpointSchema),
+  validateBody(rejectCheckpointSchema),
+  (req, res) => {
+    const { reason, userId } = req.body;
+    const result = hitlService.rejectCheckpoint(req.params.id, reason, userId);
+    res.status(result.success ? 200 : 500).json(result);
   }
+);
 
-  res.json(result);
-});
+// POST /api/hitl/checkpoint/:id/wait - 等待检查点响应
+router.post('/checkpoint/:id/wait',
+  validateParams(getCheckpointSchema),
+  validateBody(waitCheckpointSchema),
+  async (req, res) => {
+    try {
+      const result = await hitlService.waitForCheckpoint(req.params.id, req.body.timeout);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
+);
 
-/**
- * 等待检查点响应
- * POST /api/hitl/checkpoint/:id/wait
- */
-router.post('/checkpoint/:id/wait', async (req, res) => {
-  const { timeout } = req.body;
-
+// POST /api/hitl/request - 创建确认请求
+router.post('/request', validateBody(createCheckpointSchema), async (req, res) => {
   try {
-    const result = await hitlService.waitForCheckpoint(req.params.id, timeout);
+    const result = await hitlService.requestConfirmationWithTimeout(req.body);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-/**
- * 创建确认请求
- * POST /api/hitl/request
- */
-router.post('/request', async (req, res) => {
-  const { type, title, description, context, options, timeout, required } = req.body;
-
+// POST /api/hitl/confirm - 创建并等待确认（一次性操作）
+router.post('/confirm', validateBody(createCheckpointSchema), async (req, res) => {
   try {
-    const result = await hitlService.requestConfirmationWithTimeout({
-      type,
-      title,
-      description,
-      context,
-      options,
-      timeout,
-      required
-    });
-
+    const result = await hitlService.requestConfirmation(req.body);
     res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-/**
- * 创建并等待确认（一次性操作）
- * POST /api/hitl/confirm
- */
-router.post('/confirm', async (req, res) => {
-  const { type, title, description, context, options, timeout, required } = req.body;
-
-  try {
-    const result = await hitlService.requestConfirmation({
-      type,
-      title,
-      description,
-      context,
-      options,
-      timeout,
-      required
-    });
-
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
+// GET /api/hitl/history - 获取历史记录
+router.get('/history', validateQuery(historySchema), (req, res) => {
+  res.json(hitlService.getHistory(req.query.limit));
 });
 
-/**
- * 获取历史记录
- * GET /api/hitl/history
- */
-router.get('/history', (req, res) => {
-  const limit = parseInt(req.query.limit) || 50;
-  res.json(hitlService.getHistory(limit));
-});
-
-/**
- * 获取统计信息
- * GET /api/hitl/stats
- */
+// GET /api/hitl/stats - 获取统计信息
 router.get('/stats', (_req, res) => {
   res.json(hitlService.getStats());
 });
 
-/**
- * 清除所有待处理检查点
- * POST /api/hitl/clear
- */
+// POST /api/hitl/clear - 清除所有待处理检查点
 router.post('/clear', (_req, res) => {
   res.json(hitlService.clearPending());
 });
 
-/**
- * 获取检查点类型
- * GET /api/hitl/types
- */
+// GET /api/hitl/types - 获取检查点类型
 router.get('/types', (_req, res) => {
   res.json(hitlService.getTypes());
 });
 
-/**
- * 健康检查
- * GET /api/hitl/health
- */
+// GET /api/hitl/health - 健康检查
 router.get('/health', (_req, res) => {
   res.json(hitlService.healthCheck());
 });
 
-/**
- * 状态检查（/health 的别名）
- * GET /api/hitl/status
- */
+// GET /api/hitl/status - 状态检查（/health 的别名）
 router.get('/status', (_req, res) => {
   res.json(hitlService.healthCheck());
 });
 
-/**
- * SSE 连接
- * GET /api/hitl/sse
- */
+// GET /api/hitl/sse - SSE 连接
 router.get('/sse', (req, res) => {
-  const hitlManager = require('../../hitl').hitlManager;
-  const handlers = hitlService.createSSEHandlers(hitlManager);
-
-  // 设置 SSE headers
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.flushHeaders();
-
-  const clientId = `client_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  console.log(`[HITL SSE] Client connected: ${clientId}`);
-
-  // 发送连接成功事件
-  res.write(`data: ${JSON.stringify(handlers.createConnectedEvent(clientId))}\n\n`);
-
-  // 发送待处理检查点
-  const pending = hitlManager.getPendingCheckpoints();
-  if (pending.length > 0) {
-    res.write(`data: ${JSON.stringify(handlers.createPendingCheckpointsEvent(pending))}\n\n`);
-  }
-
-  // 注册事件处理器，实时推送检查点变化
-  const handleCreated = (checkpoint) => {
-    res.write(`data: ${JSON.stringify(handlers.handleCreated(checkpoint))}\n\n`);
-  };
-
-  const handleApproved = (checkpoint) => {
-    res.write(`data: ${JSON.stringify(handlers.handleApproved(checkpoint))}\n\n`);
-  };
-
-  const handleRejected = (checkpoint) => {
-    res.write(`data: ${JSON.stringify(handlers.handleRejected(checkpoint))}\n\n`);
-  };
-
-  const handleTimeout = (checkpoint) => {
-    res.write(`data: ${JSON.stringify(handlers.handleTimeout(checkpoint))}\n\n`);
-  };
-
-  hitlManager.on('checkpoint:created', handleCreated);
-  hitlManager.on('checkpoint:approved', handleApproved);
-  hitlManager.on('checkpoint:rejected', handleRejected);
-  hitlManager.on('checkpoint:timeout', handleTimeout);
-
-  // 心跳保活
-  const heartbeat = setInterval(() => {
-    res.write(`: heartbeat\n\n`);
-  }, 30000);
-
-  // 客户端断开连接
-  req.on('close', () => {
-    console.log(`[HITL SSE] Client disconnected: ${clientId}`);
-    clearInterval(heartbeat);
-    hitlManager.off('checkpoint:created', handleCreated);
-    hitlManager.off('checkpoint:approved', handleApproved);
-    hitlManager.off('checkpoint:rejected', handleRejected);
-    hitlManager.off('checkpoint:timeout', handleTimeout);
-  });
+  hitlService.setupSSEConnection(req, res);
 });
 
 module.exports = router;
