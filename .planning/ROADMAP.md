@@ -32,9 +32,9 @@ Journey: Phase 1-3 (功能实现) → Phase 4 (架构收尾) → Phase 5 (MCP完
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: 业务逻辑迁移 - 将routes/中的业务逻辑抽取到services/
+- [x] 01-01: 业务逻辑迁移 - 将routes/中的业务逻辑抽取到services/
 - [ ] 01-02: Mock数据清理 - 移除所有模拟数据，使用真实API
-- [ ] 01-03: 日志规范化 - 替换console.log为AgentLogger，ESLint规则
+- [x] 01-03: 日志规范化 - 替换console.log为AgentLogger，ESLint规则
 - [ ] 01-04: 基础设施测试 - 熔断器、限流器、配置中心的单元测试
 
 ### Phase 2: MCP工具市场完善
@@ -92,7 +92,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 完成架构收尾 | 0/4 | Not started | - |
+| 1. 完成架构收尾 | 2/4 | Complete    | 2026-04-27 |
 | 2. MCP工具市场完善 | 3/3 | Complete    | 2026-04-26 |
 | 3. 管理后台集成 | 3/3 | Complete    | 2026-04-26 |
 | 4. 生产级能力 | 2/2 | Complete    | 2026-04-26 |
