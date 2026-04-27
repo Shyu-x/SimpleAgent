@@ -18,6 +18,9 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const RAGService = require('../../services/ragService');
+const AgentLogger = require('../../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('admin-knowledge');
 
 // 创建RAG服务实例
 const ragService = new RAGService({
@@ -202,7 +205,7 @@ router.get('/docs', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('List docs error:', error);
+    logger.error('List docs error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -275,7 +278,7 @@ router.get('/search', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Search error:', error);
+    logger.error('Search error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -311,7 +314,7 @@ router.get('/stats', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Stats error:', error);
+    logger.error('Stats error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -417,7 +420,7 @@ router.post('/docs', upload.single('file'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Upload doc error:', error);
+    logger.error('Upload doc error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -475,7 +478,7 @@ router.delete('/docs/:id', async (req, res) => {
       data: { documentId: id, title: removed.title }
     });
   } catch (error) {
-    console.error('Delete doc error:', error);
+    logger.error('Delete doc error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -536,7 +539,7 @@ router.post('/reindex', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Reindex error:', error);
+    logger.error('Reindex error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });

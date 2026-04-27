@@ -14,6 +14,9 @@
 
 const express = require('express');
 const router = express.Router();
+const AgentLogger = require('../../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('admin-tool');
 
 /**
  * 获取工具注册表实例
@@ -48,7 +51,7 @@ router.get('/categories', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Categories error:', error);
+    logger.error('Categories error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -93,7 +96,7 @@ router.get('/', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('List tools error:', error);
+    logger.error('List tools error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -116,7 +119,7 @@ router.get('/stats', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Tool stats error:', error);
+    logger.error('Tool stats error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -148,7 +151,7 @@ router.get('/:name', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get tool error:', error);
+    logger.error('Get tool error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -204,7 +207,7 @@ router.post('/register', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Register tool error:', error);
+    logger.error('Register tool error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -239,7 +242,7 @@ router.patch('/:name', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Patch tool error:', error);
+    logger.error('Patch tool error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -291,7 +294,7 @@ router.put('/:name', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update tool error:', error);
+    logger.error('Update tool error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -316,7 +319,7 @@ router.delete('/:name', (req, res) => {
       data: { name, unregistered: true }
     });
   } catch (error) {
-    console.error('Delete tool error:', error);
+    logger.error('Delete tool error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -355,7 +358,7 @@ router.post('/:name/test', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Test tool error:', error);
+    logger.error('Test tool error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -377,7 +380,7 @@ router.get('/categories', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Categories error:', error);
+    logger.error('Categories error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -413,7 +416,7 @@ router.get('/categories/list', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Categories error:', error);
+    logger.error('Categories error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -442,7 +445,7 @@ router.post('/recommend', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Recommend error:', error);
+    logger.error('Recommend error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { PluginManager } = require('../services/pluginManager');
+const AgentLogger = require('../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('plugins');
 
 const pluginManager = new PluginManager({ pluginsPath: process.env.PLUGINS_PATH || './plugins' });
 const ok = (res, data) => res.json({ success: true, ...data });
-const err = (res, error, status = 500) => { console.error(error); res.status(status).json({ error: { message: error.message } }); };
+const err = (res, error, status = 500) => { logger.error('Plugin error', { error: error.message, stack: error.stack }); res.status(status).json({ error: { message: error.message } }); };
 const mapPlugin = (p) => ({ id: p.id, name: p.name, type: p.type, description: p.description, version: p.version, status: p.status, author: p.author, loadedAt: p.loadedAt });
 
 // 初始化

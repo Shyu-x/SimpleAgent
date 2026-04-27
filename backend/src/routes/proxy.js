@@ -5,6 +5,9 @@
 
 const express = require('express');
 const router = express.Router();
+const AgentLogger = require('../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('proxy');
 
 const PROVIDER = {
   name: 'MiniMax',
@@ -95,7 +98,7 @@ router.post('/chat/completions', async (req, res) => {
             }
           }
           readChunk();
-        } catch (err) { console.error('Stream error:', err); res.end(); }
+        } catch (err) { logger.error('Stream error', { error: err.message, stack: err.stack }); res.end(); }
       };
       readChunk();
     } else {
@@ -103,7 +106,7 @@ router.post('/chat/completions', async (req, res) => {
       res.json(data);
     }
   } catch (error) {
-    console.error('Proxy error:', error);
+    logger.error('Proxy error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: { message: error.message, type: 'proxy_error' } });
   }
 });
@@ -132,7 +135,7 @@ router.post('/chat', async (req, res) => {
     }
     res.json(await response.json());
   } catch (error) {
-    console.error('Chat error:', error);
+    logger.error('Chat error', { error: error.message, stack: error.stack });
     res.status(500).json({ error: { message: error.message, type: 'proxy_error' } });
   }
 });

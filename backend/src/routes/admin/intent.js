@@ -16,6 +16,9 @@
 
 const express = require('express');
 const router = express.Router();
+const AgentLogger = require('../../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('admin-intent');
 
 // ==================== 数据模型 ====================
 
@@ -328,7 +331,7 @@ router.get('/', (req, res) => {
       updatedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error('获取意图树失败:', error);
+    logger.error('获取意图树失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '获取意图树失败',
@@ -351,7 +354,7 @@ router.get('/tree', (req, res) => {
       updatedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error('获取意图树失败:', error);
+    logger.error('获取意图树失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '获取意图树失败',
@@ -381,7 +384,7 @@ router.get('/node/:id', (req, res) => {
 
     res.json(node);
   } catch (error) {
-    console.error('获取节点失败:', error);
+    logger.error('获取节点失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '获取节点失败',
@@ -492,7 +495,7 @@ router.post('/node', (req, res) => {
       version: treeVersion
     });
   } catch (error) {
-    console.error('创建节点失败:', error);
+    logger.error('创建节点失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '创建节点失败',
@@ -599,7 +602,7 @@ router.put('/node/:id', (req, res) => {
       version: treeVersion
     });
   } catch (error) {
-    console.error('更新节点失败:', error);
+    logger.error('更新节点失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '更新节点失败',
@@ -656,7 +659,7 @@ router.delete('/node/:id', (req, res) => {
       version: treeVersion
     });
   } catch (error) {
-    console.error('删除节点失败:', error);
+    logger.error('删除节点失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '删除节点失败',
@@ -731,7 +734,7 @@ router.post('/node/:id/children', (req, res) => {
       version: treeVersion
     });
   } catch (error) {
-    console.error('添加子节点失败:', error);
+    logger.error('添加子节点失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '添加子节点失败',
@@ -815,7 +818,7 @@ router.put('/node/:id/move', (req, res) => {
       version: treeVersion
     });
   } catch (error) {
-    console.error('移动节点失败:', error);
+    logger.error('移动节点失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '移动节点失败',
@@ -899,7 +902,7 @@ router.patch('/node/:id/move', (req, res) => {
       version: treeVersion
     });
   } catch (error) {
-    console.error('移动节点失败:', error);
+    logger.error('移动节点失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '移动节点失败',
@@ -969,7 +972,7 @@ router.post('/test', (req, res) => {
       });
     }
   } catch (error) {
-    console.error('意图测试失败:', error);
+    logger.error('意图测试失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '意图测试失败',
@@ -1006,7 +1009,7 @@ router.post('/reset', (req, res) => {
       version: treeVersion
     });
   } catch (error) {
-    console.error('重置失败:', error);
+    logger.error('重置失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: {
         message: '重置失败',

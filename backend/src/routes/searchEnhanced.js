@@ -5,10 +5,13 @@
 const express = require('express');
 const router = express.Router();
 const { searchRouter } = require('../services/searchRouter');
+const AgentLogger = require('../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('searchEnhanced');
 
 const ok = (res, data) => res.json({ success: true, ...data });
 const err = (res, status, code, message) => {
-  console.error(`[SearchEnhanced] ${message}`);
+  logger.error('SearchEnhanced error', { code, message });
   res.status(status).json({ success: false, error: { code, message } });
 };
 

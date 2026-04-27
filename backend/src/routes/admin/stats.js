@@ -16,6 +16,9 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const AgentLogger = require('../../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('admin-stats');
 
 /**
  * 获取工具注册表实例
@@ -52,7 +55,7 @@ function getSessionStats() {
       });
     }
   } catch (error) {
-    console.warn('读取会话统计失败:', error.message);
+    logger.warn('读取会话统计失败', { error: error.message });
   }
 
   return { totalSessions, activeSessions };
@@ -83,7 +86,7 @@ function getKnowledgeBaseStats() {
       });
     }
   } catch (error) {
-    console.warn('读取知识库统计失败:', error.message);
+    logger.warn('读取知识库统计失败', { error: error.message });
   }
 
   return knowledgeBases;
@@ -161,7 +164,7 @@ router.get('/', async (req, res) => {
       data: stats
     });
   } catch (error) {
-    console.error('获取统计信息失败:', error);
+    logger.error('获取统计信息失败', { error: error.message, stack: error.stack });
     res.status(500).json({
       success: false,
       error: error.message

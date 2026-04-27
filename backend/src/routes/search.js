@@ -6,6 +6,9 @@
 const express = require('express');
 const router = express.Router();
 const { searchWeb, formatResultsAsMarkdown, SEARCH_CONFIG, getSearchProviders, getEnabledProviders } = require('../search');
+const AgentLogger = require('../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('search');
 
 // GET / - 搜索服务状态
 router.get('/', (req, res) => {
@@ -49,7 +52,7 @@ router.post('/web', async (req, res) => {
     }
     res.json(results);
   } catch (error) {
-    console.error('[Search API] Error:', error);
+    logger.error('Search API error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: { code: 'SEARCH_FAILED', message: error.message } });
   }
 });

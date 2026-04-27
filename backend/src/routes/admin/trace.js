@@ -15,6 +15,9 @@
 const express = require('express');
 const router = express.Router();
 const { generateTraceId } = require('../../middleware/trace');
+const AgentLogger = require('../../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('admin-trace');
 
 // 内存追踪存储 - 实际项目应使用分布式追踪系统（如 Jaeger/Zipkin）
 const traceStore = new Map();
@@ -25,7 +28,7 @@ const MAX_TRACES = 1000;
  */
 function initTraceStore() {
   // 追踪数据将由实际请求填充，不再使用模拟数据
-  console.log('[Trace] 追踪存储已初始化，等待真实数据...');
+  logger.info('追踪存储已初始化，等待真实数据');
 }
 
 initTraceStore();
