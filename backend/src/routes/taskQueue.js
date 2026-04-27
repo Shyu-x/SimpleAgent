@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { DistributedTaskQueue, TaskStatus, TaskPriority } = require('../services/taskQueue');
+const AgentLogger = require('../infra/logger/AgentLogger');
+
+const logger = new AgentLogger('taskQueue');
 
 // 创建任务队列实例
 const taskQueue = new DistributedTaskQueue({
@@ -82,7 +85,7 @@ router.post('/', async (req, res) => {
       status: TaskStatus.PENDING
     });
   } catch (error) {
-    console.error('Submit task error:', error);
+    logger.error('Submit task error', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -101,7 +104,7 @@ router.get('/stats', async (req, res) => {
       stats
     });
   } catch (error) {
-    console.error('Get stats error:', error);
+    logger.error('Get stats error', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -127,7 +130,7 @@ router.get('/:taskId', async (req, res) => {
       task
     });
   } catch (error) {
-    console.error('Get task error:', error);
+    logger.error('Get task error', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -147,7 +150,7 @@ router.delete('/:taskId', async (req, res) => {
       message: 'Task cancelled'
     });
   } catch (error) {
-    console.error('Cancel task error:', error);
+    logger.error('Cancel task error', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -174,7 +177,7 @@ router.post('/handlers/:taskType', async (req, res) => {
       message: `Handler registered for ${taskType}`
     });
   } catch (error) {
-    console.error('Register handler error:', error);
+    logger.error('Register handler error', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });
@@ -194,7 +197,7 @@ router.post('/cleanup', async (req, res) => {
       message: 'Cleanup completed'
     });
   } catch (error) {
-    console.error('Cleanup error:', error);
+    logger.error('Cleanup error', { error: error.message, stack: error.stack });
     res.status(500).json({
       error: { message: error.message, type: 'server_error' }
     });

@@ -5,6 +5,9 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('SemanticMemory');
 
 class SemanticMemory {
   constructor(options = {}) {
@@ -54,9 +57,9 @@ class SemanticMemory {
       } catch {}
 
       this.initialized = true;
-      console.log('[SemanticMemory] 初始化完成，短期记忆:', this.shortTermMax, '长期记忆:', this.longTerm.items.length);
+      logger.info(`初始化完成，短期记忆: ${this.shortTermMax}，长期记忆: ${this.longTerm.items.length}`);
     } catch (error) {
-      console.error('[SemanticMemory] 初始化失败:', error);
+      logger.error('初始化失败', { error: error.message });
     }
   }
 
@@ -136,7 +139,7 @@ class SemanticMemory {
 
       return response.data.data[0].embedding;
     } catch (error) {
-      console.error('[SemanticMemory] OpenAI嵌入失败:', error.message);
+      logger.error('OpenAI嵌入失败', { error: error.message });
       return this.mockEmbedding(text, this.embeddingConfig.dimension);
     }
   }
@@ -233,7 +236,7 @@ class SemanticMemory {
     // 持久化
     await this.persist();
 
-    console.log(`[SemanticMemory] 提升到长期记忆: ${item.id}`);
+    logger.info(`提升到长期记忆: ${item.id}`);
   }
 
   /**

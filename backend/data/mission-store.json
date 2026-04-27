@@ -21,6 +21,60 @@
   "agents": [],
   "events": [
     {
+      "id": "1777308899046-1uju2j0",
+      "type": "task_started",
+      "timestamp": 1777308899046,
+      "taskId": "1777308899038-ty6f6ek",
+      "agentId": null,
+      "message": "任务开始执行: TestTask",
+      "data": null
+    },
+    {
+      "id": "1777308899038-kdepgg8",
+      "type": "task_created",
+      "timestamp": 1777308899038,
+      "taskId": "1777308899038-ty6f6ek",
+      "agentId": null,
+      "message": "新建任务: TestTask",
+      "data": null
+    },
+    {
+      "id": "1777308899035-dcvt7b0",
+      "type": "broadcast",
+      "timestamp": 1777308899035,
+      "taskId": null,
+      "agentId": null,
+      "message": "Test broadcast",
+      "data": null
+    },
+    {
+      "id": "1777308899032-dctrxll",
+      "type": "test_event",
+      "timestamp": 1777308899032,
+      "taskId": null,
+      "agentId": null,
+      "message": "Test event message",
+      "data": null
+    },
+    {
+      "id": "1777308899024-d1yz45d",
+      "type": "agent_status_change",
+      "timestamp": 1777308899024,
+      "taskId": null,
+      "agentId": "1777308899021-047h1bu",
+      "message": "Agent TestAgent 状态: working",
+      "data": null
+    },
+    {
+      "id": "1777308899021-t8wf4g4",
+      "type": "agent_status_change",
+      "timestamp": 1777308899021,
+      "taskId": null,
+      "agentId": "1777308899021-047h1bu",
+      "message": "Agent 注册: TestAgent",
+      "data": null
+    },
+    {
       "id": "1777225839140-1pyggpf",
       "type": "task_created",
       "timestamp": 1777225839140,

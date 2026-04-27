@@ -17,7 +17,7 @@
  * const expanded = await service.expand('机器学习');
  */
 
-const { MiniMaxChatClient } = require('../../services/model/clients/MiniMaxChatClient');
+const MiniMaxChatClient = require('../../services/model/clients/MiniMaxChatClient');
 const AppError = require('../../common/errors/AppError');
 
 /**

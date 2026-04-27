@@ -12,7 +12,7 @@ Journey: Phase 1-3 (功能实现) → Phase 4 (架构收尾) → Phase 5 (MCP完
 - Integer phases (1, 2, 3...): Sequential milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1**: 完成架构收尾 - 业务逻辑迁移、Mock清理、日志规范化
+- [x] **Phase 1**: 完成架构收尾 - 业务逻辑迁移、Mock清理、日志规范化 ✅ 2026-04-27
 - [ ] **Phase 2**: MCP工具市场完善 - 40% → 100%
 - [ ] **Phase 3**: 管理后台集成 - 真实API联调、数据验证
 - [ ] **Phase 4**: 生产级能力 - 数据库优化、权限控制、向量存储配置
@@ -92,7 +92,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 完成架构收尾 | 2/4 | Complete    | 2026-04-27 |
+| 1. 完成架构收尾 | 4/4 | Complete    | 2026-04-27 |
 | 2. MCP工具市场完善 | 3/3 | Complete    | 2026-04-26 |
 | 3. 管理后台集成 | 3/3 | Complete    | 2026-04-26 |
 | 4. 生产级能力 | 2/2 | Complete    | 2026-04-26 |

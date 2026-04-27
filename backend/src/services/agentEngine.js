@@ -862,7 +862,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     } catch (error) {
       results.error = error.message;
       this.state.status = 'error';
-      console.error('Agent execution error:', error);
+      this.logger.logError(error, { context: 'execution' });
 
       // 保存错误状态的检查点，支持恢复
       await this.persistence.createCheckpoint(this.sessionId, {
@@ -1036,7 +1036,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     } catch (error) {
       results.error = error.message;
       this.state.status = 'error';
-      console.error('Agent resume error:', error);
+      this.logger.logError(error, { context: 'resume' });
 
       await this.persistence.createCheckpoint(this.sessionId, {
         iteration: this.state.iteration,
@@ -1688,8 +1688,8 @@ ${contextText}
       return parsed;
     } catch (error) {
       // 记录详细错误信息以便调试
-      console.error('[AgentEngine] JSON解析失败:', {
-        error: error.message,
+      this.logger.logError(error, {
+        context: 'json_parse',
         responsePreview: response.substring(0, 200),
         responseLength: response.length
       });
@@ -1980,7 +1980,7 @@ ${context.customPrompt || ''}
 
       case A2A_MESSAGE_TYPES.ERROR_NOTIFY: {
         // 收到错误通知
-        console.error(`[AgentEngine] A2A error from ${from} for ${taskId}:`, payload);
+        this.logger.logError(new Error(`A2A error from ${from} for ${taskId}`), { payload });
         this.emit('a2a:error', { taskId, from, error: payload });
         break;
       }

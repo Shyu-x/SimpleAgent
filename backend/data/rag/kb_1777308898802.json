@@ -1,0 +1,51 @@
+{
+  "id": "kb_1777308898802",
+  "name": "TestKB",
+  "description": "自动创建的知识库",
+  "documents": [
+    {
+      "id": "doc_1777308898804",
+      "title": "Test Document",
+      "type": "text",
+      "metadata": {},
+      "createdAt": 1777308898804,
+      "chunks": [
+        {
+          "id": "chunk_doc_1777308898804_0",
+          "content": "This is a test document content。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1777308898804",
+            "documentTitle": "Test Document"
+          }
+        }
+      ]
+    },
+    {
+      "id": "doc_1777308898808",
+      "title": "Metadata Test",
+      "type": "text",
+      "metadata": {
+        "tags": [
+          "test",
+          "admin"
+        ],
+        "priority": 1
+      },
+      "createdAt": 1777308898808,
+      "chunks": [
+        {
+          "id": "chunk_doc_1777308898808_0",
+          "content": "Content with complex metadata。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1777308898808",
+            "documentTitle": "Metadata Test"
+          }
+        }
+      ]
+    }
+  ],
+  "createdAt": 1777308898802,
+  "updatedAt": 1777308898808
+}
