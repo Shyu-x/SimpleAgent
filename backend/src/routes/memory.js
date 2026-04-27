@@ -10,47 +10,7 @@
 
 const express = require('express');
 const router = express.Router();
-
-// 内存存储（生产环境应使用数据库）
-const sessionMemories = new Map(); // key: sessionId, value: Note[]
-const globalMemories = new Map();  // key: memoryId, value: GlobalMemory
-const memorySummaries = new Map(); // key: summaryId, value: Summary
-
-/**
- * 记忆数据结构
- * @typedef {Object} Note
- * @property {string} id
- * @property {string} sessionId
- * @property {string} content
- * @property {'short_term'|'long_term'|'semantic'} [type]
- * @property {'low'|'medium'|'high'} [importance]
- * @property {string[]} [tags]
- * @property {number[]} [embedding]
- * @property {number} createdAt
- * @property {number} updatedAt
- */
-
-/**
- * @typedef {Object} GlobalMemory
- * @property {string} id
- * @property {string} userId
- * @property {string} content
- * @property {'user_pref'|'context'|'knowledge'|'task'|'general'} type
- * @property {'low'|'medium'|'high'} importance
- * @property {string[]} tags
- * @property {number} createdAt
- * @property {number} updatedAt
- * @property {number} lastAccessedAt
- * @property {number} accessCount
- */
-
-/**
- * @typedef {Object} MemorySummary
- * @property {string} id
- * @property {string} sessionId
- * @property {string} content
- * @property {number} createdAt
- */
+const { memoryStoreService } = require('../services/memoryStore');
 
 // ============ 会话记忆 API ============
 
@@ -61,7 +21,7 @@ const memorySummaries = new Map(); // key: summaryId, value: Summary
 router.get('/sessions/:sessionId', (req, res) => {
   try {
     const { sessionId } = req.params;
-    const notes = sessionMemories.get(sessionId) || [];
+    const notes = memoryStoreService.getSessionNotes(sessionId);
     res.json({
       success: true,
       data: notes,
@@ -92,22 +52,13 @@ router.post('/sessions/:sessionId', (req, res) => {
       });
     }
 
-    const notes = sessionMemories.get(sessionId) || [];
-
-    const note = {
-      id: `note_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      sessionId,
+    const note = memoryStoreService.createSessionNote(sessionId, {
       content,
       type,
       importance,
       tags,
-      embedding,
-      createdAt: Date.now(),
-      updatedAt: Date.now()
-    };
-
-    notes.push(note);
-    sessionMemories.set(sessionId, notes);
+      embedding
+    });
 
     res.status(201).json({
       success: true,
@@ -138,32 +89,24 @@ router.put('/sessions/:sessionId', (req, res) => {
       });
     }
 
-    const notes = sessionMemories.get(sessionId) || [];
-    const noteIndex = notes.findIndex(n => n.id === noteId);
+    const result = memoryStoreService.updateSessionNote(sessionId, noteId, {
+      content,
+      type,
+      importance,
+      tags
+    });
 
-    if (noteIndex === -1) {
-      return res.status(404).json({
+    if (!result.success) {
+      const statusCode = result.error === 'not_found' ? 404 : 400;
+      return res.status(statusCode).json({
         success: false,
-        error: { message: '记忆不存在' }
+        error: { message: result.error === 'not_found' ? '记忆不存在' : result.error }
       });
     }
 
-    const updatedNote = {
-      ...notes[noteIndex],
-      updatedAt: Date.now()
-    };
-
-    if (content !== undefined) updatedNote.content = content;
-    if (type !== undefined) updatedNote.type = type;
-    if (importance !== undefined) updatedNote.importance = importance;
-    if (tags !== undefined) updatedNote.tags = tags;
-
-    notes[noteIndex] = updatedNote;
-    sessionMemories.set(sessionId, notes);
-
     res.json({
       success: true,
-      data: updatedNote
+      data: result.note
     });
   } catch (error) {
     res.status(500).json({
@@ -183,26 +126,17 @@ router.delete('/sessions/:sessionId', (req, res) => {
     const { sessionId } = req.params;
     const { noteId } = req.query;
 
-    if (!sessionMemories.has(sessionId)) {
-      return res.status(404).json({
-        success: false,
-        error: { message: '会话记忆不存在' }
-      });
-    }
-
     if (noteId) {
       // 删除单条记忆
-      const notes = sessionMemories.get(sessionId);
-      const filtered = notes.filter(n => n.id !== noteId);
-
-      if (filtered.length === notes.length) {
-        return res.status(404).json({
+      const result = memoryStoreService.deleteSessionNote(sessionId, noteId);
+      if (!result.success) {
+        const statusCode = result.error === 'session_not_found' ? 404 : 404;
+        return res.status(statusCode).json({
           success: false,
-          error: { message: '指定记忆不存在' }
+          error: { message: result.error === 'session_not_found' ? '会话记忆不存在' : '指定记忆不存在' }
         });
       }
 
-      sessionMemories.set(sessionId, filtered);
       res.json({
         success: true,
         message: '记忆已删除',
@@ -210,7 +144,7 @@ router.delete('/sessions/:sessionId', (req, res) => {
       });
     } else {
       // 清除整个会话的记忆
-      sessionMemories.delete(sessionId);
+      memoryStoreService.clearSessionNotes(sessionId);
       res.json({
         success: true,
         message: '会话记忆已全部清除'
@@ -233,30 +167,15 @@ router.delete('/sessions/:sessionId', (req, res) => {
  */
 router.get('/global', (req, res) => {
   try {
-    const { type, limit, offset = 0 } = req.query;
-    let memories = Array.from(globalMemories.values());
-
-    if (type) {
-      memories = memories.filter(m => m.type === type);
-    }
-
-    // 按访问时间和重要性排序
-    memories.sort((a, b) => {
-      const importanceOrder = { high: 0, medium: 1, low: 2 };
-      const impDiff = importanceOrder[a.importance] - importanceOrder[b.importance];
-      if (impDiff !== 0) return impDiff;
-      return b.accessCount - a.accessCount;
-    });
-
-    const total = memories.length;
-    const limited = limit ? memories.slice(Number(offset), Number(offset) + Number(limit)) : memories;
+    const { type, limit, offset } = req.query;
+    const result = memoryStoreService.getGlobalMemories({ type, limit, offset });
 
     res.json({
       success: true,
-      data: limited,
-      total,
-      offset: Number(offset),
-      limit: Number(limit) || total
+      data: result.data,
+      total: result.total,
+      offset: result.offset,
+      limit: result.limit
     });
   } catch (error) {
     res.status(500).json({
@@ -282,20 +201,13 @@ router.post('/global', (req, res) => {
       });
     }
 
-    const memory = {
-      id: `gm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      userId,
+    const memory = memoryStoreService.createGlobalMemory({
       content,
       type,
       importance,
       tags,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      lastAccessedAt: Date.now(),
-      accessCount: 0
-    };
-
-    globalMemories.set(memory.id, memory);
+      userId
+    });
 
     res.status(201).json({
       success: true,
@@ -318,29 +230,23 @@ router.put('/global/:memoryId', (req, res) => {
     const { memoryId } = req.params;
     const { content, type, importance, tags } = req.body;
 
-    const memory = globalMemories.get(memoryId);
-    if (!memory) {
+    const result = memoryStoreService.updateGlobalMemory(memoryId, {
+      content,
+      type,
+      importance,
+      tags
+    });
+
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         error: { message: '全局记忆不存在' }
       });
     }
 
-    const updated = {
-      ...memory,
-      updatedAt: Date.now()
-    };
-
-    if (content !== undefined) updated.content = content;
-    if (type !== undefined) updated.type = type;
-    if (importance !== undefined) updated.importance = importance;
-    if (tags !== undefined) updated.tags = tags;
-
-    globalMemories.set(memoryId, updated);
-
     res.json({
       success: true,
-      data: updated
+      data: result.memory
     });
   } catch (error) {
     res.status(500).json({
@@ -357,15 +263,14 @@ router.put('/global/:memoryId', (req, res) => {
 router.delete('/global/:memoryId', (req, res) => {
   try {
     const { memoryId } = req.params;
+    const result = memoryStoreService.deleteGlobalMemory(memoryId);
 
-    if (!globalMemories.has(memoryId)) {
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         error: { message: '全局记忆不存在' }
       });
     }
-
-    globalMemories.delete(memoryId);
 
     res.json({
       success: true,
@@ -387,22 +292,18 @@ router.delete('/global/:memoryId', (req, res) => {
 router.post('/global/:memoryId/access', (req, res) => {
   try {
     const { memoryId } = req.params;
+    const result = memoryStoreService.accessGlobalMemory(memoryId);
 
-    const memory = globalMemories.get(memoryId);
-    if (!memory) {
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         error: { message: '全局记忆不存在' }
       });
     }
 
-    memory.lastAccessedAt = Date.now();
-    memory.accessCount += 1;
-    globalMemories.set(memoryId, memory);
-
     res.json({
       success: true,
-      data: memory
+      data: result.memory
     });
   } catch (error) {
     res.status(500).json({
@@ -428,27 +329,13 @@ router.get('/search', (req, res) => {
       });
     }
 
-    const queryLower = q.toLowerCase();
-    const memories = Array.from(globalMemories.values())
-      .filter(m =>
-        m.content.toLowerCase().includes(queryLower) ||
-        m.tags.some(tag => tag.toLowerCase().includes(queryLower))
-      )
-      .sort((a, b) => b.accessCount - a.accessCount)
-      .slice(0, Number(limit));
-
-    // 更新访问计数
-    memories.forEach(m => {
-      m.lastAccessedAt = Date.now();
-      m.accessCount += 1;
-      globalMemories.set(m.id, m);
-    });
+    const result = memoryStoreService.searchGlobalMemories(q, { limit: Number(limit) });
 
     res.json({
       success: true,
-      data: memories,
-      total: memories.length,
-      query: q
+      data: result.data,
+      total: result.total,
+      query: result.query
     });
   } catch (error) {
     res.status(500).json({
@@ -468,18 +355,11 @@ router.get('/search', (req, res) => {
 router.get('/summaries', (req, res) => {
   try {
     const { sessionId, limit = 50 } = req.query;
-    let summaries = Array.from(memorySummaries.values());
-
-    if (sessionId) {
-      summaries = summaries.filter(s => s.sessionId === sessionId);
-    }
-
-    summaries.sort((a, b) => b.createdAt - a.createdAt);
-    const limited = summaries.slice(0, Number(limit));
+    const summaries = memoryStoreService.getSummaries({ sessionId, limit });
 
     res.json({
       success: true,
-      data: limited,
+      data: summaries,
       total: summaries.length
     });
   } catch (error) {
@@ -506,14 +386,7 @@ router.post('/summaries', (req, res) => {
       });
     }
 
-    const summary = {
-      id: `sum_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      sessionId,
-      content,
-      createdAt: Date.now()
-    };
-
-    memorySummaries.set(summary.id, summary);
+    const summary = memoryStoreService.createSummary({ sessionId, content });
 
     res.status(201).json({
       success: true,
@@ -534,15 +407,14 @@ router.post('/summaries', (req, res) => {
 router.delete('/summaries/:id', (req, res) => {
   try {
     const { id } = req.params;
+    const result = memoryStoreService.deleteSummary(id);
 
-    if (!memorySummaries.has(id)) {
+    if (!result.success) {
       return res.status(404).json({
         success: false,
         error: { message: '记忆摘要不存在' }
       });
     }
-
-    memorySummaries.delete(id);
 
     res.json({
       success: true,
@@ -565,26 +437,11 @@ router.delete('/summaries/:id', (req, res) => {
  */
 router.get('/stats', (req, res) => {
   try {
-    const sessionCount = sessionMemories.size;
-    const totalSessionNotes = Array.from(sessionMemories.values()).reduce((sum, notes) => sum + notes.length, 0);
-    const globalCount = globalMemories.size;
-    const summaryCount = memorySummaries.size;
-
-    // 按类型统计全局记忆
-    const byType = {};
-    globalMemories.values().forEach(m => {
-      byType[m.type] = (byType[m.type] || 0) + 1;
-    });
+    const stats = memoryStoreService.getStats();
 
     res.json({
       success: true,
-      data: {
-        sessionCount,
-        totalSessionNotes,
-        globalMemoryCount: globalCount,
-        summaryCount,
-        byType
-      }
+      data: stats
     });
   } catch (error) {
     res.status(500).json({
