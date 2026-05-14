@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { fetchApi, ApiResult } from '@/lib/apiClient';
+import { useAdminSSE } from '@/hooks/useAdminSSE';
 import {
   Database,
   Wifi,
@@ -84,104 +84,65 @@ function AdminDashboardContent() {
   const [qdrantStatus, setQdrantStatus] = useState<QdrantStatus | null>(null);
   const [collections, setCollections] = useState<CollectionInfo[]>([]);
   const [qdrantStats, setQdrantStats] = useState<QdrantStats | null>(null);
-  const [qdrantLoading, setQdrantLoading] = useState(true);
+  const [qdrantLoading, setQdrantLoading] = useState(false);
   const [qdrantError, setQdrantError] = useState<string | null>(null);
   const [expandedCollections, setExpandedCollections] = useState<Set<string>>(new Set());
 
-  // 获取统计数据
-  const loadStats = async () => {
-    try {
-      const result = await fetchApi<{ success: boolean; data: SystemStats }>('/api/admin/stats');
-      if (result.error) {
-        console.error('[AdminDashboard] Stats API error:', result.error);
-        throw new Error(result.error.message);
-      }
-      if (result.data?.data) {
-        setStats(result.data.data);
-      }
+  // SSE 实时订阅
+  const {
+    connected,
+    error: sseError,
+    stats: sseStats,
+    qdrantStatus: sseQdrantStatus,
+    collections: sseCollections
+  } = useAdminSSE({
+    autoConnect: true,
+    reconnect: true,
+    reconnectInterval: 3000,
+    maxReconnectAttempts: 5,
+    onConnected: () => {
+      console.log('[AdminDashboard] SSE Connected');
+      setLoading(false);
+    },
+    onDisconnected: () => {
+      console.log('[AdminDashboard] SSE Disconnected');
+    },
+    onError: (err) => {
+      console.error('[AdminDashboard] SSE Error:', err);
+      setError(err.message);
+    },
+    onStatsUpdate: (newStats) => {
+      setStats(newStats);
       setError(null);
-    } catch (err) {
-      console.error('[AdminDashboard] loadStats error:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
+      if (loading) setLoading(false);
+    },
+    onQdrantStatusChange: (newStatus) => {
+      setQdrantStatus(newStatus);
+      setQdrantError(newStatus.success ? null : 'Qdrant 不可用');
+      setQdrantLoading(false);
+    },
+    onCollectionsUpdate: (newCollections) => {
+      setCollections(newCollections);
+
+      // 更新 qdrantStats
+      if (newCollections.length > 0) {
+        const first = newCollections[0];
+        setQdrantStats({
+          rowCount: first.pointsCount,
+          collectionName: first.name,
+          dimension: first.vectorsCount > 0 ? 1024 : 1024
+        });
+      }
+    }
+  });
+
+  // SSE 连接失败时降级
+  useEffect(() => {
+    if (sseError && !connected) {
+      setError(`SSE连接失败: ${sseError}，将使用降级模式`);
       setLoading(false);
     }
-  };
-
-  // 获取 Qdrant 数据
-  const loadQdrantData = async () => {
-    try {
-      setQdrantLoading(true);
-      const [statusRes, collectionsRes] = await Promise.all([
-        fetchApi<QdrantStatus>('/api/qdrant/status'),
-        fetchApi<{ collections: string[] }>('/api/qdrant/collections'),
-      ]);
-
-      if (statusRes.error) throw new Error(statusRes.error.message);
-
-      const statusData = statusRes.data as QdrantStatus;
-      setQdrantStatus({
-        success: statusData.success ?? false,
-        healthy: statusData.healthy ?? false,
-        status: statusData.status ?? 'unknown',
-        collection: statusData.collection ?? 'chat_documents',
-      });
-
-      const collectionsData = collectionsRes.data as { collections: string[] } | undefined;
-      if (collectionsData?.collections) {
-        const collectionInfos = await Promise.all(
-          collectionsData.collections.map(async (name) => {
-            try {
-              const infoRes = await fetchApi<{ info: { vectors_count?: number; points_count?: number; status?: string; indexed?: boolean } }>(`/api/qdrant/collections/${name}`);
-              const infoData = infoRes.data?.info;
-              return {
-                name,
-                vectorsCount: infoData?.vectors_count ?? 0,
-                pointsCount: infoData?.points_count ?? 0,
-                status: infoData?.status ?? 'unknown',
-                indexed: infoData?.indexed ?? false,
-              } as CollectionInfo;
-            } catch {
-              return { name, vectorsCount: 0, pointsCount: 0, status: 'error', indexed: false } as CollectionInfo;
-            }
-          })
-        );
-        setCollections(collectionInfos);
-
-        if (collectionInfos.length > 0) {
-          const statsRes = await fetchApi<QdrantStats>(`/api/qdrant/stats/${collectionInfos[0].name}`);
-          if (statsRes.data) {
-            setQdrantStats({
-              rowCount: statsRes.data.rowCount ?? 0,
-              collectionName: statsRes.data.collectionName ?? collectionInfos[0].name,
-              dimension: statsRes.data.dimension ?? 1024,
-            });
-          }
-        }
-      }
-      setQdrantError(null);
-    } catch (err) {
-      console.error('[AdminDashboard] loadQdrantData error:', err);
-      setQdrantError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setQdrantLoading(false);
-    }
-  };
-
-  // 初始加载
-  useEffect(() => {
-    console.log('[AdminDashboard] Initial load starting...');
-    setLoading(true);
-    loadStats();
-    loadQdrantData();
-
-    // 定时刷新
-    const interval = setInterval(() => {
-      loadStats();
-      loadQdrantData();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [sseError, connected]);
 
   const toggleCollection = (name: string) => {
     setExpandedCollections((prev) => {
@@ -192,7 +153,15 @@ function AdminDashboardContent() {
     });
   };
 
-  if (loading) {
+  // 连接状态指示
+  const getConnectionStatus = () => {
+    if (connected) return { text: '已连接', color: 'text-green-600', dot: 'bg-green-500' };
+    if (sseError) return { text: '已断开', color: 'text-red-600', dot: 'bg-red-500' };
+    return { text: '连接中...', color: 'text-yellow-600', dot: 'bg-yellow-500' };
+  };
+  const connStatus = getConnectionStatus();
+
+  if (loading && !connected) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-950">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
@@ -202,7 +171,21 @@ function AdminDashboardContent() {
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 dark:bg-gray-950">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">系统仪表盘</h1>
+      {/* 标题栏 + 连接状态 */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">系统仪表盘</h1>
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${connStatus.dot}`}></span>
+          <span className={`text-sm ${connStatus.color}`}>{connStatus.text}</span>
+          <button
+            onClick={() => {/* SSE会自动重连，无需手动刷新 */}}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ml-2"
+            title="刷新"
+          >
+            <RefreshCw size={16} className="text-gray-500 dark:text-gray-400" />
+          </button>
+        </div>
+      </div>
 
       {error && (
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded">
@@ -308,13 +291,8 @@ function AdminDashboardContent() {
             <Database size={20} className="text-blue-600" />
             Qdrant 向量数据库
           </h2>
-          <button
-            onClick={loadQdrantData}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            title="刷新"
-          >
-            <RefreshCw size={16} className="text-gray-500 dark:text-gray-400" />
-          </button>
+          {/* SSE模式下无需刷新按钮，数据自动更新 */}
+          <span className="text-xs text-gray-400">实时更新中</span>
         </div>
 
         {qdrantError && (

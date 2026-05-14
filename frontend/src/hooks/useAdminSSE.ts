@@ -1,212 +1,293 @@
 'use client';
 
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { fetchApi } from '@/lib/apiClient';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
 
 /**
- * useAdminSSE - 管理后台实时数据更新 Hook
- *
- * 提供类似 SSE 的实时数据推送体验，底层使用 HTTP 轮询
- * 架构上与真实 SSE 完全兼容，后续可轻松切换到真正的 SSE 连接
- *
- * @example
- * const { data, isConnected, refresh } = useAdminSSE<T>({
- *   endpoint: '/api/admin/models',
- *   parser: (res) => res.data?.models || [],
- *   interval: 30000,
- *   enabled: true,
- * });
+ * 系统统计数据
  */
+export interface SystemStats {
+  totalRequests: number;
+  successRate: number;
+  avgLatency: number;
+  activeSessions: number;
+  modelCalls: { model: string; count: number }[];
+  toolCalls: { tool: string; count: number }[];
+  knowledgeBases: { name: string; docCount: number }[];
+}
 
-interface UseAdminSSEOptions<T> {
-  /** API 端点 */
-  endpoint: string;
-  /** 数据解析函数 */
-  parser: (response: any) => T;
-  /** 轮询间隔（毫秒），默认 30s */
-  interval?: number;
-  /** 是否启用，默认 true */
-  enabled?: boolean;
-  /** 初始加载完成回调 */
-  onInitialLoad?: (data: T) => void;
-  /** 数据更新回调 */
-  onUpdate?: (data: T) => void;
-  /** 错误回调 */
+/**
+ * Qdrant 状态
+ */
+export interface QdrantStatus {
+  success: boolean;
+  healthy: boolean;
+  status: string;
+  collection: string;
+}
+
+/**
+ * 集合信息
+ */
+export interface CollectionInfo {
+  name: string;
+  vectorsCount: number;
+  pointsCount: number;
+  status: string;
+  indexed: boolean;
+}
+
+/**
+ * SSE 事件类型
+ */
+export interface AdminSSEEvent {
+  type: 'connected' | 'stats' | 'qdrant_status' | 'qdrant_collections' | 'heartbeat' | 'error';
+  clientId?: string;
+  data?: SystemStats | QdrantStatus | CollectionInfo[];
+  timestamp?: number;
+  message?: string;
+}
+
+interface UseAdminSSEOptions {
+  autoConnect?: boolean;
+  reconnect?: boolean;
+  reconnectInterval?: number;
+  maxReconnectAttempts?: number;
+  onConnected?: () => void;
+  onDisconnected?: () => void;
   onError?: (error: Error) => void;
-}
-
-interface UseAdminSSEReturn<T> {
-  /** 最新数据 */
-  data: T | null;
-  /** 是否正在加载（首次） */
-  loading: boolean;
-  /** 是否连接（轮询中） */
-  isConnected: boolean;
-  /** 手动刷新 */
-  refresh: () => Promise<void>;
-  /** 最后更新时间 */
-  lastUpdated: Date | null;
-  /** 错误信息 */
-  error: Error | null;
+  onStatsUpdate?: (stats: SystemStats) => void;
+  onQdrantStatusChange?: (status: QdrantStatus) => void;
+  onCollectionsUpdate?: (collections: CollectionInfo[]) => void;
 }
 
 /**
- * 管理后台 SSE Hook
+ * Admin SSE 客户端类
  */
-export function useAdminSSE<T>(options: UseAdminSSEOptions<T>): UseAdminSSEReturn<T> {
-  const {
-    endpoint,
-    parser,
-    interval = 30000,
-    enabled = true,
-    onInitialLoad,
-    onUpdate,
-    onError,
-  } = options;
+class AdminSSEClient {
+  private eventSource: EventSource | null = null;
+  private options: Required<UseAdminSSEOptions>;
+  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+  private destroyed = false;
+  private reconnectAttempts = 0;
 
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  constructor(options: UseAdminSSEOptions) {
+    this.options = {
+      autoConnect: true,
+      reconnect: true,
+      reconnectInterval: 3000,
+      maxReconnectAttempts: 5,
+      onConnected: () => {},
+      onDisconnected: () => {},
+      onError: () => {},
+      onStatsUpdate: () => {},
+      onQdrantStatusChange: () => {},
+      onCollectionsUpdate: () => {},
+      ...options
+    };
+  }
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isFirstLoadRef = useRef(true);
-  const previousDataRef = useRef<T | null>(null);
+  private getBaseUrl(): string {
+    return `${API_BASE}/api/admin/stream`;
+  }
 
-  // 加载数据的核心函数
-  const loadData = useCallback(async (isInitial = false) => {
-    if (!enabled) return;
+  connect(): void {
+    if (this.destroyed || !this.options.autoConnect) return;
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
 
     try {
-      const response = await fetchApi(endpoint);
-      if (response.error) {
-        throw new Error(response.error.message || '加载失败');
-      }
+      this.eventSource = new EventSource(this.getBaseUrl());
 
-      const parsedData = parser(response);
+      this.eventSource.onopen = () => {
+        console.log('[AdminSSE] Connected');
+        this.reconnectAttempts = 0;
+        this.options.onConnected();
+      };
 
-      // 跳过首次相同数据（避免重复渲染）
-      if (isFirstLoadRef.current && previousDataRef.current === parsedData) {
-        setLoading(false);
-        setIsConnected(true);
-        return;
-      }
+      this.eventSource.onmessage = (event) => {
+        try {
+          const data: AdminSSEEvent = JSON.parse(event.data);
+          this._handleEvent(data);
+        } catch (error) {
+          console.error('[AdminSSE] Failed to parse message:', error);
+        }
+      };
 
-      previousDataRef.current = parsedData;
-      setData(parsedData);
-      setLastUpdated(new Date());
-      setError(null);
+      this.eventSource.onerror = (error) => {
+        console.error('[AdminSSE] Error:', error);
+        this.options.onError(new Error('SSE connection error'));
 
-      if (isFirstLoadRef.current) {
-        isFirstLoadRef.current = false;
-        setLoading(false);
-        setIsConnected(true);
-        onInitialLoad?.(parsedData);
-      } else {
-        onUpdate?.(parsedData);
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('未知错误');
-      setError(error);
-      onError?.(error);
+        if (!this.destroyed && this.options.reconnect) {
+          this._scheduleReconnect();
+        }
+      };
+    } catch (error) {
+      console.error('[AdminSSE] Failed to connect:', error);
+      this.options.onError(error as Error);
     }
-  }, [endpoint, parser, enabled, onInitialLoad, onUpdate, onError]);
+  }
 
-  // 手动刷新
-  const refresh = useCallback(async () => {
-    await loadData(false);
-  }, [loadData]);
-
-  // 启动轮询
-  useEffect(() => {
-    if (!enabled) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      setIsConnected(false);
+  private _scheduleReconnect(): void {
+    if (this.reconnectAttempts >= this.options.maxReconnectAttempts) {
+      console.log('[AdminSSE] Max reconnect attempts reached');
       return;
     }
 
-    // 初始加载
-    loadData(true);
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+    }
 
-    // 设置定时轮询
-    intervalRef.current = setInterval(() => {
-      loadData(false);
-    }, interval);
+    this.reconnectAttempts++;
+    console.log(`[AdminSSE] Reconnecting... (${this.reconnectAttempts}/${this.options.maxReconnectAttempts})`);
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
+    this.reconnectTimeout = setTimeout(() => {
+      if (!this.destroyed) {
+        this.connect();
       }
-    };
-  }, [enabled, interval, loadData]);
+    }, this.options.reconnectInterval);
+  }
 
-  return {
-    data,
-    loading,
-    isConnected,
-    refresh,
-    lastUpdated,
-    error,
-  };
+  private _handleEvent(data: AdminSSEEvent): void {
+    switch (data.type) {
+      case 'connected':
+        console.log('[AdminSSE] Connection confirmed, clientId:', data.clientId);
+        break;
+
+      case 'stats':
+        if (data.data) {
+          this.options.onStatsUpdate(data.data as SystemStats);
+        }
+        break;
+
+      case 'qdrant_status':
+        if (data.data) {
+          this.options.onQdrantStatusChange(data.data as QdrantStatus);
+        }
+        break;
+
+      case 'qdrant_collections':
+        if (data.data) {
+          this.options.onCollectionsUpdate(data.data as CollectionInfo[]);
+        }
+        break;
+
+      case 'heartbeat':
+        break;
+
+      case 'error':
+        console.error('[AdminSSE] Server error:', data.message);
+        break;
+    }
+  }
+
+  disconnect(): void {
+    this.destroyed = true;
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+    this.options.onDisconnected();
+  }
+
+  isConnected(): boolean {
+    return this.eventSource !== null && !this.destroyed;
+  }
 }
 
 /**
- * useAdminSSEBatch - 批量管理后台 SSE Hook
- *
- * 用于同时订阅多个数据源
- *
- * @example
- * const results = useAdminSSEBatch({
- *   models: { endpoint: '/api/admin/models', parser: (r) => r.data?.models || [] },
- *   stats: { endpoint: '/api/admin/models/stats', parser: (r) => r.data },
- *   interval: 30000,
- * });
- * // results.models.data, results.stats.data
+ * useAdminSSE Hook
+ * 管理后台 SSE 实时推送钩子
  */
+export function useAdminSSE(options: UseAdminSSEOptions = {}) {
+  const [connected, setConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<SystemStats | null>(null);
+  const [qdrantStatus, setQdrantStatus] = useState<QdrantStatus | null>(null);
+  const [collections, setCollections] = useState<CollectionInfo[]>([]);
 
-interface UseAdminSSEBatchOptions {
-  [key: string]: {
-    endpoint: string;
-    parser: (response: any) => any;
-    interval?: number;
-    enabled?: boolean;
-  };
-}
+  const clientRef = useRef<AdminSSEClient | null>(null);
 
-interface UseAdminSSEBatchReturn {
-  [key: string]: {
-    data: any | null;
-    loading: boolean;
-    isConnected: boolean;
-    refresh: () => Promise<void>;
-    lastUpdated: Date | null;
-    error: Error | null;
-  };
-}
+  const optionsRef = useRef(options);
+  const autoConnectRef = useRef(options.autoConnect ?? true);
 
-export function useAdminSSEBatch<T extends UseAdminSSEBatchOptions>(
-  options: T
-): { [K in keyof T]: UseAdminSSEReturn<T[K]['parser'] extends (r: any) => infer R ? R : never> } {
-  const keys = Object.keys(options);
-  const results = keys.map((key) => {
-    const opt = options[key as keyof T];
-    return useAdminSSE({
-      endpoint: opt.endpoint,
-      parser: opt.parser as any,
-      interval: opt.interval,
-      enabled: opt.enabled,
-    });
+  useEffect(() => {
+    optionsRef.current = options;
+    if (options.autoConnect !== undefined) autoConnectRef.current = options.autoConnect;
   });
 
-  return keys.reduce((acc, key, index) => {
-    acc[key as keyof typeof acc] = results[index] as any;
-    return acc;
-  }, {} as any);
+  const initClient = useCallback(() => {
+    if (clientRef.current) {
+      clientRef.current.disconnect();
+    }
+
+    clientRef.current = new AdminSSEClient({
+      ...options,
+      onConnected: () => {
+        setConnected(true);
+        setError(null);
+        options.onConnected?.();
+      },
+      onDisconnected: () => {
+        setConnected(false);
+        options.onDisconnected?.();
+      },
+      onError: (err) => {
+        setError(err.message);
+        options.onError?.(err);
+      },
+      onStatsUpdate: (newStats) => {
+        setStats(newStats);
+        options.onStatsUpdate?.(newStats);
+      },
+      onQdrantStatusChange: (newStatus) => {
+        setQdrantStatus(newStatus);
+        options.onQdrantStatusChange?.(newStatus);
+      },
+      onCollectionsUpdate: (newCollections) => {
+        setCollections(newCollections);
+        options.onCollectionsUpdate?.(newCollections);
+      }
+    });
+  }, [options]);
+
+  const connect = useCallback(() => {
+    if (!clientRef.current) {
+      initClient();
+    }
+    clientRef.current?.connect();
+  }, [initClient]);
+
+  const disconnect = useCallback(() => {
+    clientRef.current?.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (autoConnectRef.current) {
+      initClient();
+      connect();
+    }
+
+    return () => {
+      clientRef.current?.disconnect();
+    };
+  }, [initClient, connect]);
+
+  return {
+    connected,
+    error,
+    stats,
+    qdrantStatus,
+    collections,
+    connect,
+    disconnect
+  };
 }
 
 export default useAdminSSE;

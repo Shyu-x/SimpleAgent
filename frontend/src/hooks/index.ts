@@ -37,6 +37,10 @@ export { useMultiAgent } from './useMultiAgent';
 export { useMCP } from './useMCP';
 export { useN8N } from './useN8N';
 
+// ============ Admin SSE Hook ============
+export { useAdminSSE } from './useAdminSSE';
+export type { SystemStats, QdrantStatus, CollectionInfo, AdminSSEEvent } from './useAdminSSE';
+
 // ============ 浏览器自动化 Hook ============
 export { useBrowser } from './useBrowser';
 
