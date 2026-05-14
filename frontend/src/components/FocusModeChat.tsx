@@ -178,9 +178,9 @@ export default function FocusModeChat() {
 
   return (
     <ErrorBoundary moduleName="FocusModeChat" showStack>
-    <div className="fixed inset-0 z-50 flex flex-col bg-[hsl(var(--bg-app))]}>
-      {/* 顶部留白和退出按钮 */}
-      <div className="shrink-0 px-8 pt-8">
+      <div className="fixed inset-0 z-50 flex flex-col bg-[hsl(var(--bg-app))]">
+        {/* Header area */}
+        <div className="shrink-0 px-8 pt-8">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[hsl(var(--brand-700))] shadow-lg shadow-primary/20">
@@ -371,7 +371,7 @@ export default function FocusModeChat() {
       </div>
 
       <ContentPreview config={previewConfig} onClose={closePreview} />
+      </div>
     </ErrorBoundary>
-    </div>
   );
 }

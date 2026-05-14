@@ -417,6 +417,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
           </div>
         ) : (
           <div className="mx-auto w-full max-w-5xl px-4 pb-3 pt-4 sm:px-6 lg:px-8">
+            <>
             {activeConversation.messages.map((message, index) => {
               const isLast = index === activeConversation.messages.length - 1;
               // 根据消息状态确定显示状态
@@ -436,9 +437,8 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
                   onPreviewLink={triggerPreview}
                 />
               );
-            })
-
-            {/* AI 思考中动画 - 仅当isLoading且没有任何消息时显示 */}
+            })}
+            {/* AI thinking animation */}
             <AnimatePresence>
               {isLoading && activeConversation.messages.length === 0 && (
                 <motion.div
@@ -487,6 +487,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
                 </motion.div>
               )}
             </AnimatePresence>
+            </>
           </div>
         )}
       </div>

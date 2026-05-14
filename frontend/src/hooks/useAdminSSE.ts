@@ -49,11 +49,14 @@ export interface AdminSSEEvent {
   message?: string;
 }
 
-interface UseAdminSSEOptions {
+interface UseAdminSSEOptions<T = unknown> {
   autoConnect?: boolean;
   reconnect?: boolean;
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
+  endpoint?: string;
+  parser?: (response: any) => T;
+  interval?: number;
   onConnected?: () => void;
   onDisconnected?: () => void;
   onError?: (error: Error) => void;
@@ -65,19 +68,22 @@ interface UseAdminSSEOptions {
 /**
  * Admin SSE 客户端类
  */
-class AdminSSEClient {
+class AdminSSEClient<T = unknown> {
   private eventSource: EventSource | null = null;
-  private options: Required<UseAdminSSEOptions>;
+  private options: Required<UseAdminSSEOptions<T>>;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
   private reconnectAttempts = 0;
 
-  constructor(options: UseAdminSSEOptions) {
+  constructor(options: UseAdminSSEOptions<T>) {
     this.options = {
       autoConnect: true,
       reconnect: true,
       reconnectInterval: 3000,
       maxReconnectAttempts: 5,
+      endpoint: '',
+      parser: (res: any) => res as T,
+      interval: 0,
       onConnected: () => {},
       onDisconnected: () => {},
       onError: () => {},
@@ -246,7 +252,7 @@ export function useAdminSSE<T = unknown>(options: UseAdminSSEOptions = {}): {
       if (response.ok) {
         const result = await response.json();
         const parsedData = options.parser ? options.parser(result) : (result as T);
-        setData(parsedData);
+        setData(parsedData as T);
       }
     } catch (err) {
       console.error('Failed to fetch data:', err);
@@ -330,9 +336,12 @@ export function useAdminSSE<T = unknown>(options: UseAdminSSEOptions = {}): {
   return {
     connected,
     error,
+    data,
+    loading,
     stats,
     qdrantStatus,
     collections,
+    refresh: fetchData,
     connect,
     disconnect
   };
