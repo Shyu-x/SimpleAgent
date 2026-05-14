@@ -316,7 +316,10 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                       animate={{ opacity: draggedConversationId === conversation.id ? 0.5 : 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
                       onContextMenu={(e) => handleContextMenu(e, conversation)}
-                      onClick={() => setActiveConversation(conversation.id)}
+                      onClick={() => {
+                        setActiveConversation(conversation.id);
+                        addActiveWindow(conversation.id);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();

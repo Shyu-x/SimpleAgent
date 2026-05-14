@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { searchWeb, formatResultsAsMarkdown, SEARCH_CONFIG, getSearchProviders, getEnabledProviders } = require('../search');
-const AgentLogger = require('../infra/logger/AgentLogger');
+const { AgentLogger } = require('../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('search');
 

@@ -640,7 +640,7 @@ body {
    ============================================ */
 
 /* 移动端核心变量 - 8dp系统 */
-@media (max-width: 639px) {
+@media (max-width: 640px) {
   :root {
     /* 紧凑间距 */
     --mobile-space-xs: 4px;
@@ -688,7 +688,7 @@ body {
 }
 
 /* 移动端触摸优化 - 44px最小目标 */
-@media (max-width: 639px) {
+@media (max-width: 640px) {
   .mobile-touch-target {
     min-height: 44px;
     min-width: 44px;
@@ -778,7 +778,7 @@ body {
 }
 
 /* 移动端动画优化 */
-@media (max-width: 639px) {
+@media (max-width: 640px) {
   .mobile-page-enter {
     animation: mobileSlideIn 200ms var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
   }
@@ -881,7 +881,7 @@ body {
 }
 
 /* 移动端布局优化 */
-@media (max-width: 639px) {
+@media (max-width: 640px) {
   .mobile-fullscreen {
     height: 100dvh;
     height: -webkit-fill-available;
@@ -949,7 +949,7 @@ body {
 }
 
 /* 移动端暗色模式优化 */
-@media (max-width: 639px) {
+@media (max-width: 640px) {
   .dark {
     --mobile-bg-primary: 224 20% 6%;
     --mobile-bg-secondary: 224 20% 9%;

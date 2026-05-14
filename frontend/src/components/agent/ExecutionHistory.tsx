@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useCallback, useMemo } from 'react';
+import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   History,
@@ -19,7 +19,11 @@ import {
   Brain,
   RefreshCw,
   Download,
+  Filter,
+  X,
 } from 'lucide-react';
+import { fetchApi } from '@/lib/apiClient';
+import { API_ENDPOINTS } from '@/lib/apiConfig';
 
 // 执行状态
 export type ExecutionStatus = 'running' | 'completed' | 'error' | 'cancelled' | 'paused';
@@ -46,81 +50,61 @@ export interface ExecutionRecord {
   };
 }
 
-// 模拟数据
-const MOCK_EXECUTIONS: ExecutionRecord[] = [
-  {
-    id: 'exec_001',
-    taskId: 'task_001',
-    taskName: '搜索并总结最新 AI 新闻',
-    status: 'completed',
-    startedAt: Date.now() - 3600000,
-    completedAt: Date.now() - 3500000,
-    duration: 100000,
-    iterations: 3,
-    maxIterations: 10,
-    toolCalls: 5,
-    checkpoints: 3,
-    agentName: 'research-agent',
-    metadata: { model: 'claude-sonnet-4-6', tokensUsed: 2500, cost: 0.025 },
-  },
-  {
-    id: 'exec_002',
-    taskId: 'task_002',
-    taskName: '分析销售数据并生成报告',
-    status: 'completed',
-    startedAt: Date.now() - 7200000,
-    completedAt: Date.now() - 7000000,
-    duration: 200000,
-    iterations: 5,
-    maxIterations: 10,
-    toolCalls: 12,
-    checkpoints: 5,
-    agentName: 'data-analyst',
-    metadata: { model: 'claude-sonnet-4-6', tokensUsed: 5200, cost: 0.052 },
-  },
-  {
-    id: 'exec_003',
-    taskId: 'task_003',
-    taskName: '自动化测试执行',
-    status: 'error',
-    startedAt: Date.now() - 10800000,
-    completedAt: Date.now() - 10700000,
-    duration: 100000,
-    iterations: 2,
-    maxIterations: 10,
-    toolCalls: 3,
-    checkpoints: 2,
-    agentName: 'test-runner',
-    errorMessage: '测试超时：等待响应超过 30 秒',
-    metadata: { model: 'claude-haiku-4-5', tokensUsed: 800, cost: 0.008 },
-  },
-  {
-    id: 'exec_004',
-    taskId: 'task_004',
-    taskName: '代码重构优化',
-    status: 'running',
-    startedAt: Date.now() - 600000,
-    iterations: 4,
-    maxIterations: 10,
-    toolCalls: 8,
-    checkpoints: 4,
-    agentName: 'code-optimizer',
-    metadata: { model: 'claude-opus-4-6' },
-  },
-  {
-    id: 'exec_005',
-    taskId: 'task_005',
-    taskName: '用户反馈分析',
-    status: 'paused',
-    startedAt: Date.now() - 1800000,
-    iterations: 1,
-    maxIterations: 10,
-    toolCalls: 2,
-    checkpoints: 1,
-    agentName: 'sentiment-analyzer',
-    metadata: { model: 'gpt-4o' },
-  },
-];
+// API 返回的数据结构
+interface ExecutionApiData {
+  executions: ExecutionRecord[];
+  stats: {
+    total: number;
+    completed: number;
+    failed: number;
+    running: number;
+    totalTokens: number;
+    totalCost: number;
+  };
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+// 从 API 获取执行历史
+async function fetchExecutions(params: {
+  limit?: number;
+  status?: string;
+  dateRange?: string;
+}): Promise<{ executions: ExecutionRecord[]; stats: ExecutionApiData['stats'] }> {
+  const queryParams = new URLSearchParams();
+  if (params.limit) queryParams.set('limit', String(params.limit));
+  if (params.status) queryParams.set('status', params.status);
+  if (params.dateRange) queryParams.set('dateRange', params.dateRange);
+
+  const response = await fetchApi<{ success: boolean; data: ExecutionApiData }>(
+    `/api/execution?${queryParams.toString()}`
+  );
+
+  // fetchApi 返回 { data: T } 结构，需要从 response.data.data 获取后端原始数据
+  const apiData = response.data?.data;
+  if (!response.error && apiData) {
+    return {
+      executions: apiData.executions || [],
+      stats: apiData.stats
+    };
+  }
+
+  return {
+    executions: [],
+    stats: {
+      total: 0,
+      completed: 0,
+      failed: 0,
+      running: 0,
+      totalTokens: 0,
+      totalCost: 0
+    }
+  };
+}
 
 // 状态样式
 const statusStyles: Record<ExecutionStatus, { color: string; bgColor: string; icon: React.ReactNode; label: string }> = {
@@ -392,56 +376,61 @@ interface ExecutionHistoryProps {
 export const ExecutionHistory = memo(function ExecutionHistory({
   className='',
 }: ExecutionHistoryProps) {
-  const [executions, setExecutions] = useState<ExecutionRecord[]>(MOCK_EXECUTIONS);
+  const [executions, setExecutions] = useState<ExecutionRecord[]>([]);
+  const [stats, setStats] = useState({ total: 0, completed: 0, failed: 0, running: 0, totalTokens: 0, totalCost: 0 });
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ExecutionStatus | 'all'>('all');
   const [dateRange, setDateRange] = useState<'today' | 'week' | 'month' | 'all'>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 过滤执行记录
+  // 从 API 获取执行历史
+  const loadExecutions = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const result = await fetchExecutions({
+        limit: 50,
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        dateRange
+      });
+      setExecutions(result.executions);
+      setStats(result.stats);
+    } catch (error) {
+      console.error('Failed to fetch executions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [statusFilter, dateRange]);
+
+  // 初始加载 + 过滤变化时重新加载
+  useEffect(() => {
+    loadExecutions();
+  }, [loadExecutions]);
+
+  // 定时刷新（每 30 秒）
+  useEffect(() => {
+    pollRef.current = setInterval(loadExecutions, 30000);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [loadExecutions]);
+
+  // 过滤执行记录（前端本地过滤搜索）
   const filteredExecutions = useMemo(() => {
     return executions.filter((exec) => {
-      // 搜索过滤
       const matchesSearch = searchQuery === '' ||
         exec.taskName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         exec.agentName.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // 状态过滤
-      const matchesStatus = statusFilter === 'all' || exec.status === statusFilter;
-
-      // 日期过滤
-      let matchesDate = true;
-      const now = Date.now();
-      if (dateRange === 'today') {
-        matchesDate = now - exec.startedAt < 86400000;
-      } else if (dateRange === 'week') {
-        matchesDate = now - exec.startedAt < 604800000;
-      } else if (dateRange === 'month') {
-        matchesDate = now - exec.startedAt < 2592000000;
-      }
-
-      return matchesSearch && matchesStatus && matchesDate;
+      return matchesSearch;
     });
-  }, [executions, searchQuery, statusFilter, dateRange]);
+  }, [executions, searchQuery]);
 
-  // 统计
-  const stats = useMemo(() => {
-    const total = executions.length;
-    const completed = executions.filter(e => e.status === 'completed').length;
-    const failed = executions.filter(e => e.status === 'error').length;
-    const running = executions.filter(e => e.status === 'running').length;
-    const totalTokens = executions.reduce((sum, e) => sum + (e.metadata?.tokensUsed || 0), 0);
-    const totalCost = executions.reduce((sum, e) => sum + (e.metadata?.cost || 0), 0);
-    return { total, completed, failed, running, totalTokens, totalCost };
-  }, [executions]);
-
-  // 恢复执行
+  // 恢复执行（模拟）
   const handleRestore = useCallback((id: string) => {
-    setExecutions(prev => prev.map(e =>
-      e.id === id ? { ...e, status: 'running' as ExecutionStatus } : e
-    ));
+    console.log('Restore execution:', id);
   }, []);
 
-  // 删除执行记录
+  // 删除执行记录（前端本地）
   const handleDelete = useCallback((id: string) => {
     setExecutions(prev => prev.filter(e => e.id !== id));
   }, []);
@@ -457,11 +446,21 @@ export const ExecutionHistory = memo(function ExecutionHistory({
         <div className="flex items-center gap-2">
           <History size={20} className="text-primary" />
           <span className="font-medium">执行历史</span>
+          {isLoading && <Loader2 size={14} className="animate-spin text-muted-foreground" />}
         </div>
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span>{stats.completed}/{stats.total} 完成</span>
-          <span>{stats.totalTokens.toLocaleString()} tokens</span>
-          <span>${stats.totalCost.toFixed(3)}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span>{stats.completed}/{stats.total} 完成</span>
+            <span>{stats.totalTokens.toLocaleString()} tokens</span>
+            <span>${stats.totalCost.toFixed(3)}</span>
+          </div>
+          <button
+            onClick={loadExecutions}
+            className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+            title="刷新"
+          >
+            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+          </button>
         </div>
       </div>
 

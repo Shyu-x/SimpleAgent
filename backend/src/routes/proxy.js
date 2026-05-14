@@ -5,7 +5,17 @@
 
 const express = require('express');
 const router = express.Router();
-const AgentLogger = require('../infra/logger/AgentLogger');
+const { AgentLogger } = require('../infra/logger/AgentLogger');
+
+// 导入熔断器
+const { getBreakerWithPreset } = require('../common/resilience/integration');
+
+// 获取 MiniMax API 熔断器
+const minimaxBreaker = getBreakerWithPreset('minimax-proxy', 'STANDARD', {
+  onStateChange: (from, to, reason) => {
+    logger.warn(`CircuitBreaker [minimax-proxy] state: ${from} -> ${to}${reason ? ` (${reason})` : ''}`);
+  },
+});
 
 const logger = new AgentLogger('proxy');
 
@@ -46,10 +56,18 @@ router.post('/chat/completions', async (req, res) => {
     return res.status(401).json({ error: { message: 'MiniMax API Key 未配置', type: 'authentication_error' } });
   }
 
+  // 调试日志：检查收到的消息内容
+  const firstMessage = req.body.messages?.[0];
+  logger.debug('收到消息', {
+    content: firstMessage?.content,
+    contentBytes: Buffer.from(firstMessage?.content || '').toString('hex')
+  });
+
   const targetUrl = PROVIDER.baseUrl + PROVIDER.chatEndpoint;
   const requestBody = transformRequest(req);
 
-  try {
+  // 使用熔断器保护外部 API 调用
+  await minimaxBreaker.execute(async () => {
     const response = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
@@ -59,9 +77,7 @@ router.post('/chat/completions', async (req, res) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      return res.status(response.status).json({
-        error: { message: errorData.error?.message || `API 错误: ${response.status}`, type: 'api_error' }
-      });
+      throw new Error(errorData.error?.message || `API 错误: ${response.status}`);
     }
 
     // 流式响应
@@ -105,10 +121,12 @@ router.post('/chat/completions', async (req, res) => {
       const data = await response.json();
       res.json(data);
     }
-  } catch (error) {
-    logger.error('Proxy error', { error: error.message, stack: error.stack });
-    res.status(500).json({ error: { message: error.message, type: 'proxy_error' } });
-  }
+  }, () => {
+    // 降级响应
+    res.status(503).json({
+      error: { message: '服务暂时不可用，请稍后重试', type: 'circuit_breaker_open' }
+    });
+  });
 });
 
 // POST /chat - 简单聊天接口 (非流式)
@@ -121,7 +139,8 @@ router.post('/chat', async (req, res) => {
   const { messages, model, temperature, max_tokens } = req.body;
   const requestBody = transformRequest({ body: { messages, model, temperature, max_tokens, stream: false } });
 
-  try {
+  // 使用熔断器保护外部 API 调用
+  await minimaxBreaker.execute(async () => {
     const response = await fetch(PROVIDER.baseUrl + PROVIDER.chatEndpoint, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
@@ -131,13 +150,15 @@ router.post('/chat', async (req, res) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      return res.status(response.status).json({ error: { message: errorData.error?.message || `API 错误: ${response.status}`, type: 'api_error' } });
+      throw new Error(errorData.error?.message || `API 错误: ${response.status}`);
     }
     res.json(await response.json());
-  } catch (error) {
-    logger.error('Chat error', { error: error.message, stack: error.stack });
-    res.status(500).json({ error: { message: error.message, type: 'proxy_error' } });
-  }
+  }, () => {
+    // 降级响应
+    res.status(503).json({
+      error: { message: '服务暂时不可用，请稍后重试', type: 'circuit_breaker_open' }
+    });
+  });
 });
 
 // GET /health - 健康检查

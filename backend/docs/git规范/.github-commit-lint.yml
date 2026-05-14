@@ -1,0 +1,163 @@
+# GitHub Actions - CommitLint 工作流
+#
+# 验证提交信息格式，确保符合 Conventional Commits 规范
+# 格式：type(scope): description
+
+name: Commit Lint
+
+on:
+  push:
+    branches:
+      - '**'  # 监听所有分支
+  pull_request:
+    branches:
+      - main
+      - develop
+      - 'release/*'
+
+jobs:
+  # ========== CommitLint Job ==========
+  commitlint:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+
+    steps:
+      # 检出代码
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史用于遍历 commits
+
+      # 设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 安装依赖
+      - name: Install Dependencies
+        run: npm install --save-dev @commitlint/cli @commitlint/config-conventional
+
+      # 创建 commitlint 配置
+      - name: Create CommitLint Config
+        run: |
+          cat > commitlint.config.js << 'EOF'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+            rules: {
+              'type-enum': [2, 'always', [
+                'feat', 'fix', 'docs', 'style', 'refactor',
+                'perf', 'test', 'build', 'ci', 'chore', 'revert', 'wip'
+              ]],
+              'scope-enum': [2, 'always', [
+                'auth', 'user', 'order', 'payment', 'product', 'inventory', 'notification',
+                'frontend', 'ui', 'api', 'service', 'middleware', 'database', 'cache',
+                'admin', 'dashboard', 'analytics', 'infra', 'config', 'security',
+                'docs', 'test', 'ci', 'deps', 'core', 'shared', 'migration',
+                'mcp', 'rag', 'agent', 'a2a', 'hitl', 'memory', 'search', 'tool', '*'
+              ]],
+              'subject-case': [2, 'always', 'lower-case'],
+              'subject-empty': [2, 'never'],
+              'type-empty': [2, 'never'],
+              'header-min-length': [2, 'always', 10]
+            }
+          };
+          EOF
+
+      # 获取此次推送的 commits
+      - name: Get Commit Range
+        id: commits
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "range=${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "range=${{ github.event.before }}..${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+      # 运行 CommitLint
+      - name: Validate Commits
+        run: |
+          RANGE="${{ steps.commits.outputs.range }}"
+          echo "验证提交范围: $RANGE"
+
+          # 处理首次推送（before 为空）
+          if [ "$RANGE" == "0000000000000000000000000000000000000000.." ]; then
+            echo "首次推送，跳过验证"
+            exit 0
+          fi
+
+          # 获取所有 commit 消息
+          COMMITS=$(git log $RANGE --format=%s)
+          echo "=========================================="
+          echo "提交消息列表："
+          echo "=========================================="
+          echo "$COMMITS"
+          echo ""
+
+          # 逐个验证
+          FAILED=0
+          while IFS= read -r msg; do
+            if [ -n "$msg" ]; then
+              echo "验证: $msg"
+              echo "$msg" | npx commitlint || FAILED=1
+            fi
+          done <<< "$COMMITS"
+
+          if [ $FAILED -eq 1 ]; then
+            echo ""
+            echo "=========================================="
+            echo "✖ Commit 格式验证失败"
+            echo "=========================================="
+            echo ""
+            echo "正确的格式："
+            echo "  feat(module): description"
+            echo "  fix(auth): resolve login issue"
+            echo "  docs: update README"
+            echo ""
+            echo "type 可选值："
+            echo "  feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, wip"
+            echo ""
+            echo "module 可选值："
+            echo "  auth, user, order, payment, frontend, api, service, admin, infra, docs, ..."
+            echo ""
+            exit 1
+          fi
+
+          echo ""
+          echo "✓ 所有提交格式验证通过"
+
+  # ========== BranchLint Job ==========
+  branchlint:
+    name: Validate Branch Names
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Branch Name
+        run: |
+          BRANCH_NAME="${{ github.ref_name }}"
+          echo "检查分支: $BRANCH_NAME"
+
+          # 允许的分支模式
+          # main, develop, feature/*, hotfix/*, release/*, fix/*, chore/*
+          VALID_PATTERNS="^main$|^develop$|^feature/|^hotfix/|^release/|^fix/|^chore/|^infra/"
+
+          if echo "$BRANCH_NAME" | grep -qE "$VALID_PATTERNS"; then
+            echo "✓ 分支命名符合规范"
+          else
+            echo "=========================================="
+            echo "✖ 分支命名不符合规范"
+            echo "=========================================="
+            echo ""
+            echo "允许的分支命名："
+            echo "  - main (主分支)"
+            echo "  - develop (开发分支)"
+            echo "  - feature/module-name (特性分支)"
+            echo "  - hotfix/issue-description (热修复分支)"
+            echo "  - release/version (发布分支)"
+            echo "  - fix/module-description (修复分支)"
+            echo "  - chore/task-name (任务分支)"
+            echo ""
+            echo "当前分支: $BRANCH_NAME"
+            exit 1
+          fi

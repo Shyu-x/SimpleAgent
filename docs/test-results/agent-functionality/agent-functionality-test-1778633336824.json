@@ -1,0 +1,177 @@
+{
+  "timestamp": "2026-05-13T00:48:56.438Z",
+  "summary": {
+    "total": 23,
+    "passed": 2,
+    "failed": 21,
+    "duration": 384
+  },
+  "scenarios": [
+    {
+      "scenario": "RAG知识问答",
+      "testName": "健康检查",
+      "passed": true,
+      "timestamp": "2026-05-13T00:48:56.532Z",
+      "duration": 91,
+      "status": "degraded"
+    },
+    {
+      "scenario": "RAG知识问答",
+      "testName": "知识库列表查询",
+      "passed": true,
+      "timestamp": "2026-05-13T00:48:56.537Z",
+      "duration": 5,
+      "count": 0
+    },
+    {
+      "scenario": "RAG知识问答",
+      "testName": "知识问答请求",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.775Z",
+      "duration": 238,
+      "hasResponse": false
+    },
+    {
+      "scenario": "RAG知识问答",
+      "testName": "RAG检索请求",
+      "timestamp": "2026-05-13T00:48:56.778Z",
+      "duration": 3,
+      "results": 0
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "工具注册表查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.781Z",
+      "duration": 2,
+      "count": 0
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "工具分类查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.783Z",
+      "duration": 2,
+      "categories": 0
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "天气查询请求",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.786Z",
+      "duration": 3
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "计算工具请求",
+      "timestamp": "2026-05-13T00:48:56.788Z",
+      "duration": 2
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "工具指标查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.791Z",
+      "duration": 2
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "Agent列表查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.794Z",
+      "duration": 3,
+      "count": 0
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "协作任务创建",
+      "timestamp": "2026-05-13T00:48:56.796Z",
+      "duration": 2
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "协调模式查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.798Z",
+      "duration": 2,
+      "modes": 0
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "Agent消息发送",
+      "timestamp": "2026-05-13T00:48:56.800Z",
+      "duration": 2
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "协作统计查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.802Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "检查点创建",
+      "timestamp": "2026-05-13T00:48:56.805Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "检查点详情查询",
+      "timestamp": "2026-05-13T00:48:56.807Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "检查点批准",
+      "timestamp": "2026-05-13T00:48:56.809Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "待处理检查点查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.812Z",
+      "duration": 3,
+      "count": 0
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "非流式对话",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.815Z",
+      "duration": 3,
+      "hasResponse": false,
+      "tokens": 0
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "流式对话",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.817Z",
+      "duration": 2,
+      "chunks": 0
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "会话历史查询",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.820Z",
+      "duration": 3
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "上下文保持",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.822Z",
+      "duration": 2
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "记忆检索",
+      "passed": false,
+      "timestamp": "2026-05-13T00:48:56.824Z",
+      "duration": 2
+    }
+  ]
+}

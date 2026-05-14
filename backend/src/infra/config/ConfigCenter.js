@@ -35,7 +35,8 @@ class ConfigCenter extends EventEmitter {
         chunkSize: 512,
         topK: 5,
         rerankEnabled: true,
-        embeddingModel: 'mxbai-embed-large'
+        // 注意：默认使用简单向量化，如需更精确的语义搜索可配置外部 embedding 服务
+        embeddingModel: 'simple'
       },
       agent: {
         maxIterations: 10,

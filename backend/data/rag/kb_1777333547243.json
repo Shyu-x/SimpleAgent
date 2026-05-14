@@ -1,0 +1,8 @@
+{
+  "id": "kb_1777333547243",
+  "name": "Test KB <script>alert(\"xss\")</script>",
+  "description": "",
+  "documents": [],
+  "createdAt": 1777333547243,
+  "updatedAt": 1777333547243
+}

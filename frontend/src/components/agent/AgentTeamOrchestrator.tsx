@@ -717,7 +717,7 @@ export const AgentTeamOrchestrator = memo(function AgentTeamOrchestrator({
         };
       }>('/api/a2a/collaborate', {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           title: 'Agent Team 协作任务',
           tasks: taskDefinitions,
           options: {
@@ -725,7 +725,7 @@ export const AgentTeamOrchestrator = memo(function AgentTeamOrchestrator({
             useSSE: true,
             enableHooks: true,
           },
-        },
+        }),
         timeout: 300000, // 5分钟超时
       });
 
@@ -1065,7 +1065,7 @@ export const AgentTeamOrchestrator = memo(function AgentTeamOrchestrator({
                     key={agent.id}
                     agent={agent}
                     isSelected={agent.id === selectedAgentId}
-                    onSelect={setSelectedAgentId}
+                    onSelect={(agent) => setSelectedAgentId(agent.id)}
                     onStartTask={(agentId) => {
                       const pendingTask = tasks.find((t) => t.status === 'pending');
                       if (pendingTask) assignTask(pendingTask.id, agentId);
@@ -1193,7 +1193,7 @@ export const AgentTeamOrchestrator = memo(function AgentTeamOrchestrator({
                     key={task.id}
                     task={task}
                     isSelected={task.id === selectedTaskId}
-                    onSelect={setSelectedTaskId}
+                    onSelect={(task) => setSelectedTaskId(task.id)}
                     onAssign={assignTask}
                     agents={agents}
                   />

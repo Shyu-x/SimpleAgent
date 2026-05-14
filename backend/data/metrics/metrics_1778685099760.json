@@ -1,0 +1,243 @@
+{
+  "timestamp": "2026-05-13T15:11:39.760Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"304\"": 8,
+      "endpoint=\"/api/qdrant/status\",method=\"GET\",status=\"304\"": 8,
+      "endpoint=\"/api/qdrant/collections\",method=\"GET\",status=\"304\"": 8,
+      "endpoint=\"/api/qdrant/collections/chat_documents\",method=\"GET\",status=\"304\"": 8,
+      "endpoint=\"/api/qdrant/stats/chat_documents\",method=\"GET\",status=\"304\"": 8
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 2
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 10,
+        "sum": 0.199,
+        "mean": 0.0199,
+        "buckets": {
+          "1": 10,
+          "5": 10,
+          "10": 10,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 5,
+          "0.05": 10,
+          "0.1": 10,
+          "0.25": 10,
+          "0.5": 10,
+          "2.5": 10
+        }
+      },
+      "endpoint=\"/api/admin/stats\",method=\"GET\"": {
+        "count": 10,
+        "sum": 0.201,
+        "mean": 0.0201,
+        "buckets": {
+          "1": 10,
+          "5": 10,
+          "10": 10,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 4,
+          "0.05": 10,
+          "0.1": 10,
+          "0.25": 10,
+          "0.5": 10,
+          "2.5": 10
+        }
+      },
+      "endpoint=\"/status\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.148,
+        "mean": 0.0185,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 0,
+          "0.01": 2,
+          "0.025": 6,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/api/qdrant/status\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.149,
+        "mean": 0.018625,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 6,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/collections\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.13299999999999998,
+        "mean": 0.016624999999999997,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 0,
+          "0.01": 2,
+          "0.025": 6,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/api/qdrant/collections\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.13299999999999998,
+        "mean": 0.016624999999999997,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 0,
+          "0.01": 2,
+          "0.025": 6,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/collections/chat_documents\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.044,
+        "mean": 0.0055,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 4,
+          "0.01": 8,
+          "0.025": 8,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/api/qdrant/collections/chat_documents\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.044,
+        "mean": 0.0055,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 4,
+          "0.01": 8,
+          "0.025": 8,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/stats/chat_documents\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.034,
+        "mean": 0.00425,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 6,
+          "0.01": 8,
+          "0.025": 8,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/api/qdrant/stats/chat_documents\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.034,
+        "mean": 0.00425,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 6,
+          "0.01": 8,
+          "0.025": 8,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 2
+}

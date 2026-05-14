@@ -128,7 +128,12 @@ class MiniMaxRouter extends EventEmitter {
       let result = apiResult;
       let probeInfo = null;
 
-      if (stream && shouldProbe && apiResult instanceof ReadableStream) {
+      // 检测是否为浏览器 ReadableStream（Node.js stream 需要特殊处理）
+      const isBrowserReadableStream = stream && shouldProbe &&
+        typeof apiResult?.getReader === 'function' &&
+        typeof apiResult?.pipe !== 'function';
+
+      if (stream && shouldProbe && isBrowserReadableStream) {
         const probeResult = await this._probeStream(apiResult, requestId);
         result = probeResult.stream;
         probeInfo = probeResult.probeResult;
@@ -250,11 +255,16 @@ class MiniMaxRouter extends EventEmitter {
         thinking_budget: options.thinking_budget
       });
 
-      // 如果启用了首包探测，包装响应流
+      // 如果启用了首包探测且是浏览器 ReadableStream，包装响应流
       let result = apiResult;
       let probeInfo = null;
 
-      if (shouldProbe && apiResult instanceof ReadableStream) {
+      // 检测是否为浏览器 ReadableStream
+      const isBrowserReadableStream = shouldProbe &&
+        typeof apiResult?.getReader === 'function' &&
+        typeof apiResult?.pipe !== 'function';
+
+      if (isBrowserReadableStream) {
         const probeResult = await this._probeStream(apiResult, requestId);
         result = probeResult.stream;
         probeInfo = probeResult.probeResult;

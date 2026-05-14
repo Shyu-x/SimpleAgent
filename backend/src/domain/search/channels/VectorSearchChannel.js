@@ -5,11 +5,13 @@
  * - 基于向量相似度的语义检索
  * - 使用余弦相似度计算相关性
  * - 支持 Qdrant 向量数据库后端
+ * - 默认使用 Qdrant，Qdrant 不可用时降级到内存模式
  *
  * 企业级要点：
- * - Embedding 模型抽象：可接入 MiniMax/OpenAI 等任意 Embedding 服务
+ * - Embedding 模型抽象：可接入外部 Embedding 服务
  * - 支持批量检索优化
  * - 向量缓存减少重复计算
+ * - Qdrant 优先，降级到 memory
  */
 
 const { SearchChannel, SearchResult } = require('../SearchChannel');
@@ -25,16 +27,14 @@ class VectorSearchChannel extends SearchChannel {
       failureThreshold: config.failureThreshold || 5
     });
 
-    // 向量数据库类型: 'qdrant' | 'memory'
-    this.vectorDbType = config.vectorDbType || process.env.VECTOR_DB_TYPE || 'memory';
+    // 向量数据库类型: 'qdrant' (默认) | 'memory' (降级)
+    // 优先使用 Qdrant，Qdrant 不可用时降级到内存
+    this.vectorDbType = config.vectorDbType || process.env.VECTOR_DB_TYPE || 'qdrant';
 
     // Qdrant 路由
     this.qdrantRouter = config.qdrantRouter || null;
 
-    // 内存向量存储（备用）
-    this.memoryStore = new Map();
-
-    // 内存向量存储（备用）
+    // 内存向量存储（备用，降级模式）
     this.memoryStore = new Map();
 
     // Embedding 模型客户端（用于内存模式）
@@ -42,6 +42,9 @@ class VectorSearchChannel extends SearchChannel {
 
     this.dimension = config.dimension || 1024;           // 向量维度
     this._embeddingCache = new Map();                     // Embedding 缓存
+
+    // 是否已降级到内存模式
+    this.degradedToMemory = false;
   }
 
   getType() {
@@ -56,13 +59,34 @@ class VectorSearchChannel extends SearchChannel {
   async search(query, options = {}) {
     const maxResults = options.maxResults || this.maxResults;
 
-    // Qdrant 模式
+    // 首次尝试 Qdrant 模式
     if (this.vectorDbType === 'qdrant' && this.qdrantRouter) {
-      return this._searchWithQdrant(query, options);
+      // 首次搜索前检查连接状态
+      if (!this.degradedToMemory) {
+        const health = await this.qdrantRouter.healthCheck();
+        if (!health.success) {
+          console.warn(`[VectorSearchChannel] Qdrant 健康检查失败，降级到内存模式`);
+          this.degradedToMemory = true;
+        }
+      }
+
+      if (!this.degradedToMemory) {
+        try {
+          return await this._searchWithQdrant(query, options);
+        } catch (error) {
+          console.warn(`[VectorSearchChannel] Qdrant 不可用，降级到内存模式: ${error.message}`);
+          this.degradedToMemory = true;
+        }
+      }
     }
 
-    // 内存模式（默认）
-    return this._searchWithMemory(query, options);
+    // 降级到内存模式
+    if (this.degradedToMemory || this.vectorDbType === 'memory') {
+      console.log('[VectorSearchChannel] 使用内存向量存储模式');
+      return this._searchWithMemory(query, options);
+    }
+
+    return [];
   }
 
   /**
@@ -300,13 +324,13 @@ class VectorSearchChannel extends SearchChannel {
       return this._embeddingCache.get(cacheKey);
     }
 
-    // 使用 Embedding 模型或 Ollama API
+    // 使用 Embedding 模型或内置简单向量化
     let vector;
     if (this.embeddingModel) {
       vector = await this.embeddingModel.embed(text);
     } else {
-      // 使用 Ollama API 进行真实向量化
-      vector = await this._ollamaEmbed(text);
+      // 使用内置简单向量化
+      vector = this._simpleEmbed(text);
     }
 
     // 存入缓存
@@ -315,30 +339,25 @@ class VectorSearchChannel extends SearchChannel {
   }
 
   /**
-   * Ollama 向量化（真实 API 调用）
+   * 内置简单向量化
    */
-  async _ollamaEmbed(text) {
-    const baseUrl = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-    const model = process.env.OLLAMA_EMBEDDING_MODEL || 'mxbai-embed-large';
-
-    try {
-      const response = await fetch(`${baseUrl}/api/embeddings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, prompt: text }),
-        signal: AbortSignal.timeout(30000)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.status}`);
+  _simpleEmbed(text) {
+    const words = text.toLowerCase().split(/[\s,，。.!?]+/).filter(w => w.length > 1);
+    const vector = new Array(384).fill(0);
+    for (const word of words) {
+      let hash = 0;
+      for (let i = 0; i < word.length; i++) {
+        hash = ((hash << 5) - hash) + word.charCodeAt(i);
+        hash = hash & hash;
       }
-
-      const data = await response.json();
-      return data.embedding;
-    } catch (error) {
-      console.error(`[VectorSearchChannel] Ollama embedding failed: ${error.message}`);
-      throw error;
+      const index = Math.abs(hash) % 384;
+      vector[index] += 1;
     }
+    const magnitude = Math.sqrt(vector.reduce((s, v) => s + v * v, 0));
+    if (magnitude > 0) {
+      for (let i = 0; i < vector.length; i++) vector[i] /= magnitude;
+    }
+    return vector;
   }
 
   /**

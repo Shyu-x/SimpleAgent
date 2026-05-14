@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PluginManager } = require('../services/pluginManager');
-const AgentLogger = require('../infra/logger/AgentLogger');
+const { AgentLogger } = require('../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('plugins');
 

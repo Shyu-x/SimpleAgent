@@ -9,7 +9,7 @@ interface SSEOptions {
 }
 
 // 后端代理地址 - API Key 在后端安全存储
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
 
 /**
  * 通过后端代理发送 SSE 聊天请求
@@ -24,24 +24,36 @@ export async function sendSSEChatMessage(
 ): Promise<void> {
   const { onMessage, onThinking, onError, onComplete, signal } = options;
 
+  // 调试日志：检查发送的消息
+  console.log('[SSE] 发送请求:', {
+    model,
+    messageCount: messages.length,
+    lastMessage: messages[messages.length - 1]?.content?.substring(0, 50),
+    lastMessageBytes: messages[messages.length - 1]?.content ? new TextEncoder().encode(messages[messages.length - 1].content.substring(0, 10)).toString() : null
+  });
+
   try {
     // 通过后端代理发送请求，保护 API Key
     // 后端将 proxy 路由挂载在 /api/v1 下
+    const requestBody = {
+      model,
+      messages,
+      stream: true,
+      // 传递前端配置
+      apiKey: apiKey || undefined,
+      baseURL: baseURL || undefined,
+      // 优先使用 baseURL 推断，其次回退到模型归属
+      provider: resolveProvider(baseURL, model),
+    };
+
+    console.log('[SSE] 请求体:', JSON.stringify(requestBody).substring(0, 200) + '...');
+
     const response = await fetch(`${BACKEND_URL}/api/v1/chat/completions`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
-      body: JSON.stringify({
-        model,
-        messages,
-        stream: true,
-        // 传递前端配置
-        apiKey: apiKey || undefined,
-        baseURL: baseURL || undefined,
-        // 优先使用 baseURL 推断，其次回退到模型归属
-        provider: resolveProvider(baseURL, model),
-      }),
+      body: JSON.stringify(requestBody),
       signal,  // 传递取消信号
     });
 

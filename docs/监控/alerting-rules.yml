@@ -1,0 +1,301 @@
+# Prometheus Alerting Rules - AI Chat 玩具
+#
+# 告警规则配置
+# 用于 Prometheus + AlertManager 告警系统
+#
+# @author AI Chat 玩具团队
+# @date 2026-05-13
+
+# ==================== 全局配置 ====================
+groups:
+  - name: ai_chat_alerts
+    interval: 30s  # 评估间隔
+    rules:
+
+      # ==================== 错误率告警 ====================
+
+      # 错误率 > 50% 告警 (严重)
+      - alert: HighErrorRateCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m])) by (module)
+            /
+            sum(rate(http_requests_total[5m])) by (module)
+          ) > 0.5
+        for: 1m
+        labels:
+          severity: critical
+          team: backend
+          module: gateway
+        annotations:
+          summary: "模块 {{ $labels.module }} 错误率超过 50%"
+          description: "模块 {{ $labels.module }} 的错误率已达 {{ $value | humanizePercentage }}，持续时间 1 分钟。"
+          runbook_url: "https://docs.example.com/runbooks/high-error-rate"
+
+      # 错误率 > 20% 告警 (警告)
+      - alert: HighErrorRateWarning
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m])) by (module)
+            /
+            sum(rate(http_requests_total[5m])) by (module)
+          ) > 0.2
+        for: 2m
+        labels:
+          severity: warning
+          team: backend
+          module: gateway
+        annotations:
+          summary: "模块 {{ $labels.module }} 错误率超过 20%"
+          description: "模块 {{ $labels.module }} 的错误率已达 {{ $value | humanizePercentage }}，持续时间 2 分钟。"
+
+      # HTTP 5xx 错误率 > 10% 告警
+      - alert: HttpServerErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.1
+        for: 1m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "HTTP 服务器错误率过高"
+          description: "5xx 错误率: {{ $value | humanizePercentage }}"
+
+      # ==================== 延迟告警 ====================
+
+      # P95 延迟 > 2s 告警 (严重)
+      - alert: HighLatencyCritical
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, module)
+          ) > 2
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "P95 延迟超过 2 秒"
+          description: "模块 {{ $labels.module }} P95 延迟为 {{ $value }}s，持续时间 2 分钟。"
+          runbook_url: "https://docs.example.com/runbooks/high-latency"
+
+      # P95 延迟 > 1s 告警 (警告)
+      - alert: HighLatencyWarning
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, module)
+          ) > 1
+        for: 3m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "P95 延迟超过 1 秒"
+          description: "模块 {{ $labels.module }} P95 延迟为 {{ $value }}s，持续时间 3 分钟。"
+
+      # P99 延迟 > 5s 告警
+      - alert: HighLatencyP99
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, module)
+          ) > 5
+        for: 2m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "P99 延迟超过 5 秒"
+          description: "模块 {{ $labels.module }} P99 延迟为 {{ $value }}s"
+
+      # ==================== 熔断器告警 ====================
+
+      # 熔断器打开告警 (严重)
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 1
+        for: 30s
+        labels:
+          severity: critical
+          team: backend
+          type: circuit_breaker
+        annotations:
+          summary: "熔断器 {{ $labels.circuit }} 已打开"
+          description: "熔断器 {{ $labels.circuit }} 已打开超过 30 秒，可能导致服务中断。"
+          runbook_url: "https://docs.example.com/runbooks/circuit-breaker"
+
+      # 多个熔断器打开告警
+      - alert: MultipleCircuitBreakersOpen
+        expr: sum(circuit_breaker_state == 1) by (instance) > 2
+        for: 1m
+        labels:
+          severity: critical
+          team: backend
+          type: circuit_breaker
+        annotations:
+          summary: "多个熔断器打开"
+          description: "实例 {{ $labels.instance }} 上有 {{ $value }} 个熔断器同时打开"
+
+      # 熔断器频繁切换告警
+      - alert: CircuitBreakerFlapping
+        expr: |
+          sum(delta(circuit_breaker_state[5m])) by (circuit) != 0
+          and
+          sum(delta(circuit_breaker_state[5m])) by (circuit) > 4
+        for: 30s
+        labels:
+          severity: warning
+          team: backend
+          type: circuit_breaker
+        annotations:
+          summary: "熔断器 {{ $labels.circuit }} 频繁切换"
+          description: "熔断器在 5 分钟内切换超过 4 次，存在抖动问题"
+
+      # ==================== 模块错误告警 ====================
+
+      # 模块错误数突增
+      - alert: ModuleErrorsSpike
+        expr: |
+          increase(module_errors_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "模块 {{ $labels.module }} 错误数突增"
+          description: "模块 {{ $labels.module }} 在 5 分钟内新增 {{ $value }} 个错误"
+
+      # 模型错误告警
+      - alert: ModelErrorsHigh
+        expr: model_errors_total > 5
+        for: 2m
+        labels:
+          severity: warning
+          team: ml
+          type: model
+        annotations:
+          summary: "模型错误数过高"
+          description: "模型错误数: {{ $value }}，持续 2 分钟"
+
+      # 工具执行错误告警
+      - alert: ToolErrorsHigh
+        expr: tool_errors_total > 10
+        for: 2m
+        labels:
+          severity: warning
+          team: backend
+          type: tool
+        annotations:
+          summary: "工具执行错误数过高"
+          description: "工具 {{ $labels.tool }} 错误数: {{ $value }}"
+
+      # ==================== 系统资源告警 ====================
+
+      # CPU 使用率 > 80%
+      - alert: HighCpuUsage
+        expr: |
+          100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "CPU 使用率超过 80%"
+          description: "实例 {{ $labels.instance }} CPU 使用率: {{ $value }}%"
+
+      # 内存使用率 > 90%
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "内存使用率超过 90%"
+          description: "实例 {{ $labels.instance }} 内存使用率: {{ $value }}%"
+
+      # ==================== 可用性告警 ====================
+
+      # 活跃请求数异常
+      - alert: HighActiveRequests
+        expr: http_requests_active > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "活跃请求数异常"
+          description: "活跃请求数: {{ $value }}，可能存在请求堆积"
+
+      # 服务不健康 (health check 失败)
+      - alert: ServiceUnhealthy
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "服务不可用"
+          description: "服务 {{ $labels.job }} 已下线超过 1 分钟"
+
+      # ==================== 业务指标告警 ====================
+
+      # Agent 执行失败率
+      - alert: AgentExecutionFailureRate
+        expr: |
+          sum(rate(agent_executions_total{success="false"}[5m]))
+          /
+          sum(rate(agent_executions_total[5m])) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+          team: ml
+          type: agent
+        annotations:
+          summary: "Agent 执行失败率超过 20%"
+          description: "Agent 执行失败率: {{ $value | humanizePercentage }}"
+
+      # Agent 迭代次数异常
+      - alert: AgentHighIterations
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(agent_iterations_total_bucket[5m])) by (le)
+          ) > 20
+        for: 3m
+        labels:
+          severity: info
+          team: ml
+          type: agent
+        annotations:
+          summary: "Agent 迭代次数异常高"
+          description: "Agent P95 迭代次数: {{ $value }}"
+
+      # ==================== 降级状态告警 ====================
+
+      # 降级状态持续
+      - alert: ServiceInDegradedState
+        expr: |
+          sum(degradation_level != 0) by (service) > 0
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "服务处于降级状态"
+          description: "服务 {{ $labels.service }} 已降级超过 5 分钟"
+
+      # ==================== 恢复告警 ====================
+
+      # 从故障中恢复
+      - alert: ServiceRecovered
+        expr: |
+          sum(delta(http_requests_total{status=~"5.."}[5m])) by (module) < 5
+          and
+          sum(delta(module_errors_total[5m])) by (module) < 10
+        for: 1m
+        labels:
+          severity: info
+          team: backend
+        annotations:
+          summary: "服务已恢复"
+          description: "模块 {{ $labels.module }} 已恢复正常运行"

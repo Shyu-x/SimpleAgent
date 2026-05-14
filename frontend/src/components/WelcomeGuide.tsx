@@ -25,6 +25,7 @@ import { useChatStore, validateApiKey, getProviderFromModel } from '@/store/chat
 import { AVAILABLE_MODELS, Model } from '@/types';
 import MarkdownRenderer from './MarkdownRenderer';
 import { getBaseURLForModel } from '@/lib/modelConfig';
+import { isClient } from '@/lib/ssrStorage';
 
 // 步骤定义
 const STEPS = ['welcome', 'features', 'demo', 'api-setup', 'complete'] as const;
@@ -207,7 +208,9 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
   const [enableReasoning, setEnableReasoning] = useState(true);
 
   const handleSkip = useCallback(() => {
-    localStorage.setItem('onboarding-completed', 'true');
+    if (isClient()) {
+      localStorage.setItem('onboarding-completed', 'true');
+    }
     onComplete();
   }, [onComplete]);
 
@@ -275,7 +278,9 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
       baseURL: localBaseURL,
       model: localModel,
     });
-    localStorage.setItem('onboarding-completed', 'true');
+    if (isClient()) {
+      localStorage.setItem('onboarding-completed', 'true');
+    }
     onComplete();
   }, [localApiKey, localBaseURL, localModel, enableReasoning, setApiConfig, addConfiguredModel, onComplete]);
 
@@ -932,19 +937,21 @@ export function useOnboarding() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const onboardingCompleted = localStorage.getItem('onboarding-completed');
-    const hasApiKey = sessionStorage.getItem('ai-chat-storage');
+    if (isClient()) {
+      const onboardingCompleted = localStorage.getItem('onboarding-completed');
+      const hasApiKey = sessionStorage.getItem('ai-chat-storage');
 
-    if (!onboardingCompleted) {
-      setShowOnboarding(true);
-    } else if (hasApiKey) {
-      try {
-        const data = JSON.parse(hasApiKey);
-        if (!data.state?.apiConfig?.apiKey) {
+      if (!onboardingCompleted) {
+        setShowOnboarding(true);
+      } else if (hasApiKey) {
+        try {
+          const data = JSON.parse(hasApiKey);
+          if (!data.state?.apiConfig?.apiKey) {
+            setShowOnboarding(true);
+          }
+        } catch {
           setShowOnboarding(true);
         }
-      } catch {
-        setShowOnboarding(true);
       }
     }
 

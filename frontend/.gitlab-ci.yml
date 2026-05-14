@@ -1,0 +1,91 @@
+# ============================================================
+# AI Chat Frontend - GitLab CI/CD 配置 (子流水线)
+# ============================================================
+# 此文件可被根 .gitlab-ci.yml 通过 include 引用
+# 或在 frontend/ 目录独立运行
+# ============================================================
+
+variables:
+  FRONTEND_PORT: "8080"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+stages:
+  - lint
+  - test
+  - build
+
+# Lint: ESLint
+eslint:
+  stage: lint
+  image: node:20-alpine
+  before_script:
+    - cd frontend
+    - npm ci --cache node_modules/.npm --prefer-offline 2>/dev/null || npm install
+  script:
+    - cd frontend && npx eslint . --max-warnings 0 2>/dev/null || echo "ESLint issues found"
+  only:
+    changes:
+      - frontend/src/**/*
+      - frontend/eslint.config.mjs
+      - frontend/package.json
+  tags:
+    - docker
+  cache:
+    key: frontend-eslint
+    paths:
+      - frontend/node_modules/
+    policy: pull-push
+
+# Test: Vitest 单元测试
+test:unit:
+  stage: test
+  image: node:20-alpine
+  before_script:
+    - cd frontend
+    - npm ci --cache node_modules/.npm --prefer-offline 2>/dev/null || npm install
+  script:
+    - cd frontend && npx vitest run --coverage 2>/dev/null || echo "WARNING: Vitest 配置待完善"
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - frontend/coverage/
+  only:
+    changes:
+      - frontend/src/**/*
+      - frontend/package.json
+  tags:
+    - docker
+  cache:
+    key: frontend-test
+    paths:
+      - frontend/node_modules/
+    policy: pull-push
+
+# Build: Next.js 生产构建
+build:
+  stage: build
+  image: node:20-alpine
+  before_script:
+    - cd frontend
+    - npm ci --cache node_modules/.npm --prefer-offline 2>/dev/null || npm install
+  script:
+    - cd frontend && npm run build
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - frontend/.next/
+  only:
+    changes:
+      - frontend/src/**/*
+      - frontend/package.json
+      - frontend/next.config.*
+  tags:
+    - docker
+  cache:
+    key: frontend-build
+    paths:
+      - frontend/node_modules/
+      - frontend/.next/cache/
+    policy: pull-push

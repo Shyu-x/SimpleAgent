@@ -2,6 +2,7 @@
 
 import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isClient } from '@/lib/ssrStorage';
 import {
   AlertCircle,
   AlertTriangle,
@@ -285,12 +286,14 @@ const HumanConfirmationDialog = memo(function HumanConfirmationDialog({
   const handleConfirm = useCallback((optionId: string) => {
     setSelectedOption(optionId);
 
-    // 如果勾选了"不再提示"，存储到 localStorage
+    // 如果勾选了"不再提示"，存储到 localStorage (SSR 安全)
     if (skipSimilar && request.similarOperationKey) {
       try {
-        const skipped = JSON.parse(localStorage.getItem('hitl_skipped_operations') || '{}');
-        skipped[request.similarOperationKey] = Date.now();
-        localStorage.setItem('hitl_skipped_operations', JSON.stringify(skipped));
+        if (isClient()) {
+          const skipped = JSON.parse(localStorage.getItem('hitl_skipped_operations') || '{}');
+          skipped[request.similarOperationKey] = Date.now();
+          localStorage.setItem('hitl_skipped_operations', JSON.stringify(skipped));
+        }
       } catch {
         // Handle error silently
       }

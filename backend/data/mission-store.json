@@ -16,10 +16,62 @@
         "result": null,
         "error": null
       }
+    ],
+    [
+      "1777380484459-2duqii7",
+      {
+        "id": "1777380484459-2duqii7",
+        "name": "��֤��������",
+        "description": "PUAģʽ��֤",
+        "priority": "high",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1777380484459,
+        "updatedAt": 1777380484459,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1778688814238-4jpv3b4",
+      {
+        "id": "1778688814238-4jpv3b4",
+        "name": "Test Mission API Task",
+        "description": "Testing API endpoint",
+        "priority": "high",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1778688814238,
+        "updatedAt": 1778688814238,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
     ]
   ],
   "agents": [],
   "events": [
+    {
+      "id": "1778688814238-ppevupd",
+      "type": "task_created",
+      "timestamp": 1778688814238,
+      "taskId": "1778688814238-4jpv3b4",
+      "agentId": null,
+      "message": "新建任务: Test Mission API Task",
+      "data": null
+    },
+    {
+      "id": "1777380484459-hjeb253",
+      "type": "task_created",
+      "timestamp": 1777380484459,
+      "taskId": "1777380484459-2duqii7",
+      "agentId": null,
+      "message": "新建任务: ��֤��������",
+      "data": null
+    },
     {
       "id": "1777308899046-1uju2j0",
       "type": "task_started",

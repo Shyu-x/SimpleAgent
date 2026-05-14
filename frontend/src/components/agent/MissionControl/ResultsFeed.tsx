@@ -443,14 +443,9 @@ const ResultsFeed = memo(function ResultsFeed() {
     }
   }, [events, category, search]);
 
-  // 模拟 SSE 事件
+  // 接收父组件传入的连接状态，移除模拟代码
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        setIsSSEConnected(prev => !prev ? true : true);
-      }
-    }, 5000);
-    return () => clearInterval(interval);
+    // 不再模拟 SSE 连接状态，由父组件控制
   }, []);
 
   if (events.length === 0) {

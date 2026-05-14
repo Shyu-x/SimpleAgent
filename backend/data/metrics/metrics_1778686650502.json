@@ -1,0 +1,378 @@
+{
+  "timestamp": "2026-05-13T15:37:30.502Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/knowledge/list\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/model/list\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/prompt/list\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/trace/list\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/models/platform\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models/platform\",method=\"GET\",status=\"304\"": 3,
+      "endpoint=\"/api/tools/list\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/mission/tasks\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/agents\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/events\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/agents\",method=\"GET\",status=\"304\"": 1509,
+      "endpoint=\"/api/mission/tasks\",method=\"GET\",status=\"304\"": 1509,
+      "endpoint=\"/api/mission/events\",method=\"GET\",status=\"304\"": 1509,
+      "endpoint=\"/api/v1/chat/completions\",method=\"POST\",status=\"200\"": 1
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 1
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.028,
+        "mean": 0.028,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.029,
+        "mean": 0.029,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/list\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/model/list\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/prompt/list\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/trace/list\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/platform\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.622,
+        "mean": 0.1555,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 1,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/admin/models/platform\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.622,
+        "mean": 0.1555,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 1,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/tools/list\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/tasks\",method=\"GET\"": {
+        "count": 1510,
+        "sum": 0.2940000000000002,
+        "mean": 0.00019470198675496702,
+        "buckets": {
+          "1": 1510,
+          "5": 1510,
+          "10": 1510,
+          "0.005": 1510,
+          "0.01": 1510,
+          "0.025": 1510,
+          "0.05": 1510,
+          "0.1": 1510,
+          "0.25": 1510,
+          "0.5": 1510,
+          "2.5": 1510
+        }
+      },
+      "endpoint=\"/api/mission/tasks\",method=\"GET\"": {
+        "count": 1510,
+        "sum": 0.33400000000000024,
+        "mean": 0.00022119205298013262,
+        "buckets": {
+          "1": 1510,
+          "5": 1510,
+          "10": 1510,
+          "0.005": 1510,
+          "0.01": 1510,
+          "0.025": 1510,
+          "0.05": 1510,
+          "0.1": 1510,
+          "0.25": 1510,
+          "0.5": 1510,
+          "2.5": 1510
+        }
+      },
+      "endpoint=\"/agents\",method=\"GET\"": {
+        "count": 1510,
+        "sum": 0.18700000000000014,
+        "mean": 0.0001238410596026491,
+        "buckets": {
+          "1": 1510,
+          "5": 1510,
+          "10": 1510,
+          "0.005": 1510,
+          "0.01": 1510,
+          "0.025": 1510,
+          "0.05": 1510,
+          "0.1": 1510,
+          "0.25": 1510,
+          "0.5": 1510,
+          "2.5": 1510
+        }
+      },
+      "endpoint=\"/api/mission/agents\",method=\"GET\"": {
+        "count": 1510,
+        "sum": 0.22400000000000017,
+        "mean": 0.00014834437086092727,
+        "buckets": {
+          "1": 1510,
+          "5": 1510,
+          "10": 1510,
+          "0.005": 1510,
+          "0.01": 1510,
+          "0.025": 1510,
+          "0.05": 1510,
+          "0.1": 1510,
+          "0.25": 1510,
+          "0.5": 1510,
+          "2.5": 1510
+        }
+      },
+      "endpoint=\"/events\",method=\"GET\"": {
+        "count": 1510,
+        "sum": 0.21100000000000016,
+        "mean": 0.00013973509933774844,
+        "buckets": {
+          "1": 1510,
+          "5": 1510,
+          "10": 1510,
+          "0.005": 1510,
+          "0.01": 1510,
+          "0.025": 1510,
+          "0.05": 1510,
+          "0.1": 1510,
+          "0.25": 1510,
+          "0.5": 1510,
+          "2.5": 1510
+        }
+      },
+      "endpoint=\"/api/mission/events\",method=\"GET\"": {
+        "count": 1510,
+        "sum": 0.25000000000000017,
+        "mean": 0.00016556291390728488,
+        "buckets": {
+          "1": 1510,
+          "5": 1510,
+          "10": 1510,
+          "0.005": 1510,
+          "0.01": 1510,
+          "0.025": 1510,
+          "0.05": 1510,
+          "0.1": 1510,
+          "0.25": 1510,
+          "0.5": 1510,
+          "2.5": 1510
+        }
+      },
+      "endpoint=\"/chat/completions\",method=\"POST\"": {
+        "count": 1,
+        "sum": 30.274,
+        "mean": 30.274,
+        "buckets": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/api/v1/chat/completions\",method=\"POST\"": {
+        "count": 1,
+        "sum": 30.274,
+        "mean": 30.274,
+        "buckets": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 1
+}

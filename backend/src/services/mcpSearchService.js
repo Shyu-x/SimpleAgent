@@ -46,7 +46,8 @@ class MiniMaxMCPSearchService extends EventEmitter {
         let buffer = '';
 
         this.process.stdout.on('data', (data) => {
-          buffer += data.toString();
+          const text = Buffer.isBuffer(data) ? data.toString('utf8') : String(data);
+          buffer += text;
           const lines = buffer.split('\n');
           buffer = lines.pop() || '';
 

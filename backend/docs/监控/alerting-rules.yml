@@ -1,0 +1,292 @@
+# Prometheus 告警规则配置
+# 用于 Prometheus Alertmanager 的告警规则定义
+#
+# 使用方法：
+# 1. 将此文件放置在 Prometheus 配置目录
+# 2. 在 prometheus.yml 中添加 rule_files 引用
+# 3. 或使用 promtool 检查规则: promtool check rules alerting-rules.yml
+#
+# @author AI Chat 玩具团队
+# @date 2026-05-13
+
+groups:
+  - name: ai-chat-http
+    interval: 30s
+    rules:
+      # HTTP 错误率告警
+      - alert: HighHTTPErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (module)
+          / sum(rate(http_requests_total[5m])) by (module) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP 错误率过高"
+          description: "模块 {{ $labels.module }} 5分钟内错误率超过 5%，当前值: {{ $value | humanizePercentage }}"
+
+      # HTTP 延迟告警
+      - alert: HighHTTPLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, module)) > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP 请求延迟过高"
+          description: "模块 {{ $labels.module }} P95 延迟超过 2 秒，当前值: {{ $value }}s"
+
+      # 活跃请求数过多
+      - alert: TooManyActiveRequests
+        expr: http_requests_active > 500
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "活跃请求数过多"
+          description: "当前活跃请求数: {{ $value }}，超过阈值 500"
+
+  - name: ai-chat-circuit-breaker
+    interval: 30s
+    rules:
+      # 熔断器打开告警
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "熔断器已打开"
+          description: "熔断器 {{ $labels.circuit }} 已打开，请求被拒绝，请检查下游服务状态"
+
+      # 熔断器半开状态
+      - alert: CircuitBreakerHalfOpen
+        expr: circuit_breaker_state == 2
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "熔断器处于半开状态"
+          description: "熔断器 {{ $labels.circuit }} 正在尝试恢复，请求部分放行"
+
+  - name: ai-chat-model
+    interval: 60s
+    rules:
+      # 模型错误过多
+      - alert: HighModelErrorRate
+        expr: rate(model_errors_total[5m]) > 1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "模型请求错误率过高"
+          description: "模型错误数增长过快，当前速率: {{ $value }}/s"
+
+      # 模型 Token 消耗异常
+      - alert: UnusualTokenConsumption
+        expr: rate(model_tokens_total[10m]) > 100000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Token 消耗异常"
+          description: "Token 消耗速率过高，当前: {{ $value }}/s"
+
+  - name: ai-chat-tool
+    interval: 60s
+    rules:
+      # 工具调用失败过多
+      - alert: HighToolErrorRate
+        expr: rate(tool_errors_total[5m]) > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "工具调用失败率过高"
+          description: "工具 {{ $labels.tool }} 错误率过高，当前速率: {{ $value }}/s"
+
+  - name: ai-chat-agent
+    interval: 60s
+    rules:
+      # Agent 执行迭代过多
+      - alert: HighAgentIterations
+        expr: rate(agent_iterations_total[5m]) > 10
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Agent 迭代次数过多"
+          description: "Agent 平均迭代次数过多，可能陷入循环，当前: {{ $value }}/s"
+
+  - name: ai-chat-system
+    interval: 30s
+    rules:
+      # 系统资源告警 - CPU
+      - alert: HighCPUUsage
+        expr: system_cpu_usage > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU 使用率过高"
+          description: "CPU 使用率超过 80%，当前: {{ $value | humanizePercentage }}"
+
+      # 系统资源告警 - 内存
+      - alert: HighMemoryUsage
+        expr: system_memory_usage > 0.9
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "内存使用率过高"
+          description: "内存使用率超过 90%，当前: {{ $value | humanizePercentage }}，请检查内存泄漏"
+
+      # 进程重启
+      - alert: ProcessRestart
+        expr: increase(process_restart_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "进程发生重启"
+          description: "进程在 5 分钟内发生了重启，请检查日志"
+
+  - name: ai-chat-queue
+    interval: 30s
+    rules:
+      # 队列积压告警
+      - alert: QueueBacklog
+        expr: queue_length > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "任务队列积压"
+          description: "队列积压任务数: {{ $value }}，超过阈值 100"
+
+      # 队列满告警
+      - alert: QueueFull
+        expr: queue_length >= queue_capacity
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "任务队列已满"
+          description: "队列已满，新任务将被拒绝，请尽快处理"
+
+  - name: ai-chat-gateway
+    interval: 30s
+    rules:
+      # 服务降级告警
+      - alert: ServiceDegraded
+        expr: gateway_degradation_level != 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "服务处于降级状态"
+          description: "网关服务降级级别: {{ $labels.level }}，原因: {{ $labels.reason }}"
+
+      # 严重降级告警
+      - alert: ServiceCriticallyDegraded
+        expr: gateway_degradation_level >= 3
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务严重降级"
+          description: "服务处于严重降级状态 (level={{ $value }}), 仅支持基础功能"
+
+  # ==================== Qdrant 向量数据库告警 ====================
+  - name: ai-chat-qdrant
+    interval: 30s
+    rules:
+      # Qdrant 健康状态异常
+      - alert: QdrantUnhealthy
+        expr: qdrant_health_status{instance="qdrant"} != 1
+        for: 1m
+        labels:
+          severity: critical
+          component: qdrant
+        annotations:
+          summary: "Qdrant 服务不健康"
+          description: "Qdrant 健康状态异常，当前状态: {{ $value }} (0=异常, 1=健康, 2=降级)"
+
+      # Qdrant 查询延迟过高
+      - alert: QdrantHighLatency
+        expr: histogram_quantile(0.99, sum(rate(qdrant_query_latency_seconds_bucket{instance="qdrant"}[5m])) by (le)) > 1
+        for: 3m
+        labels:
+          severity: warning
+          component: qdrant
+        annotations:
+          summary: "Qdrant 查询延迟过高"
+          description: "Qdrant P99 查询延迟超过 1 秒，当前值: {{ $value }}s"
+
+      # Qdrant 极高高延迟
+      - alert: QdrantCriticalLatency
+        expr: histogram_quantile(0.99, sum(rate(qdrant_query_latency_seconds_bucket{instance="qdrant"}[5m])) by (le)) > 5
+        for: 1m
+        labels:
+          severity: critical
+          component: qdrant
+        annotations:
+          summary: "Qdrant 查询延迟严重超标"
+          description: "Qdrant P99 查询延迟超过 5 秒，当前值: {{ $value }}s，请立即检查"
+
+      # Qdrant 错误率过高
+      - alert: QdrantHighErrorRate
+        expr: |
+          sum(rate(qdrant_errors_total{instance="qdrant"}[5m])) by ()
+          / sum(rate(qdrant_operations_total{instance="qdrant"}[5m])) by () > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: qdrant
+        annotations:
+          summary: "Qdrant 错误率过高"
+          description: "Qdrant 5 分钟内错误率超过 5%，当前值: {{ $value | humanizePercentage }}"
+
+      # Qdrant 连接池耗尽
+      - alert: QdrantConnectionPoolExhausted
+        expr: qdrant_connection_pool_active{instance="qdrant"} / qdrant_connection_pool_total{instance="qdrant"} > 0.9
+        for: 2m
+        labels:
+          severity: warning
+          component: qdrant
+        annotations:
+          summary: "Qdrant 连接池接近耗尽"
+          description: "Qdrant 连接池使用率超过 90%，当前: {{ $value | humanizePercentage }}"
+
+      # Qdrant 降级到内存
+      - alert: QdrantDegradedToMemory
+        expr: increase(qdrant_degraded_to_memory_total{instance="qdrant"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          component: qdrant
+        annotations:
+          summary: "Qdrant 已降级到内存存储"
+          description: "Qdrant 在最近 5 分钟内发生了降级事件，可能影响性能"
+
+      # Qdrant 连接错误
+      - alert: QdrantConnectionErrors
+        expr: rate(qdrant_errors_connection_total{instance="qdrant"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: qdrant
+        annotations:
+          summary: "Qdrant 连接错误过多"
+          description: "Qdrant 连接错误速率过高，当前: {{ $value }}/s，请检查网络连接"
+
+      # Qdrant 超时错误
+      - alert: QdrantTimeoutErrors
+        expr: rate(qdrant_errors_timeout_total{instance="qdrant"}[5m]) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+          component: qdrant
+        annotations:
+          summary: "Qdrant 超时错误过多"
+          description: "Qdrant 超时错误速率过高，当前: {{ $value }}/s，请检查服务负载"

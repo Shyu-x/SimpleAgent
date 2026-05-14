@@ -106,24 +106,23 @@ function convertTask(task: TaskResponse): Omit<MissionTask, 'id' | 'createdAt' |
     assignedAgent: task.assignedAgent || undefined,
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
-    startedAt: task.startedAt,
-    completedAt: task.completedAt,
     result: task.result || undefined,
     error: task.error || undefined,
   };
 }
 
 // 转换后端 Agent 到前端格式
-function convertAgent(agent: AgentResponse): Omit<MissionAgent, 'lastHeartbeat'> & { id: string } {
+function convertAgent(agent: AgentResponse): MissionAgent {
   return {
     id: agent.id,
     name: agent.name,
-    role: agent.role,
+    role: agent.role as MissionAgent['role'],
     avatar: agent.avatar || '🤖',
     status: agent.status as MissionAgent['status'],
     currentTask: agent.currentTask || undefined,
     progress: agent.progress,
     capabilities: agent.capabilities,
+    lastHeartbeat: Date.now(),
   };
 }
 

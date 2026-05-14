@@ -17,6 +17,25 @@ const router = express.Router();
 const { MiniMaxRouter, MINIMAX_MODELS, DEFAULT_MODEL } = require('../../services/router/modelRouter');
 const { MiniMaxChatModelClient } = require('../../domain/model/ChatModelClient');
 const { breakerFactory } = require('../../common/CircuitBreaker');
+const config = require('../../config');
+
+// 获取实际模型列表的辅助函数
+function getAvailableModelsFromAPI() {
+  return {
+    data: [
+      { id: 'MiniMax-M2.7', display_name: 'MiniMax-M2.7', type: 'model', created_at: '2026-03-18T02:00:00Z' },
+      { id: 'MiniMax-M2.7-highspeed', display_name: 'MiniMax-M2.7-Highspeed', type: 'model', created_at: '2026-03-18T02:00:00Z' },
+      { id: 'MiniMax-M2.5', display_name: 'MiniMax-M2.5', type: 'model', created_at: '2026-02-13T02:00:00Z' },
+      { id: 'MiniMax-M2.5-highspeed', display_name: 'MiniMax-M2.5-Highspeed', type: 'model', created_at: '2026-02-13T02:00:00Z' },
+      { id: 'MiniMax-M2.1', display_name: 'MiniMax-M2.1', type: 'model', created_at: '2025-12-23T02:00:00Z' },
+      { id: 'MiniMax-M2.1-highspeed', display_name: 'MiniMax-M2.1-Highspeed', type: 'model', created_at: '2025-12-23T02:00:00Z' },
+      { id: 'MiniMax-M2', display_name: 'MiniMax-M2', type: 'model', created_at: '2025-10-27T02:00:00Z' },
+      { id: 'MiniMax-VL-01', display_name: 'MiniMax-VL-01 (多模态)', type: 'model', created_at: '2025-08-01T02:00:00Z' },
+      { id: 'MiniMax-Text-01', display_name: 'MiniMax-Text-01 (长文本)', type: 'model', created_at: '2025-06-01T02:00:00Z' },
+    ],
+    has_more: false
+  };
+}
 
 // 单例路由器
 let modelRouter = null;
@@ -30,6 +49,52 @@ function getRouter() {
   }
   return modelRouter;
 }
+
+/**
+ * GET /api/admin/models/platform
+ * 从 MiniMax 平台获取实时模型列表
+ */
+router.get('/platform', async (req, res) => {
+  try {
+    const apiKey = config.get?.('api.minimaxKey') || config.MINIMAX_API_KEY || process.env.MINIMAX_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({
+        success: false,
+        error: 'MiniMax API Key 未配置'
+      });
+    }
+
+    const response = await fetch('https://api.minimaxi.com/anthropic/v1/models', {
+      headers: {
+        'X-Api-Key': apiKey,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`MiniMax API 返回错误: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    res.json({
+      success: true,
+      data: {
+        models: data.data || [],
+        total: data.data?.length || 0,
+        has_more: data.has_more || false,
+        first_id: data.first_id,
+        last_id: data.last_id
+      }
+    });
+  } catch (error) {
+    console.error('获取平台模型列表失败:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || '获取模型列表失败'
+    });
+  }
+});
 
 /**
  * GET /api/admin/models
@@ -99,10 +164,12 @@ router.get('/stats', (req, res) => {
         successThreshold: 3,
         timeout: 30000
       });
+      const state = breaker.getState();
       circuitBreakerStates[modelId] = {
-        state: breaker.state || 'CLOSED',
-        failures: breaker.failures || 0,
-        successes: breaker.successes || 0
+        state: state.circuit || 'CLOSED',
+        failureCount: state.failureCount || 0,
+        successCount: state.successCount || 0,
+        lastFailureTime: state.lastFailureTime || null
       };
     }
 

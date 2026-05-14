@@ -1,0 +1,166 @@
+{
+  "summary": {
+    "total": 25,
+    "passed": 21,
+    "failed": 2,
+    "warnings": 2,
+    "duration": "262s",
+    "timestamp": "2026-05-13T11:50:20.012Z"
+  },
+  "results": [
+    {
+      "name": "页面加载",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:01.413Z",
+      "message": "页面标题正确: AI Chat"
+    },
+    {
+      "name": "页面加载",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:02.227Z",
+      "message": "页面加载正常，无明显异常"
+    },
+    {
+      "name": "侧边栏",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:03.186Z",
+      "message": "侧边栏显示正常"
+    },
+    {
+      "name": "聊天功能",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:03.721Z",
+      "message": "聊天输入框存在"
+    },
+    {
+      "name": "聊天功能",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:05.966Z",
+      "message": "消息输入正常"
+    },
+    {
+      "name": "聊天功能",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:05.984Z",
+      "message": "使用 Ctrl+Enter 发送消息"
+    },
+    {
+      "name": "聊天功能",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:08.386Z",
+      "message": "聊天功能正常，收到 AI 回复"
+    },
+    {
+      "name": "多窗口",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:10.833Z",
+      "message": "并排布局切换成功"
+    },
+    {
+      "name": "多窗口",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:11.955Z",
+      "message": "网格布局切换成功"
+    },
+    {
+      "name": "多窗口",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:11.961Z",
+      "message": "多窗口布局正常，检测到 1 个窗口元素"
+    },
+    {
+      "name": "专注模式",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:13.610Z",
+      "message": "专注模式已激活，侧边栏已隐藏"
+    },
+    {
+      "name": "设置面板",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:17.379Z",
+      "message": "设置面板打开正常"
+    },
+    {
+      "name": "设置面板",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:17.391Z",
+      "message": "设置面板包含 4 个可配置项"
+    },
+    {
+      "name": "记忆面板",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:20.018Z",
+      "message": "记忆面板打开正常"
+    },
+    {
+      "name": "Agent模式",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:21.826Z",
+      "message": "Agent 模式按钮存在"
+    },
+    {
+      "name": "Agent模式",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:46:29.467Z",
+      "message": "Agent 模式已激活（检测到相关文本）"
+    },
+    {
+      "name": "知识库",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:47:15.638Z",
+      "message": "未找到知识库按钮"
+    },
+    {
+      "name": "移动端适配",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:48:00.344Z",
+      "message": "移动端底部导航存在"
+    },
+    {
+      "name": "联网搜索",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:48:02.646Z",
+      "message": "搜索输入正常"
+    },
+    {
+      "name": "联网搜索",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:48:08.109Z",
+      "message": "搜索功能正常，显示 2 个结果"
+    },
+    {
+      "name": "思维链可视化",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:49:15.674Z",
+      "message": "未检测到思维链元素，可能需要特定模型支持（如 MiniMax-M2.7-highspeed）"
+    },
+    {
+      "name": "快捷键",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:49:17.427Z",
+      "message": "快捷键帮助面板打开正常"
+    },
+    {
+      "name": "快捷键",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:49:17.435Z",
+      "message": "快捷键列表完整，共 12 个"
+    },
+    {
+      "name": "响应式布局",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:49:48.594Z",
+      "message": "响应式布局测试失败",
+      "error": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://localhost:3001/\"\u001b[22m\n",
+      "screenshot": "./test-results/screenshots/响应式布局-failure-1778672988292.png"
+    },
+    {
+      "name": "控制台错误",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:50:19.502Z",
+      "message": "控制台错误检测失败",
+      "error": "page.reload: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n\u001b[2m    - navigated to \"http://localhost:3001/\"\u001b[22m\n",
+      "screenshot": "./test-results/screenshots/控制台错误-failure-1778673019106.png"
+    }
+  ]
+}

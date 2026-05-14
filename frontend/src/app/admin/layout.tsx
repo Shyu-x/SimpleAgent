@@ -15,6 +15,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
 
 const NAV_ITEMS = [
   { href: '/admin', label: '仪表盘', icon: LayoutDashboard, exact: true },
@@ -115,7 +116,9 @@ export default function AdminLayout({
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto">
-          {children}
+          <ErrorBoundary moduleName="AdminContent" showStack={process.env.NODE_ENV === 'development'}>
+            {children}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

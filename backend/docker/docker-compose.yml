@@ -1,0 +1,209 @@
+# ================================================
+# Docker Compose 配置 - 微服务容器编排
+# ================================================
+# 用途: 定义完整的微服务架构，支持独立部署和重启
+# 使用: docker-compose -f docker/docker-compose.yml up -d
+
+version: '3.8'
+
+services:
+  # ================================================
+  # API 网关服务 - 统一入口
+  # ================================================
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.gateway
+    container_name: api-gateway
+    ports:
+      - "${GATEWAY_PORT:-30000}:30000"
+    environment:
+      - NODE_ENV=production
+      - PORT=30000
+      - ORDER_SERVICE_URL=http://order-service:30001
+      - USER_SERVICE_URL=http://user-service:30002
+      - PAYMENT_SERVICE_URL=http://payment-service:30003
+    depends_on:
+      order-service:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ================================================
+  # 订单服务
+  # ================================================
+  order-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.module
+    container_name: order-service
+    ports:
+      - "${ORDER_SERVICE_PORT:-30001}:30001"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=order-service
+      - SERVICE_PORT=30001
+      - SERVICE_TYPE=order
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/orders}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    deploy:
+      replicas: ${ORDER_REPLICAS:-2}
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ================================================
+  # 用户服务
+  # ================================================
+  user-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.module
+    container_name: user-service
+    ports:
+      - "${USER_SERVICE_PORT:-30002}:30002"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=user-service
+      - SERVICE_PORT=30002
+      - SERVICE_TYPE=user
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/users}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    deploy:
+      replicas: ${USER_REPLICAS:-2}
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ================================================
+  # 支付服务
+  # ================================================
+  payment-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.module
+    container_name: payment-service
+    ports:
+      - "${PAYMENT_SERVICE_PORT:-30003}:30003"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_NAME=payment-service
+      - SERVICE_PORT=30003
+      - SERVICE_TYPE=payment
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/payments}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    deploy:
+      replicas: ${PAYMENT_REPLICAS:-2}
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ================================================
+  # PostgreSQL 数据库
+  # ================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_MULTIPLE_DATABASES=orders,users,payments
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ================================================
+  # Redis 缓存服务
+  # ================================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ================================================
+# 网络定义
+# ================================================
+networks:
+  microservices-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ================================================
+# 存储卷定义
+# ================================================
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local

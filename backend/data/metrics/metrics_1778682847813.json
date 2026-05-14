@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-05-13T14:34:07.813Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"200\"": 4
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 0
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.048,
+        "mean": 0.012,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 1,
+          "0.01": 2,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/admin/stats\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.048,
+        "mean": 0.012,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 1,
+          "0.01": 2,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 0
+}

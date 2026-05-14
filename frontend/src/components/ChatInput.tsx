@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { Send, Loader2, Mic, Image, X, Play, Square, Trash2, Check, ChevronDown, Sparkles, Settings, MessageSquare, Zap } from 'lucide-react';
+import { Send, Loader2, Mic, Image, X, Play, Square, Trash2, Check, ChevronDown, Sparkles, Settings, MessageSquare, Zap, Search, CheckCircle, Cpu, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from './Toast';
 import type { Attachment } from '@/types';
@@ -34,6 +34,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
   const [isPlaying, setIsPlaying] = useState(false);
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showQuickSettings, setShowQuickSettings] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -69,6 +70,47 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
   // 意图检测状态
   const [detectedIntent, setDetectedIntent] = useState<IntentResult | null>(null);
   const [showIntentBanner, setShowIntentBanner] = useState(false);
+
+  // 平台模型相关状态
+  const [platformModels, setPlatformModels] = useState<Array<{ id: string; display_name: string; type: string; created_at: string }>>([]);
+  const [isLoadingPlatformModels, setIsLoadingPlatformModels] = useState(false);
+
+  // 模型信息映射
+  const MODEL_INFO: Record<string, { name: string; description: string; maxTokens: number; features: string[] }> = {
+    'MiniMax-M2.7': { name: 'M2.7 旗舰编程版', description: '最新一代旗舰模型，编程能力最强', maxTokens: 100000, features: ['编程增强', '长上下文', '思维链'] },
+    'MiniMax-M2.7-highspeed': { name: 'M2.7 高速版', description: 'M2.7 高速响应版本', maxTokens: 100000, features: ['快速响应', '编程增强', '思维链'] },
+    'MiniMax-M2.5': { name: 'M2.5 标准版', description: '平衡性能与速度', maxTokens: 100000, features: ['编程增强', '长上下文'] },
+    'MiniMax-M2.5-highspeed': { name: 'M2.5 高速版', description: 'M2.5 快速响应版本', maxTokens: 100000, features: ['快速响应', '编程增强'] },
+    'MiniMax-M2.1': { name: 'M2.1 轻量版', description: '轻量级模型，适合简单任务', maxTokens: 100000, features: ['轻量', '快速'] },
+    'MiniMax-M2.1-highspeed': { name: 'M2.1 高速版', description: 'M2.1 快速响应版本', maxTokens: 100000, features: ['快速响应', '轻量'] },
+    'MiniMax-M2': { name: 'M2 基础版', description: '基础对话模型', maxTokens: 100000, features: ['基础对话'] },
+    'MiniMax-VL-01': { name: 'VL-01 多模态版', description: '支持图像理解的多模态模型', maxTokens: 32000, features: ['图像理解', '多模态'] },
+    'MiniMax-Text-01': { name: 'Text-01 长文本版', description: '超长上下文处理', maxTokens: 400000, features: ['长文本', '400K上下文'] },
+  };
+
+  // 获取平台模型列表
+  const fetchModelsFromAPI = useCallback(async () => {
+    setIsLoadingPlatformModels(true);
+    try {
+      const response = await fetch('/api/admin/models/platform');
+      const result = await response.json();
+      if (result.success && result.data?.models) {
+        setPlatformModels(result.data.models);
+        return result.data.models;
+      }
+      return [];
+    } catch (err) {
+      console.error('获取平台模型列表失败:', err);
+      return [];
+    } finally {
+      setIsLoadingPlatformModels(false);
+    }
+  }, []);
+
+  // 初始加载平台模型
+  useEffect(() => {
+    fetchModelsFromAPI();
+  }, [fetchModelsFromAPI]);
 
   const quickPhrasePrompts = [...customPrompts, ...DEFAULT_PROMPTS].slice(0, 8);
 
@@ -182,7 +224,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
     },
   }), []);
 
-  // Load draft from sessionStorage (more secure, cleared when tab closes)
+  // Load draft from sessionStorage (SSR safe - useEffect only runs on client)
   useEffect(() => {
     try {
       const draft = sessionStorage.getItem('chat-draft');
@@ -286,6 +328,9 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
   }, []);
 
   const handleSend = useCallback(() => {
+    // IME 输入期间不发送
+    if (isComposing) return;
+
     if ((input.trim() || attachments.length > 0) && !disabled) {
       onSend(input.trim(), attachments.length > 0 ? attachments : undefined);
       setInput('');
@@ -296,7 +341,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
         textareaRef.current.style.height = 'auto';
       }
     }
-  }, [input, disabled, onSend, attachments]);
+  }, [input, disabled, onSend, attachments, isComposing]);
 
   const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -312,10 +357,20 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
     const history = getMessageHistory();
     const currentIndex = history.findIndex((item) => item === input);
 
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    // IME 输入期间忽略 Enter 键
+    if (isComposing) return;
+
+    if (e.key === 'Enter' && !e.shiftKey && (e.ctrlKey || e.metaKey)) {
       // Ctrl/Cmd + Enter - Send message
       e.preventDefault();
       handleSend();
+    } else if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      // Enter without Shift - Send message (最常见的中文输入场景)
+      e.preventDefault();
+      handleSend();
+    } else if (e.key === 'Enter' && e.shiftKey) {
+      // Shift + Enter - Insert newline (用于多行输入)
+      // 不阻止默认行为，让 textarea 正常插入换行符
     } else if (e.key === 'ArrowUp') {
       // Arrow Up - Previous history
       e.preventDefault();
@@ -340,7 +395,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
       setShowQuickPhrases(false);
       setShowQuickSettings(false);
     }
-  }, [input, getMessageHistory, handleSend]);
+  }, [input, getMessageHistory, handleSend, isComposing]);
 
   // 图片上传处理
   const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -635,77 +690,158 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
               <ChevronDown size={14} className={`text-muted-foreground transition-transform ${showModelSelector ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* 模型下拉菜单 */}
+            {/* 模型下拉菜单 - 商业级设计 */}
             <AnimatePresence>
               {showModelSelector && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute bottom-full left-0 z-50 mb-2 max-h-80 w-72 overflow-y-auto rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/99 shadow-2xl backdrop-blur-xl"
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute bottom-full left-0 z-50 mb-2 w-96 rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/99 shadow-2xl backdrop-blur-xl overflow-hidden"
                 >
-                  {/* 自定义模型输入 */}
-                  <div className="p-2 border-b border-[hsl(var(--border-subtle))]">
-                    <div className="flex gap-1">
-                      <input
-                        type="text"
-                        value={customModelInput}
-                        onChange={(e) => setCustomModelInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleCustomModelSubmit();
-                          }
-                        }}
-                        placeholder="输入自定义模型名称"
-                        className="flex-1 text-sm px-2 py-1.5 rounded border bg-background outline-none focus:ring-1 focus:ring-primary/50"
-                      />
+                  {/* 头部 */}
+                  <div className="px-4 py-3 border-b border-[hsl(var(--border-subtle))] bg-gradient-to-r from-[hsl(var(--guide-6)/0.08)] to-transparent">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(var(--guide-6))] to-[hsl(var(--guide-5))] flex items-center justify-center">
+                          <Sparkles size={14} className="text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-sm">选择 AI 模型</h3>
+                          <p className="text-[10px] text-[hsl(var(--text-muted))]">实时获取 MiniMax 平台模型</p>
+                        </div>
+                      </div>
                       <button
-                        onClick={handleCustomModelSubmit}
-                        className="px-2 py-1.5 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90"
+                        onClick={() => {
+                          // 刷新模型列表
+                          fetchModelsFromAPI().then(models => {
+                            if (models.length > 0) {
+                              setPlatformModels(models);
+                            }
+                          });
+                        }}
+                        className="p-2 rounded-lg hover:bg-[hsl(var(--bg-muted))] transition-colors"
+                        title="刷新模型列表"
                       >
-                        添加
+                        <RefreshCw size={14} className="text-[hsl(var(--text-muted))]" />
                       </button>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 px-1">
-                      输入任意模型名称，如 ark-code-latest
-                    </p>
                   </div>
 
-                  {/* 当前自定义模型指示器 */}
-                  {isCustomModel && (
-                    <div className="px-3 py-2 bg-accent/50 text-sm border-b border-[hsl(var(--border-subtle))]">
-                      <span className="text-muted-foreground">当前: </span>
-                      <span className="font-medium">{apiConfig.model}</span>
+                  {/* 搜索框 */}
+                  <div className="px-4 py-2 border-b border-[hsl(var(--border-subtle))]">
+                    <div className="relative">
+                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[hsl(var(--text-muted))]" />
+                      <input
+                        type="text"
+                        id="model-search"
+                        placeholder="搜索模型..."
+                        className="w-full pl-9 pr-3 py-2 text-sm bg-[hsl(var(--bg-muted))]/50 rounded-lg border border-transparent focus:border-[hsl(var(--border-strong))] outline-none transition-colors"
+                      />
                     </div>
-                  )}
+                  </div>
 
-                  {/* 已配置的模型列表 */}
-                  {allModels.length === 0 ? (
-                    <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-                      {!isApiConfigured ? (
-                        <>请先在设置中配置 API Key</>
-                      ) : (
-                        <>无可用模型，请使用自定义模型</>
-                      )}
+                  {/* 当前选中的模型 */}
+                  <div className="px-4 py-2 bg-blue-500/5 border-b border-blue-500/20">
+                    <div className="flex items-center gap-2 text-xs text-blue-600">
+                      <CheckCircle size={12} />
+                      <span>当前: <span className="font-medium">{isCustomModel ? apiConfig.model : currentModel.name}</span></span>
                     </div>
-                  ) : (
-                    allModels.map((model) => (
-                      <button
-                        key={`${model.id}-${model.config?.baseURL || 'default'}`}
-                        onClick={() => handleModelChange(model)}
-                        className={`w-full flex items-center justify-between px-3 py-2 text-left transition-colors hover:bg-[hsl(var(--bg-muted))]/80 ${
-                          model.id === apiConfig.model ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : ''
-                        }`}
-                      >
-                        <div>
-                          <div className="text-sm font-medium">{model.name}</div>
-                          <div className="text-xs text-muted-foreground">{model.provider}</div>
+                  </div>
+
+                  {/* 模型列表 */}
+                  <div className="max-h-72 overflow-y-auto">
+                    {platformModels.length === 0 ? (
+                      <div className="px-4 py-8 text-center">
+                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[hsl(var(--bg-muted))] flex items-center justify-center">
+                          <Loader2 size={20} className="animate-spin text-[hsl(var(--text-muted))]" />
                         </div>
-                        {model.id === apiConfig.model && <Check size={16} className="text-primary" />}
-                      </button>
-                    ))
-                  )}
+                        <p className="text-sm text-[hsl(var(--text-muted))]">正在加载模型列表...</p>
+                      </div>
+                    ) : (
+                      platformModels.map((model) => {
+                        const info = MODEL_INFO[model.id] || {
+                          name: model.display_name || model.id,
+                          description: 'MiniMax 智能模型',
+                          maxTokens: 100000,
+                          features: []
+                        };
+                        const isSelected = apiConfig.model === model.id;
+
+                        return (
+                          <button
+                            key={model.id}
+                            onClick={() => {
+                              handleModelChange({
+                                id: model.id,
+                                name: info.name,
+                                config: {
+                                  id: 'platform',
+                                  apiKey: '',
+                                  baseURL: 'https://api.minimaxi.com/anthropic',
+                                  model: model.id,
+                                  createdAt: Date.now()
+                                }
+                              });
+                              setShowModelSelector(false);
+                              showToast(`已切换到 ${info.name}`, 'success');
+                            }}
+                            className={`w-full px-4 py-3 flex items-start gap-3 transition-all hover:bg-[hsl(var(--bg-muted))]/80 ${
+                              isSelected ? 'bg-blue-500/10 border-l-2 border-blue-500' : ''
+                            }`}
+                          >
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                              isSelected
+                                ? 'bg-gradient-to-br from-blue-500 to-purple-500'
+                                : 'bg-[hsl(var(--bg-muted))]'
+                            }`}>
+                              {isSelected ? (
+                                <Sparkles size={16} className="text-white" />
+                              ) : (
+                                <Cpu size={16} className="text-[hsl(var(--text-muted))]" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">{info.name}</span>
+                                {isSelected && (
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-blue-500 text-white rounded-full">
+                                    当前
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-[hsl(var(--text-muted))] mt-0.5 line-clamp-1">
+                                {info.description}
+                              </p>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {info.features.map((feature) => (
+                                  <span
+                                    key={feature}
+                                    className="px-1.5 py-0.5 text-[10px] bg-[hsl(var(--bg-muted))] rounded"
+                                  >
+                                    {feature}
+                                  </span>
+                                ))}
+                                <span className="px-1.5 py-0.5 text-[10px] bg-green-500/10 text-green-600 rounded">
+                                  {(info.maxTokens / 1000).toFixed(0)}K
+                                </span>
+                              </div>
+                            </div>
+                            {isSelected && <Check size={16} className="text-blue-500 shrink-0 mt-1" />}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {/* 底部信息 */}
+                  <div className="px-4 py-2 border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-muted))]/30">
+                    <p className="text-[10px] text-[hsl(var(--text-muted))] flex items-center gap-1">
+                      <Zap size={10} className="text-[hsl(var(--guide-6))]" />
+                      数据来源: MiniMax 平台 · {platformModels.length} 个可用模型
+                    </p>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -917,6 +1053,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
             value={input}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={() => setIsComposing(false)}
             placeholder="发送消息..."
             disabled={disabled}
             rows={1}

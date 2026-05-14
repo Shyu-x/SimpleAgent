@@ -98,8 +98,8 @@ export default function Home() {
     }
   }, []);
 
-  // 响应式断点
-  const isMobile = useMediaQuery('(max-width: 639px)');
+  // 响应式断点 - 使用 Tailwind 默认断点 640px
+  const isMobile = useMediaQuery('(max-width: 640px)');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidePanelContent, setSidePanelContent] = useState<SidePanelContent>('none');
 
@@ -289,7 +289,7 @@ export default function Home() {
             </AnimatePresence>
 
             {/* 2. 主内容区域 - 桌面端 */}
-            <motion.main layout className="relative z-20 flex min-w-0 flex-1 flex-col">
+            <motion.main layout className="relative z-20 flex min-w-0 min-h-0 flex-1 flex-col">
               {/* 桌面端 Header */}
               <header className="mx-3 mt-3 flex h-16 shrink-0 items-center justify-between rounded-3xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/92 px-5 shadow-sm backdrop-blur-xl">
                 <div className="flex items-center gap-4">

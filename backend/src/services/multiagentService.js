@@ -163,6 +163,81 @@ async function executeEngineTask(sessionId, task, context = {}) {
 }
 
 /**
+ * 暂停引擎
+ */
+function pauseEngine(sessionId) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  engine.pause();
+  return { success: true, message: 'Engine paused' };
+}
+
+/**
+ * 恢复引擎
+ */
+function resumeEngine(sessionId) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  engine.resume();
+  return { success: true, message: 'Engine resumed' };
+}
+
+/**
+ * 创建检查点
+ */
+function checkpointEngine(sessionId) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  const checkpoint = engine.checkpointManager.save(sessionId, engine.getState());
+  return { checkpointId: checkpoint.id, message: 'Checkpoint created successfully' };
+}
+
+/**
+ * 获取检查点列表
+ */
+function listEngineCheckpoints(sessionId) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  return engine.checkpointManager.list(sessionId);
+}
+
+/**
+ * 确认引擎请求
+ */
+function confirmEngineRequest(sessionId, confirmationId, approved, modifiedInput) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  return engine.respondToConfirmation(confirmationId, approved, modifiedInput);
+}
+
+/**
+ * 获取引擎状态
+ */
+function getEngineStatus(sessionId) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  return { state: engine.getState(), status: engine.getState().status };
+}
+
+/**
+ * 获取引擎内存统计
+ */
+function getEngineMemoryStats(sessionId) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  return engine.memory.getStats();
+}
+
+/**
+ * 搜索引擎记忆
+ */
+async function searchEngineMemory(sessionId, query, options) {
+  const engine = enhancedEngines.get(sessionId);
+  if (!engine) throw new Error('Engine not found');
+  return await engine.memory.search(query, options || {});
+}
+
+/**
  * 从检查点恢复
  */
 async function restoreFromCheckpoint(sessionId, checkpointId) {
@@ -210,6 +285,43 @@ function getHealthStatus() {
 }
 
 // ============================================
+// Agent / Task 工厂函数 (使用顶部导入的 Agent, Task)
+// ============================================
+
+/**
+ * 创建 Agent
+ */
+function createAgent({ role, goal, backstory, tools, provider, model }) {
+  if (!role || !goal) {
+    throw new Error('Missing role or goal');
+  }
+  return new Agent({
+    role,
+    goal,
+    backstory: backstory || '',
+    tools: tools || [],
+    provider,
+    model
+  });
+}
+
+/**
+ * 创建 Task
+ */
+function createTask({ description, expectedOutput, agentId, context, tools }) {
+  if (!description) {
+    throw new Error('Missing description');
+  }
+  return new Task({
+    description,
+    expectedOutput,
+    agent: agentId ? { id: agentId } : null,
+    context: context || [],
+    tools: tools || []
+  });
+}
+
+// ============================================
 // 导出
 // ============================================
 
@@ -219,6 +331,10 @@ module.exports = {
     agentTemplates: AGENT_TEMPLATES,
     taskTemplates: TASK_TEMPLATES
   }),
+
+  // Agent / Task
+  createAgent,
+  createTask,
 
   // Crew
   createCrew,
@@ -233,6 +349,14 @@ module.exports = {
   deleteEngine,
   executeEngineTask,
   restoreFromCheckpoint,
+  pauseEngine,
+  resumeEngine,
+  checkpointEngine,
+  listEngineCheckpoints,
+  confirmEngineRequest,
+  getEngineStatus,
+  getEngineMemoryStats,
+  searchEngineMemory,
 
   // LLM
   createRealLLMClient,

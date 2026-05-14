@@ -59,9 +59,9 @@ export const API_ENDPOINTS = {
 
   // Intent Tree
   intent: {
-    tree: `${API_BASE}/admin/intent/tree`,
-    node: `${API_BASE}/admin/intent/node`,
-    test: `${API_BASE}/admin/intent/test`,
+    tree: `${API_BASE}/api/admin/intent/tree`,
+    node: `${API_BASE}/api/admin/intent/node`,
+    test: `${API_BASE}/api/admin/intent/test`,
   },
 
   // Admin
@@ -76,10 +76,16 @@ export const API_ENDPOINTS = {
 
   // Metrics
   metrics: {
-    realtime: `${API_BASE}/metrics/realtime`,
-    summary: `${API_BASE}/metrics/summary`,
-    prometheus: `${API_BASE}/metrics`,
+    realtime: `${API_BASE}/api/metrics/realtime`,
+    summary: `${API_BASE}/api/metrics/summary`,
+    prometheus: `${API_BASE}/api/metrics`,
   },
+
+  // Execution History
+  execution: `${API_BASE}/api/execution`,
+
+  // Alerts
+  alerts: `${API_BASE}/api/alerts`,
 } as const;
 
 export default API_ENDPOINTS;

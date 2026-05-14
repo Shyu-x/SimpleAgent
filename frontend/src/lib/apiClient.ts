@@ -140,14 +140,17 @@ let requestId = 0;
 apiClient.addRequestInterceptor((config) => {
   const id = ++requestId;
   console.debug(`[API] ➡️  ${config.method || 'GET'} ${config.url} [id=${id}]`);
-  (config as Record<string, unknown>).__requestId = id;
+  // @ts-expect-error - Adding custom property to track request ID
+  config.__requestId = id;
   return config;
 });
 
 // 响应计时拦截器
 apiClient.addResponseInterceptor((response, data) => {
-  const id = (response as Record<string, unknown>).__requestId as number;
-  const latency = (response as Record<string, unknown>).__latency as number;
+  // @ts-expect-error - Custom property added by request interceptor
+  const id = response.__requestId as number;
+  // @ts-expect-error - Custom property added in fetchApi
+  const latency = response.__latency as number;
   console.debug(`[API] ⬅️  ${response.url} [id=${id}] status=${response.status} latency=${latency}ms`);
   return response;
 });
@@ -162,7 +165,8 @@ apiClient.addErrorInterceptor((error) => {
 
 // Bearer Token 认证拦截器
 apiClient.addRequestInterceptor((config) => {
-  const token = sessionStorage.getItem(TOKEN_KEY);
+  // SSR 保护：sessionStorage 在服务端不可用
+  const token = typeof window !== 'undefined' ? sessionStorage.getItem(TOKEN_KEY) : null;
   if (token) {
     const headers = new Headers(config.headers);
     headers.set('Authorization', `Bearer ${token}`);
@@ -351,7 +355,8 @@ export async function fetchApi<T = unknown>(
 
       // 记录延迟
       const latency = Date.now() - startTime;
-      (response as Record<string, unknown>).__latency = latency;
+      // @ts-expect-error - Custom property for tracking latency
+      response.__latency = latency;
 
       if (timeoutId) clearTimeout(timeoutId);
 
@@ -454,7 +459,8 @@ export async function fetchStream(
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   // 获取 token（用于重试时重新创建请求）
-  const token = sessionStorage.getItem(TOKEN_KEY);
+  // SSR 保护：sessionStorage 在服务端不可用
+  const token = typeof window !== 'undefined' ? sessionStorage.getItem(TOKEN_KEY) : null;
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -529,9 +535,19 @@ export async function fetchStream(
               const lastData = lastLine.slice(6);
               if (lastData !== '[DONE]') {
                 try {
-                  const parsed = JSON.parse(lastData) as Record<string, string>;
-                  if (parsed.thinking) callbacks.onThinking?.(parsed.thinking);
-                  if (parsed.content) callbacks.onChunk(parsed.content);
+                  const parsed = JSON.parse(lastData) as Record<string, unknown>;
+                  const type = parsed.type as string;
+                  const content = parsed.content as string;
+
+                  if (type === 'thinking' && content) {
+                    callbacks.onThinking?.(content);
+                  } else if ((type === 'chunk' || type === 'content') && content) {
+                    callbacks.onChunk(content);
+                  } else if (parsed.thinking && typeof parsed.thinking === 'string') {
+                    callbacks.onThinking?.(parsed.thinking as string);
+                  } else if (parsed.content && typeof parsed.content === 'string' && !type) {
+                    callbacks.onChunk(parsed.content as string);
+                  }
                 } catch {
                   // 忽略解析错误
                 }
@@ -542,16 +558,24 @@ export async function fetchStream(
           }
 
           try {
-            const parsed = JSON.parse(data) as Record<string, string>;
+            const parsed = JSON.parse(data) as Record<string, unknown>;
 
-            // MiniMax 思维链内容
-            if (parsed.thinking) {
-              callbacks.onThinking?.(parsed.thinking);
+            // 后端 SSE 格式: { type: 'chunk', content: 'xxx' } 或 { type: 'thinking', content: 'xxx' }
+            const type = parsed.type as string;
+            const content = parsed.content as string;
+
+            if (type === 'thinking' && content) {
+              callbacks.onThinking?.(content);
+            } else if ((type === 'chunk' || type === 'content') && content) {
+              callbacks.onChunk(content);
             }
 
-            // 流式文本内容
-            if (parsed.content) {
-              callbacks.onChunk(parsed.content);
+            // 兼容旧格式: { content: 'xxx' } 或 { thinking: 'xxx' }
+            if (parsed.thinking && typeof parsed.thinking === 'string') {
+              callbacks.onThinking?.(parsed.thinking as string);
+            }
+            if (parsed.content && typeof parsed.content === 'string' && !type) {
+              callbacks.onChunk(parsed.content as string);
             }
           } catch {
             // 忽略解析错误

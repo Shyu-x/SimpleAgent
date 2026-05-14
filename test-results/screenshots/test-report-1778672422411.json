@@ -1,0 +1,116 @@
+{
+  "summary": {
+    "total": 17,
+    "passed": 4,
+    "failed": 1,
+    "warnings": 12,
+    "duration": "29s",
+    "timestamp": "2026-05-13T11:40:22.411Z"
+  },
+  "results": [
+    {
+      "name": "页面加载",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:01.909Z",
+      "message": "页面标题异常: "
+    },
+    {
+      "name": "页面加载",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:40:02.014Z",
+      "message": "页面加载正常，无明显异常"
+    },
+    {
+      "name": "聊天功能",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:40:03.207Z",
+      "message": "未找到聊天输入框",
+      "error": "Input not found",
+      "screenshot": "./test-results/screenshots/聊天功能-failure-1778672403128.png"
+    },
+    {
+      "name": "多窗口",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:03.796Z",
+      "message": "未找到布局切换按钮"
+    },
+    {
+      "name": "专注模式",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:04.372Z",
+      "message": "未找到专注模式按钮"
+    },
+    {
+      "name": "设置面板",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:04.959Z",
+      "message": "未找到设置按钮"
+    },
+    {
+      "name": "记忆面板",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:05.540Z",
+      "message": "未找到记忆按钮"
+    },
+    {
+      "name": "Agent模式",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:06.439Z",
+      "message": "未找到 Agent 模式按钮"
+    },
+    {
+      "name": "知识库",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:07.350Z",
+      "message": "未找到知识库按钮"
+    },
+    {
+      "name": "移动端适配",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:09.169Z",
+      "message": "未检测到移动端专用导航"
+    },
+    {
+      "name": "联网搜索",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:09.772Z",
+      "message": "未找到搜索功能入口"
+    },
+    {
+      "name": "思维链可视化",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:10.887Z",
+      "message": "未找到聊天输入框，跳过思维链测试"
+    },
+    {
+      "name": "快捷键",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:12.073Z",
+      "message": "未检测到快捷键帮助面板"
+    },
+    {
+      "name": "响应式布局",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:40:14.716Z",
+      "message": "桌面 1920px 布局适配正常"
+    },
+    {
+      "name": "响应式布局",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:40:16.446Z",
+      "message": "平板 768px 布局适配正常"
+    },
+    {
+      "name": "响应式布局",
+      "status": "passed",
+      "timestamp": "2026-05-13T11:40:18.151Z",
+      "message": "移动 375px 布局适配正常"
+    },
+    {
+      "name": "控制台错误",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:40:21.908Z",
+      "message": "控制台有 1 个警告"
+    }
+  ]
+}

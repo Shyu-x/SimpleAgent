@@ -24,7 +24,8 @@ export default function PerformanceDashboard() {
     try {
       const response = await fetch('/api/metrics/realtime');
       const data = await response.json();
-      if (data.success) {
+      // /api/metrics/realtime 直接返回数据，无 success 包装
+      if (data && data.performance) {
         setMetrics(prev => ({
           ...prev,
           ...data,

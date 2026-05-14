@@ -453,7 +453,6 @@ class CitationFormatter {
    * HTML转义
    */
   _escapeHtml(text) {
-    const div = { innerHTML: '' };
     return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

@@ -539,8 +539,8 @@ class MultiModelRouter extends EventEmitter {
         transformRequest: (req) => req.body
       },
       minimax: {
-        baseUrl: 'https://api.minimax.chat/v1',
-        chatEndpoint: '/text/chatcompletion_v2',
+        baseUrl: process.env.MINIMAX_API_HOST || 'https://api.minimaxi.com',
+        chatEndpoint: '/v1/text/chatcompletion_pro',
         headers: (apiKey) => ({
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'

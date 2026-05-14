@@ -6,6 +6,7 @@ import { sendSSEChatMessage } from '@/lib/sse';
 import Message from './Message';
 import ChatInput, { ChatInputRef } from './ChatInput';
 import ContentPreview, { useContentPreview } from './ContentPreview';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import {
   Bot,
   Zap,
@@ -176,7 +177,8 @@ export default function FocusModeChat() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[hsl(var(--bg-app))]">
+    <ErrorBoundary moduleName="FocusModeChat" showStack>
+    <div className="fixed inset-0 z-50 flex flex-col bg-[hsl(var(--bg-app))]}>
       {/* 顶部留白和退出按钮 */}
       <div className="shrink-0 px-8 pt-8">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
@@ -369,6 +371,7 @@ export default function FocusModeChat() {
       </div>
 
       <ContentPreview config={previewConfig} onClose={closePreview} />
+    </ErrorBoundary>
     </div>
   );
 }

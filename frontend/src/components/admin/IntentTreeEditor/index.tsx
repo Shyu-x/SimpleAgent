@@ -20,7 +20,9 @@ import type {
   IntentNode,
   IntentLevel,
   IntentTestResult,
-  INTENT_LEVEL_NAMES
+  INTENT_LEVEL_NAMES,
+  IntentNodeCreateRequest,
+  IntentNodeUpdateRequest
 } from '@/types/intent';
 import { INTENT_LEVEL_COLORS } from '@/types/intent';
 

@@ -14,7 +14,7 @@
 
 const express = require('express');
 const router = express.Router();
-const AgentLogger = require('../../infra/logger/AgentLogger');
+const { AgentLogger } = require('../../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('admin-tool');
 

@@ -1,0 +1,343 @@
+{
+  "timestamp": "2026-05-12T20:12:50.763Z",
+  "toolRegistry": {
+    "success": true,
+    "totalTools": 0,
+    "categories": {}
+  },
+  "concurrentCalls": {
+    "level_10": {
+      "total": 10,
+      "successes": 0,
+      "errors": 10,
+      "timeouts": 0,
+      "errorRate": "100.00%",
+      "successRate": "0.00%",
+      "retryCount": 0,
+      "circuitBreakerTrips": 0,
+      "latencies": {
+        "min": "13.00ms",
+        "max": "48.00ms",
+        "avg": "39.00ms",
+        "p50": "43.00ms",
+        "p90": "48.00ms",
+        "p99": "48.00ms"
+      },
+      "throughput": "208.33 req/s",
+      "toolStats": {
+        "Calculate": {
+          "successes": 0,
+          "errors": 2,
+          "total": 2,
+          "avgLatency": "28.00ms",
+          "minLatency": "13.00ms",
+          "maxLatency": "43.00ms",
+          "p90": "43.00ms"
+        },
+        "What": {
+          "successes": 0,
+          "errors": 2,
+          "total": 2,
+          "avgLatency": "36.00ms",
+          "minLatency": "28.00ms",
+          "maxLatency": "44.00ms",
+          "p90": "44.00ms"
+        },
+        "Search": {
+          "successes": 0,
+          "errors": 2,
+          "total": 2,
+          "avgLatency": "43.00ms",
+          "minLatency": "40.00ms",
+          "maxLatency": "46.00ms",
+          "p90": "46.00ms"
+        },
+        "Translate": {
+          "successes": 0,
+          "errors": 2,
+          "total": 2,
+          "avgLatency": "43.00ms",
+          "minLatency": "41.00ms",
+          "maxLatency": "45.00ms",
+          "p90": "45.00ms"
+        },
+        "Summarize": {
+          "successes": 0,
+          "errors": 2,
+          "total": 2,
+          "avgLatency": "45.00ms",
+          "minLatency": "42.00ms",
+          "maxLatency": "48.00ms",
+          "p90": "48.00ms"
+        }
+      },
+      "baselineComparison": {
+        "avgLatency": {
+          "value": "39",
+          "baseline": 200,
+          "passed": true
+        },
+        "throughput": {
+          "value": 208.33333333333334,
+          "baseline": 50,
+          "passed": true
+        }
+      }
+    },
+    "level_50": {
+      "total": 50,
+      "successes": 0,
+      "errors": 50,
+      "timeouts": 0,
+      "errorRate": "100.00%",
+      "successRate": "0.00%",
+      "retryCount": 0,
+      "circuitBreakerTrips": 0,
+      "latencies": {
+        "min": "8.00ms",
+        "max": "57.00ms",
+        "avg": "41.00ms",
+        "p50": "40.00ms",
+        "p90": "55.00ms",
+        "p99": "57.00ms"
+      },
+      "throughput": "877.19 req/s",
+      "toolStats": {
+        "Calculate": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "38.50ms",
+          "minLatency": "8.00ms",
+          "maxLatency": "55.00ms",
+          "p90": "55.00ms"
+        },
+        "What": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "40.80ms",
+          "minLatency": "28.00ms",
+          "maxLatency": "55.00ms",
+          "p90": "55.00ms"
+        },
+        "Search": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "41.40ms",
+          "minLatency": "28.00ms",
+          "maxLatency": "56.00ms",
+          "p90": "56.00ms"
+        },
+        "Translate": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "42.10ms",
+          "minLatency": "28.00ms",
+          "maxLatency": "57.00ms",
+          "p90": "57.00ms"
+        },
+        "Summarize": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "42.20ms",
+          "minLatency": "28.00ms",
+          "maxLatency": "57.00ms",
+          "p90": "57.00ms"
+        }
+      },
+      "baselineComparison": {
+        "avgLatency": {
+          "value": "41",
+          "baseline": 200,
+          "passed": true
+        },
+        "throughput": {
+          "value": 877.1929824561403,
+          "baseline": 50,
+          "passed": true
+        }
+      }
+    },
+    "level_100": {
+      "total": 50,
+      "successes": 0,
+      "errors": 50,
+      "timeouts": 0,
+      "errorRate": "100.00%",
+      "successRate": "0.00%",
+      "retryCount": 0,
+      "circuitBreakerTrips": 0,
+      "latencies": {
+        "min": "7.00ms",
+        "max": "53.00ms",
+        "avg": "25.84ms",
+        "p50": "25.00ms",
+        "p90": "50.00ms",
+        "p99": "53.00ms"
+      },
+      "throughput": "943.40 req/s",
+      "toolStats": {
+        "Calculate": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "24.00ms",
+          "minLatency": "7.00ms",
+          "maxLatency": "50.00ms",
+          "p90": "50.00ms"
+        },
+        "What": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "24.90ms",
+          "minLatency": "7.00ms",
+          "maxLatency": "51.00ms",
+          "p90": "51.00ms"
+        },
+        "Search": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "25.80ms",
+          "minLatency": "7.00ms",
+          "maxLatency": "51.00ms",
+          "p90": "51.00ms"
+        },
+        "Translate": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "26.80ms",
+          "minLatency": "7.00ms",
+          "maxLatency": "52.00ms",
+          "p90": "52.00ms"
+        },
+        "Summarize": {
+          "successes": 0,
+          "errors": 10,
+          "total": 10,
+          "avgLatency": "27.70ms",
+          "minLatency": "7.00ms",
+          "maxLatency": "53.00ms",
+          "p90": "53.00ms"
+        }
+      },
+      "baselineComparison": {
+        "avgLatency": {
+          "value": "26",
+          "baseline": 200,
+          "passed": true
+        },
+        "throughput": {
+          "value": 943.3962264150944,
+          "baseline": 50,
+          "passed": true
+        }
+      }
+    }
+  },
+  "executionLatency": {
+    "total": 50,
+    "successes": 1,
+    "errors": 49,
+    "timeouts": 0,
+    "errorRate": "98.00%",
+    "successRate": "2.00%",
+    "retryCount": 0,
+    "circuitBreakerTrips": 0,
+    "latencies": {
+      "min": "2.00ms",
+      "max": "1720.00ms",
+      "avg": "44.68ms",
+      "p50": "3.00ms",
+      "p90": "70.00ms",
+      "p99": "1720.00ms"
+    },
+    "throughput": "22.36 req/s",
+    "toolStats": {
+      "calculator": {
+        "successes": 1,
+        "errors": 9,
+        "total": 10,
+        "avgLatency": "181.60ms",
+        "minLatency": "2.00ms",
+        "maxLatency": "1720.00ms",
+        "p90": "1720.00ms"
+      },
+      "search": {
+        "successes": 0,
+        "errors": 10,
+        "total": 10,
+        "avgLatency": "11.90ms",
+        "minLatency": "2.00ms",
+        "maxLatency": "91.00ms",
+        "p90": "91.00ms"
+      },
+      "weather": {
+        "successes": 0,
+        "errors": 10,
+        "total": 10,
+        "avgLatency": "9.70ms",
+        "minLatency": "2.00ms",
+        "maxLatency": "70.00ms",
+        "p90": "70.00ms"
+      },
+      "translate": {
+        "successes": 0,
+        "errors": 10,
+        "total": 10,
+        "avgLatency": "10.70ms",
+        "minLatency": "2.00ms",
+        "maxLatency": "78.00ms",
+        "p90": "78.00ms"
+      },
+      "summary": {
+        "successes": 0,
+        "errors": 10,
+        "total": 10,
+        "avgLatency": "9.50ms",
+        "minLatency": "2.00ms",
+        "maxLatency": "68.00ms",
+        "p90": "68.00ms"
+      }
+    },
+    "baselineComparison": {
+      "avgLatency": {
+        "value": "45",
+        "baseline": 200,
+        "passed": true
+      },
+      "throughput": {
+        "value": 22.361359570661893,
+        "baseline": 50,
+        "passed": false
+      }
+    }
+  },
+  "retryMechanism": {
+    "totalRetries": 7,
+    "successfulRetries": 9,
+    "failedRetries": 1,
+    "maxRetries": 3,
+    "successRate": "90.00%",
+    "testPassed": true
+  },
+  "circuitBreaker": {
+    "triggered": false,
+    "triggerCount": 0,
+    "recoveryTime": 0,
+    "protectionActive": false,
+    "testPassed": false
+  },
+  "toolTimeout": {
+    "timeouts": 0,
+    "completed": 0,
+    "totalTests": 10,
+    "testPassed": true
+  }
+}

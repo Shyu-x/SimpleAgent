@@ -35,6 +35,7 @@ export interface PerformanceMetrics {
   minResponseTime: number;
   maxResponseTime: number;
   p95ResponseTime: number;
+  p99ResponseTime: number;
   requestsPerMinute: number;
   tokensPerMinute: number;
   successRate: number;
@@ -418,36 +419,11 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
   className = '',
   refreshInterval = 5000,
 }: PerformanceMonitorProps) {
-  // 基础指标
-  const [metrics, setMetrics] = useState<PerformanceMetrics>({
-    avgResponseTime: 1250,
-    minResponseTime: 450,
-    maxResponseTime: 3500,
-    p95ResponseTime: 2800,
-    requestsPerMinute: 12.5,
-    tokensPerMinute: 15000,
-    successRate: 96.5,
-    errorRate: 3.5,
-    cpuUsage: 45,
-    memoryUsage: 62,
-    avgIterations: 4.2,
-    avgToolCalls: 6.8,
-    totalCost: 12.45,
-    costPerRequest: 0.025,
-  });
+  // 基础指标 - 初始化为null，等待真实API数据
+  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
 
-  // Agent 执行指标
-  const [agentMetrics, setAgentMetrics] = useState<AgentExecutionMetrics>({
-    currentIteration: 3,
-    maxIterations: 10,
-    toolCallCount: 5,
-    totalTokens: 3200,
-    inputTokens: 1200,
-    outputTokens: 2000,
-    estimatedMemoryMB: 128,
-    executionDuration: 12000,
-    thinkingSteps: 2,
-  });
+  // Agent 执行指标 - 初始化为null
+  const [agentMetrics, setAgentMetrics] = useState<AgentExecutionMetrics | null>(null);
 
   // 时间序列数据
   const [responseTimeData, setResponseTimeData] = useState<TimeSeriesPoint[]>([]);
@@ -689,7 +665,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     setSuggestions(newSuggestions);
   }, []);
 
-  // 刷新数据
+  // 刷新数据 - 从 MetricsCollector API 获取真实数据
   const refreshData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -697,33 +673,68 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
       if (!response.ok) throw new Error('Failed to fetch metrics');
       const data = await response.json();
 
+      // 从API获取的真实默认值
+      const defaultMetrics: PerformanceMetrics = {
+        avgResponseTime: 0,
+        minResponseTime: 0,
+        maxResponseTime: 0,
+        p95ResponseTime: 0,
+        p99ResponseTime: 0,
+        requestsPerMinute: 0,
+        tokensPerMinute: 0,
+        successRate: 100,
+        errorRate: 0,
+        cpuUsage: data.system?.cpuUsage ?? 0,
+        memoryUsage: data.system?.memoryUsage ?? 0,
+        avgIterations: 0,
+        avgToolCalls: 0,
+        totalCost: 0,
+        costPerRequest: 0,
+      };
+
+      const defaultAgentMetrics: AgentExecutionMetrics = {
+        currentIteration: 0,
+        maxIterations: 10,
+        toolCallCount: 0,
+        totalTokens: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        estimatedMemoryMB: 0,
+        executionDuration: 0,
+        thinkingSteps: 0,
+      };
+
       // 更新性能指标
-      setMetrics(prev => {
-        const newMemory = data.system?.memoryUsage ?? prev.memoryUsage;
-        return {
-          ...prev,
-          avgResponseTime: data.performance?.avgResponseTime ?? prev.avgResponseTime,
-          minResponseTime: data.performance?.minResponseTime ?? prev.minResponseTime,
-          maxResponseTime: data.performance?.maxResponseTime ?? prev.maxResponseTime,
-          p95ResponseTime: data.performance?.p95ResponseTime ?? prev.p95ResponseTime,
-          requestsPerMinute: data.throughput?.requestsPerMinute ?? prev.requestsPerMinute,
-          tokensPerMinute: data.tokens?.tokensPerMinute ?? prev.tokensPerMinute,
-          successRate: data.success?.successRate ?? prev.successRate,
-          errorRate: data.success?.errorRate ?? prev.errorRate,
-          cpuUsage: data.system?.cpuUsage ?? prev.cpuUsage,
-          memoryUsage: newMemory,
-          avgIterations: data.iterations?.avgIterations ?? prev.avgIterations,
-          avgToolCalls: data.iterations?.avgToolCalls ?? prev.avgToolCalls,
-          totalCost: data.cost?.totalCost ?? prev.totalCost,
-          costPerRequest: data.cost?.costPerRequest ?? prev.costPerRequest,
-        };
+      setMetrics({
+        ...defaultMetrics,
+        avgResponseTime: data.performance?.avgResponseTime ?? 0,
+        minResponseTime: data.performance?.minResponseTime ?? 0,
+        maxResponseTime: data.performance?.maxResponseTime ?? 0,
+        p95ResponseTime: data.performance?.p95ResponseTime ?? 0,
+        p99ResponseTime: data.performance?.p99ResponseTime ?? 0,
+        requestsPerMinute: data.throughput?.requestsPerMinute ?? 0,
+        tokensPerMinute: data.tokens?.tokensPerMinute ?? 0,
+        successRate: data.success?.successRate ?? (data.successRate ?? 100),
+        errorRate: data.success?.errorRate ?? (data.errorRate ?? 0),
+        cpuUsage: data.system?.cpuUsage ?? 0,
+        memoryUsage: data.system?.memoryUsage ?? 0,
+        avgIterations: data.iterations?.avgIterations ?? 0,
+        avgToolCalls: data.iterations?.avgToolCalls ?? 0,
+        totalCost: data.cost?.totalCost ?? 0,
+        costPerRequest: data.cost?.costPerRequest ?? 0,
       });
 
       // 更新时间序列
+      const currentAvgResponseTime = data.performance?.avgResponseTime ?? 0;
+      const currentRequestsPerMinute = data.throughput?.requestsPerMinute ?? 0;
+      const currentTokensPerMinute = data.tokens?.totalTokens ?? 0;
+      const currentAvgIterations = data.iterations?.avgIterations ?? 0;
+      const currentAvgToolCalls = data.iterations?.avgToolCalls ?? 0;
+
       setResponseTimeData(prev => {
         const newPoint: TimeSeriesPoint = {
           timestamp: Date.now(),
-          value: data.performance?.avgResponseTime ?? metrics.avgResponseTime,
+          value: currentAvgResponseTime,
         };
         return [...prev.slice(-59), newPoint];
       });
@@ -731,7 +742,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
       setThroughputData(prev => {
         const newPoint: TimeSeriesPoint = {
           timestamp: Date.now(),
-          value: data.throughput?.requestsPerMinute ?? metrics.requestsPerMinute,
+          value: currentRequestsPerMinute,
         };
         return [...prev.slice(-59), newPoint];
       });
@@ -739,7 +750,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
       setTokenData(prev => {
         const newPoint: TimeSeriesPoint = {
           timestamp: Date.now(),
-          value: data.tokens?.totalTokens ?? agentMetrics.totalTokens,
+          value: currentTokensPerMinute,
         };
         return [...prev.slice(-59), newPoint];
       });
@@ -754,24 +765,22 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
         lastUpdated: Date.now(),
       }));
 
-      // 使用 API 返回的真实数据更新 Agent 执行指标
-      setAgentMetrics(prev => ({
-        ...prev,
-        currentIteration: data.iterations?.avgIterations ?? prev.currentIteration,
-        toolCallCount: data.iterations?.avgToolCalls ?? prev.toolCallCount,
-        totalTokens: data.tokens?.totalTokens ?? prev.totalTokens,
-        estimatedMemoryMB: data.system?.memoryUsage ?? prev.estimatedMemoryMB,
-        executionDuration: data.performance?.avgResponseTime ?? prev.executionDuration,
-      }));
+      // 使用真实 API 数据更新 Agent 执行指标
+      setAgentMetrics({
+        ...defaultAgentMetrics,
+        currentIteration: Math.round(currentAvgIterations),
+        toolCallCount: Math.round(currentAvgToolCalls),
+        totalTokens: data.tokens?.totalTokens ?? 0,
+        estimatedMemoryMB: data.system?.memoryUsage ?? 0,
+        executionDuration: data.performance?.avgResponseTime ?? 0,
+      });
 
       setToolCallHistory(prev => {
-        const newCount = data.iterations?.avgToolCalls ?? agentMetrics.toolCallCount;
-        return [...prev.slice(-19), newCount];
+        return [...prev.slice(-19), Math.round(currentAvgToolCalls)];
       });
 
       setIterationHistory(prev => {
-        const newCount = data.iterations?.avgIterations ?? agentMetrics.currentIteration;
-        return [...prev.slice(-19), newCount];
+        return [...prev.slice(-19), Math.round(currentAvgIterations)];
       });
 
       // 使用真实 API 数据更新执行历史
@@ -779,67 +788,32 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
         const newRecord: ExecutionRecord = {
           id: `exec-${Date.now()}`,
           timestamp: Date.now(),
-          duration: data.performance?.avgResponseTime ?? metrics.avgResponseTime,
-          iterations: data.iterations?.avgIterations ?? metrics.avgIterations,
-          toolCalls: data.iterations?.avgToolCalls ?? metrics.avgToolCalls,
+          duration: currentAvgResponseTime,
+          iterations: Math.round(currentAvgIterations),
+          toolCalls: Math.round(currentAvgToolCalls),
           inputTokens: Math.floor((data.tokens?.totalTokens ?? 0) * 0.3),
           outputTokens: Math.floor((data.tokens?.totalTokens ?? 0) * 0.7),
           memoryMB: data.system?.memoryUsage ?? 50,
-          success: (data.success?.successRate ?? 100) > 90,
+          success: (data.success?.successRate ?? data.successRate ?? 100) > 90,
         };
         return [...prev.slice(-49), newRecord];
       });
     } catch (error) {
       console.error('Failed to fetch metrics:', error);
-      // API 失败时保持当前值不做变化，避免误导性模拟数据
-      // 用户会看到数据停止更新而不是看到虚假的波动
     } finally {
       setIsLoading(false);
     }
-  }, [metrics, agentMetrics]);
+  }, []);
 
-  // 初始化数据
+  // 初始化数据 - 等待API真实数据后再填充
   useEffect(() => {
-    const now = Date.now();
-    // 使用初始状态值创建历史数据（等待 API 真实数据）
-    setResponseTimeData(
-      Array.from({ length: 30 }, (_, i) => ({
-        timestamp: now - (30 - i - 1) * 60000,
-        value: metrics.avgResponseTime,
-      }))
-    );
-    setThroughputData(
-      Array.from({ length: 30 }, (_, i) => ({
-        timestamp: now - (30 - i - 1) * 60000,
-        value: metrics.requestsPerMinute,
-      }))
-    );
-    setTokenData(
-      Array.from({ length: 20 }, (_, i) => ({
-        timestamp: now - (20 - i - 1) * 30000,
-        value: metrics.tokensPerMinute,
-      }))
-    );
-    setIterationHistory(
-      Array.from({ length: 10 }, () => Math.floor(metrics.avgIterations))
-    );
-    setToolCallHistory(
-      Array.from({ length: 10 }, () => Math.floor(metrics.avgToolCalls))
-    );
-    // 初始化历史记录
-    setExecutionHistory(
-      Array.from({ length: 10 }, (_, i) => ({
-        id: `init-${i}`,
-        timestamp: now - (10 - i) * 60000,
-        duration: metrics.avgResponseTime * 3,
-        iterations: Math.floor(metrics.avgIterations),
-        toolCalls: Math.floor(metrics.avgToolCalls),
-        inputTokens: Math.floor(metrics.tokensPerMinute * 0.3),
-        outputTokens: Math.floor(metrics.tokensPerMinute * 0.7),
-        memoryMB: metrics.memoryUsage,
-        success: metrics.successRate > 90,
-      }))
-    );
+    // 初始化空的时间序列（等待API）
+    setResponseTimeData([]);
+    setThroughputData([]);
+    setTokenData([]);
+    setIterationHistory([]);
+    setToolCallHistory([]);
+    setExecutionHistory([]);
   }, []);
 
   // 定时刷新
@@ -848,14 +822,18 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     return () => clearInterval(interval);
   }, [refreshData, refreshInterval]);
 
-  // 阈值检查
+  // 阈值检查 - 仅当有真实数据时执行
   useEffect(() => {
-    checkThresholds(agentMetrics, metrics.memoryUsage);
-  }, [agentMetrics, metrics.memoryUsage, checkThresholds]);
+    if (agentMetrics && metrics) {
+      checkThresholds(agentMetrics, metrics.memoryUsage);
+    }
+  }, [agentMetrics, metrics, checkThresholds]);
 
-  // 建议分析
+  // 建议分析 - 仅当有真实数据时执行
   useEffect(() => {
-    analyzeSuggestions(executionHistory, agentMetrics);
+    if (executionHistory.length > 0 && agentMetrics) {
+      analyzeSuggestions(executionHistory, agentMetrics);
+    }
   }, [executionHistory, agentMetrics, analyzeSuggestions]);
 
   // 状态颜色
@@ -993,269 +971,227 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
         </div>
       </div>
 
-      {/* ========== Agent 执行指标区 ========== */}
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-1.5 mb-3">
-          <Brain size={14} className="text-primary" />
-          <span className="text-sm font-medium">Agent 执行指标</span>
+      {/* 加载状态 */}
+      {!metrics || !agentMetrics ? (
+        <div className="flex items-center justify-center p-8">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCw size={24} className="animate-spin text-primary" />
+            <span className="text-xs text-muted-foreground">正在加载指标数据...</span>
+          </div>
         </div>
+      ) : (
+        <>
+          {/* ========== Agent 执行指标区 ========== */}
+          <div className="p-4 border-b">
+            <div className="flex items-center gap-1.5 mb-3">
+              <Brain size={14} className="text-primary" />
+              <span className="text-sm font-medium">Agent 执行指标</span>
+            </div>
 
-        {/* 迭代进度条 */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Timer size={12} />
-              <span>执行时间</span>
-            </div>
-            <span className="text-xs font-medium">
-              {(agentMetrics.executionDuration / 1000).toFixed(1)}s
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ backgroundColor: iterationColor }}
-                initial={{ width: 0 }}
-                animate={{
-                  width: `${Math.min(100, iterationProgress)}%`,
-                }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-            <span className="text-xs text-muted-foreground w-20 text-right">
-              迭代 {agentMetrics.currentIteration}/{agentMetrics.maxIterations}
-            </span>
-          </div>
-        </div>
-
-        {/* 三列指标 */}
-        <div className="grid grid-cols-3 gap-3 mb-3">
-          {/* 迭代次数 */}
-          <div className="flex flex-col p-3 rounded-lg bg-muted/30">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Brain size={12} className="text-primary" />
-              <span className="text-xs text-muted-foreground">迭代次数</span>
-            </div>
-            <div className="text-xl font-bold">{agentMetrics.currentIteration}</div>
-            <div className="text-[10px] text-muted-foreground">最大 {agentMetrics.maxIterations}</div>
-          </div>
-          {/* 工具调用 */}
-          <div className="flex flex-col p-3 rounded-lg bg-muted/30">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Cpu size={12} className="text-primary" />
-              <span className="text-xs text-muted-foreground">工具调用</span>
-            </div>
-            <div className="text-xl font-bold">{agentMetrics.toolCallCount}</div>
-            <div className="text-[10px] text-muted-foreground">思考步骤 {agentMetrics.thinkingSteps}</div>
-          </div>
-          {/* Token 消耗 */}
-          <div className="flex flex-col p-3 rounded-lg bg-muted/30">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Coins size={12} className="text-primary" />
-              <span className="text-xs text-muted-foreground">Token</span>
-            </div>
-            <div className="text-xl font-bold">{agentMetrics.totalTokens.toLocaleString()}</div>
-            <div className="text-[10px] text-muted-foreground">
-              IN {agentMetrics.inputTokens.toLocaleString()} / OUT {agentMetrics.outputTokens.toLocaleString()}
-            </div>
-          </div>
-        </div>
-
-        {/* 内存估算 */}
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-          <MemoryStick size={14} className="text-muted-foreground shrink-0" />
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground">内存估算</span>
-              <span className="text-xs font-medium" style={{ color: memoryColor }}>
-                {agentMetrics.estimatedMemoryMB} MB
-              </span>
-            </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ backgroundColor: memoryColor }}
-                animate={{ width: `${Math.min(100, metrics.memoryUsage)}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-xs text-muted-foreground">系统内存</span>
-            <span className="text-xs font-medium" style={{ color: memoryColor }}>
-              {metrics.memoryUsage.toFixed(0)}%
-            </span>
-          </div>
-        </div>
-
-        {/* 性能趋势图表（纯CSS/SVG） */}
-        <div className="grid grid-cols-2 gap-3 mt-3">
-          {/* 迭代趋势柱状图 */}
-          <div className="p-3 rounded-lg bg-muted/30">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-medium">迭代趋势</span>
-              <span className="text-[10px] text-muted-foreground">最近10次</span>
-            </div>
-            <BarChart
-              data={iterationHistory}
-              color={iterationColor}
-              height={45}
-              maxValue={agentMetrics.maxIterations}
-            />
-          </div>
-          {/* 工具调用趋势 */}
-          <div className="p-3 rounded-lg bg-muted/30">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-medium">工具调用趋势</span>
-              <span className="text-[10px] text-muted-foreground">最近10次</span>
-            </div>
-            <BarChart
-              data={toolCallHistory}
-              color={toolCallTrend}
-              height={45}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 核心指标 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-4 border-b">
-        <MetricCard
-          title="平均响应时间"
-          value={metrics.avgResponseTime.toFixed(0)}
-          unit="ms"
-          icon={<Clock size={12} />}
-          status={metrics.avgResponseTime < 2000 ? 'good' : metrics.avgResponseTime < 3000 ? 'warning' : 'error'}
-          trend={-2.5}
-        />
-        <MetricCard
-          title="请求/分钟"
-          value={metrics.requestsPerMinute.toFixed(1)}
-          icon={<Zap size={12} />}
-          status="good"
-          trend={5.2}
-        />
-        <MetricCard
-          title="成功率"
-          value={metrics.successRate.toFixed(1)}
-          unit="%"
-          icon={<CheckCircle2 size={12} />}
-          status={metrics.successRate > 95 ? 'good' : metrics.successRate > 90 ? 'warning' : 'error'}
-          trend={1.2}
-        />
-        <MetricCard
-          title="错误率"
-          value={metrics.errorRate.toFixed(1)}
-          unit="%"
-          icon={<XCircle size={12} />}
-          status={metrics.errorRate < 5 ? 'good' : metrics.errorRate < 10 ? 'warning' : 'error'}
-          trend={-0.5}
-        />
-      </div>
-
-      {/* 图表区域 */}
-      <div className="grid grid-cols-2 gap-4 p-4 border-b">
-        {/* 响应时间图表 */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium">响应时间趋势</span>
-            <span className="text-[10px] text-muted-foreground">最近 30 分钟</span>
-          </div>
-          <div className="p-3 rounded-lg bg-muted/30">
-            <MiniLineChart data={responseTimeData} color="var(--primary)" height={55} showArea />
-            <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
-              <span>P95: {metrics.p95ResponseTime}ms</span>
-              <span>Max: {metrics.maxResponseTime}ms</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Token 消耗面积图 */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium">Token 消耗趋势</span>
-            <span className="text-[10px] text-muted-foreground">最近 30 分钟</span>
-          </div>
-          <div className="p-3 rounded-lg bg-muted/30">
-            <MiniLineChart data={tokenData} color="hsl(var(--warning-500))" height={55} showArea />
-            <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
-              <span>当前: {agentMetrics.totalTokens.toLocaleString()}</span>
-              <span>峰值: {Math.max(...tokenData.map(d => d.value), 0).toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 资源使用 */}
-      <div className="grid grid-cols-4 gap-2 p-4 border-b">
-        <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-          <ProgressRing
-            value={metrics.cpuUsage}
-            color={
-              metrics.cpuUsage > 80 ? 'hsl(var(--destructive))' :
-              metrics.cpuUsage > 60 ? 'hsl(var(--warning-500))' :
-              'hsl(var(--success-500))'
-            }
-            label="CPU"
-            size={56}
-            strokeWidth={6}
-          />
-        </div>
-        <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-          <ProgressRing
-            value={metrics.memoryUsage}
-            color={memoryColor}
-            label="内存"
-            size={56}
-            strokeWidth={6}
-          />
-        </div>
-        <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-          <div className="text-lg font-bold">{metrics.avgIterations.toFixed(1)}</div>
-          <div className="text-[10px] text-muted-foreground">平均迭代</div>
-          <div className="text-[10px] text-muted-foreground">工具 {metrics.avgToolCalls.toFixed(1)}</div>
-        </div>
-        <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-          <div className="text-lg font-bold">${metrics.totalCost.toFixed(2)}</div>
-          <div className="text-[10px] text-muted-foreground">总成本</div>
-          <div className="text-[10px] text-muted-foreground">${metrics.costPerRequest.toFixed(4)}/req</div>
-        </div>
-      </div>
-
-      {/* ========== 优化建议区 ========== */}
-      {suggestions.length > 0 && (
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5">
-              <Gauge size={14} className="text-primary" />
-              <span className="text-sm font-medium">性能优化建议</span>
-              <span className="text-xs text-muted-foreground">基于 {executionHistory.length} 次执行分析</span>
-            </div>
-            <button
-              onClick={() => setShowSuggestions(v => !v)}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              {showSuggestions ? '折叠' : '展开'}
-            </button>
-          </div>
-          {showSuggestions && (
-            <div className="space-y-2">
-              <AnimatePresence>
-                {suggestions.map(s => (
+            {/* 迭代进度条 */}
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Timer size={12} />
+                  <span>执行时间</span>
+                </div>
+                <span className="text-xs font-medium">
+                  {(agentMetrics.executionDuration / 1000).toFixed(1)}s
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                   <motion.div
-                    key={s.id}
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <SuggestionCard suggestion={s} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: iterationColor }}
+                    initial={{ width: 0 }}
+                    animate={{
+                      width: `${Math.min(100, iterationProgress)}%`,
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+                <span className="text-xs text-muted-foreground w-20 text-right">
+                  迭代 {agentMetrics.currentIteration}/{agentMetrics.maxIterations}
+                </span>
+              </div>
+            </div>
+
+            {/* 三列指标 */}
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              {/* 迭代次数 */}
+              <div className="flex flex-col p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Brain size={12} className="text-primary" />
+                  <span className="text-xs text-muted-foreground">迭代次数</span>
+                </div>
+                <div className="text-xl font-bold">{agentMetrics.currentIteration}</div>
+                <div className="text-[10px] text-muted-foreground">最大 {agentMetrics.maxIterations}</div>
+              </div>
+              {/* 工具调用 */}
+              <div className="flex flex-col p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Cpu size={12} className="text-primary" />
+                  <span className="text-xs text-muted-foreground">工具调用</span>
+                </div>
+                <div className="text-xl font-bold">{agentMetrics.toolCallCount}</div>
+                <div className="text-[10px] text-muted-foreground">思考步骤 {agentMetrics.thinkingSteps}</div>
+              </div>
+              {/* Token 消耗 */}
+              <div className="flex flex-col p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Coins size={12} className="text-primary" />
+                  <span className="text-xs text-muted-foreground">Token</span>
+                </div>
+                <div className="text-xl font-bold">{agentMetrics.totalTokens.toLocaleString()}</div>
+                <div className="text-[10px] text-muted-foreground">
+                  IN {agentMetrics.inputTokens.toLocaleString()} / OUT {agentMetrics.outputTokens.toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            {/* 内存估算 */}
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+              <MemoryStick size={14} className="text-muted-foreground shrink-0" />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-muted-foreground">内存估算</span>
+                  <span className="text-xs font-medium" style={{ color: memoryColor }}>
+                    {agentMetrics.estimatedMemoryMB} MB
+                  </span>
+                </div>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: memoryColor }}
+                    animate={{ width: `${Math.min(100, metrics.memoryUsage)}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className="text-xs text-muted-foreground">系统内存</span>
+                <span className="text-xs font-medium" style={{ color: memoryColor }}>
+                  {metrics.memoryUsage.toFixed(0)}%
+                </span>
+              </div>
+            </div>
+
+            {/* 性能趋势图表（纯CSS/SVG） */}
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              {/* 迭代趋势柱状图 */}
+              <div className="p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium">迭代趋势</span>
+                  <span className="text-[10px] text-muted-foreground">最近10次</span>
+                </div>
+                <BarChart
+                  data={iterationHistory}
+                  color={iterationColor}
+                  height={45}
+                  maxValue={agentMetrics.maxIterations}
+                />
+              </div>
+              {/* 工具调用趋势 */}
+              <div className="p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium">工具调用趋势</span>
+                  <span className="text-[10px] text-muted-foreground">最近10次</span>
+                </div>
+                <BarChart
+                  data={toolCallHistory}
+                  color={toolCallTrend}
+                  height={45}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 核心指标 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 p-4 border-b">
+            <MetricCard title="平均响应时间" value={metrics.avgResponseTime.toFixed(0)} unit="ms" icon={<Clock size={12} />} status={metrics.avgResponseTime < 2000 ? 'good' : metrics.avgResponseTime < 3000 ? 'warning' : 'error'} trend={-2.5} />
+            <MetricCard title="请求/分钟" value={metrics.requestsPerMinute.toFixed(1)} icon={<Zap size={12} />} status="good" trend={5.2} />
+            <MetricCard title="成功率" value={metrics.successRate.toFixed(1)} unit="%" icon={<CheckCircle2 size={12} />} status={metrics.successRate > 95 ? 'good' : metrics.successRate > 90 ? 'warning' : 'error'} trend={1.2} />
+            <MetricCard title="错误率" value={metrics.errorRate.toFixed(1)} unit="%" icon={<XCircle size={12} />} status={metrics.errorRate < 5 ? 'good' : metrics.errorRate < 10 ? 'warning' : 'error'} trend={-0.5} />
+          </div>
+
+          {/* 图表区域 */}
+          <div className="grid grid-cols-2 gap-4 p-4 border-b">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">响应时间趋势</span>
+                <span className="text-[10px] text-muted-foreground">最近 30 分钟</span>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30">
+                <MiniLineChart data={responseTimeData} color="var(--primary)" height={55} showArea />
+                <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
+                  <span>P95: {metrics.p95ResponseTime}ms</span>
+                  <span>Max: {metrics.maxResponseTime}ms</span>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">Token 消耗趋势</span>
+                <span className="text-[10px] text-muted-foreground">最近 30 分钟</span>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/30">
+                <MiniLineChart data={tokenData} color="hsl(var(--warning-500))" height={55} showArea />
+                <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
+                  <span>当前: {agentMetrics.totalTokens.toLocaleString()}</span>
+                  <span>峰值: {Math.max(...tokenData.map(d => d.value), 0).toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 资源使用 */}
+          <div className="grid grid-cols-4 gap-2 p-4 border-b">
+            <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
+              <ProgressRing value={metrics.cpuUsage} color={metrics.cpuUsage > 80 ? 'hsl(var(--destructive))' : metrics.cpuUsage > 60 ? 'hsl(var(--warning-500))' : 'hsl(var(--success-500))'} label="CPU" size={56} strokeWidth={6} />
+            </div>
+            <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
+              <ProgressRing value={metrics.memoryUsage} color={memoryColor} label="内存" size={56} strokeWidth={6} />
+            </div>
+            <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
+              <div className="text-lg font-bold">{metrics.avgIterations.toFixed(1)}</div>
+              <div className="text-[10px] text-muted-foreground">平均迭代</div>
+              <div className="text-[10px] text-muted-foreground">工具 {metrics.avgToolCalls.toFixed(1)}</div>
+            </div>
+            <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
+              <div className="text-lg font-bold">${metrics.totalCost.toFixed(2)}</div>
+              <div className="text-[10px] text-muted-foreground">总成本</div>
+              <div className="text-[10px] text-muted-foreground">${metrics.costPerRequest.toFixed(4)}/req</div>
+            </div>
+          </div>
+
+          {/* ========== 优化建议区 ========== */}
+          {suggestions.length > 0 && (
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1.5">
+                  <Gauge size={14} className="text-primary" />
+                  <span className="text-sm font-medium">性能优化建议</span>
+                  <span className="text-xs text-muted-foreground">基于 {executionHistory.length} 次执行分析</span>
+                </div>
+                <button onClick={() => setShowSuggestions(v => !v)} className="text-xs text-muted-foreground hover:text-foreground">
+                  {showSuggestions ? '折叠' : '展开'}
+                </button>
+              </div>
+              {showSuggestions && (
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {suggestions.map(s => (
+                      <motion.div key={s.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                        <SuggestionCard suggestion={s} />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
     </motion.div>
   );

@@ -2,6 +2,7 @@
 
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isClient } from '@/lib/ssrStorage';
 import {
   Workflow,
   Plus,
@@ -217,6 +218,7 @@ const CATEGORY_CONFIG: Record<TemplateCategory, {
 const STORAGE_KEY = 'ai_chat_workflow_templates';
 
 function loadCustomTemplates(): WorkflowTemplate[] {
+  if (!isClient()) return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -226,6 +228,7 @@ function loadCustomTemplates(): WorkflowTemplate[] {
 }
 
 function saveCustomTemplates(templates: WorkflowTemplate[]): void {
+  if (!isClient()) return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
   } catch (e) {
@@ -864,7 +867,9 @@ export const WorkflowEditor = memo(function WorkflowEditor({
 
   // 从 localStorage 加载自定义模板
   useEffect(() => {
-    setCustomTemplates(loadCustomTemplates());
+    if (isClient()) {
+      setCustomTemplates(loadCustomTemplates());
+    }
   }, []);
 
   const dragStateRef = useRef({

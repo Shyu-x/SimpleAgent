@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf .next)",
+      "Bash(rmdir /s /q .next)",
+      "Bash(npm run *)"
+    ]
+  }
+}

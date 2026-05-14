@@ -4,13 +4,14 @@
  * 职责：
  * - 将文本chunk转换为向量嵌入
  * - 支持批量处理优化性能
- * - 支持多种embedding模型
- * - 处理embedding服务不可用的情况
+ * - 支持配置外部embedding服务
+ * - 默认使用简单向量化（simpleVectorize）
  *
  * 设计考量：
  * - 批量处理减少API调用次数
  * - 并行请求提升吞吐量
  * - 失败重试保证可靠性
+ * - 默认使用内存向量，支持配置外部服务
  */
 
 const { IngestionNode } = require('../IngestionNode');
@@ -22,7 +23,9 @@ class EmbeddingNode extends IngestionNode {
     this.options = {
       batchSize: options.batchSize || 32, // 每批处理数量
       maxRetries: options.maxRetries || 3,
-      model: options.model || 'embedding-multilingual',
+      // 注意：默认使用简单的向量化实现
+      // 如需更精确的语义搜索，可配置外部embedding服务
+      model: options.model || 'simple',
       apiUrl: options.apiUrl, // 可配置embedding服务
       ...options,
     };

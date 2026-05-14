@@ -197,10 +197,11 @@ class SearchRouter {
 
       // 备用：直接调用 MiniMax API
       if (process.env.MINIMAX_API_KEY) {
-        const response = await axios.post(
-          'https://api.minimax.chat/v1/text/chatcompletion_pro',
-          {
-            model: 'abab6.5s-chat',
+        const baseUrl = process.env.MINIMAX_API_HOST || 'https://api.minimaxi.com';
+      const response = await axios.post(
+        `${baseUrl}/v1/text/chatcompletion_pro`,
+        {
+          model: 'abab6.5s-chat',
             messages: [
               {
                 role: 'system',

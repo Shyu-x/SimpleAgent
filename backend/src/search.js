@@ -363,8 +363,9 @@ async function searchMiniMaxMCP(query, limit = 10) {
 async function searchMiniMaxAPI(query, limit = 10) {
   try {
     // 使用 MiniMax 的对话 API 进行搜索
+    const baseUrl = process.env.MINIMAX_API_HOST || 'https://api.minimaxi.com';
     const response = await axios.post(
-      'https://api.minimax.chat/v1/text/chatcompletion_pro',
+      `${baseUrl}/v1/text/chatcompletion_pro`,
       {
         model: 'abab6.5s-chat',
         messages: [

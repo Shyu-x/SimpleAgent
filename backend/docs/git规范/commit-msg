@@ -1,0 +1,101 @@
+#!/bin/sh
+#
+# Commit Msg Hook - 验证提交信息格式
+#
+# 使用 commitlint 验证提交信息是否符合规范
+# 格式要求：type(module): description
+#
+# 示例：
+# feat(auth): add JWT refresh token support
+# fix(payment): resolve refund loop issue
+# docs: update API documentation
+#
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo "📝 正在验证提交信息..."
+
+# 检查 commitlint 是否安装
+if ! command -v npx &> /dev/null; then
+    echo -e "${YELLOW}⚠️  npx 未找到，跳过 commitlint 验证${NC}"
+    exit 0
+fi
+
+# 获取提交信息文件路径
+commit_msg_file="$1"
+
+# 检查文件是否存在
+if [ ! -f "$commit_msg_file" ]; then
+    echo -e "${RED}✖ 提交信息文件不存在${NC}"
+    exit 1
+fi
+
+# 读取提交信息
+commit_msg=$(cat "$commit_msg_file")
+
+# 基本格式检查
+# 格式：type(scope): description 或 type: description
+
+# 检查是否为空
+if [ -z "$commit_msg" ]; then
+    echo -e "${RED}✖ 提交信息不能为空${NC}"
+    echo ""
+    echo "请使用以下格式提交："
+    echo "  feat(auth): add new feature"
+    echo "  fix(payment): resolve bug"
+    echo "  docs: update documentation"
+    echo ""
+    exit 1
+fi
+
+# 跳过 merge 提交
+if echo "$commit_msg" | grep -qE "^Merge branch"; then
+    echo -e "${GREEN}✓ 检测到 merge 提交，跳过验证${NC}"
+    exit 0
+fi
+
+# 跳过 revert 提交
+if echo "$commit_msg" | grep -qE "^Revert"; then
+    echo -e "${GREEN}✓ 检测到 revert 提交，跳过验证${NC}"
+    exit 0
+fi
+
+# 运行 commitlint 验证
+echo "$commit_msg" | npx --yes commitlint --edit "$commit_msg_file" 2>/dev/null
+
+# 获取退出码
+commitlint_exit=$?
+
+if [ $commitlint_exit -eq 0 ]; then
+    echo ""
+    echo -e "${GREEN}✓ 提交信息格式验证通过${NC}"
+    exit 0
+else
+    echo ""
+    echo -e "${RED}✖ 提交信息格式不正确${NC}"
+    echo ""
+    echo "正确的格式："
+    echo "  feat(module): description"
+    echo "  fix(auth): resolve login issue"
+    echo "  docs: update README"
+    echo ""
+    echo "type 可选值："
+    echo "  feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, wip"
+    echo ""
+    echo "module 可选值（必须小写）："
+    echo "  auth, user, order, payment, product, inventory, notification"
+    echo "  frontend, ui, api, service, middleware, database, cache"
+    echo "  admin, dashboard, analytics, infra, config, security"
+    echo "  docs, test, ci, deps, core, shared, migration"
+    echo ""
+
+    # 显示具体错误
+    echo "详细错误："
+    npx --yes commitlint --edit "$commit_msg_file" 2>&1 | head -20
+
+    exit 1
+fi

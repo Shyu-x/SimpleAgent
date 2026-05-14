@@ -1,0 +1,77 @@
+{
+  "timestamp": "2026-05-12T20:05:47.807Z",
+  "results": [
+    {
+      "test": "qdrant_native_status",
+      "latency": 53,
+      "success": true
+    },
+    {
+      "test": "create_collection",
+      "latency": 16,
+      "success": false
+    },
+    {
+      "test": "batch_insert_100",
+      "latency": 4,
+      "success": false,
+      "count": 100,
+      "qps": 25000
+    },
+    {
+      "test": "batch_insert_500",
+      "latency": 6,
+      "success": false,
+      "count": 500,
+      "qps": 83333.33333333333
+    },
+    {
+      "test": "batch_insert_1000",
+      "latency": 12,
+      "success": false,
+      "count": 1000,
+      "qps": 83333.33333333333
+    },
+    {
+      "test": "search_10",
+      "latency": 64,
+      "success": 10,
+      "qps": 156.25
+    },
+    {
+      "test": "search_50",
+      "latency": 138,
+      "success": 50,
+      "qps": 362.3188405797101
+    },
+    {
+      "test": "search_100",
+      "latency": 128,
+      "success": 40,
+      "qps": 781.25
+    },
+    {
+      "test": "search_200",
+      "latency": 186,
+      "success": 0,
+      "qps": 1075.268817204301
+    },
+    {
+      "test": "get_collection_info",
+      "latency": 6,
+      "success": false
+    },
+    {
+      "test": "fallback_search",
+      "latency": 2,
+      "success": false
+    },
+    {
+      "test": "concurrent_batch_100x5",
+      "latency": 6,
+      "success": 0,
+      "totalDocs": 500,
+      "qps": 83333.33333333333
+    }
+  ]
+}

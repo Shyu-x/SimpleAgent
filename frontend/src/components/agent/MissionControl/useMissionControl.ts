@@ -34,129 +34,6 @@ async function apiRequest<T>(
   }
 }
 
-// Demo Agents - 5个不同角色的 Agent
-export const demoAgents: Omit<MissionAgent, 'lastHeartbeat'>[] = [
-  {
-    id: 'agent-planner-01',
-    name: '战略规划师',
-    role: 'planner',
-    status: 'idle',
-    avatar: '🧠',
-    capabilities: ['任务分解', '资源规划', '风险评估', '优先级排序'],
-    progress: 0,
-  },
-  {
-    id: 'agent-executor-01',
-    name: '执行专家',
-    role: 'executor',
-    status: 'idle',
-    avatar: '⚡',
-    capabilities: ['代码生成', '任务执行', '批量处理', '自动化'],
-    progress: 0,
-  },
-  {
-    id: 'agent-executor-02',
-    name: '数据分析师',
-    role: 'executor',
-    status: 'idle',
-    avatar: '📊',
-    capabilities: ['数据分析', '可视化', '报表生成', '指标监控'],
-    progress: 0,
-  },
-  {
-    id: 'agent-reviewer-01',
-    name: '质量审核员',
-    role: 'reviewer',
-    status: 'idle',
-    avatar: '🔍',
-    capabilities: ['代码审查', '质量检查', '测试验证', '合规审计'],
-    progress: 0,
-  },
-  {
-    id: 'agent-coordinator-01',
-    name: '任务协调员',
-    role: 'coordinator',
-    status: 'idle',
-    avatar: '🎯',
-    capabilities: ['任务调度', '进度跟踪', '资源协调', '状态同步'],
-    progress: 0,
-  },
-];
-
-// Demo Tasks - 10个不同优先级的任务
-export const demoTasks: Omit<MissionTask, 'id' | 'createdAt' | 'updatedAt'>[] = [
-  {
-    title: '系统架构设计',
-    description: '设计新一代微服务架构方案，包含服务网格、熔断降级、限流策略',
-    priority: 'critical',
-    status: 'pending',
-    estimatedDuration: 3600000,
-  },
-  {
-    title: '用户认证模块重构',
-    description: '将 JWT 认证迁移至 OAuth 2.0，支持第三方登录',
-    priority: 'high',
-    status: 'pending',
-    estimatedDuration: 1800000,
-  },
-  {
-    title: '数据库性能优化',
-    description: '分析慢查询日志，优化索引策略，提升查询效率 50%',
-    priority: 'high',
-    status: 'pending',
-    estimatedDuration: 2400000,
-  },
-  {
-    title: '前端组件库升级',
-    description: '升级 React 18 至 React 19，更新配套组件库',
-    priority: 'medium',
-    status: 'pending',
-    estimatedDuration: 1200000,
-  },
-  {
-    title: 'API 文档自动化',
-    description: '集成 Swagger 生成 API 文档，实现版本管理',
-    priority: 'medium',
-    status: 'pending',
-    estimatedDuration: 900000,
-  },
-  {
-    title: '日志监控系统搭建',
-    description: '部署 ELK Stack，实现日志收集、分析、告警',
-    priority: 'medium',
-    status: 'pending',
-    estimatedDuration: 3000000,
-  },
-  {
-    title: '单元测试覆盖率提升',
-    description: '将单元测试覆盖率从 45% 提升至 80%',
-    priority: 'low',
-    status: 'pending',
-    estimatedDuration: 1500000,
-  },
-  {
-    title: 'CI/CD 流程优化',
-    description: '优化构建流程，缩短 CI/CD 耗时 40%',
-    priority: 'low',
-    status: 'pending',
-    estimatedDuration: 600000,
-  },
-  {
-    title: '技术文档整理',
-    description: '整理项目技术债，编写架构设计文档',
-    priority: 'low',
-    status: 'pending',
-    estimatedDuration: 720000,
-  },
-  {
-    title: '开发环境容器化',
-    description: '使用 Docker Compose 简化本地开发环境搭建',
-    priority: 'low',
-    status: 'pending',
-    estimatedDuration: 450000,
-  },
-];
-
 // 任务优先级配置
 const priorityConfig: Record<TaskPriority, { label: string; color: string; order: number }> = {
   critical: { label: '紧急', color: 'text-red-500', order: 0 },
@@ -339,14 +216,6 @@ export function useEvents() {
   };
 }
 
-/**
- * initializeMission - 初始化演示数据
- */
-export function initializeMission(missionName: string = '演示任务') {
-  initializeAgents(demoAgents);
-  startMission(missionName, demoTasks);
-}
-
 // 导出 store 中的操作供直接使用
 export { useMissionControlStore };
 
@@ -359,16 +228,15 @@ import { agentWorkflowAPI } from '@/lib/agentWorkflowAPI';
  */
 export async function fetchAgentsFromBackend(): Promise<Omit<MissionAgent, 'lastHeartbeat'>[]> {
   try {
-    const response = await agentWorkflowAPI.healthCheck();
-    if (response.success && response.data) {
-      // 后端健康检查返回 engines 和 crews 数量
-      // 实际的 Agent 列表需要从其他端点获取
-      return demoAgents; // 暂时使用 demo，实际应从后端获取
+    const response = await apiRequest<{ agents: Array<Omit<MissionAgent, 'lastHeartbeat'>> }>('/api/mission/agents');
+    if (response.success && response.data?.agents) {
+      return response.data.agents;
     }
-    return demoAgents;
+    console.warn('[MissionControl] No agents from backend, returning empty array');
+    return [];
   } catch (error) {
     console.error('[MissionControl] Failed to fetch agents:', error);
-    return demoAgents;
+    return [];
   }
 }
 
@@ -377,14 +245,22 @@ export async function fetchAgentsFromBackend(): Promise<Omit<MissionAgent, 'last
  */
 export async function fetchTasksFromBackend(): Promise<Omit<MissionTask, 'id' | 'createdAt' | 'updatedAt'>[]> {
   try {
-    const response = await agentWorkflowAPI.healthCheck();
-    if (response.success && response.data) {
-      return demoTasks; // 暂时使用 demo，实际应从后端获取
+    const response = await apiRequest<{ tasks: Array<{ name: string; description?: string; priority?: string; status?: string; estimatedDuration?: number }> }>('/api/mission/tasks');
+    if (response.success && response.data?.tasks) {
+      // 转换后端任务格式到前端格式
+      return response.data.tasks.map(task => ({
+        title: task.name || '',
+        description: task.description || '',
+        priority: (task.priority || 'medium') as 'critical' | 'high' | 'medium' | 'low',
+        status: (task.status || 'pending') as 'pending' | 'in_progress' | 'completed' | 'failed' | 'cancelled',
+        estimatedDuration: task.estimatedDuration || 0,
+      }));
     }
-    return demoTasks;
+    console.warn('[MissionControl] No tasks from backend, returning empty array');
+    return [];
   } catch (error) {
     console.error('[MissionControl] Failed to fetch tasks:', error);
-    return demoTasks;
+    return [];
   }
 }
 
@@ -406,8 +282,6 @@ export async function initializeMissionFromBackend(missionName: string = '后端
     return { agents, tasks };
   } catch (error) {
     console.error('[MissionControl] Failed to initialize from backend:', error);
-    // 降级到 demo 数据
-    initializeMission(missionName);
     return null;
   }
 }

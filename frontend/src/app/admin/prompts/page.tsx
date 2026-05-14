@@ -1,12 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-// 禁用 SSR 防止 hydration mismatch
-const PromptTemplatePage = dynamic(
-  () => import('@/components/admin/PromptTemplate/index').then((m) => m.default),
-  { ssr: false, loading: () => <PageLoading /> }
-);
+import { useState, useEffect } from 'react';
 
 function PageLoading() {
   return (
@@ -17,5 +11,17 @@ function PageLoading() {
 }
 
 export default function PromptsPage() {
-  return <PromptTemplatePage />;
+  const [mounted, setMounted] = useState(false);
+  const [Component, setComponent] = useState<React.ComponentType | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    import('@/components/admin/PromptTemplate/index').then((m) => {
+      setComponent(() => m.default);
+    });
+  }, []);
+
+  if (!mounted) return <PageLoading />;
+  if (!Component) return <PageLoading />;
+  return <Component />;
 }

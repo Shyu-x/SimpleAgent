@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
 const { QueryRewriteService } = require('../domain/rag/QueryRewriteService');
+const { QueryDecomposeService } = require('../domain/rag/QueryDecomposeService');
 const RerankerService = require('./rag/RerankerService');
 
 // 简单的文本分块
@@ -101,6 +102,12 @@ class RAGService extends EventEmitter {
       llmClient: options.llmClient
     });
 
+    // 查询拆分服务
+    this.queryDecomposeService = new QueryDecomposeService({
+      enabled: options.enableQueryRewrite !== false,
+      llmClient: options.llmClient
+    });
+
     // 重排序服务
     this.rerankerService = new RerankerService({
       enabled: options.enableRerank !== false,
@@ -115,6 +122,34 @@ class RAGService extends EventEmitter {
   ensureStoragePath() {
     if (!fs.existsSync(this.storagePath)) {
       fs.mkdirSync(this.storagePath, { recursive: true });
+    }
+  }
+
+  /**
+   * 启动时加载所有知识库到内存
+   */
+  async loadAllKnowledgeBases() {
+    try {
+      const files = fs.readdirSync(this.storagePath).filter(f => f.endsWith('.json'));
+      for (const file of files) {
+        try {
+          const filePath = path.join(this.storagePath, file);
+          const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+          if (data && data.id) {
+            // 重新生成嵌入
+            for (const doc of data.documents || []) {
+              for (const chunk of doc.chunks || []) {
+                chunk.embedding = await this.generateEmbedding(chunk.content);
+              }
+            }
+            this.knowledgeBases.set(data.id, data);
+          }
+        } catch (e) {
+          // 忽略解析失败的文件
+        }
+      }
+    } catch (error) {
+      // 目录不存在时忽略
     }
   }
 
@@ -270,9 +305,9 @@ class RAGService extends EventEmitter {
 
     // 拆分子问题（用于多路检索）
     let subQueries = [expandedQuery];
-    if (this.queryRewriteService) {
+    if (this.queryDecomposeService) {
       try {
-        const decomposeResult = this.queryRewriteService.decompose(expandedQuery);
+        const decomposeResult = await this.queryDecomposeService.decompose(expandedQuery);
         if (decomposeResult && decomposeResult.length > 0) {
           subQueries = decomposeResult;
         }
@@ -541,6 +576,47 @@ class RAGService extends EventEmitter {
       totalChunks,
       storagePath: this.storagePath
     };
+  }
+
+  /**
+   * 网页抓取（直接内容）
+   */
+  async fetchUrl(url) {
+    const IngestionPipeline = require('../domain/rag/ingestion/IngestionPipeline');
+    const UrlFetchNode = require('../domain/rag/ingestion/nodes/UrlFetchNode');
+    const EnhanceNode = require('../domain/rag/ingestion/nodes/EnhanceNode');
+    const pipeline = new IngestionPipeline({ logger: console });
+    pipeline.use(new UrlFetchNode({ timeout: 30000, maxContentLength: 10 * 1024 * 1024 }));
+    pipeline.use(new EnhanceNode({ autoDetectType: true, extractEntities: true }));
+    const context = await pipeline.run({ url });
+    if (context.errors && context.errors.length > 0) {
+      throw new Error(context.errors[0].message || '抓取失败');
+    }
+    return {
+      content: context.enhancedContent,
+      metadata: { ...context.fetchMetadata, ...context.enhancedMetadata },
+      images: context.images || [],
+      links: context.links || [],
+      traceId: context.traceId,
+      duration: context.duration
+    };
+  }
+
+  /**
+   * 网页抓取（添加到知识库）
+   */
+  async fetchUrlToKB(kbId, url, title) {
+    if (!this.knowledgeBases.get(kbId)) {
+      throw new Error('知识库不存在');
+    }
+    const { content, metadata } = await this.fetchUrl(url);
+    const docTitle = title || metadata?.title || new URL(url).hostname;
+    return this.addDocument(kbId, {
+      title: docTitle,
+      content,
+      type: 'article',
+      metadata: { url, ...metadata }
+    });
   }
 }
 

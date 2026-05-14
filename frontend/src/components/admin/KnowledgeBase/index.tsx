@@ -754,7 +754,7 @@ function StatusBadge({ status }: { status: DocumentInfo['status'] }) {
     pending: { label: '等待中', class: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' },
     error: { label: '错误', class: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300' },
   };
-  const c = config[status];
+  const c = config[status] || { label: status, class: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' };
   return (
     <span className={`px-2 py-0.5 rounded text-xs font-medium ${c.class}`}>{c.label}</span>
   );

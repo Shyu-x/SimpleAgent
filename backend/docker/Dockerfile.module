@@ -1,0 +1,109 @@
+# ================================================
+# 通用模块 Dockerfile
+# ================================================
+# 用途: 所有微服务模块的统一构建配置
+# 特性: 多阶段构建、生产优化、安全加固
+
+# ================================================
+# 第一阶段: 构建依赖
+# ================================================
+FROM node:18-alpine AS deps
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装依赖时使用国内镜像(可选)
+RUN npm config set registry https://registry.npmmirror.com
+
+# 复制 package 文件
+COPY package*.json ./
+
+# 安装生产依赖
+RUN npm ci --only=production && npm cache clean --force
+
+# ================================================
+# 第二阶段: 构建应用
+# ================================================
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# 复制 package 文件
+COPY package*.json ./
+
+# 安装所有依赖(包括 devDependencies)
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm ci
+
+# 复制源代码
+COPY src/ ./src/
+
+# 构建 TypeScript 或其他预处理
+# RUN npm run build
+
+# ================================================
+# 第三阶段: 生产镜像
+# ================================================
+FROM node:18-alpine AS runner
+
+# ================================================
+# 安全: 创建非 root 用户
+# ================================================
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# ================================================
+# 安全: 精简镜像，移除额外工具
+# ================================================
+RUN apk add --no-cache curl && \
+    apk del apk-cache
+
+# 设置工作目录
+WORKDIR /app
+
+# ================================================
+# 安全: 设置只读文件系统(可选)
+# ================================================
+# RUN chmod -R 755 /app && chown -R nodejs:nodejs /app
+
+# ================================================
+# 从构建阶段复制依赖
+# ================================================
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/package*.json ./
+
+# ================================================
+# 安全: 切换到非 root 用户
+# ================================================
+USER nodejs
+
+# ================================================
+# 健康检查
+# ================================================
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${SERVICE_PORT:-3000}/health || exit 1
+
+# ================================================
+# 暴露端口
+# ================================================
+EXPOSE ${SERVICE_PORT:-3000}
+
+# ================================================
+# 环境配置
+# ================================================
+ENV NODE_ENV=production
+ENV SERVICE_NAME=${SERVICE_NAME:-unknown}
+ENV SERVICE_TYPE=${SERVICE_TYPE:-generic}
+
+# ================================================
+# 启动命令
+# ================================================
+CMD ["node", "src/index.js"]
+
+# ================================================
+# 构建说明
+# ================================================
+# 构建: docker build -f docker/Dockerfile.module -t ai-chat:module .
+# 运行: docker run -e SERVICE_NAME=order-service ai-chat:module
+# 带环境变量: docker run -e SERVICE_PORT=30001 -e DATABASE_URL=... ai-chat:module

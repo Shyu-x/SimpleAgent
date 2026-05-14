@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Chat 玩具 - 测试报告</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #f8fafc; margin-bottom: 2rem; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat { background: #1e293b; border-radius: 12px; padding: 1.5rem; text-align: center; }
+    .stat-value { font-size: 2.5rem; font-weight: bold; }
+    .stat-label { color: #94a3b8; margin-top: 0.5rem; }
+    .stat.passed .stat-value { color: #22c55e; }
+    .stat.failed .stat-value { color: #ef4444; }
+    .stat.warnings .stat-value { color: #f59e0b; }
+    .results { background: #1e293b; border-radius: 12px; overflow: hidden; }
+    .result { padding: 1rem 1.5rem; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 1rem; }
+    .result:last-child { border-bottom: none; }
+    .result-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .result.passed .result-icon { background: #22c55e; }
+    .result.failed .result-icon { background: #ef4444; }
+    .result.warning .result-icon { background: #f59e0b; }
+    .result-name { flex: 1; }
+    .result-status { color: #94a3b8; font-size: 0.875rem; }
+    .screenshot-link { color: #3b82f6; text-decoration: none; }
+    .screenshot-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 AI Chat 玩具 - 全界面测试报告</h1>
+
+    <div class="summary">
+      <div class="stat">
+        <div class="stat-value">25</div>
+        <div class="stat-label">总测试数</div>
+      </div>
+      <div class="stat passed">
+        <div class="stat-value">21</div>
+        <div class="stat-label">通过</div>
+      </div>
+      <div class="stat failed">
+        <div class="stat-value">2</div>
+        <div class="stat-label">失败</div>
+      </div>
+      <div class="stat warnings">
+        <div class="stat-value">2</div>
+        <div class="stat-label">警告</div>
+      </div>
+    </div>
+
+    <div class="results">
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">页面加载</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">页面加载</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">侧边栏</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">聊天功能</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">聊天功能</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">聊天功能</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">聊天功能</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">多窗口</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">多窗口</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">多窗口</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">专注模式</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">设置面板</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">设置面板</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">记忆面板</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">Agent模式</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">Agent模式</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result warning">
+          <div class="result-icon">⚠</div>
+          <div class="result-name">知识库</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">移动端适配</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">联网搜索</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">联网搜索</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result warning">
+          <div class="result-icon">⚠</div>
+          <div class="result-name">思维链可视化</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">快捷键</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result passed">
+          <div class="result-icon">✓</div>
+          <div class="result-name">快捷键</div>
+          <div class="result-status"></div>
+          
+        </div>
+      
+        <div class="result failed">
+          <div class="result-icon">✗</div>
+          <div class="result-name">响应式布局</div>
+          <div class="result-status"></div>
+          <a class="screenshot-link" href="./test-results/screenshots/响应式布局-failure-1778672988292.png">📷 截图</a>
+        </div>
+      
+        <div class="result failed">
+          <div class="result-icon">✗</div>
+          <div class="result-name">控制台错误</div>
+          <div class="result-status"></div>
+          <a class="screenshot-link" href="./test-results/screenshots/控制台错误-failure-1778673019106.png">📷 截图</a>
+        </div>
+      
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,183 @@
+{
+  "timestamp": "2026-05-12T20:26:52.003Z",
+  "summary": {
+    "total": 23,
+    "passed": 11,
+    "failed": 12,
+    "duration": 8050
+  },
+  "scenarios": [
+    {
+      "scenario": "RAG知识问答",
+      "testName": "健康检查",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:52.120Z",
+      "duration": 109,
+      "status": "degraded"
+    },
+    {
+      "scenario": "RAG知识问答",
+      "testName": "知识库列表查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:52.125Z",
+      "duration": 5,
+      "count": 0
+    },
+    {
+      "scenario": "RAG知识问答",
+      "testName": "知识问答请求",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:52.133Z",
+      "duration": 7,
+      "hasResponse": false
+    },
+    {
+      "scenario": "RAG知识问答",
+      "testName": "RAG检索请求",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:52.137Z",
+      "duration": 4,
+      "results": 0
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "工具注册表查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:52.141Z",
+      "duration": 2,
+      "count": 0
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "工具分类查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:52.143Z",
+      "duration": 2,
+      "categories": 0
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "天气查询请求",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:54.307Z",
+      "duration": 2163
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "计算工具请求",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:54.311Z",
+      "duration": 3
+    },
+    {
+      "scenario": "工具调用",
+      "testName": "工具指标查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:54.313Z",
+      "duration": 2
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "Agent列表查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:54.316Z",
+      "duration": 1,
+      "count": 0
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "协作任务创建",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:54.319Z",
+      "duration": 3
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "协调模式查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:54.320Z",
+      "duration": 1,
+      "modes": 0
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "Agent消息发送",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:54.323Z",
+      "duration": 3
+    },
+    {
+      "scenario": "多Agent协作",
+      "testName": "协作统计查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:54.325Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "HITL请求创建",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:54.329Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "HITL状态查询",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:54.332Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "HITL响应提交",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:54.335Z",
+      "duration": 2
+    },
+    {
+      "scenario": "HITL人机协作",
+      "testName": "检查点列表查询",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:54.338Z",
+      "duration": 3
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "非流式对话",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:54.341Z",
+      "duration": 3,
+      "hasResponse": false,
+      "tokens": 0
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "流式对话",
+      "passed": true,
+      "timestamp": "2026-05-12T20:26:55.886Z",
+      "duration": 1544,
+      "chunks": 2
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "会话历史查询",
+      "passed": false,
+      "timestamp": "2026-05-12T20:26:55.889Z",
+      "duration": 2
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "上下文保持",
+      "passed": true,
+      "timestamp": "2026-05-12T20:27:00.052Z",
+      "duration": 4163
+    },
+    {
+      "scenario": "端到端对话",
+      "testName": "记忆检索",
+      "passed": false,
+      "timestamp": "2026-05-12T20:27:00.058Z",
+      "duration": 6
+    }
+  ]
+}

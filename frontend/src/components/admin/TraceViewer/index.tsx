@@ -25,6 +25,7 @@ interface Trace {
   duration: number;
   status: 'success' | 'error' | 'partial';
   totalSpans: number;
+  metadata?: Record<string, unknown>;
 }
 
 interface TraceSpan {
@@ -38,12 +39,14 @@ interface TraceSpan {
   tags?: Record<string, string>;
   logs?: TraceEvent[];
   children?: TraceSpan[];
+  attributes?: Record<string, unknown>;
 }
 
 interface TraceEvent {
   timestamp: number;
   event?: string;
   message?: string;
+  attributes?: Record<string, unknown>;
 }
 
 interface TraceStats {
@@ -54,6 +57,17 @@ interface TraceStats {
   errorTraces: number;
   tracesByType: Record<string, number>;
   durationDistribution: { bucket: string; count: number }[];
+  overview?: {
+    totalTraces: number;
+    errorRate: string;
+    errorCount: number;
+  };
+  performance?: {
+    avgDuration: string | number;
+  };
+  distribution?: {
+    byOperation: Record<string, number>;
+  };
 }
 
 interface TraceFilter {
@@ -138,9 +152,9 @@ export default function TraceViewerPage() {
     if (filter.searchQuery) {
       const query = filter.searchQuery.toLowerCase();
       return (
-        t.id.toLowerCase().includes(query) ||
         t.traceId.toLowerCase().includes(query) ||
-        JSON.stringify(t.metadata).toLowerCase().includes(query)
+        t.operationName.toLowerCase().includes(query) ||
+        JSON.stringify(t.metadata || {}).toLowerCase().includes(query)
       );
     }
     return true;
@@ -489,7 +503,7 @@ function TraceDetailPanel({ trace }: { trace: Trace }) {
         <div className="bg-gray-50 rounded p-3">
           <div className="text-sm text-gray-500">事件数量</div>
           <div className="text-xl font-bold">
-            {spans.reduce ? spans.reduce((acc: number, s: TraceSpan) => acc + (s.events?.length || 0), 0) : 0}
+            {spans.reduce ? spans.reduce((acc: number, s: TraceSpan) => acc + (s.logs?.length || 0), 0) : 0}
           </div>
         </div>
       </div>
@@ -575,7 +589,6 @@ function SpanList({ spans }: { spans: TraceSpan[] }) {
               className={`h-2 rounded-full ${
                 span.status === 'error'
                   ? 'bg-red-500'
-                  : 'bg-blue-500'
                   : 'bg-blue-500'
               }`}
               style={{ width: `${(span.duration / maxDuration) * 100}%` }}

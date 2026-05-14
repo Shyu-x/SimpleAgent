@@ -1,0 +1,29 @@
+{
+  "id": "kb_1777380431549",
+  "name": "损坏的知识库_第二",
+  "description": "此知识库名称因编码问题已损坏，已自动修复",
+  "documents": [
+    {
+      "id": "doc_1777380440868",
+      "title": "Untitled",
+      "type": "text",
+      "metadata": {
+        "source": "test"
+      },
+      "createdAt": 1777380440868,
+      "chunks": [
+        {
+          "id": "chunk_doc_1777380440868_0",
+          "content": "����һ�������ĵ�������һЩ�����˹����ܵ�֪ʶ��。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1777380440868",
+            "documentTitle": "Untitled"
+          }
+        }
+      ]
+    }
+  ],
+  "createdAt": 1777380431549,
+  "updatedAt": 1777380440868
+}

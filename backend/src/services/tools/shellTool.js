@@ -110,11 +110,11 @@ class ShellTool {
       let stderr = '';
 
       child.stdout.on('data', (data) => {
-        stdout += data.toString();
+        stdout += Buffer.isBuffer(data) ? data.toString('utf8') : String(data);
       });
 
       child.stderr.on('data', (data) => {
-        stderr += data.toString();
+        stderr += Buffer.isBuffer(data) ? data.toString('utf8') : String(data);
       });
 
       // 超时处理

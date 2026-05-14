@@ -15,7 +15,7 @@
 const express = require('express');
 const router = express.Router();
 const { generateTraceId } = require('../../middleware/trace');
-const AgentLogger = require('../../infra/logger/AgentLogger');
+const { AgentLogger } = require('../../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('admin-trace');
 

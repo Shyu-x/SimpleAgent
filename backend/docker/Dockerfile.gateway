@@ -1,0 +1,105 @@
+# ================================================
+# API 网关 Dockerfile
+# ================================================
+# 用途: 统一入口服务，负责路由分发和负载均衡
+# 特性: 多阶段构建、健康检查、高可用配置
+
+# ================================================
+# 第一阶段: 构建依赖
+# ================================================
+FROM node:18-alpine AS deps
+
+WORKDIR /app
+
+# 使用国内镜像
+RUN npm config set registry https://registry.npmmirror.com
+
+# 复制 package 文件
+COPY package*.json ./
+
+# 安装生产依赖
+RUN npm ci --only=production && npm cache clean --force
+
+# ================================================
+# 第二阶段: 构建阶段
+# ================================================
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# 复制 package 文件
+COPY package*.json ./
+
+# 安装所有依赖
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm ci
+
+# 复制源代码
+COPY src/ ./src/
+
+# 复制网关专用文件
+COPY docker/gateway/ ./gateway/
+
+# ================================================
+# 第三阶段: 生产镜像
+# ================================================
+FROM node:18-alpine AS runner
+
+# ================================================
+# 安全: 添加 nodejs 用户组
+# ================================================
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# 安装 curl 用于健康检查
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+# ================================================
+# 安全: 权限设置
+# ================================================
+RUN chmod -R 755 /app && chown -R nodejs:nodejs /app
+
+# ================================================
+# 复制依赖和源代码
+# ================================================
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/docker/gateway ./gateway
+COPY --from=builder /app/package*.json ./
+
+# ================================================
+# 安全: 切换到非 root 用户
+# ================================================
+USER nodejs
+
+# ================================================
+# 健康检查
+# ================================================
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:30000/health || exit 1
+
+# ================================================
+# 暴露端口
+# ================================================
+EXPOSE 30000
+
+# ================================================
+# 环境配置
+# ================================================
+ENV NODE_ENV=production
+ENV PORT=30000
+ENV GATEWAY_MODE=true
+
+# ================================================
+# 启动命令 - 入口点脚本
+# ================================================
+CMD ["node", "gateway/entry.js"]
+
+# ================================================
+# 构建说明
+# ================================================
+# 构建: docker build -f docker/Dockerfile.gateway -t ai-chat:gateway .
+# 运行: docker run -p 30000:30000 ai-chat:gateway
+# 查看日志: docker logs -f api-gateway

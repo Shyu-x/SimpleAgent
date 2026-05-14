@@ -80,8 +80,8 @@ export default function ToolManagement() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {tools.map((tool) => (
-              <tr key={tool.name} className="hover:bg-gray-50">
+            {tools.map((tool, idx) => (
+              <tr key={`tool-${tool.name}-${idx}`} className="hover:bg-gray-50">
                 <td className="px-4 py-3">
                   <div className="font-medium">{tool.name}</div>
                   <div className="text-sm text-gray-500 truncate max-w-xs">{tool.description}</div>

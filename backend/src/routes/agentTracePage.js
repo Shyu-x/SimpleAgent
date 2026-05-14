@@ -1,363 +1,63 @@
 /**
- * Agent 可视化页面路由
- * 提供独立的可视化展示页面
+ * Agent 可视化页面路由 (Thin Wrapper)
+ * 委托 AgentVisualizer 服务 + 静态HTML
  */
-
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const { agentVisualizer } = require('../services/agent/AgentVisualizer');
 
 /**
  * 获取可视化页面
  * GET /agent/visualizer
  */
 router.get('/visualizer', (req, res) => {
-  const html = `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent 执行可视化</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .step-running {
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    .timeline-line {
-      position: absolute;
-      left: 23px;
-      top: 40px;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(to bottom, #e5e7eb, #f3f4f6);
-    }
-  </style>
-</head>
-<body class="bg-gray-100 min-h-screen">
-  <div id="app" class="container mx-auto px-4 py-8 max-w-4xl">
-    <!-- 头部 -->
-    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-xl p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold">Agent 执行可视化</h1>
-          <p class="text-indigo-200 mt-1">实时追踪 Agent 执行全流程</p>
-        </div>
-        <div class="text-right">
-          <button id="refreshBtn" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors">
-            🔄 刷新
-          </button>
-        </div>
-      </div>
-    </div>
+  res.type('html').sendFile(path.join(__dirname, 'agentTracePage.html'));
+});
 
-    <!-- 轨迹选择 -->
-    <div class="bg-white px-6 py-4 border-x border-gray-200">
-      <div class="flex items-center gap-4">
-        <label class="text-sm font-medium text-gray-700">选择轨迹:</label>
-        <select id="traceSelect" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-          <option value="">-- 请选择 --</option>
-        </select>
-        <button id="createTraceBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
-          + 新建轨迹
-        </button>
-      </div>
-    </div>
+/**
+ * 获取最近轨迹列表
+ * GET /agent/traces
+ */
+router.get('/traces', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const traces = agentVisualizer.getRecentTraces(limit);
+    res.json({ success: true, traces, total: agentVisualizer.traces.size });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
-    <!-- 主内容 -->
-    <div id="mainContent" class="bg-white border-x border-gray-200 p-6 min-h-96">
-      <div id="emptyState" class="flex flex-col items-center justify-center py-16 text-gray-400">
-        <div class="text-6xl mb-4">🔍</div>
-        <p class="text-lg">请选择或创建一个轨迹</p>
-      </div>
+/**
+ * 获取单个轨迹详情
+ * GET /agent/trace/:traceId
+ */
+router.get('/trace/:traceId', (req, res) => {
+  try {
+    const trace = agentVisualizer.getTrace(req.params.traceId);
+    if (!trace) return res.status(404).json({ success: false, error: '轨迹不存在' });
+    res.json({ success: true, ...trace.toJSON() });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
-      <div id="traceContent" class="hidden">
-        <!-- 轨迹信息 -->
-        <div class="mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <span class="text-sm text-gray-500">Trace ID:</span>
-              <span id="traceId" class="ml-2 font-mono text-sm text-gray-700"></span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span id="statusBadge" class="px-3 py-1 rounded-full text-sm font-medium"></span>
-              <span id="duration" class="text-2xl font-bold text-indigo-600"></span>
-              <span class="text-gray-500">ms</span>
-            </div>
-          </div>
-
-          <div id="queryInfo" class="bg-gray-50 rounded-lg p-4 mb-4">
-            <div class="text-xs text-gray-500 mb-1">查询内容</div>
-            <div id="queryText" class="text-gray-800"></div>
-          </div>
-
-          <div id="intentBadge" class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm"></div>
-        </div>
-
-        <!-- 执行时间线 -->
-        <div class="mb-6">
-          <h3 class="text-lg font-medium text-gray-800 mb-4">执行时间线</h3>
-          <div id="timeline" class="relative pl-10">
-            <div class="timeline-line"></div>
-            <!-- 时间线项目将动态插入 -->
-          </div>
-        </div>
-
-        <!-- 性能统计 -->
-        <div>
-          <h3 class="text-lg font-medium text-gray-800 mb-4">性能统计</h3>
-          <div id="statsGrid" class="grid grid-cols-3 gap-4 mb-6">
-            <!-- 统计卡片将动态插入 -->
-          </div>
-
-          <div id="typeStats" class="space-y-3">
-            <!-- 分类型统计将动态插入 -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 底部 -->
-    <div class="bg-gray-50 rounded-b-xl px-6 py-4 border-t border-gray-200 text-center text-sm text-gray-500">
-      Agent Visualizer v2.1.0 | 实时追踪 · 高性能 · 可扩展
-    </div>
-  </div>
-
-  <script>
-    // 步骤类型配置
-    const STEP_CONFIG = {
-      intent_detection: { name: '意图识别', color: 'indigo' },
-      query_rewrite: { name: '问题改写', color: 'violet' },
-      query_decompose: { name: '问题拆分', color: 'purple' },
-      tool_selection: { name: '工具选择', color: 'pink' },
-      tool_execution: { name: '工具执行', color: 'orange' },
-      model_call: { name: '模型调用', color: 'teal' },
-      result_aggregation: { name: '结果聚合', color: 'green' },
-      error: { name: '错误', color: 'red' }
-    };
-
-    const COLOR_CLASSES = {
-      indigo: { bg: 'bg-indigo-100', border: 'border-indigo-500', text: 'text-indigo-700' },
-      violet: { bg: 'bg-violet-100', border: 'border-violet-500', text: 'text-violet-700' },
-      purple: { bg: 'bg-purple-100', border: 'border-purple-500', text: 'text-purple-700' },
-      pink: { bg: 'bg-pink-100', border: 'border-pink-500', text: 'text-pink-700' },
-      orange: { bg: 'bg-orange-100', border: 'border-orange-500', text: 'text-orange-700' },
-      teal: { bg: 'bg-teal-100', border: 'border-teal-500', text: 'text-teal-700' },
-      green: { bg: 'bg-green-100', border: 'border-green-500', text: 'text-green-700' },
-      red: { bg: 'bg-red-100', border: 'border-red-500', text: 'text-red-700' }
-    };
-
-    const STATUS_ICONS = {
-      pending: '⏳',
-      running: '🔄',
-      success: '✅',
-      error: '❌',
-      skipped: '⏭️'
-    };
-
-    let currentTraceId = null;
-
-    // API 请求
-    async function fetchTraces() {
-      const res = await fetch('/api/agent/traces?limit=20');
-      const data = await res.json();
-      return data.traces || [];
-    }
-
-    async function fetchTrace(traceId) {
-      const res = await fetch('/api/agent/trace/' + traceId);
-      const data = await res.json();
-      return data;
-    }
-
-    async function createTrace() {
-      const queries = [
-        '帮我搜索一下最新的React 19新特性',
-        '北京的天气怎么样？',
-        '帮我写一个快速排序算法',
-        '翻译这段话成英文：你好世界',
-        '查询一下比特币的实时价格'
-      ];
-      const query = queries[Math.floor(Math.random() * queries.length)];
-
-      const res = await fetch('/api/agent/trace', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
-      });
-      const data = await res.json();
-      return data.traceId;
-    }
-
-    // 渲染轨迹列表
-    async function renderTraceSelect() {
-      const traces = await fetchTraces();
-      const select = document.getElementById('traceSelect');
-
-      select.innerHTML = '<option value="">-- 请选择 --</option>';
-      traces.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.traceId;
-        opt.textContent = \`\${t.query.substring(0, 30)}... (\${t.totalDuration}ms) [\${{
-          success: '✅',
-          error: '❌',
-          running: '🔄'
-        }[t.status] || '⏳'}]\`;
-        select.appendChild(opt);
-      });
-    }
-
-    // 渲染轨迹详情
-    async function renderTrace(trace) {
-      document.getElementById('emptyState').classList.add('hidden');
-      document.getElementById('traceContent').classList.remove('hidden');
-
-      // 基本信息
-      document.getElementById('traceId').textContent = trace.traceId.substring(0, 16) + '...';
-      document.getElementById('queryText').textContent = trace.query;
-      document.getElementById('duration').textContent = trace.totalDuration;
-
-      // 状态徽章
-      const statusBadge = document.getElementById('statusBadge');
-      const statusMap = {
-        success: ['bg-green-100 text-green-700', '✅ 成功'],
-        error: ['bg-red-100 text-red-700', '❌ 失败'],
-        running: ['bg-yellow-100 text-yellow-700', '🔄 运行中']
-      };
-      const [cls, text] = statusMap[trace.status] || ['bg-gray-100 text-gray-700', '⏳ 未知'];
-      statusBadge.className = \`px-3 py-1 rounded-full text-sm font-medium \${cls}\`;
-      statusBadge.textContent = text;
-
-      // 意图
-      const intentBadge = document.getElementById('intentBadge');
-      if (trace.intent) {
-        intentBadge.textContent = '意图: ' + trace.intent;
-        intentBadge.classList.remove('hidden');
-      } else {
-        intentBadge.classList.add('hidden');
-      }
-
-      // 时间线
-      renderTimeline(trace.steps || []);
-
-      // 统计
-      renderStats(trace.stats);
-    }
-
-    function renderTimeline(steps) {
-      const container = document.getElementById('timeline');
-
-      // 清除旧内容，保留时间线
-      const line = container.querySelector('.timeline-line');
-      container.innerHTML = '';
-      container.appendChild(line);
-
-      steps.forEach((step, idx) => {
-        const config = STEP_CONFIG[step.type] || { name: step.type, color: 'gray' };
-        const colors = COLOR_CLASSES[config.color] || COLOR_CLASSES.gray;
-
-        const isLast = idx === steps.length - 1;
-
-        const item = document.createElement('div');
-        item.className = 'relative flex items-start py-3';
-        item.innerHTML = \`
-          <div class="flex-shrink-0 w-10 h-10 rounded-full \${colors.bg} flex items-center justify-center text-lg mr-4 z-10">
-            \${STATUS_ICONS[step.status] || '⏳'}
-          </div>
-          <div class="flex-1 min-w-0 p-3 rounded-lg border-l-4 \${colors.border} \${colors.bg} \${step.status === 'running' ? 'step-running' : ''}">
-            <div class="flex items-center justify-between">
-              <span class="font-medium \${colors.text}">\${config.name}</span>
-              <span class="text-sm text-gray-500">\${step.duration}ms</span>
-            </div>
-            \${step.metadata?.tool ? \`<div class="mt-1 text-sm text-gray-600">工具: \${step.metadata.tool}</div>\` : ''}
-            \${step.metadata?.error ? \`<div class="mt-1 text-sm text-red-600">错误: \${step.metadata.error}</div>\` : ''}
-          </div>
-        \`;
-
-        container.appendChild(item);
-      });
-    }
-
-    function renderStats(stats) {
-      // 总体统计卡片
-      const grid = document.getElementById('statsGrid');
-      grid.innerHTML = \`
-        <div class="text-center p-4 bg-indigo-50 rounded-xl">
-          <div class="text-3xl font-bold text-indigo-600">\${stats.totalDuration}</div>
-          <div class="text-sm text-indigo-500">总耗时 (ms)</div>
-        </div>
-        <div class="text-center p-4 bg-teal-50 rounded-xl">
-          <div class="text-3xl font-bold text-teal-600">\${stats.stepCount}</div>
-          <div class="text-sm text-teal-500">执行步骤</div>
-        </div>
-        <div class="text-center p-4 bg-green-50 rounded-xl">
-          <div class="text-3xl font-bold text-green-600">\${(stats.totalDuration / Math.max(1, stats.stepCount)).toFixed(1)}</div>
-          <div class="text-sm text-green-500">平均步长 (ms)</div>
-        </div>
-      \`;
-
-      // 分类型统计
-      const typeStats = document.getElementById('typeStats');
-      typeStats.innerHTML = '<h4 class="text-sm font-medium text-gray-700 mb-3">各阶段耗时</h4>';
-
-      Object.entries(stats.byType || {}).forEach(([type, data]) => {
-        const config = STEP_CONFIG[type] || { name: type, color: 'gray' };
-        const colors = COLOR_CLASSES[config.color] || COLOR_CLASSES.gray;
-        const percentage = (data.totalDuration / stats.totalDuration) * 100;
-
-        const item = document.createElement('div');
-        item.className = 'flex items-center gap-3';
-        item.innerHTML = \`
-          <div class="w-3 h-3 rounded-full \${colors.bg} border-2 \${colors.border}"></div>
-          <span class="text-sm \${colors.text} w-24">\${config.name}</span>
-          <div class="flex-1 bg-gray-100 rounded-full h-2">
-            <div class="\${colors.bg} rounded-full h-2 transition-all" style="width: \${percentage}%"></div>
-          </div>
-          <span class="text-sm text-gray-600 w-20 text-right">\${data.totalDuration}ms</span>
-          \${data.errors > 0 ? \`<span class="text-xs text-red-500">(\${data.errors}错误)</span>\` : ''}
-        \`;
-        typeStats.appendChild(item);
-      });
-    }
-
-    // 事件绑定
-    document.getElementById('traceSelect').addEventListener('change', async (e) => {
-      const traceId = e.target.value;
-      if (traceId) {
-        currentTraceId = traceId;
-        const trace = await fetchTrace(traceId);
-        renderTrace(trace);
-      }
-    });
-
-    document.getElementById('refreshBtn').addEventListener('click', async () => {
-      await renderTraceSelect();
-      if (currentTraceId) {
-        const trace = await fetchTrace(currentTraceId);
-        renderTrace(trace);
-      }
-    });
-
-    document.getElementById('createTraceBtn').addEventListener('click', async () => {
-      const traceId = await createTrace();
-      await renderTraceSelect();
-      document.getElementById('traceSelect').value = traceId;
-      const trace = await fetchTrace(traceId);
-      renderTrace(trace);
-    });
-
-    // 初始化
-    renderTraceSelect();
-  </script>
-</body>
-</html>
-  `;
-
-  res.type('html').send(html);
+/**
+ * 创建新轨迹
+ * POST /agent/trace
+ */
+router.post('/trace', (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query) return res.status(400).json({ success: false, error: '缺少 query 参数' });
+    const traceId = `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const trace = agentVisualizer.createTrace(traceId, query);
+    trace.complete();
+    res.json({ success: true, traceId, message: '轨迹已创建' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 module.exports = router;

@@ -18,7 +18,9 @@ import {
   XCircle,
   Settings,
   Trash2,
+  RefreshCw,
 } from 'lucide-react';
+import { fetchApi } from '@/lib/apiClient';
 
 // 断点
 export interface Breakpoint {
@@ -68,43 +70,44 @@ const frameTypeStyles = {
   error: { icon: <AlertCircle size={12} />, color: 'text-destructive', bg: 'bg-destructive/10', label: '错误' },
 };
 
-// 模拟数据
-const mockFrames: DebugFrame[] = [
-  {
-    id: 'frame_1',
-    name: '分析任务',
-    type: 'thought',
-    timestamp: Date.now() - 5000,
-    content: '用户想要搜索最新的 AI 新闻，需要使用 web_search 工具',
-    variables: [
-      { name: 'task', value: '搜索最新 AI 新闻', type: 'string', scope: 'local' },
-      { name: 'intent', value: 'search', type: 'string', scope: 'local' },
-    ],
-    duration: 150,
-  },
-  {
-    id: 'frame_2',
-    name: 'web_search',
-    type: 'action',
-    timestamp: Date.now() - 4000,
-    content: '调用 web_search 工具，参数: { query: "最新 AI 新闻 2024" }',
-    variables: [
-      { name: 'query', value: '最新 AI 新闻 2024', type: 'string', scope: 'local' },
-    ],
-    duration: 2300,
-  },
-  {
-    id: 'frame_3',
-    name: '搜索结果',
-    type: 'observation',
-    timestamp: Date.now() - 1500,
-    content: '找到 10 条相关新闻，第一条来自 TechCrunch...',
-    variables: [
-      { name: 'results', value: [{ title: 'AI News 1', url: '...' }], type: 'array', scope: 'local' },
-    ],
-    duration: 100,
-  },
-];
+// API 响应类型
+interface TraceResponse {
+  success: boolean;
+  traces?: Array<{
+    traceId: string;
+    query: string;
+    startTime: number;
+    endTime?: number;
+    duration?: number;
+    status: string;
+    frames?: DebugFrame[];
+  }>;
+}
+
+// 从 Agent 轨迹 API 获取数据
+async function fetchAgentTraces(limit = 10): Promise<DebugFrame[]> {
+  try {
+    const response = await fetchApi<TraceResponse>('/api/agent/traces');
+    if (response.data?.traces) {
+      // 将轨迹转换为调试帧
+      const frames: DebugFrame[] = [];
+      response.data.traces.slice(0, limit).forEach((trace, idx) => {
+        frames.push({
+          id: `trace_${trace.traceId}`,
+          name: `轨迹 ${idx + 1}`,
+          type: trace.status === 'completed' ? 'observation' : trace.status === 'error' ? 'error' : 'thought',
+          timestamp: trace.startTime,
+          content: trace.query || 'Agent 执行',
+          duration: trace.duration || 0,
+        });
+      });
+      return frames;
+    }
+  } catch (error) {
+    console.error('Failed to fetch agent traces:', error);
+  }
+  return [];
+}
 
 // 控制栏
 interface ControlsBarProps {
@@ -443,22 +446,49 @@ export const AgentDebugger = memo(function AgentDebugger({
   const [state, setState] = useState<DebugState>({
     status: 'idle',
     currentFrameId: null,
-    frames: mockFrames,
-    variables: mockFrames[2]?.variables || [],
+    frames: [],
+    variables: [],
     breakpoints: [
       { id: 'bp_1', nodeId: 'node_2', enabled: true, hitCount: 0 },
     ],
-    callStack: ['main', 'execute_task', 'web_search'],
-    logs: [
-      '[INFO] Agent 初始化完成',
-      '[INFO] 加载工具: web_search, file_ops, calculator',
-      '[DEBUG] 任务分析开始',
-      '[INFO] 检测到搜索意图',
-      '[DEBUG] 调用 web_search 工具',
-      '[INFO] 搜索完成，返回 10 条结果',
-    ],
+    callStack: ['main'],
+    logs: ['[INFO] Agent 调试器已初始化', '[INFO] 等待真实轨迹数据...'],
   });
   const [activePanel, setActivePanel] = useState<'frames' | 'variables' | 'breakpoints'>('frames');
+  const [isLoading, setIsLoading] = useState(false);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 从 API 获取轨迹数据
+  const loadTraces = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const frames = await fetchAgentTraces(10);
+      if (frames.length > 0) {
+        setState(prev => ({
+          ...prev,
+          frames,
+          logs: [...prev.logs.slice(-20), `[INFO] 加载了 ${frames.length} 条轨迹`],
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to load traces:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // 初始加载
+  useEffect(() => {
+    loadTraces();
+  }, [loadTraces]);
+
+  // 定时刷新
+  useEffect(() => {
+    pollRef.current = setInterval(loadTraces, 15000);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [loadTraces]);
 
   // 控制操作
   const handleRun = useCallback(() => {
@@ -536,9 +566,19 @@ export const AgentDebugger = memo(function AgentDebugger({
       animate={{ opacity: 1, y: 0 }}
     >
       {/* 头部 */}
-      <div className="flex items-center gap-2 p-3 border-b bg-muted/30">
-        <Bug size={18} className="text-primary" />
-        <span className="font-medium">Agent 调试器</span>
+      <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+        <div className="flex items-center gap-2">
+          <Bug size={18} className="text-primary" />
+          <span className="font-medium">Agent 调试器</span>
+          {isLoading && <RefreshCw size={14} className="animate-spin text-muted-foreground" />}
+        </div>
+        <button
+          onClick={loadTraces}
+          className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+          title="刷新轨迹"
+        >
+          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+        </button>
       </div>
 
       {/* 控制栏 */}

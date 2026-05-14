@@ -1,10 +1,12 @@
 /**
  * 记忆窗口管理器
  * 控制Token使用量、自动摘要压缩、摘要持久化
+ * 集成 tiktoken 专业 Token 计数
  */
 
 const fs = require('fs').promises;
 const path = require('path');
+const { TokenManager, createTokenManager } = require('./TokenManager');
 
 class MemoryWindowManager {
   /**
@@ -14,6 +16,7 @@ class MemoryWindowManager {
    * @param {number} options.summaryThreshold - 触发摘要的Token阈值（默认3000）
    * @param {string} options.storageDir - 摘要持久化目录（默认./data/memory_windows）
    * @param {Function} options.summarizeFn - 自定义摘要函数，接收消息数组返回摘要字符串
+   * @param {string} options.model - 模型名称（默认 minimax）
    */
   constructor(options = {}) {
     this.windowSize = options.windowSize || 20;
@@ -21,6 +24,13 @@ class MemoryWindowManager {
     this.summaryThreshold = options.summaryThreshold || 3000;
     this.storageDir = options.storageDir || './data/memory_windows';
     this.customSummarizeFn = options.summarizeFn;
+    this.model = options.model || 'minimax';
+
+    // 专业 Token 管理器
+    this.tokenManager = createTokenManager({
+      model: this.model,
+      defaultLimit: options.defaultLimit || 100000
+    });
 
     // 会话记忆窗口
     this.windows = new Map();
@@ -29,6 +39,8 @@ class MemoryWindowManager {
     this.summaries = new Map();
 
     this.initialized = false;
+
+    console.log(`[MemoryWindowManager] 初始化完成，模型: ${this.model}, Token预算: ${this.maxTokens}`);
   }
 
   /**
@@ -267,9 +279,12 @@ class MemoryWindowManager {
    */
   _estimateTokens(text) {
     if (!text) return 0;
-    const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
-    const otherChars = text.length - chineseChars;
-    return Math.ceil(chineseChars / 1.5 + otherChars / 4);
+    return this.tokenManager.count(text);
+  }
+
+  _countMessageTokens(messages) {
+    if (!messages || messages.length === 0) return 0;
+    return this.tokenManager.countMessages(messages);
   }
 
   /**

@@ -14,6 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 class MetricsCollector {
   /**
@@ -61,6 +62,10 @@ class MetricsCollector {
     // 告警规则
     this._alertRules = new Map();
     this._activeAlerts = new Map();
+
+    // CPU/内存缓存值（避免异常时返回随机数据）
+    this._lastCpuUsage = 50;
+    this._lastMemoryUsage = 50;
 
     // 初始化
     this._init();
@@ -958,7 +963,8 @@ class MetricsCollector {
       if (!this._lastCpuInfo) {
         this._lastCpuInfo = { totalIdle, totalTick };
         this._lastCpuTime = Date.now();
-        return Math.round(30 + Math.random() * 30);
+        this._lastCpuUsage = 50; // 初始缓存值
+        return 50;
       }
 
       const idleDiff = totalIdle - this._lastCpuInfo.totalIdle;
@@ -967,11 +973,16 @@ class MetricsCollector {
       this._lastCpuInfo = { totalIdle, totalTick };
       this._lastCpuTime = Date.now();
 
-      if (totalDiff === 0) return 0;
+      if (totalDiff === 0) return this._lastCpuUsage || 0;
       const usage = 100 - (100 * idleDiff / totalDiff);
-      return Math.round(Math.max(0, Math.min(100, usage)));
-    } catch {
-      return Math.round(30 + Math.random() * 30);
+      const roundedUsage = Math.round(Math.max(0, Math.min(100, usage)));
+      this._lastCpuUsage = roundedUsage; // 缓存值
+      return roundedUsage;
+    } catch (error) {
+      // 使用上次缓存值而非随机值
+      const lastValue = this._lastCpuUsage || 50;
+      console.warn('[MetricsCollector] CPU usage fallback to cached value:', lastValue);
+      return lastValue;
     }
   }
 
@@ -986,8 +997,11 @@ class MetricsCollector {
       const used = mem.heapUsed;
       if (total === 0) return 0;
       return Math.round((used / total) * 100);
-    } catch {
-      return Math.round(40 + Math.random() * 20);
+    } catch (error) {
+      // 使用上次缓存值而非随机值
+      const lastValue = this._lastMemoryUsage || 50;
+      console.warn('[MetricsCollector] Memory usage fallback to cached value:', lastValue);
+      return lastValue;
     }
   }
 
@@ -1000,7 +1014,8 @@ class MetricsCollector {
     const counters = this._counters.get(name);
     if (!counters) return 0;
     let sum = 0;
-    for (const val of Object.values(counters)) {
+    // counters is a Map, need to use Array.from to get values
+    for (const val of counters.values()) {
       sum += typeof val === 'number' ? val : 0;
     }
     return sum;

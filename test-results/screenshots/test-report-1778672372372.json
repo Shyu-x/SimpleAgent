@@ -1,0 +1,106 @@
+{
+  "summary": {
+    "total": 14,
+    "passed": 0,
+    "failed": 5,
+    "warnings": 9,
+    "duration": "23s",
+    "timestamp": "2026-05-13T11:39:32.372Z"
+  },
+  "results": [
+    {
+      "name": "页面加载",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:39:14.822Z",
+      "message": "页面加载失败",
+      "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:8080/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:8080/\", waiting until \"networkidle\"\u001b[22m\n",
+      "screenshot": "./test-results/screenshots/页面加载-failure-1778672354679.png"
+    },
+    {
+      "name": "聊天功能",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:39:15.965Z",
+      "message": "未找到聊天输入框",
+      "error": "Input not found",
+      "screenshot": "./test-results/screenshots/聊天功能-failure-1778672355905.png"
+    },
+    {
+      "name": "多窗口",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:16.525Z",
+      "message": "未找到布局切换按钮"
+    },
+    {
+      "name": "专注模式",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:17.103Z",
+      "message": "未找到专注模式按钮"
+    },
+    {
+      "name": "设置面板",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:17.684Z",
+      "message": "未找到设置按钮"
+    },
+    {
+      "name": "记忆面板",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:18.271Z",
+      "message": "未找到记忆按钮"
+    },
+    {
+      "name": "Agent模式",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:19.164Z",
+      "message": "未找到 Agent 模式按钮"
+    },
+    {
+      "name": "知识库",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:20.044Z",
+      "message": "未找到知识库按钮"
+    },
+    {
+      "name": "移动端适配",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:39:22.982Z",
+      "message": "移动端适配测试失败",
+      "error": "page.reload: net::ERR_CONNECTION_REFUSED\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n",
+      "screenshot": "./test-results/screenshots/移动端适配-failure-1778672362946.png"
+    },
+    {
+      "name": "联网搜索",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:23.511Z",
+      "message": "未找到搜索功能入口"
+    },
+    {
+      "name": "思维链可视化",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:24.567Z",
+      "message": "未找到聊天输入框，跳过思维链测试"
+    },
+    {
+      "name": "快捷键",
+      "status": "warning",
+      "timestamp": "2026-05-13T11:39:25.653Z",
+      "message": "未检测到快捷键帮助面板"
+    },
+    {
+      "name": "响应式布局",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:39:28.925Z",
+      "message": "响应式布局测试失败",
+      "error": "page.reload: net::ERR_CONNECTION_REFUSED\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n",
+      "screenshot": "./test-results/screenshots/响应式布局-failure-1778672368822.png"
+    },
+    {
+      "name": "控制台错误",
+      "status": "failed",
+      "timestamp": "2026-05-13T11:39:31.862Z",
+      "message": "控制台错误检测失败",
+      "error": "page.reload: net::ERR_CONNECTION_REFUSED\nCall log:\n\u001b[2m  - waiting for navigation until \"networkidle\"\u001b[22m\n",
+      "screenshot": "./test-results/screenshots/控制台错误-failure-1778672371777.png"
+    }
+  ]
+}

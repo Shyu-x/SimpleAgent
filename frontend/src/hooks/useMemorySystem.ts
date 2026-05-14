@@ -1,8 +1,13 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useChatStore } from '@/store/chatStore';
 import { Note, MemoryType, MemoryImportance, GlobalMemory } from '@/types';
+
+// 导入 API 客户端
+import { fetchApi, post, del, put } from '@/lib/apiClient';
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
 
 // 记忆类型配置
 export const MEMORY_TYPE_CONFIG: Record<MemoryType, { label: string; color: string; icon: string }> = {
@@ -56,6 +61,10 @@ function cosineSimilarity(a: number[], b: number[]): number {
 
 type SessionMemoryMetadata = Partial<Pick<Note, 'type' | 'importance' | 'tags' | 'embedding'>>;
 
+// 防抖同步锁
+let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+const SYNC_DEBOUNCE_MS = 500;
+
 export function useMemorySystem() {
   const conversations = useChatStore((state) => state.conversations);
   const globalMemories = useChatStore((state) => state.globalMemories);
@@ -71,6 +80,77 @@ export function useMemorySystem() {
   const hydrateGlobalMemories = useChatStore((state) => state.hydrateGlobalMemories);
 
   const isLoading = false;
+  const syncInProgress = useRef(false);
+
+  // ========== 后端同步方法 ==========
+
+  /**
+   * 同步全局记忆到后端（带防抖）
+   */
+  const syncToBackend = useCallback(async () => {
+    if (syncInProgress.current) return;
+    if (typeof window === 'undefined') return;
+
+    // 防抖：避免高频操作触发多次同步
+    if (syncDebounceTimer) {
+      clearTimeout(syncDebounceTimer);
+    }
+
+    syncDebounceTimer = setTimeout(async () => {
+      syncInProgress.current = true;
+      try {
+        const currentMemories = useChatStore.getState().globalMemories;
+        const res = await post(`${API_BASE}/api/memory/global/sync`, {
+          memories: currentMemories,
+          timestamp: Date.now(),
+        });
+        if (!res.error) {
+          console.debug('[MemorySystem] Synced to backend:', currentMemories.length, 'memories');
+        }
+      } catch (error) {
+        console.error('[MemorySystem] Failed to sync to backend:', error);
+      } finally {
+        syncInProgress.current = false;
+      }
+    }, SYNC_DEBOUNCE_MS);
+  }, []);
+
+  /**
+   * 从后端加载全局记忆
+   */
+  const loadFromBackend = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const res = await fetchApi<{ data: GlobalMemory[]; total: number }>(
+        `${API_BASE}/api/memory/global?limit=100&offset=0`,
+        { method: 'GET', timeout: 5000 }
+      );
+
+      if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        // 合并：后端数据优先，但保留本地特有的记忆
+        const backendMemories = res.data.data;
+        const localMemories = useChatStore.getState().globalMemories;
+        const localIds = new Set(localMemories.map(m => m.id));
+
+        // 去重：使用后端ID，避免重复
+        const merged = [
+          ...backendMemories,
+          ...localMemories.filter(m => !localIds.has(m.id))
+        ];
+
+        hydrateGlobalMemories(merged);
+        console.debug('[MemorySystem] Loaded from backend:', backendMemories.length, 'memories');
+      }
+    } catch (error) {
+      console.error('[MemorySystem] Failed to load from backend:', error);
+    }
+  }, [hydrateGlobalMemories]);
+
+  // 启动时从后端加载数据
+  useEffect(() => {
+    loadFromBackend();
+  }, [loadFromBackend]);
 
   // 兼容旧架构：将 localStorage 的 global_memories 迁移到统一 store
   useEffect(() => {

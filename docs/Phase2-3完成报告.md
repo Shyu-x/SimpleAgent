@@ -105,23 +105,21 @@
 
 ---
 
-## 六、Ollama 向量模型集成
+## 六、向量存储服务
 
 ### 已完成 ✅
 
 | 组件 | 文件 | 说明 |
 |------|------|------|
-| Qdrant路由 | `services/router/QdrantRouter.js` | Qdrant向量数据库路由 |
-| Qdrant API | `routes/qdrant.js` | 向量存储API |
-| 部署配置 | `docker-compose.yml` | Qdrant容器化部署 |
-| 使用指南 | `docs/Qdrant部署指南.md` | 部署文档 |
+| Qdrant路由 | `services/router/QdrantRouter.js` | Qdrant向量数据库路由（可选） |
+| Qdrant API | `routes/qdrant.js` | 向量存储API（可选） |
+| 内存向量 | `enhancedMemory.js` | 默认使用内存向量存储 |
+| 部署配置 | `docker-compose.yml` | Qdrant容器化部署（可选） |
 
-### Docker 特性
+### 向量存储模式
 
-- Qdrant 向量数据库（端口6333/6334）
-- RESTful API 接口
-- 高性能向量相似度搜索
-- 无需额外 SDK 依赖
+- **内存模式（默认）**: `VECTOR_DB_TYPE=memory`，使用 `simpleVectorize` 简易向量化
+- **Qdrant模式（可选）**: 需要启动 Qdrant 容器，提供更精确的向量检索
 
 ---
 
@@ -191,12 +189,15 @@ IntentRouter ──── 意图分流
 
 ## 八、环境变量配置
 
-### Ollama 配置
+### 向量存储配置
 
 ```bash
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_EMBEDDING_MODEL=mxbai-embed-large
-OLLAMA_LLM_MODEL=qwen2.5:7b
+# Qdrant 向量数据库（可选）
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+
+# 向量存储模式
+VECTOR_DB_TYPE=memory  # 使用内存向量存储，如需Qdrant改为qdrant
 ```
 
 ### RAG 配置

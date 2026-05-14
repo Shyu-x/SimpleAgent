@@ -210,7 +210,7 @@ const MissionControl = memo(function MissionControl({
     } else {
       // 恢复任务
       tasks
-        .filter((t) => t.status === 'waiting')
+        .filter((t) => t.status === 'in_progress')
         .forEach((task) => {
           if (task.assignedAgent) {
             updateAgentStatus(task.assignedAgent, 'working', task.id);
@@ -449,7 +449,7 @@ const MissionControl = memo(function MissionControl({
             layout
             className="flex-1 overflow-hidden"
           >
-            <ResultsFeed events={events} maxDisplay={30} />
+            <ResultsFeed />
           </motionClass.div>
         </motionClass.div>
 

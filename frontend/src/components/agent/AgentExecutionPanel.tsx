@@ -2,6 +2,7 @@
 
 import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isClient } from '@/lib/ssrStorage';
 import {
   Bot,
   Brain,
@@ -174,7 +175,7 @@ function calculateToolUsageStats(toolCalls: ToolCallInfo[]): ToolUsageStat[] {
 
 // 加载历史记录
 function loadHistory(): ExecutionHistoryRecord[] {
-  if (typeof window === 'undefined') return [];
+  if (!isClient()) return [];
   try {
     const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
     if (!raw) return [];
@@ -190,7 +191,7 @@ function loadHistory(): ExecutionHistoryRecord[] {
 
 // 保存历史记录
 function saveHistory(records: ExecutionHistoryRecord[]): void {
-  if (typeof window === 'undefined') return;
+  if (!isClient()) return;
   try {
     const trimmed = records.slice(0, MAX_HISTORY_RECORDS);
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(trimmed));

@@ -1,0 +1,92 @@
+# ==========================================
+# AI Chat Platform - Docker Compose
+# ==========================================
+
+services:
+  # ==========================================
+  # Backend Service
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-chat-backend
+    restart: unless-stopped
+    ports:
+      - "30000:30000"
+    environment:
+      # Application
+      - NODE_ENV=production
+      - PORT=30000
+
+      # Logging
+      - LOG_LEVEL=info
+
+      # MiniMax API
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      - MINIMAX_BASE_URL=${MINIMAX_BASE_URL:-https://api.minimaxi.com/anthropic}
+
+      # Qdrant Vector Database
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-chat_documents}
+      - QDRANT_DIMENSION=${QDRANT_DIMENSION:-1024}
+
+      # RAG Config
+      - RAG_CHUNK_SIZE=${RAG_CHUNK_SIZE:-512}
+      - RAG_TOP_K=${RAG_TOP_K:-5}
+      - RAG_RERANK=${RAG_RERANK:-true}
+
+      # Deployment
+      - HEALTH_CHECK_PATH=/api/health
+      - REQUEST_TIMEOUT=${REQUEST_TIMEOUT:-60000}
+    volumes:
+      # Mount for hot reload in development
+      - ./backend/src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ai-chat-network
+    depends_on:
+      qdrant:
+        condition: service_healthy
+
+  # ==========================================
+  # Qdrant Vector Database
+  # ==========================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ai-chat-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - ai-chat-network
+
+# ==========================================
+# Networks
+# ==========================================
+networks:
+  ai-chat-network:
+    driver: bridge
+    name: ai-chat-network
+
+# ==========================================
+# Volumes
+# ==========================================
+volumes:
+  qdrant_data:
+    name: ai-chat-qdrant-data

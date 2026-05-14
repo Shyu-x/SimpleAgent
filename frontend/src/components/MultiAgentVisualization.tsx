@@ -20,6 +20,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useMultiAgent, AGENT_TEMPLATES } from '@/hooks/useMultiAgent';
+import { fetchApi } from '@/lib/apiClient';
+import { API_ENDPOINTS } from '@/lib/apiConfig';
 
 // Agent 状态类型
 type AgentStatus = 'idle' | 'running' | 'completed' | 'error';
@@ -155,21 +157,144 @@ export function MultiAgentVisualization() {
     });
   }, []);
 
-  // 模拟执行工作流
+  // 执行工作流（调用真实 A2A 协作 API）
   const runWorkflow = useCallback(async () => {
     if (!workflow || isRunning) return;
 
     setIsRunning(true);
     setWorkflow(prev => prev ? { ...prev, status: 'running', startTime: Date.now() } : null);
-
-    // 添加启动日志
     addLog('info', '工作流开始执行');
+
+    try {
+      // 调用真实的 A2A 协作 API
+      const result = await fetchApi<{ collaborationId: string }>('/api/a2a/collaborate', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: workflow.name,
+          tasks: workflow.tasks.map((t, i) => ({
+            id: t.id,
+            agentName: workflow.agents[i % workflow.agents.length]?.name || 'agent-' + i,
+            taskType: 'general',
+            prompt: t.description,
+            dependencies: t.dependencies,
+          })),
+        }),
+      });
+
+      if (result.error || !result.data?.collaborationId) {
+        addLog('error', `API 调用失败: ${result.error?.message || '未知错误'}`);
+        setWorkflow(prev => prev ? { ...prev, status: 'error', endTime: Date.now() } : null);
+        setIsRunning(false);
+        return;
+      }
+
+      const collaborationId = result.data.collaborationId;
+      addLog('info', `协作任务已创建: ${collaborationId}`);
+
+      // 订阅 SSE 获取实时状态更新
+      const eventSource = new EventSource(`${API_ENDPOINTS.base}/api/a2a/subscribe/${collaborationId}`);
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          // 更新任务状态
+          if (data.taskId && data.status) {
+            const taskUpdate: Partial<TaskNode> = {
+              status: data.status === 'completed' ? 'completed' :
+                      data.status === 'failed' ? 'error' :
+                      data.status === 'running' ? 'running' : 'pending',
+            };
+
+            if (data.status === 'completed' || data.status === 'failed') {
+              taskUpdate.endTime = Date.now();
+              taskUpdate.result = data.result || (data.status === 'completed' ? '任务完成' : '任务失败');
+            }
+
+            setWorkflow(prev => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                tasks: prev.tasks.map(t =>
+                  t.id === data.taskId ? { ...t, ...taskUpdate } : t
+                ),
+              };
+            });
+
+            // 更新 Agent 状态
+            const agentIndex = workflow.tasks.findIndex(t => t.id === data.taskId);
+            if (agentIndex >= 0) {
+              const agent = workflow.agents[agentIndex % workflow.agents.length];
+              setWorkflow(prev => {
+                if (!prev) return null;
+                return {
+                  ...prev,
+                  agents: prev.agents.map(a =>
+                    a.id === agent.id ? {
+                      ...a,
+                      status: data.status === 'completed' ? 'completed' :
+                             data.status === 'failed' ? 'error' :
+                             data.status === 'running' ? 'running' : 'idle',
+                      progress: data.status === 'completed' ? 100 : data.progress || 0,
+                      currentTask: data.status === 'running' ? data.message : undefined,
+                    } : a
+                  ),
+                };
+              });
+            }
+
+            // 记录日志
+            if (data.status === 'running') {
+              addLog('info', data.message || `任务 ${data.taskId} 开始执行`);
+            } else if (data.status === 'completed') {
+              addLog('success', data.message || `任务 ${data.taskId} 已完成`);
+            } else if (data.status === 'failed') {
+              addLog('error', data.message || `任务 ${data.taskId} 执行失败`);
+            }
+          }
+
+          // 检查协作是否完成
+          if (data.status === 'completed' || data.status === 'failed') {
+            setWorkflow(prev => prev ? {
+              ...prev,
+              status: data.status === 'completed' ? 'completed' : 'error',
+              endTime: Date.now(),
+            } : null);
+
+            if (data.status === 'completed') {
+              addLog('success', '工作流执行完成');
+            }
+
+            eventSource.close();
+            setIsRunning(false);
+          }
+        } catch (e) {
+          console.error('[MultiAgentVisualization] SSE 解析错误:', e);
+        }
+      };
+
+      eventSource.onerror = () => {
+        addLog('error', 'SSE 连接错误，尝试模拟进度');
+        eventSource.close();
+
+        // SSE 失败时使用模拟进度（降级方案）
+        simulateTaskExecution();
+      };
+    } catch (err) {
+      addLog('error', `执行失败: ${err instanceof Error ? err.message : '未知错误'}`);
+      setWorkflow(prev => prev ? { ...prev, status: 'error', endTime: Date.now() } : null);
+      setIsRunning(false);
+    }
+  }, [workflow, isRunning]);
+
+  // 降级模拟执行（当 SSE 不可用时）
+  const simulateTaskExecution = useCallback(async () => {
+    if (!workflow) return;
 
     for (let i = 0; i < workflow.tasks.length; i++) {
       const task = workflow.tasks[i];
       const agent = workflow.agents[i % workflow.agents.length];
 
-      // 更新任务状态为运行中
       setWorkflow(prev => {
         if (!prev) return null;
         return {
@@ -200,7 +325,7 @@ export function MultiAgentVisualization() {
       }
 
       // 任务完成
-      const success = Math.random() > 0.1; // 90% 成功率
+      const success = Math.random() > 0.1;
       setWorkflow(prev => {
         if (!prev) return null;
         return {
@@ -234,9 +359,9 @@ export function MultiAgentVisualization() {
     }
 
     setWorkflow(prev => prev ? { ...prev, status: 'completed', endTime: Date.now() } : null);
-    addLog('success', '工作流执行完成');
+    addLog('success', '工作流执行完成（模拟模式）');
     setIsRunning(false);
-  }, [workflow, isRunning]);
+  }, [workflow]);
 
   // 添加日志
   const addLog = useCallback((type: LogEntry['type'], message: string, agentId?: string, taskId?: string) => {

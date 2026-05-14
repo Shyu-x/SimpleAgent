@@ -2,9 +2,9 @@
  * QdrantRouter - Qdrant 向量路由
  *
  * 功能：
- * - 文本向量化（使用 MiniMax Embedding API）
  * - 向量存储与检索（使用 Qdrant）
- * - 统一接口封装
+ * - 向量化（使用 simpleVectorize）
+ * - Qdrant 优先，降级到内存模式
  *
  * @module services/vector/QdrantRouter
  */
@@ -12,6 +12,39 @@
 const QdrantVectorStore = require('./QdrantVectorStore');
 const { createLogger } = require('../../infra/logger/AgentLogger');
 const logger = createLogger('QdrantRouter');
+
+/**
+ * 简易向量化函数（128维）
+ * 用于在 Qdrant 不可用时提供降级支持
+ */
+function simpleVectorize(text) {
+  const vector = new Array(128).fill(0);
+  const words = text.toLowerCase().split(/\s+/);
+
+  words.forEach((word, idx) => {
+    for (let i = 0; i < word.length; i++) {
+      const charCode = word.charCodeAt(i);
+      vector[(idx + charCode) % 128] += 1;
+      vector[(i * 7 + charCode) % 128] += charCode % 10;
+    }
+  });
+
+  // 归一化
+  const max = Math.max(...vector);
+  return max > 0 ? vector.map(v => v / max) : vector;
+}
+
+/**
+ * 将向量填充到指定维度（补零）
+ */
+function padVector(vector, targetDim) {
+  if (vector.length === targetDim) return vector;
+  const padded = [...vector];
+  while (padded.length < targetDim) {
+    padded.push(0);
+  }
+  return padded.slice(0, targetDim);
+}
 
 class QdrantRouter {
   constructor(options = {}) {
@@ -23,10 +56,7 @@ class QdrantRouter {
       apiKey: options.apiKey || process.env.QDRANT_API_KEY,
     });
 
-    // MiniMax Embedding API 配置
-    this.embeddingApiUrl = options.embeddingApiUrl || process.env.MINIMAX_EMBEDDING_URL || 'https://api.minimaxi.com/anthropic/v1/embeddings';
-    this.embeddingModel = options.embeddingModel || process.env.MINIMAX_EMBEDDING_MODEL || 'embedding-multilingual';
-    this.embeddingApiKey = options.embeddingApiKey || process.env.MINIMAX_API_KEY;
+    this.dimension = options.dimension || parseInt(process.env.QDRANT_DIMENSION) || 1024;
 
     this.isHealthy = false;
     this.lastHealthCheck = null;
@@ -71,7 +101,6 @@ class QdrantRouter {
     return {
       success: this.isHealthy,
       vectorStore: vectorStoreHealth,
-      embeddingModel: this.embeddingModel,
     };
   }
 
@@ -83,13 +112,14 @@ class QdrantRouter {
       healthy: this.isHealthy,
       lastCheck: this.lastHealthCheck,
       initialized: this.initialized,
-      embeddingModel: this.embeddingModel,
       collection: this.vectorStore.collectionName,
+      dimension: this.dimension,
     };
   }
 
   /**
-   * 文本向量化（使用 MiniMax API）
+   * 文本向量化
+   * 使用 simpleVectorize 生成 128 维向量，然后填充到目标维度
    * @param {string} text
    * @returns {Promise<Object>}
    */
@@ -99,30 +129,17 @@ class QdrantRouter {
         return { success: false, error: 'Text is empty' };
       }
 
-      const response = await fetch(this.embeddingApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.embeddingApiKey}`,
-        },
-        body: JSON.stringify({
-          model: this.embeddingModel,
-          input: text,
-        }),
-      });
+      // 使用 simpleVectorize 生成 128 维向量
+      const vector128 = simpleVectorize(text);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Embedding API error: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
+      // 填充到目标维度（QDRANT_DIMENSION）
+      const embedding = padVector(vector128, this.dimension);
 
       return {
         success: true,
-        embedding: data.data?.[0]?.embedding || data.embedding,
-        model: data.model || this.embeddingModel,
-        dimension: data.data?.[0]?.embedding?.length || data.embedding?.length || 0,
+        embedding: embedding,
+        model: 'simpleVectorize',
+        dimension: this.dimension,
       };
     } catch (error) {
       logger.error(`Embedding failed: ${error.message}`);
@@ -141,54 +158,27 @@ class QdrantRouter {
     }
 
     const results = [];
-    const batchSize = 32;
 
-    for (let i = 0; i < texts.length; i += batchSize) {
-      const batch = texts.slice(i, i + batchSize);
-
+    for (let i = 0; i < texts.length; i++) {
+      const text = texts[i];
       try {
-        const response = await fetch(this.embeddingApiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.embeddingApiKey}`,
-          },
-          body: JSON.stringify({
-            model: this.embeddingModel,
-            input: batch,
-          }),
+        const vector128 = simpleVectorize(text);
+        const embedding = padVector(vector128, this.dimension);
+        results.push({
+          index: i,
+          text: text,
+          embedding: embedding,
+          success: true,
         });
-
-        if (!response.ok) {
-          throw new Error(`Embedding API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const embeddings = data.data || [];
-
-        for (let j = 0; j < batch.length; j++) {
-          results.push({
-            index: i + j,
-            text: batch[j],
-            embedding: embeddings[j]?.embedding || null,
-            success: !!embeddings[j]?.embedding,
-          });
-        }
       } catch (error) {
-        logger.error(`Batch embedding failed: ${error.message}`);
-        for (let j = 0; j < batch.length; j++) {
-          results.push({
-            index: i + j,
-            text: batch[j],
-            embedding: null,
-            success: false,
-            error: error.message,
-          });
-        }
-      }
-
-      if (i + batchSize < texts.length) {
-        await this.sleep(100);
+        logger.error(`Batch embedding failed for text ${i}: ${error.message}`);
+        results.push({
+          index: i,
+          text: text,
+          embedding: null,
+          success: false,
+          error: error.message,
+        });
       }
     }
 

@@ -18,17 +18,34 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const RAGService = require('../../services/ragService');
-const AgentLogger = require('../../infra/logger/AgentLogger');
+const { AgentLogger } = require('../../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('admin-knowledge');
 
-// 创建RAG服务实例
-const ragService = new RAGService({
-  storagePath: process.env.RAG_STORAGE_PATH || './data/rag',
-  chunkSize: 500,
-  overlap: 50,
-  topK: 5
-});
+// 注意：HTML 转义应该在输出到 HTML 时才进行，而不是在 JSON API 层
+// 在 JSON API 中保留原始值，避免编码问题
+
+// 复用 rag.js 的单例模式，确保数据一致
+// 通过导出的 getRAGService 函数获取同一实例
+let ragServiceInstance = null;
+const getRAGService = () => {
+  if (!ragServiceInstance) {
+    ragServiceInstance = new RAGService({
+      storagePath: process.env.RAG_STORAGE_PATH || './data/rag',
+      chunkSize: 500,
+      overlap: 50,
+      topK: 5
+    });
+    // 初始化时加载所有知识库
+    ragServiceInstance.loadAllKnowledgeBases().catch(err => {
+      logger.warn('RAG服务初始化失败', { error: err.message });
+    });
+  }
+  return ragServiceInstance;
+};
+
+// 使用与 rag.js 相同的单例
+const ragService = getRAGService();
 
 // 配置multer用于文件上传
 const storage = multer.diskStorage({
@@ -315,6 +332,42 @@ router.get('/stats', (req, res) => {
     });
   } catch (error) {
     logger.error('Stats error', { error: error.message, stack: error.stack });
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/admin/knowledge/bases:
+ *   get:
+ *     tags: [knowledge]
+ *     summary: 获取知识库列表
+ *     description: 获取所有知识库的基本信息
+ *     responses:
+ *       200:
+ *         description: 知识库列表
+ */
+router.get('/bases', (req, res) => {
+  try {
+    const knowledgeBases = ragService.listKnowledgeBases();
+
+    res.json({
+      success: true,
+      data: {
+        knowledgeBases: knowledgeBases.map(kb => ({
+          id: kb.id,
+          name: kb.name,
+          description: kb.description || '',
+          documentCount: kb.documentCount || 0,
+          totalChunks: kb.totalChunks || 0,
+          createdAt: kb.createdAt,
+          updatedAt: kb.updatedAt
+        })),
+        total: knowledgeBases.length
+      }
+    });
+  } catch (error) {
+    logger.error('List knowledge bases error', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, error: error.message });
   }
 });

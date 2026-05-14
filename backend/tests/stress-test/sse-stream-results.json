@@ -1,0 +1,216 @@
+{
+  "timestamp": "2026-05-12T20:11:45.264Z",
+  "concurrentTests": {
+    "10_connections": {
+      "total": 2,
+      "successes": 2,
+      "errors": 8,
+      "errorRate": "400.00%",
+      "duration": "2.16s",
+      "latencies": {
+        "min": "188.00ms",
+        "max": "2100.00ms",
+        "avg": "1144.00ms",
+        "p50": "2100.00ms",
+        "p90": "2100.00ms",
+        "p99": "2100.00ms"
+      },
+      "firstPacket": {
+        "avg": "1144.00ms",
+        "min": "188.00ms",
+        "max": "2100.00ms"
+      },
+      "throughput": "0.93 req/s",
+      "dataTransfer": {
+        "totalBytes": 1884,
+        "totalMB": "0.00 MB",
+        "avgPerRequest": "942 bytes"
+      }
+    },
+    "50_connections": {
+      "total": 0,
+      "successes": 0,
+      "errors": 50,
+      "errorRate": "0%",
+      "duration": "0.07s",
+      "latencies": {
+        "min": "N/A",
+        "max": "N/A",
+        "avg": "N/A",
+        "p50": "N/A",
+        "p90": "N/A",
+        "p99": "N/A"
+      },
+      "firstPacket": {
+        "avg": "N/A",
+        "min": "N/A",
+        "max": "N/A"
+      },
+      "throughput": "N/A",
+      "dataTransfer": {
+        "totalBytes": 0,
+        "totalMB": "0.00 MB",
+        "avgPerRequest": "N/A"
+      }
+    },
+    "100_connections": {
+      "total": 0,
+      "successes": 0,
+      "errors": 100,
+      "errorRate": "0%",
+      "duration": "0.20s",
+      "latencies": {
+        "min": "N/A",
+        "max": "N/A",
+        "avg": "N/A",
+        "p50": "N/A",
+        "p90": "N/A",
+        "p99": "N/A"
+      },
+      "firstPacket": {
+        "avg": "N/A",
+        "min": "N/A",
+        "max": "N/A"
+      },
+      "throughput": "N/A",
+      "dataTransfer": {
+        "totalBytes": 0,
+        "totalMB": "0.00 MB",
+        "avgPerRequest": "N/A"
+      }
+    },
+    "200_connections": {
+      "total": 0,
+      "successes": 0,
+      "errors": 200,
+      "errorRate": "0%",
+      "duration": "0.26s",
+      "latencies": {
+        "min": "N/A",
+        "max": "N/A",
+        "avg": "N/A",
+        "p50": "N/A",
+        "p90": "N/A",
+        "p99": "N/A"
+      },
+      "firstPacket": {
+        "avg": "N/A",
+        "min": "N/A",
+        "max": "N/A"
+      },
+      "throughput": "N/A",
+      "dataTransfer": {
+        "totalBytes": 0,
+        "totalMB": "0.00 MB",
+        "avgPerRequest": "N/A"
+      }
+    }
+  },
+  "firstPacketTests": {
+    "total": 0,
+    "successes": 0,
+    "errors": 20,
+    "errorRate": "0%",
+    "duration": "0.04s",
+    "latencies": {
+      "min": "N/A",
+      "max": "N/A",
+      "avg": "N/A",
+      "p50": "N/A",
+      "p90": "N/A",
+      "p99": "N/A"
+    },
+    "firstPacket": {
+      "avg": "N/A",
+      "min": "N/A",
+      "max": "N/A"
+    },
+    "throughput": "N/A",
+    "dataTransfer": {
+      "totalBytes": 0,
+      "totalMB": "0.00 MB",
+      "avgPerRequest": "N/A"
+    }
+  },
+  "throughputTests": {
+    "total": 34,
+    "successes": 34,
+    "errors": 245,
+    "errorRate": "720.59%",
+    "duration": "35.09s",
+    "latencies": {
+      "min": "1.00ms",
+      "max": "383.00ms",
+      "avg": "71.47ms",
+      "p50": "3.00ms",
+      "p90": "193.00ms",
+      "p99": "383.00ms"
+    },
+    "firstPacket": {
+      "avg": "71.47ms",
+      "min": "1.00ms",
+      "max": "383.00ms"
+    },
+    "throughput": "0.97 req/s",
+    "dataTransfer": {
+      "totalBytes": 0,
+      "totalMB": "0.00 MB",
+      "avgPerRequest": "0 bytes"
+    },
+    "totalRequests": 279
+  },
+  "longRunningTests": {
+    "total": 0,
+    "successes": 0,
+    "errors": 1,
+    "errorRate": "0%",
+    "duration": "5 minutes",
+    "latencies": {
+      "min": "N/A",
+      "max": "N/A",
+      "avg": "N/A",
+      "p50": "N/A",
+      "p90": "N/A",
+      "p99": "N/A"
+    },
+    "firstPacket": {
+      "avg": "N/A",
+      "min": "N/A",
+      "max": "N/A"
+    },
+    "throughput": "N/A",
+    "dataTransfer": {
+      "totalBytes": 0,
+      "totalMB": "0.00 MB",
+      "avgPerRequest": "N/A"
+    },
+    "memoryDelta": "0.03 MB",
+    "memoryLeak": "NONE"
+  },
+  "reconnectionTests": {
+    "total": 1,
+    "successes": 1,
+    "errors": 4,
+    "errorRate": "400.00%",
+    "duration": "7.57s",
+    "latencies": {
+      "min": "2485.00ms",
+      "max": "2485.00ms",
+      "avg": "2485.00ms",
+      "p50": "2485.00ms",
+      "p90": "2485.00ms",
+      "p99": "2485.00ms"
+    },
+    "firstPacket": {
+      "avg": "N/A",
+      "min": "N/A",
+      "max": "N/A"
+    },
+    "throughput": "0.13 req/s",
+    "dataTransfer": {
+      "totalBytes": 0,
+      "totalMB": "0.00 MB",
+      "avgPerRequest": "0 bytes"
+    }
+  }
+}

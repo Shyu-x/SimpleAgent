@@ -29,9 +29,6 @@ export { useRealAgentSSE as useRealAgentSSEAlt } from './useRealAgentSSE';
 export { useHumanInTheLoop, CheckpointModal } from './useHITL';
 export { useHITLSSE } from './useHITLSSE';
 
-// ============ 知识库 Hook ============
-export { useKnowledgeBase } from './useKnowledgeBase';
-
 // ============ 增强 Agent Hooks ============
 export { useEnhancedAgent } from './useEnhancedAgent';
 export { useEnhancedMemory } from './useEnhancedMemory';
@@ -50,4 +47,5 @@ export { useSearch } from './useSearch';
 export { useWorkflowExecution } from './useWorkflowExecution';
 
 // ============ 图片意图 Hook ============
-export { useImageIntent } from './useImageIntent';
+export { detectImageIntent, cleanImagePrompt } from './useImageIntent';
+export { default as useImageIntent } from './useImageIntent';

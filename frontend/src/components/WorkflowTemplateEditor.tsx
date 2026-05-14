@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { isClient } from '@/lib/ssrStorage';
 import {
   Plus,
   Trash2,
@@ -92,7 +93,7 @@ export default function WorkflowTemplateEditor() {
     setIsLoading(true);
     try {
       // 从本地存储加载自定义模板
-      const stored = localStorage.getItem('custom-workflow-templates');
+      const stored = isClient() ? localStorage.getItem('custom-workflow-templates') : null;
       const customTemplates: CustomWorkflowTemplate[] = stored ? JSON.parse(stored) : [];
 
       // 合并预设模板
@@ -137,7 +138,9 @@ export default function WorkflowTemplateEditor() {
 
   // 保存模板到本地存储
   const saveTemplatesToStorage = useCallback((customTemplates: CustomWorkflowTemplate[]) => {
-    localStorage.setItem('custom-workflow-templates', JSON.stringify(customTemplates));
+    if (isClient()) {
+      localStorage.setItem('custom-workflow-templates', JSON.stringify(customTemplates));
+    }
   }, []);
 
   // 初始化加载

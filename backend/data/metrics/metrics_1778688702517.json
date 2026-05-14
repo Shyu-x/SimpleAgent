@@ -1,0 +1,2070 @@
+{
+  "timestamp": "2026-05-13T16:11:42.517Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/api/v1/chat/completions\",method=\"POST\",status=\"200\"": 8,
+      "endpoint=\"/api/a2a/agents\",method=\"GET\",status=\"200\"": 3,
+      "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/a2a/coordination/modes\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/agent/status\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/request\",method=\"POST\",status=\"200\"": 3,
+      "endpoint=\"/api/a2a/tasks/define\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/collaboration/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools/categories\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools/categories/list\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/a2a/status\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/intent/tree\",method=\"GET\",status=\"200\"": 6,
+      "endpoint=\"/api/a2a/tasks\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/minimax/status\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/metrics/realtime\",method=\"GET\",status=\"200\"": 4,
+      "endpoint=\"/api/admin/tools/web_search\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/register\",method=\"POST\",status=\"201\"": 2,
+      "endpoint=\"/api/admin/tools/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools/recommend\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/health\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/types\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/send\",method=\"POST\",status=\"200\"": 2,
+      "endpoint=\"/api/mcp/tools\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/metrics/realtime\",method=\"GET\",status=\"404\"": 2,
+      "endpoint=\"/api/admin/tools/web_search\",method=\"PATCH\",status=\"200\"": 2,
+      "endpoint=\"/api/admin/tools/calculator\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/pending\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mcp/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mcp/categories\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools/calculator/test\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/metrics\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/queue\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/mission/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/checkpoint\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/collaborate\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/test-agent-1/heartbeat\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/test-agent-1/unregister\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/agents/test-agent-final\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/alerts\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/a2a/receive\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/tasks\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/memory/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/result/task_1778688368888_ytfa8z9gz\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/a2a/tasks/task_1778688368888_ytfa8z9gz\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/mission/agents\",method=\"GET\",status=\"200\"": 2,
+      "endpoint=\"/api/mission/events\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/knowledge/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/knowledge/docs\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/memory/notes\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/models\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/prompts\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/traces\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/traces/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/intent/node\",method=\"POST\",status=\"201\"": 1,
+      "endpoint=\"/api/memory/global\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/mission/subscribe\",method=\"GET\",status=\"404\"": 1,
+      "endpoint=\"/api/admin/intent/node/mp49a4bwqg6yj95el\",method=\"PUT\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/intent/test\",method=\"POST\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/intent/node/mp49a4bwqg6yj95el\",method=\"DELETE\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/request\",method=\"POST\",status=\"500\"": 1,
+      "endpoint=\"/api/admin/knowledge/search\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/prompts/test-render\",method=\"POST\",status=\"200\"": 1
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 1
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    },
+    "module_errors_total": {
+      "module=\"unknown\",type=\"server_error\"": 1
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/chat/completions\",method=\"POST\"": {
+        "count": 8,
+        "sum": 91.743,
+        "mean": 11.467875,
+        "buckets": {
+          "1": 0,
+          "5": 2,
+          "10": 5,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/v1/chat/completions\",method=\"POST\"": {
+        "count": 8,
+        "sum": 91.74199999999999,
+        "mean": 11.467749999999999,
+        "buckets": {
+          "1": 0,
+          "5": 2,
+          "10": 5,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents\",method=\"GET\"": {
+        "count": 5,
+        "sum": 0.003,
+        "mean": 0.0006000000000000001,
+        "buckets": {
+          "1": 5,
+          "5": 5,
+          "10": 5,
+          "0.005": 5,
+          "0.01": 5,
+          "0.025": 5,
+          "0.05": 5,
+          "0.1": 5,
+          "0.25": 5,
+          "0.5": 5,
+          "2.5": 5
+        }
+      },
+      "endpoint=\"/api/a2a/agents\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0.003,
+        "mean": 0.001,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/health\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/coordination/modes\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/coordination/modes\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/status\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/agent/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/request\",method=\"POST\"": {
+        "count": 4,
+        "sum": 30.521,
+        "mean": 7.63025,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/hitl/request\",method=\"POST\"": {
+        "count": 4,
+        "sum": 30.521,
+        "mean": 7.63025,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/tasks/define\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/tasks/define\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/collaboration/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/collaboration/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/categories\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/tools/categories\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/categories/list\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/categories/list\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 7,
+        "sum": 0.019000000000000003,
+        "mean": 0.0027142857142857147,
+        "buckets": {
+          "1": 7,
+          "5": 7,
+          "10": 7,
+          "0.005": 6,
+          "0.01": 6,
+          "0.025": 7,
+          "0.05": 7,
+          "0.1": 7,
+          "0.25": 7,
+          "0.5": 7,
+          "2.5": 7
+        }
+      },
+      "endpoint=\"/api/admin/tools\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tree\",method=\"GET\"": {
+        "count": 6,
+        "sum": 0.018000000000000002,
+        "mean": 0.0030000000000000005,
+        "buckets": {
+          "1": 6,
+          "5": 6,
+          "10": 6,
+          "0.005": 5,
+          "0.01": 5,
+          "0.025": 6,
+          "0.05": 6,
+          "0.1": 6,
+          "0.25": 6,
+          "0.5": 6,
+          "2.5": 6
+        }
+      },
+      "endpoint=\"/api/admin/intent/tree\",method=\"GET\"": {
+        "count": 6,
+        "sum": 0.018000000000000002,
+        "mean": 0.0030000000000000005,
+        "buckets": {
+          "1": 6,
+          "5": 6,
+          "10": 6,
+          "0.005": 5,
+          "0.01": 5,
+          "0.025": 6,
+          "0.05": 6,
+          "0.1": 6,
+          "0.25": 6,
+          "0.5": 6,
+          "2.5": 6
+        }
+      },
+      "endpoint=\"/tasks\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0.001,
+        "mean": 0.0003333333333333333,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/a2a/tasks\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/minimax/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/realtime\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.006,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/metrics/realtime\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.006,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/web_search\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/web_search\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/register\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/agents/register\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/stats\",method=\"GET\"": {
+        "count": 8,
+        "sum": 0.007,
+        "mean": 0.000875,
+        "buckets": {
+          "1": 8,
+          "5": 8,
+          "10": 8,
+          "0.005": 8,
+          "0.01": 8,
+          "0.025": 8,
+          "0.05": 8,
+          "0.1": 8,
+          "0.25": 8,
+          "0.5": 8,
+          "2.5": 8
+        }
+      },
+      "endpoint=\"/api/admin/tools/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/recommend\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/recommend\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/health\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/hitl/health\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/types\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/hitl/types\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/send\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/a2a/send\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/tools\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/tools\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/metrics/realtime\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/web_search\",method=\"PATCH\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/tools/web_search\",method=\"PATCH\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/calculator\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/calculator\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/pending\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/hitl/pending\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/hitl/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/categories\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/calculator/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools/calculator/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.014,
+        "mean": 0.014,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/metrics\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/queue\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/mission/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/checkpoint\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/hitl/checkpoint\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/collaborate\",method=\"POST\"": {
+        "count": 1,
+        "sum": 60.018,
+        "mean": 60.018,
+        "buckets": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/api/a2a/collaborate\",method=\"POST\"": {
+        "count": 1,
+        "sum": 60.018,
+        "mean": 60.018,
+        "buckets": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/agents/test-agent-1/heartbeat\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/test-agent-1/heartbeat\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/test-agent-1/unregister\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/test-agent-1/unregister\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/agents/test-agent-final\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/agents/test-agent-final\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/alerts\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/receive\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/receive\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/tasks\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.001,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/memory/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/result/task_1778688368888_ytfa8z9gz\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/result/task_1778688368888_ytfa8z9gz\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/tasks/task_1778688368888_ytfa8z9gz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/a2a/tasks/task_1778688368888_ytfa8z9gz\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/agents\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/events\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/events\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.005,
+        "mean": 0.005,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/docs\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/docs\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/notes\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/memory/notes\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/prompts\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/traces\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/traces/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/node\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/intent/node\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/global\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/memory/global\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mission/subscribe\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/node/mp49a4bwqg6yj95el\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/intent/node/mp49a4bwqg6yj95el\",method=\"PUT\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/intent/test\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/node/mp49a4bwqg6yj95el\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/intent/node/mp49a4bwqg6yj95el\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/search\",method=\"GET\"": {
+        "count": 1,
+        "sum": 65.598,
+        "mean": 65.598,
+        "buckets": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/search\",method=\"GET\"": {
+        "count": 1,
+        "sum": 65.598,
+        "mean": 65.598,
+        "buckets": {
+          "1": 0,
+          "5": 0,
+          "10": 0,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/test-render\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/prompts/test-render\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 1
+}

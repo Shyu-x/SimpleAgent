@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { isClient } from '@/lib/ssrStorage';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 
 // ==================== 类型定义 ====================
@@ -332,6 +333,7 @@ export function useHITLSSE(options: UseHITLSSEOptions = {}) {
 
   // 检查是否应跳过同类操作（根据 localStorage 中的记录）
   const shouldSkipSimilar = useCallback((operationKey: string): boolean => {
+    if (!isClient()) return false;
     try {
       const skipped = JSON.parse(localStorage.getItem('hitl_skipped_operations') || '{}');
       const timestamp = skipped[operationKey];
@@ -352,6 +354,7 @@ export function useHITLSSE(options: UseHITLSSEOptions = {}) {
 
   // 清除同类操作的跳过记录
   const clearSkipSimilar = useCallback((operationKey?: string) => {
+    if (!isClient()) return;
     try {
       if (operationKey) {
         const skipped = JSON.parse(localStorage.getItem('hitl_skipped_operations') || '{}');

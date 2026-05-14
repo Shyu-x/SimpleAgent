@@ -8,11 +8,14 @@
  * - 模型调用统计
  * - 工具使用统计
  * - RAG知识库状态
+ * - Qdrant 向量数据库监控
  * - 最近请求追踪
  */
 
 import React, { useState, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
+import { SafeAdminWrapper } from './SafeAdminWrapper';
+import QdrantMonitor from './QdrantMonitor';
 
 interface SystemStats {
   totalRequests: number;
@@ -92,8 +95,8 @@ export default function AdminDashboard() {
       <div className="bg-white border rounded-lg p-4">
         <h2 className="text-lg font-semibold mb-4">模型调用分布</h2>
         <div className="space-y-2">
-          {stats.modelCalls.map((item) => (
-            <div key={item.model} className="flex items-center gap-4">
+          {stats.modelCalls.map((item, idx) => (
+            <div key={`model-${item.model}-${idx}`} className="flex items-center gap-4">
               <span className="w-32 truncate">{item.model}</span>
               <div className="flex-1 bg-gray-200 rounded-full h-2">
                 <div
@@ -113,8 +116,8 @@ export default function AdminDashboard() {
       <div className="bg-white border rounded-lg p-4">
         <h2 className="text-lg font-semibold mb-4">工具调用分布</h2>
         <div className="space-y-2">
-          {stats.toolCalls.map((item) => (
-            <div key={item.tool} className="flex items-center gap-4">
+          {stats.toolCalls.map((item, idx) => (
+            <div key={`tool-${item.tool}-${idx}`} className="flex items-center gap-4">
               <span className="w-32 truncate">{item.tool}</span>
               <div className="flex-1 bg-gray-200 rounded-full h-2">
                 <div
@@ -142,8 +145,8 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody>
-            {stats.knowledgeBases.map((kb) => (
-              <tr key={kb.name} className="border-b last:border-0">
+            {stats.knowledgeBases.map((kb, index) => (
+              <tr key={`kb-${index}-${kb.name.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '')}`} className="border-b last:border-0">
                 <td className="py-2">{kb.name}</td>
                 <td className="py-2">{kb.docCount}</td>
                 <td className="py-2">
@@ -156,6 +159,9 @@ export default function AdminDashboard() {
           </tbody>
         </table>
       </div>
+
+      {/* Qdrant 向量数据库监控 */}
+      <QdrantMonitor />
     </div>
   );
 }

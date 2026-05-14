@@ -8,7 +8,6 @@ export {
   MiniStatusIndicator,
 } from './AgentStatusIndicator';
 export type {
-  AgentStatus,
   AgentTool,
   AgentInfo,
 } from './AgentStatusIndicator';

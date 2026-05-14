@@ -1,0 +1,193 @@
+{
+  "timestamp": "2026-05-12T19:34:20.585Z",
+  "total": 22,
+  "passed": 0,
+  "failed": 0,
+  "skipped": 22,
+  "errors": 0,
+  "results": [
+    {
+      "category": "qdrant",
+      "name": "Qdrant 状态检查 - GET /api/qdrant/status",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.631Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "qdrant",
+      "name": "Qdrant 集合列表 - GET /api/qdrant/collections",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.633Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "qdrant",
+      "name": "Qdrant 健康状态 - GET /api/health (检查 Qdrant 依赖)",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.636Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "vectorSearch",
+      "name": "创建测试集合 - PUT /api/qdrant/collections/test_func",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.638Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "vectorSearch",
+      "name": "插入测试文档 - POST /api/qdrant/documents",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.640Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "vectorSearch",
+      "name": "向量相似度搜索 - POST /api/qdrant/search",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.643Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "vectorSearch",
+      "name": "清理测试集合 - DELETE /api/qdrant/collections/test_func",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.644Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "fallback",
+      "name": "检查降级配置 - GET /api/config",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.647Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "fallback",
+      "name": "RAG 搜索（降级路径）- POST /api/rag/search",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.649Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "fallback",
+      "name": "搜索服务降级 - GET /api/search",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.650Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "sse",
+      "name": "SSE 流式聊天 - POST /api/chat (流式)",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.653Z",
+      "message": "SSE 服务不可用"
+    },
+    {
+      "category": "sse",
+      "name": "非流式聊天响应 - POST /api/chat (非流式)",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.655Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "知识库统计 - GET /api/admin/knowledge/stats",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.657Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "知识库列表 - GET /api/admin/knowledge/docs",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.659Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "工具列表 - GET /api/admin/tools",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.660Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "工具分类 - GET /api/admin/tools/categories/list",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.662Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "模型列表 - GET /api/admin/models",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.663Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "模型统计 - GET /api/admin/models/stats",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.665Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "Prompt 模板列表 - GET /api/admin/prompts",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.666Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "链路追踪列表 - GET /api/admin/traces",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.668Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "意图列表 - GET /api/admin/intents",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.669Z",
+      "message": "服务未启动或无法连接"
+    },
+    {
+      "category": "admin",
+      "name": "管理后台统计 - GET /api/admin/stats",
+      "status": "SKIP",
+      "timestamp": "2026-05-12T19:34:20.670Z",
+      "message": "服务未启动或无法连接"
+    }
+  ],
+  "summary": {
+    "qdrant": {
+      "total": 3,
+      "passed": 0,
+      "failed": 0
+    },
+    "vectorSearch": {
+      "total": 4,
+      "passed": 0,
+      "failed": 0
+    },
+    "fallback": {
+      "total": 3,
+      "passed": 0,
+      "failed": 0
+    },
+    "sse": {
+      "total": 2,
+      "passed": 0,
+      "failed": 0
+    },
+    "admin": {
+      "total": 10,
+      "passed": 0,
+      "failed": 0
+    }
+  },
+  "issues": [],
+  "recommendations": []
+}

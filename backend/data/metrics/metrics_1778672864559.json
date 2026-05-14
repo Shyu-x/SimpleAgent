@@ -1,0 +1,171 @@
+{
+  "timestamp": "2026-05-13T11:47:44.559Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/api/mission/tasks\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/agents\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/events\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/mission/tasks\",method=\"GET\",status=\"304\"": 7006,
+      "endpoint=\"/api/mission/agents\",method=\"GET\",status=\"304\"": 7006,
+      "endpoint=\"/api/mission/events\",method=\"GET\",status=\"304\"": 7006
+    }
+  },
+  "gauges": {
+    "process_cpu_seconds_total": {
+      "{}": 0
+    },
+    "process_memory_bytes": {
+      "{}": 0
+    },
+    "process_open_handles": {
+      "{}": 0
+    },
+    "http_requests_active": {
+      "{}": 2
+    },
+    "http_requests_total": {
+      "{}": 0
+    },
+    "http_request_duration_seconds": {
+      "{}": 0
+    },
+    "model_tokens_total": {
+      "{}": 0
+    },
+    "model_requests_total": {
+      "{}": 0
+    },
+    "model_errors_total": {
+      "{}": 0
+    },
+    "tool_calls_total": {
+      "{}": 0
+    },
+    "tool_errors_total": {
+      "{}": 0
+    },
+    "tool_duration_seconds": {
+      "{}": 0
+    },
+    "queue_length": {
+      "{}": 0
+    },
+    "queue_capacity": {
+      "{}": 0
+    }
+  },
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/tasks\",method=\"GET\"": {
+        "count": 7007,
+        "sum": 1.3989999999999583,
+        "mean": 0.00019965748537176514,
+        "buckets": {
+          "1": 7007,
+          "5": 7007,
+          "10": 7007,
+          "0.005": 7007,
+          "0.01": 7007,
+          "0.025": 7007,
+          "0.05": 7007,
+          "0.1": 7007,
+          "0.25": 7007,
+          "0.5": 7007,
+          "2.5": 7007
+        }
+      },
+      "endpoint=\"/api/mission/tasks\",method=\"GET\"": {
+        "count": 7007,
+        "sum": 1.5729999999999402,
+        "mean": 0.0002244897959183588,
+        "buckets": {
+          "1": 7007,
+          "5": 7007,
+          "10": 7007,
+          "0.005": 7007,
+          "0.01": 7007,
+          "0.025": 7007,
+          "0.05": 7007,
+          "0.1": 7007,
+          "0.25": 7007,
+          "0.5": 7007,
+          "2.5": 7007
+        }
+      },
+      "endpoint=\"/agents\",method=\"GET\"": {
+        "count": 7007,
+        "sum": 0.8290000000000006,
+        "mean": 0.00011831026116740412,
+        "buckets": {
+          "1": 7007,
+          "5": 7007,
+          "10": 7007,
+          "0.005": 7007,
+          "0.01": 7007,
+          "0.025": 7007,
+          "0.05": 7007,
+          "0.1": 7007,
+          "0.25": 7007,
+          "0.5": 7007,
+          "2.5": 7007
+        }
+      },
+      "endpoint=\"/api/mission/agents\",method=\"GET\"": {
+        "count": 7007,
+        "sum": 0.9770000000000008,
+        "mean": 0.00013943199657485384,
+        "buckets": {
+          "1": 7007,
+          "5": 7007,
+          "10": 7007,
+          "0.005": 7007,
+          "0.01": 7007,
+          "0.025": 7007,
+          "0.05": 7007,
+          "0.1": 7007,
+          "0.25": 7007,
+          "0.5": 7007,
+          "2.5": 7007
+        }
+      },
+      "endpoint=\"/events\",method=\"GET\"": {
+        "count": 7007,
+        "sum": 1.162999999999983,
+        "mean": 0.00016597688026259212,
+        "buckets": {
+          "1": 7007,
+          "5": 7007,
+          "10": 7007,
+          "0.005": 7007,
+          "0.01": 7007,
+          "0.025": 7007,
+          "0.05": 7007,
+          "0.1": 7007,
+          "0.25": 7007,
+          "0.5": 7007,
+          "2.5": 7007
+        }
+      },
+      "endpoint=\"/api/mission/events\",method=\"GET\"": {
+        "count": 7007,
+        "sum": 1.3079999999999676,
+        "mean": 0.0001866704723847535,
+        "buckets": {
+          "1": 7007,
+          "5": 7007,
+          "10": 7007,
+          "0.005": 7007,
+          "0.01": 7007,
+          "0.025": 7007,
+          "0.05": 7007,
+          "0.1": 7007,
+          "0.25": 7007,
+          "0.5": 7007,
+          "2.5": 7007
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 2
+}

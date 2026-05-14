@@ -5,6 +5,7 @@ import { useChatStore } from '@/store/chatStore';
 import { sendSSEChatMessage } from '@/lib/sse';
 import { detectImageIntent, cleanImagePrompt } from '@/hooks/useImageIntent';
 import { useSearchEnhanced } from '@/hooks/useSearchEnhanced';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import Message from './Message';
 import ChatInput, { ChatInputRef } from './ChatInput';
 import ContentPreview, { useContentPreview } from './ContentPreview';
@@ -93,12 +94,21 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     }
   }, []);
 
-  // 消息更新时，如果用户没有主动上滑，保持贴底
+  // 获取当前最后一条消息的内容长度，用于检测流式更新
+  const lastMessageContentLength = activeConversation?.messages.length && activeConversation.messages.length > 0
+    ? activeConversation.messages[activeConversation.messages.length - 1].content.length
+    : 0;
+
+  // 消息或内容更新时，如果用户没有主动上滑，保持贴底
+  // 注意：这里不依赖 messages.length，而是依赖 lastMessageContentLength 来检测流式内容更新
   useEffect(() => {
-    if (!userScrolledRef.current) {
-      scrollToBottom(isLoading ? 'smooth' : 'auto');
+    if (!userScrolledRef.current && activeConversationId) {
+      // 使用 requestAnimationFrame 确保 DOM 更新后再滚动
+      requestAnimationFrame(() => {
+        scrollToBottom(isLoading ? 'smooth' : 'auto');
+      });
     }
-  }, [activeConversation?.messages.length, isLoading, scrollToBottom]);
+  }, [lastMessageContentLength, activeConversationId, isLoading, scrollToBottom]);
 
   // 切换对话时重置滚动状态
   useEffect(() => {
@@ -298,6 +308,13 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     }
 
     try {
+      // 调试日志：检查发送的消息内容
+      console.log('[ChatArea] 发送消息:', {
+        contentLength: content.length,
+        contentPreview: content.substring(0, 50),
+        contentBytes: new TextEncoder().encode(content.slice(0, 10)).toString()
+      });
+
       const assistantMessageId = assistantMessage.id;
 
       await sendSSEChatMessage(
@@ -348,12 +365,14 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
   };
 
   return (
-    <div className="relative flex h-full flex-col bg-transparent">
+    <ErrorBoundary moduleName="ChatArea" showStack>
+      <div className="relative flex h-full flex-col bg-transparent">
       {/* Messages Area */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="custom-scrollbar flex-1 overflow-y-auto"
+        className="custom-scrollbar flex-1 overflow-y-auto bg-transparent"
+        style={{ backgroundColor: 'transparent' }}
       >
         {!activeConversation?.messages.length ? (
           <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col items-center justify-center px-6 py-16 text-center">
@@ -417,9 +436,9 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
                   onPreviewLink={triggerPreview}
                 />
               );
-            })}
+            })
 
-            {/* AI 思考中动画 - 仅当没有任何消息时显示 */}
+            {/* AI 思考中动画 - 仅当isLoading且没有任何消息时显示 */}
             <AnimatePresence>
               {isLoading && activeConversation.messages.length === 0 && (
                 <motion.div
@@ -557,7 +576,8 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
       </div>
 
       <ContentPreview config={previewConfig} onClose={closePreview} />
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }
 

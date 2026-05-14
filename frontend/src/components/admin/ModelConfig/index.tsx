@@ -10,8 +10,9 @@
  * - 熔断器状态
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
+import { useAdminSSE } from '@/hooks/useAdminSSE';
 
 // ============ 类型定义 ============
 
@@ -54,45 +55,39 @@ interface ModelStats {
 // ============ 主组件 ============
 
 export default function ModelConfigPage() {
-  const [models, setModels] = useState<ModelConfig[]>([]);
   const [stats, setStats] = useState<ModelStats | null>(null);
-  const [loading, setLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelConfig | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'stats'>('list');
 
+  // SSE 订阅 models 数据
+  const { data: modelsData, loading: modelsLoading, refresh: refreshModels } = useAdminSSE<ModelConfig[]>({
+    endpoint: '/api/admin/models',
+    parser: (res) => res?.data?.data?.models || [],
+    interval: 30000,
+  });
+
+  // SSE 订阅 stats 数据
+  const { data: statsData, loading: statsLoading, refresh: refreshStats } = useAdminSSE<ModelStats | null>({
+    endpoint: '/api/admin/models/stats',
+    parser: (res) => res?.data?.data || null,
+    interval: 30000,
+  });
+
+  const models = modelsData || [];
+  const loading = modelsLoading || statsLoading;
+
+  // 同步 stats
+  useEffect(() => {
+    if (statsData) setStats(statsData);
+  }, [statsData]);
+
   const fetchModels = useCallback(async () => {
-    try {
-      const { data, error } = await fetchApi<{ success: boolean; data: { models: ModelConfig[]; total: number; defaultModel: string } }>('/api/admin/models');
-      if (error) throw new Error(error.message);
-      // 后端返回 { success: true, data: { models: [...], total, defaultModel } }
-      setModels(data?.data?.models || []);
-    } catch (err) {
-      console.error('Failed to fetch models:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    await refreshModels();
+  }, [refreshModels]);
 
   const fetchStats = useCallback(async () => {
-    try {
-      const { data, error } = await fetchApi<{ success: boolean; data: ModelStats }>('/api/admin/models/stats');
-      if (error) throw new Error(error.message);
-      // 后端返回 { success: true, data: {...} }
-      setStats(data?.data || null);
-    } catch (err) {
-      console.error('Failed to fetch stats:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchModels();
-    fetchStats();
-    const interval = setInterval(() => {
-      fetchModels();
-      fetchStats();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [fetchModels, fetchStats]);
+    await refreshStats();
+  }, [refreshStats]);
 
   const toggleModel = async (modelId: string, enabled: boolean) => {
     try {

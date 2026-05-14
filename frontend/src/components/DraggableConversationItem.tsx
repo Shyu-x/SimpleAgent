@@ -44,8 +44,8 @@ export default function DraggableConversationItem({
   return (
     <div
       draggable
-      onDragStart={handleDragStart as unknown as undefined}
-      onDragEnd={handleDragEnd as unknown as undefined}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       className="relative cursor-grab active:cursor-grabbing"
     >
       <motion.div

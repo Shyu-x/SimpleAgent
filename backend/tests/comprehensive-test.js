@@ -91,7 +91,6 @@ const testResults = {
     rag: { total: 0, passed: 0, failed: 0 },
     search: { total: 0, passed: 0, failed: 0 },
     agent: { total: 0, passed: 0, failed: 0 },
-    ollama: { total: 0, passed: 0, failed: 0 },
     hitl: { total: 0, passed: 0, failed: 0 },
     a2a: { total: 0, passed: 0, failed: 0 }
   },
@@ -350,31 +349,6 @@ async function testAgentAPI() {
 }
 
 /**
- * Ollama API 测试
- */
-async function testOllamaAPI() {
-  console.log('\n📦 Ollama 向量模型 API');
-
-  await runTest('ollama', 'Ollama状态 - GET /api/ollama/status', async () => {
-    const res = await request(`${BASE_URL}/api/ollama/status`);
-    return res.status === 200 && res.data.success ? true : res;
-  });
-
-  await runTest('ollama', 'Ollama模型 - GET /api/ollama/models', async () => {
-    const res = await request(`${BASE_URL}/api/ollama/models`);
-    return res.status === 200 && res.data.success ? true : res;
-  });
-
-  await runTest('ollama', '嵌入测试 - POST /api/ollama/embed', async () => {
-    const res = await request(`${BASE_URL}/api/ollama/embed`, {
-      method: 'POST',
-      body: { text: '测试文本嵌入' }
-    });
-    return res.status === 200 ? true : res;
-  });
-}
-
-/**
  * HITL API 测试
  */
 async function testHITLAPI() {
@@ -432,7 +406,6 @@ async function runAllTests() {
   await testRAGAPI();
   await testSearchAPI();
   await testAgentAPI();
-  await testOllamaAPI();
   await testHITLAPI();
   await testA2AAPI();
 

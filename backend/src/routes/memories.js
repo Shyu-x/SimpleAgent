@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { prisma } = require('../services/database');
-const AgentLogger = require('../infra/logger/AgentLogger');
+const { AgentLogger } = require('../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('memories');
 

@@ -64,7 +64,8 @@ const DEFAULT_CONFIG = {
     chunkSize: parseInt(process.env.RAG_CHUNK_SIZE, 10) || 512,
     topK: parseInt(process.env.RAG_TOP_K, 10) || 5,
     rerankEnabled: process.env.RAG_RERANK !== 'false',
-    embeddingModel: process.env.RAG_EMBEDDING_MODEL || 'minimax-embedding',
+    // 注意：向量存储使用内存模式（simpleVectorize），如需更精确的语义搜索可配置外部 embedding 服务
+    embeddingModel: process.env.RAG_EMBEDDING_MODEL || 'simple',
   },
 
   /**

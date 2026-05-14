@@ -2,6 +2,7 @@
 
 import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isClient } from '@/lib/ssrStorage';
 import {
   Package,
   Search,
@@ -129,121 +130,64 @@ const modalVariants = {
   }
 } as const;
 
-// 模拟工具数据
-const MOCK_TOOLS: ToolInfo[] = [
-  {
-    id: 'web-search',
-    name: 'Web Search',
-    description: '搜索互联网获取实时信息，支持多种搜索引擎',
-    version: '2.1.0',
-    author: 'AI Tools Inc.',
-    category: 'web',
-    status: 'enabled',
-    downloads: 15420,
-    rating: 4.8,
-    tags: ['搜索', '网络', '实时'],
-    installedAt: Date.now() - 86400000 * 30,
-    lastUpdated: Date.now() - 86400000 * 7,
-  },
-  {
-    id: 'code-executor',
-    name: 'Code Executor',
-    description: '安全执行 Python、JavaScript 代码片段',
-    version: '1.5.2',
-    author: 'DevTools Co.',
-    category: 'development',
-    status: 'installed',
-    downloads: 8932,
-    rating: 4.6,
-    tags: ['代码', '执行', 'Python', 'JavaScript'],
-    installedAt: Date.now() - 86400000 * 15,
-    lastUpdated: Date.now() - 86400000 * 3,
-  },
-  {
-    id: 'file-manager',
-    name: 'File Manager',
-    description: '文件读写、搜索、管理工具',
-    version: '3.0.1',
-    author: 'System Tools',
-    category: 'productivity',
-    status: 'enabled',
-    downloads: 22156,
-    rating: 4.9,
-    tags: ['文件', '管理', '搜索'],
-    installedAt: Date.now() - 86400000 * 60,
-    lastUpdated: Date.now() - 86400000 * 1,
-  },
-  {
-    id: 'database-connector',
-    name: 'Database Connector',
-    description: '连接和操作多种数据库（PostgreSQL、MySQL、MongoDB）',
-    version: '2.0.0',
-    author: 'Data Solutions',
-    category: 'data',
-    status: 'available',
-    downloads: 6543,
-    rating: 4.5,
-    tags: ['数据库', 'SQL', 'NoSQL'],
-  },
-  {
-    id: 'image-generator',
-    name: 'Image Generator',
-    description: '使用 AI 生成和编辑图像',
-    version: '1.2.0',
-    author: 'Creative AI',
-    category: 'media',
-    status: 'available',
-    downloads: 12890,
-    rating: 4.7,
-    tags: ['图像', 'AI', '生成'],
-  },
-  {
-    id: 'workflow-automation',
-    name: 'Workflow Automation',
-    description: '创建和管理自动化工作流',
-    version: '4.1.0',
-    author: 'AutomateX',
-    category: 'automation',
-    status: 'available',
-    downloads: 9234,
-    rating: 4.4,
-    tags: ['自动化', '工作流', 'n8n'],
-  },
-  {
-    id: 'slack-integration',
-    name: 'Slack Integration',
-    description: '与 Slack 工作区集成，发送消息和通知',
-    version: '1.8.5',
-    author: 'Integrations Hub',
-    category: 'integration',
-    status: 'available',
-    downloads: 7654,
-    rating: 4.6,
-    tags: ['Slack', '通知', '集成'],
-  },
-];
+// 工具信息类型（映射后端 API 响应）
+interface ToolApiResponse {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  author?: string;
+  category: string;
+  enabled?: boolean;
+  tags?: string[];
+  metadata?: {
+    downloads?: number;
+    rating?: number;
+    installedAt?: number;
+    lastUpdated?: number;
+  };
+}
+
+function mapApiToToolInfo(apiTool: ToolApiResponse): ToolInfo {
+  return {
+    id: apiTool.id,
+    name: apiTool.name,
+    description: apiTool.description,
+    version: apiTool.version,
+    author: apiTool.author || 'Unknown',
+    category: (apiTool.category as ToolCategory) || 'productivity',
+    status: apiTool.enabled ? 'enabled' : 'available',
+    downloads: apiTool.metadata?.downloads || 0,
+    rating: apiTool.metadata?.rating || 0,
+    tags: apiTool.tags || [],
+    installedAt: apiTool.metadata?.installedAt,
+    lastUpdated: apiTool.metadata?.lastUpdated,
+  };
+}
 
 function loadPersistedTools(): ToolInfo[] {
-  if (typeof window === 'undefined') {
-    return MOCK_TOOLS;
-  }
+  if (!isClient()) return [];
 
   try {
     const raw = window.sessionStorage.getItem(TOOL_MARKETPLACE_STORAGE_KEY);
     if (!raw) {
-      return MOCK_TOOLS;
+      return [];
     }
 
     const persisted = JSON.parse(raw) as ToolInfo[];
     const persistedMap = new Map(persisted.map((tool) => [tool.id, tool]));
 
-    return MOCK_TOOLS.map((tool) => {
-      const stored = persistedMap.get(tool.id);
-      return stored ? { ...tool, ...stored } : tool;
-    });
+    // 从 API 获取的工具列表需要与 persisted 合并状态
+    // 如果 persisted 为空，返回空数组（将由 API 数据填充）
+    if (persisted.length === 0) {
+      return [];
+    }
+
+    // 返回 persisted 工具（保留用户在 UI 中修改的状态）
+    return persisted;
   } catch (error) {
     console.warn('Failed to load tool marketplace state:', error);
-    return MOCK_TOOLS;
+    return [];
   }
 }
 
@@ -626,7 +570,8 @@ const ToolMarketplace = memo(function ToolMarketplace({
   isOpen,
   onClose,
 }: ToolMarketplaceProps) {
-  const [tools, setTools] = useState<ToolInfo[]>(loadPersistedTools);
+  const [tools, setTools] = useState<ToolInfo[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<ToolStatus | 'all'>('all');
@@ -763,6 +708,36 @@ const ToolMarketplace = memo(function ToolMarketplace({
     }
   }, []);
 
+  // 从 API 获取工具列表
+  useEffect(() => {
+    async function fetchTools() {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+        const res = await fetch(`${backendUrl}/api/admin/tools`);
+        const data = await res.json();
+        if (data.success && data.tools) {
+          const mappedTools = data.tools.map(mapApiToToolInfo);
+          // 从 sessionStorage 恢复用户修改的状态
+          const persisted = loadPersistedTools();
+          const persistedMap = new Map(persisted.map((t) => [t.id, t]));
+          const mergedTools = mappedTools.map((tool) => {
+            const stored = persistedMap.get(tool.id);
+            return stored ? { ...tool, ...stored } : tool;
+          });
+          setTools(mergedTools);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch tools from API:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (isOpen) {
+      fetchTools();
+    }
+  }, [isOpen]);
+
   // 打开时拉取 MCP 状态，启动轮询
   useEffect(() => {
     if (!isOpen) return;
@@ -774,7 +749,7 @@ const ToolMarketplace = memo(function ToolMarketplace({
   }, [isOpen, fetchMcpStatus]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isClient()) return;
 
     try {
       window.sessionStorage.setItem(TOOL_MARKETPLACE_STORAGE_KEY, JSON.stringify(tools));
@@ -951,7 +926,13 @@ const ToolMarketplace = memo(function ToolMarketplace({
 
             {/* 工具列表 */}
             <div className="flex-1 overflow-y-auto p-4">
-              {filteredTools.length > 0 ? (
+              {loading ? (
+                <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                  <Loader2 size={48} className="mb-4 opacity-50 animate-spin" />
+                  <p className="text-lg font-medium">加载工具列表...</p>
+                  <p className="text-sm">正在从后端获取工具数据</p>
+                </div>
+              ) : filteredTools.length > 0 ? (
                 <motion.div
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                   variants={containerVariants}

@@ -56,6 +56,10 @@ interface TestResult {
   timestamp: string;
 }
 
+function safeStats(stats: ToolStats | null): ToolStats {
+  return stats || { callCount: 0, successCount: 0, failureCount: 0, totalLatency: 0, avgLatency: 0 };
+}
+
 interface ToolCategory {
   id: string;
   name: string;
@@ -150,7 +154,6 @@ export default function ToolRegistryPage() {
           <>
             {activeTab === 'list' && <ToolList categories={categories} onRefresh={fetchCategories} />}
             {activeTab === 'register' && <ToolRegister onSuccess={() => { setActiveTab('list'); fetchCategories(); }} />}
-            {activeTab === 'detail' && <ToolDetail />}
             {activeTab === 'test' && <ToolTester />}
             {activeTab === 'stats' && <ToolStatsPanel categories={categories} />}
           </>
@@ -252,13 +255,13 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-center">
           <div className="text-xl font-bold text-blue-600">
-            {tools.reduce((sum, t) => sum + t.stats.callCount, 0)}
+            {tools.reduce((sum, t) => sum + safeStats(t.stats).callCount, 0)}
           </div>
           <div className="text-xs text-gray-500">总调用次数</div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-center">
           <div className="text-xl font-bold text-purple-600">
-            {(tools.reduce((sum, t) => sum + t.stats.avgLatency, 0) / Math.max(tools.length, 1)).toFixed(0)}ms
+            {(tools.reduce((sum, t) => sum + safeStats(t.stats).avgLatency, 0) / Math.max(tools.length, 1)).toFixed(0)}ms
           </div>
           <div className="text-xs text-gray-500">平均延迟</div>
         </div>
@@ -271,9 +274,9 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
         ) : tools.length === 0 ? (
           <div className="col-span-full text-center py-8 text-gray-500">未找到工具</div>
         ) : (
-          tools.map((tool) => (
+          tools.map((tool, idx) => (
             <div
-              key={tool.name}
+              key={`tool-card-${tool.name}-${idx}`}
               onClick={() => setSelectedTool(tool)}
               className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
             >
@@ -381,8 +384,8 @@ function ToolDetailPanel({ tool, onClose }: { tool: ToolInfo; onClose: () => voi
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2">参数定义</h3>
             <div className="space-y-2">
-              {tool.parameters.map((param) => (
-                <div key={param.name} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+              {tool.parameters.map((param, pIdx) => (
+                <div key={`param-${param.name}-${pIdx}`} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-1">
                     <code className="text-sm font-medium text-blue-600 dark:text-blue-400">{param.name}</code>
                     <span className="text-xs text-gray-500">{param.type}</span>
@@ -657,10 +660,15 @@ function ToolTester() {
   const outputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchApi<{ data: { tools: ToolInfo[] } }>('/api/admin/tools').then(({ data }) => {
+    console.log('[ToolRegistry] Fetching tools from /api/admin/tools');
+    fetchApi<{ success: boolean; data: { tools: ToolInfo[] } }>('/api/admin/tools').then(({ data, error }) => {
+      console.log('[ToolRegistry] API response:', { data, error });
+      if (error) {
+        console.error('[ToolRegistry] API error:', error);
+      }
       if (data?.data) {
-        setTools(data.data.tools.filter((t: ToolInfo) => t.enabled));
-        if (data.data.tools.length > 0) setSelectedTool(data.data.tools[0].name);
+        console.log('[ToolRegistry] Setting tools, count:', data.data.tools.length);
+        setTools(data.data.tools);
       }
     });
   }, []);
@@ -675,7 +683,7 @@ function ToolTester() {
     if (!selectedTool) return;
     setTesting(true);
     setStreaming('');
-    setResults(prev => [...prev, { success: false, output: '', timestamp: new Date().toISOString() }]);
+    setResults(prev => [...prev, { success: false, output: '', latency: 0, timestamp: new Date().toISOString() }]);
     const resultIndex = results.length;
 
     try {
@@ -726,8 +734,8 @@ function ToolTester() {
             }}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm"
           >
-            {tools.map(t => (
-              <option key={t.name} value={t.name}>{t.name}</option>
+            {tools.map((t, idx) => (
+              <option key={`select-tool-${t.name}-${idx}`} value={t.name}>{t.name}</option>
             ))}
           </select>
         </div>
@@ -736,8 +744,8 @@ function ToolTester() {
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <h3 className="font-medium text-gray-900 dark:text-white mb-3">输入参数</h3>
             <div className="space-y-3">
-              {currentTool.parameters?.map(param => (
-                <div key={param.name}>
+              {currentTool.parameters?.map((param, pIdx) => (
+                <div key={`test-param-${param.name}-${pIdx}`}>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {param.name}
                     {param.required && <span className="text-red-500 ml-0.5">*</span>}
@@ -822,11 +830,11 @@ function ToolStatsPanel({ categories }: { categories: ToolCategory[] }) {
     });
   }, []);
 
-  const totalCalls = tools.reduce((sum, t) => sum + t.stats.callCount, 0);
-  const totalSuccess = tools.reduce((sum, t) => sum + t.stats.successCount, 0);
-  const totalFailure = tools.reduce((sum, t) => sum + t.stats.failureCount, 0);
+  const totalCalls = tools.reduce((sum, t) => sum + safeStats(t.stats).callCount, 0);
+  const totalSuccess = tools.reduce((sum, t) => sum + safeStats(t.stats).successCount, 0);
+  const totalFailure = tools.reduce((sum, t) => sum + safeStats(t.stats).failureCount, 0);
   const avgLatency = tools.length > 0
-    ? tools.reduce((sum, t) => sum + t.stats.avgLatency * t.stats.callCount, 0) / Math.max(totalCalls, 1)
+    ? tools.reduce((sum, t) => sum + safeStats(t.stats).avgLatency * safeStats(t.stats).callCount, 0) / Math.max(totalCalls, 1)
     : 0;
 
   // Top 10 工具
@@ -838,7 +846,7 @@ function ToolStatsPanel({ categories }: { categories: ToolCategory[] }) {
   const byCategory = categories.map(cat => ({
     ...cat,
     count: tools.filter(t => t.category === cat.id && t.enabled).length,
-    calls: tools.filter(t => t.category === cat.id).reduce((sum, t) => sum + t.stats.callCount, 0),
+    calls: tools.filter(t => t.category === cat.id).reduce((sum, t) => sum + safeStats(t.stats).callCount, 0),
   }));
 
   return (
@@ -862,7 +870,7 @@ function ToolStatsPanel({ categories }: { categories: ToolCategory[] }) {
               <div className="text-center py-4 text-gray-500">暂无数据</div>
             ) : (
               topTools.map((tool, index) => (
-                <div key={tool.name} className="flex items-center gap-3">
+                <div key={`top-tool-${tool.name}-${index}`} className="flex items-center gap-3">
                   <span className={`w-6 h-6 flex items-center justify-center rounded text-xs font-bold ${
                     index === 0 ? 'bg-yellow-100 text-yellow-800' :
                     index === 1 ? 'bg-gray-200 text-gray-700' :
@@ -911,19 +919,19 @@ function ToolStatsPanel({ categories }: { categories: ToolCategory[] }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
             <div className="text-2xl font-bold text-green-600">
-              {tools.filter(t => t.stats.callCount > 0 && t.stats.successCount / t.stats.callCount >= 0.9).length}
+              {tools.filter(t => safeStats(t.stats).callCount > 0 && safeStats(t.stats).successCount / safeStats(t.stats).callCount >= 0.9).length}
             </div>
             <div className="text-sm text-gray-500 mt-1">优秀 (≥90%)</div>
           </div>
           <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
             <div className="text-2xl font-bold text-yellow-600">
-              {tools.filter(t => t.stats.callCount > 0 && t.stats.successCount / t.stats.callCount >= 0.7 && t.stats.successCount / t.stats.callCount < 0.9).length}
+              {tools.filter(t => safeStats(t.stats).callCount > 0 && safeStats(t.stats).successCount / safeStats(t.stats).callCount >= 0.7 && safeStats(t.stats).successCount / safeStats(t.stats).callCount < 0.9).length}
             </div>
             <div className="text-sm text-gray-500 mt-1">良好 (70-90%)</div>
           </div>
           <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
             <div className="text-2xl font-bold text-red-600">
-              {tools.filter(t => t.stats.callCount > 0 && t.stats.successCount / t.stats.callCount < 0.7).length}
+              {tools.filter(t => safeStats(t.stats).callCount > 0 && safeStats(t.stats).successCount / safeStats(t.stats).callCount < 0.7).length}
             </div>
             <div className="text-sm text-gray-500 mt-1">需改进 (&lt;70%)</div>
           </div>

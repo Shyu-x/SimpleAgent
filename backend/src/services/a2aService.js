@@ -719,6 +719,46 @@ class A2AService extends EventEmitter {
   }
 
   /**
+   * 长轮询接收消息
+   */
+  pollMessages(agentId, maxWait = 30000, req, res) {
+    this.agentHeartbeat(agentId);
+    const pollInterval = 1000;
+    let waited = 0;
+
+    const checkMessages = () => {
+      const messages = this.receiveMessages(agentId, { limit: 50, clearReceived: true });
+      if (messages.length > 0 || waited >= maxWait) {
+        res.json({ success: true, messages: messages.map(m => m.toJSON()), count: messages.length, waited, timeout: waited >= maxWait });
+      } else {
+        waited += pollInterval;
+        setTimeout(checkMessages, pollInterval);
+      }
+    };
+    checkMessages();
+  }
+
+  /**
+   * 确认消息（已读）
+   */
+  ackMessages(agentId, messageIds) {
+    const messages = this.broker.receive(agentId, { limit: 1000, clearReceived: false });
+    const ackedIds = [];
+    const remaining = [];
+    for (const msg of messages) {
+      if (messageIds.includes(msg.id)) {
+        ackedIds.push(msg.id);
+      } else {
+        remaining.push(msg);
+      }
+    }
+    if (remaining.length > 0) {
+      this.broker.inbox.set(agentId, remaining);
+    }
+    return { ackedCount: ackedIds.length, ackedIds };
+  }
+
+  /**
    * 创建统一 API 响应
    * 格式: {success, data, error: {code, message} | null, timestamp}
    */

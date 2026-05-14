@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
+import { isClient } from '@/lib/ssrStorage';
 import { useAgentWorkflowStore, type WorkflowDefinition, type AgentConfig, type TaskConfig, type WorkflowExecution } from '@/store/agentWorkflowStore';
 import { agentWorkflowAPI } from '@/lib/agentWorkflowAPI';
 
@@ -31,6 +32,7 @@ class WorkflowStorageService {
 
   // 保存工作流
   saveWorkflows(workflows: WorkflowDefinition[]): void {
+    if (!isClient()) return;
     try {
       const data = {
         version: '1.0',
@@ -48,6 +50,7 @@ class WorkflowStorageService {
 
   // 加载工作流
   loadWorkflows(): WorkflowDefinition[] {
+    if (!isClient()) return [];
     try {
       const data = localStorage.getItem(this.storageKey);
       if (!data) return [];
@@ -61,6 +64,7 @@ class WorkflowStorageService {
 
   // 保存执行历史
   saveExecutionHistory(execution: WorkflowExecution): void {
+    if (!isClient()) return;
     try {
       const history = this.loadExecutionHistory();
       history.unshift({
@@ -77,6 +81,7 @@ class WorkflowStorageService {
 
   // 加载执行历史
   loadExecutionHistory(): Array<WorkflowExecution & { savedAt: number }> {
+    if (!isClient()) return [];
     try {
       const data = localStorage.getItem(this.executionHistoryKey);
       if (!data) return [];
@@ -89,6 +94,7 @@ class WorkflowStorageService {
 
   // 清理过期数据
   cleanup(): void {
+    if (!isClient()) return;
     try {
       const now = Date.now();
       const maxAge = 7 * 24 * 60 * 60 * 1000; // 7天
@@ -183,6 +189,7 @@ class CheckpointService {
     execution: WorkflowExecution,
     taskResults: Map<string, string>
   ): void {
+    if (!isClient()) return;
     try {
       const checkpoint = {
         workflowId,
@@ -202,6 +209,7 @@ class CheckpointService {
     taskResults: Map<string, string>;
     savedAt: number;
   } | null {
+    if (!isClient()) return null;
     try {
       const data = localStorage.getItem(this.checkpointKey);
       if (!data) return null;
@@ -217,10 +225,12 @@ class CheckpointService {
   }
 
   clearCheckpoint(): void {
+    if (!isClient()) return;
     localStorage.removeItem(this.checkpointKey);
   }
 
   hasCheckpoint(): boolean {
+    if (!isClient()) return false;
     return localStorage.getItem(this.checkpointKey) !== null;
   }
 }
@@ -364,7 +374,9 @@ export function useExecutionHistory() {
   }, []);
 
   const clearHistory = useCallback(() => {
-    localStorage.removeItem('agent-execution-history');
+    if (isClient()) {
+      localStorage.removeItem('agent-execution-history');
+    }
     setHistory([]);
   }, []);
 
@@ -385,7 +397,7 @@ export function useAutoSave(
 
   // 加载自动保存
   useEffect(() => {
-    if (!workflow) return;
+    if (!workflow || !isClient()) return;
     const saved = localStorage.getItem(autoSaveKey);
     if (saved) {
       try {
@@ -400,7 +412,7 @@ export function useAutoSave(
 
   // 定时保存
   useEffect(() => {
-    if (!workflow) return;
+    if (!workflow || !isClient()) return;
 
     const intervalId = setInterval(() => {
       setIsSaving(true);
@@ -423,7 +435,9 @@ export function useAutoSave(
 
   // 清除自动保存
   const clearAutoSave = useCallback(() => {
-    localStorage.removeItem(autoSaveKey);
+    if (isClient()) {
+      localStorage.removeItem(autoSaveKey);
+    }
     setLastSaved(null);
   }, [autoSaveKey]);
 

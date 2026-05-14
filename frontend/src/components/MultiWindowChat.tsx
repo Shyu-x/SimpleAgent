@@ -13,13 +13,7 @@ interface MultiWindowChatProps {
 }
 
 export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowChatProps) {
-  const {
-    activeConversationIds,
-    conversations,
-    removeActiveWindow,
-    activeConversationId,
-    windowConfigs,
-  } = useChatStore();
+  const { addActiveWindow, removeActiveWindow, activeConversationIds, conversations, activeConversationId } = useChatStore();
 
   // 拖拽高亮状态
   const [highlightedWindow, setHighlightedWindow] = useState<string | null>(null);
@@ -40,8 +34,28 @@ export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowCh
 
   // 处理拖拽放置
   const handleDrop = useCallback((conversationId: string, windowId: string) => {
-    console.log('对话已放置到窗口:', conversationId, windowId);
+    // 将对话分配到指定窗口
+    useChatStore.getState().assignConversationToWindow(conversationId, windowId);
   }, []);
+
+  // 计算窗口样式类名
+  const getWindowClassName = (layout: string, windowCount: number, isEmpty: boolean) => {
+    const base = 'relative flex flex-col overflow-hidden rounded-3xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/92 shadow-lg backdrop-blur-xl';
+
+    if (layout === 'single') {
+      return `${base} flex-1 w-full h-full`;
+    }
+
+    if (layout === 'grid' && windowCount === 1) {
+      return `${base} col-span-2 row-span-2`;
+    }
+
+    if (layout === 'grid' && isEmpty) {
+      return `${base} border-dashed border-primary/30`;
+    }
+
+    return base;
+  };
 
   const getContainerStyles = () => {
     if (layout === 'single' || windowIds.length === 0) return 'flex h-full w-full flex-col';
@@ -79,7 +93,9 @@ export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowCh
               const isEmptyWindow = convId.startsWith('empty-') || (!conversation && layout !== 'single');
               const isHighlighted = highlightedWindow === convId;
 
-              return (
+              const shouldHide = layout === 'single' && index > 0;
+
+              return shouldHide ? null : (
                 <motion.div
                   key={convId}
                   layout
@@ -87,12 +103,7 @@ export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowCh
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
                   transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                  className={`
-                    relative flex flex-col overflow-hidden rounded-3xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/92 shadow-lg backdrop-blur-xl
-                    ${layout === 'single' ? (index === windowIds.length - 1 ? 'flex-1 w-full h-full' : 'hidden') : ''}
-                    ${layout === 'grid' && windowIds.length === 1 ? 'col-span-2 row-span-2' : ''}
-                    ${isEmptyWindow && layout === 'grid' ? 'border-dashed border-primary/30' : ''}
-                  `}
+                  className={getWindowClassName(layout, windowIds.length, isEmptyWindow)}
                 >
                   {/* 窗口 Header (非单窗口模式下显示) */}
                   {layout !== 'single' && (

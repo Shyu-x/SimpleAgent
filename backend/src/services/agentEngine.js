@@ -28,6 +28,7 @@ const { A2AService, A2A_MESSAGE_TYPES, A2A_TASK_STATUS } = require('./a2aService
 const { AgentLogger, formatConsole } = require('./AgentLogger');
 const { withRetry, withTimeout, sleep, TimeoutConfig } = require('../utils/retry');
 const SessionNoteTool = require('./tools/SessionNoteTool');
+const { createTokenManager } = require('./agent/TokenManager');
 const MiniMaxSearchTool = require('./miniMaxSearchTool');
 const DuckDuckGoSearchTool = require('./duckduckgoSearchTool');
 const GitHubTool = require('./tools/githubTool');
@@ -152,6 +153,12 @@ class AgentEngine {
     this.tokenLimit = options.tokenLimit || 80000; // 超过此值触发摘要
     this.apiTotalTokens = 0; // API报告的token数
     this._skipNextTokenCheck = false; // 防连续触发摘要
+
+    // 专业 Token 管理器（使用 tiktoken）
+    this.tokenManager = createTokenManager({
+      model: this.llmModelId,
+      defaultLimit: this.tokenLimit
+    });
 
     // Session Note Tool (借鉴 MiniMax Mini-Agent)
     this.sessionNoteTool = new SessionNoteTool({
@@ -509,13 +516,11 @@ class AgentEngine {
   // ==================== Token管理 (借鉴 MiniMax Mini-Agent) ====================
 
   /**
-   * 估算消息列表的token数 (简单估算)
+   * 计算消息列表的token数 (使用 tiktoken 专业计数)
    */
   _estimateTokens() {
     if (!this.messages) return 0;
-    const text = JSON.stringify(this.messages);
-    // 粗略估算：中文约2字符/token，英文约4字符/token
-    return Math.ceil(text.length / 3);
+    return this.tokenManager.countMessages(this.messages);
   }
 
   /**

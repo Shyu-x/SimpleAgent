@@ -227,7 +227,7 @@ export default function PromptTemplatePage() {
           {isEditing ? (
             <TemplateEditor
               template={selectedTemplate}
-              onSave={selectedTemplate ? updateTemplate : createTemplate}
+              onSave={(id, data) => selectedTemplate ? updateTemplate(selectedTemplate.id, data) : createTemplate(data)}
               onCancel={() => {
                 setIsEditing(false);
                 if (!selectedTemplate) setSelectedTemplate(null);
@@ -380,9 +380,9 @@ function TemplateDetail({
         <div>
           <h3 className="font-medium mb-2">模板变量</h3>
           <div className="flex flex-wrap gap-2">
-            {template.variables.map((v) => (
+            {template.variables.map((v, idx) => (
               <span
-                key={v.name}
+                key={`var-${v.name}-${idx}`}
                 className={`px-2 py-1 rounded text-sm ${
                   v.required
                     ? 'bg-red-100 text-red-700'
@@ -413,8 +413,8 @@ function TemplateDetail({
           {/* 变量输入 */}
           {template.variables.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
-              {template.variables.map((v) => (
-                <div key={v.name}>
+              {template.variables.map((v, idx) => (
+                <div key={`test-var-${v.name}-${idx}`}>
                   <label className="block text-sm font-medium mb-1">
                     {v.name}
                     {v.required && <span className="text-red-500 ml-1">*</span>}
@@ -584,9 +584,9 @@ function TemplateEditor({
         <div>
           <label className="block text-sm font-medium mb-2">模板变量</label>
           <div className="flex flex-wrap gap-2 mb-3">
-            {variables.map((v) => (
+            {variables.map((v, idx) => (
               <span
-                key={v.name}
+                key={`edit-var-${v.name}-${idx}`}
                 className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm flex items-center gap-1"
               >
                 {`{{${v.name}}}`}

@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isClient } from '@/lib/ssrStorage';
 import { Keyboard, X } from 'lucide-react';
 
 interface ShortcutItem {
@@ -50,6 +51,7 @@ const KeyboardShortcutHint = memo(function KeyboardShortcutHint({
 
   // 新手引导：首次显示
   useEffect(() => {
+    if (!isClient()) return;
     const hasSeen = localStorage.getItem('mc_shortcut_hint_shown');
     if (!hasSeen) {
       setShowBanner(true);

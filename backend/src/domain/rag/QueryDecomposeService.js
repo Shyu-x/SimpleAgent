@@ -18,7 +18,7 @@
  * // subs: [{ q: 'React的特点和优势', dependOn: [] }, { q: 'Vue的特点和优势', dependOn: [] }, { q: '两者对比分析', dependOn: [0, 1] }]
  */
 
-const { MiniMaxChatClient } = require('../../services/model/clients/MiniMaxChatClient');
+const { MiniMaxChatClient } = require('../../services/model');
 const AppError = require('../../common/errors/AppError');
 
 /**

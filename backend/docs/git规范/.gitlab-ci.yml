@@ -1,0 +1,138 @@
+# GitLab CI 配置 - CommitLint 阶段
+#
+# 验证提交信息格式，确保符合 Conventional Commits 规范
+# 格式：type(scope): description
+
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+# ========== CommitLint 阶段 ==========
+# 验证所有提交信息格式
+commitlint:
+  stage: lint
+  image: node:20-alpine
+  only:
+    - branches
+  script:
+    # 安装依赖
+    - npm install --save-dev @commitlint/cli @commitlint/config-conventional
+
+    # 创建 commitlint 配置
+    - |
+      cat > commitlint.config.js << 'EOF'
+      module.exports = {
+        extends: ['@commitlint/config-conventional'],
+        rules: {
+          'type-enum': [2, 'always', [
+            'feat', 'fix', 'docs', 'style', 'refactor',
+            'perf', 'test', 'build', 'ci', 'chore', 'revert', 'wip'
+          ]],
+          'scope-enum': [2, 'always', [
+            'auth', 'user', 'order', 'payment', 'product', 'inventory', 'notification',
+            'frontend', 'ui', 'api', 'service', 'middleware', 'database', 'cache',
+            'admin', 'dashboard', 'analytics', 'infra', 'config', 'security',
+            'docs', 'test', 'ci', 'deps', 'core', 'shared', 'migration',
+            'mcp', 'rag', 'agent', 'a2a', 'hitl', 'memory', 'search', 'tool', '*'
+          ]],
+          'subject-case': [2, 'always', 'lower-case'],
+          'subject-empty': [2, 'never'],
+          'type-empty': [2, 'never']
+        }
+      };
+      EOF
+
+    # 获取此次提交的 commits
+    - |
+      if [ "$CI_COMMIT_BEFORE_SHA" == "0000000000000000000000000000000000000000" ]; then
+        RANGE=""
+      else
+        RANGE="$CI_COMMIT_BEFORE_SHA..$CI_COMMIT_SHA"
+      fi
+
+    # 验证 commit 范围
+    - |
+      echo "验证提交范围: $RANGE"
+      if [ -z "$RANGE" ]; then
+        echo "首次提交，跳过验证"
+        exit 0
+      fi
+
+    # 获取所有 commit 消息
+    - |
+      COMMITS=$(git log $RANGE --format=%s)
+      echo "提交消息列表："
+      echo "$COMMITS"
+      echo ""
+
+    # 逐个验证
+    - |
+      FAILED=0
+      for msg in $COMMITS; do
+        echo "$msg" | npx commitlint || FAILED=1
+      done
+
+      if [ $FAILED -eq 1 ]; then
+        echo ""
+        echo "=========================================="
+        echo "✖ Commit 格式验证失败"
+        echo "=========================================="
+        echo ""
+        echo "正确的格式："
+        echo "  feat(module): description"
+        echo "  fix(auth): resolve login issue"
+        echo "  docs: update README"
+        echo ""
+        echo "type 可选值："
+        echo "  feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, wip"
+        echo ""
+        echo "module 可选值："
+        echo "  auth, user, order, payment, frontend, api, service, admin, infra, docs, ..."
+        echo ""
+        exit 1
+      fi
+  rules:
+    # 除 main 和 release 分支外都需要验证
+    - if: '$CI_COMMIT_BRANCH !~ /^main$/'
+    - if: '$CI_COMMIT_BRANCH !~ /^release\//'
+
+# ========== BranchLint 阶段 ==========
+# 检查分支命名规范
+branchlint:
+  stage: lint
+  image: alpine:latest
+  only:
+    - branches
+  script:
+    - apk add --no-cache bash git
+    - |
+      BRANCH_NAME="$CI_COMMIT_REF_NAME"
+      echo "检查分支: $BRANCH_NAME"
+
+      # 允许的分支模式
+      # main, develop, feature/*, hotfix/*, release/*, fix/*, chore/*
+      VALID_PATTERNS="^main$|^develop$|^feature/|^hotfix/|^release/|^fix/|^chore/|^infra/"
+
+      if echo "$BRANCH_NAME" | grep -qE "$VALID_PATTERNS"; then
+        echo "✓ 分支命名符合规范"
+      else
+        echo "=========================================="
+        echo "✖ 分支命名不符合规范"
+        echo "=========================================="
+        echo ""
+        echo "允许的分支命名："
+        echo "  - main (主分支)"
+        echo "  - develop (开发分支)"
+        echo "  - feature/module-name (特性分支)"
+        echo "  - hotfix/issue-description (热修复分支)"
+        echo "  - release/version (发布分支)"
+        echo "  - fix/module-description (修复分支)"
+        echo "  - chore/task-name (任务分支)"
+        echo ""
+        echo "当前分支: $BRANCH_NAME"
+        exit 1
+      fi
+  rules:
+    - if: '$CI_COMMIT_BRANCH' # 所有分支
