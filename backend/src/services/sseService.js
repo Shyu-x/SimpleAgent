@@ -3,7 +3,11 @@
  * MiniMax 单一架构 - 实际调用 MiniMax API
  */
 
+const { AgentLogger, createLogger } = require('../infra/logger/AgentLogger');
 const { MiniMaxRouter } = require('./router/modelRouter');
+
+// 创建日志记录器
+const logger = new AgentLogger('sse');
 
 // 创建路由器实例
 const miniMaxRouter = new MiniMaxRouter({
@@ -136,6 +140,16 @@ function validateChatRequest(body) {
   return errors;
 }
 
+/**
+ * 检测流类型 - 兼容浏览器 ReadableStream 和 Node.js stream
+ */
+function detectStreamType(stream) {
+  if (!stream) return null;
+  if (typeof stream.getReader === 'function') return 'browser';
+  if (typeof stream.pipe === 'function' && typeof stream.on === 'function') return 'node';
+  return null;
+}
+
 // SSE流式输出服务
 class SSEService {
   /**
@@ -196,10 +210,13 @@ class SSEService {
         return;
       }
 
-      // 获取流式响应 - execute 返回的是 result.result
+      // 获取流式响应
       const responseStream = result.result;
 
-      if (!responseStream || typeof responseStream.getReader !== 'function') {
+      // 检测流类型
+      const streamType = detectStreamType(responseStream);
+
+      if (!streamType) {
         res.write(`data: ${JSON.stringify({
           type: 'error',
           errorType: ErrorType.SERVER,
@@ -209,68 +226,17 @@ class SSEService {
         return;
       }
 
-      // 读取流并发送到客户端
-      const reader = responseStream.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
-            break;
-          }
-
-          // 解码数据
-          buffer += decoder.decode(value, { stream: true });
-
-          // 按行处理
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.trim()) {
-              try {
-                if (line.startsWith('data: ')) {
-                  const data = line.slice(6);
-                  if (data === '[DONE]') {
-                    res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
-                  } else {
-                    // 尝试解析 JSON
-                    try {
-                      const jsonData = JSON.parse(data);
-                      // 转换格式
-                      if (jsonData.type === 'content_block_delta') {
-                        if (jsonData.delta?.type === 'text_delta') {
-                          res.write(`data: ${JSON.stringify({ type: 'chunk', content: jsonData.delta.text })}\n\n`);
-                        } else if (jsonData.delta?.type === 'thinking_delta') {
-                          res.write(`data: ${JSON.stringify({ type: 'thinking', content: jsonData.delta.thinking })}\n\n`);
-                        }
-                      } else if (jsonData.type === 'message_stop') {
-                        res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
-                      } else {
-                        res.write(`data: ${data}\n\n`);
-                      }
-                    } catch {
-                      // 非 JSON，直接发送
-                      res.write(`data: ${JSON.stringify({ type: 'chunk', content: line })}\n\n`);
-                    }
-                  }
-                }
-              } catch (e) {
-                // 忽略解析错误
-              }
-            }
-          }
-        }
-      } finally {
-        reader.releaseLock();
+      // 根据流类型选择处理方式
+      if (streamType === 'browser') {
+        // 浏览器 ReadableStream
+        await SSEService._handleBrowserStream(responseStream, res);
+      } else {
+        // Node.js stream
+        await SSEService._handleNodeStream(responseStream, res);
       }
 
     } catch (error) {
-      console.error('SSE Chat Error:', error);
+      logger.error('SSE Chat Error', { error: error.message, stack: error.stack });
       const errorInfo = classifyError(error);
       const requestId = req.body?.requestId || 'unknown';
       res.write(`data: ${JSON.stringify({
@@ -282,6 +248,127 @@ class SSEService {
     }
 
     res.end();
+  }
+
+  /**
+   * 处理浏览器 ReadableStream
+   */
+  static async _handleBrowserStream(stream, res) {
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        await SSEService._processBuffer(buffer, res, (processed, remaining) => {
+          buffer = remaining;
+        });
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  }
+
+  /**
+   * 处理 Node.js stream
+   */
+  static async _handleNodeStream(stream, res) {
+    return new Promise((resolve, reject) => {
+      let buffer = '';
+
+      stream.on('data', async (chunk) => {
+        // 明确指定UTF-8编码，避免系统默认编码问题
+        const text = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : String(chunk);
+        buffer += text;
+        await SSEService._processBuffer(buffer, res, (processed, remaining) => {
+          buffer = remaining;
+        });
+      });
+
+      stream.on('end', () => {
+        if (buffer.trim()) {
+          res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
+        } else {
+          res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
+        }
+        resolve();
+      });
+
+      stream.on('error', (err) => {
+        logger.error('Node stream error', { error: err.message, stack: err.stack });
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          errorType: ErrorType.SERVER,
+          message: '流处理错误: ' + err.message
+        })}\n\n`);
+        resolve();
+      });
+    });
+  }
+
+  /**
+   * 处理缓冲区数据 - 正确处理中文内容
+   */
+  static async _processBuffer(buffer, res, callback) {
+    const lines = buffer.split('\n');
+    const remaining = lines.pop() || '';
+    callback(null, remaining);
+
+    for (const line of lines) {
+      if (line.trim()) {
+        try {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') {
+              res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
+            } else {
+              try {
+                const jsonData = JSON.parse(data);
+                if (jsonData.type === 'content_block_delta') {
+                  if (jsonData.delta?.type === 'text_delta') {
+                    res.write(`data: ${JSON.stringify({ type: 'chunk', content: jsonData.delta.text })}\n\n`);
+                  } else if (jsonData.delta?.type === 'thinking_delta') {
+                    res.write(`data: ${JSON.stringify({ type: 'thinking', content: jsonData.delta.thinking })}\n\n`);
+                  }
+                } else if (jsonData.type === 'message_stop') {
+                  res.write(`data: ${JSON.stringify({ type: 'done', content: '' })}\n\n`);
+                } else if (jsonData.type === 'error') {
+                  res.write(`data: ${JSON.stringify({ type: 'error', message: jsonData.error || 'Unknown error' })}\n\n`);
+                } else {
+                  // 透传其他类型的数据
+                  res.write(`data: ${data}\n\n`);
+                }
+              } catch {
+                // JSON 解析失败时，如果包含 delta.text 字段，尝试提取
+                if (data.includes('"delta"') && data.includes('"text_delta"')) {
+                  try {
+                    const jsonData = JSON.parse(`{${data.split('{').slice(1).join('{').split('}').slice(0, -1).join('}')}}`);
+                    if (jsonData.delta?.type === 'text_delta') {
+                      res.write(`data: ${JSON.stringify({ type: 'chunk', content: jsonData.delta.text })}\n\n`);
+                      continue;
+                    }
+                  } catch {
+                    // 提取失败，忽略
+                  }
+                }
+                // 原始数据当作普通 chunk 处理
+                res.write(`data: ${JSON.stringify({ type: 'chunk', content: data })}\n\n`);
+              }
+            }
+          }
+        } catch (e) {
+          // 忽略解析错误
+        }
+      }
+    }
   }
 
   /**
