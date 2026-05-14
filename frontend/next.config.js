@@ -6,7 +6,6 @@ const backendOrigin =
 
 const nextConfig = {
   reactStrictMode: true,
-  //poweredByHeader: false,
   // Experimental features for better DX
   experimental: {
     // Optimize package imports for faster HMR
@@ -44,10 +43,6 @@ const nextConfig = {
       },
     ];
   },
-  // Log level for development
-  loglies: false,
-  // Enable strict mode for development
-  reactStrictMode: true,
 };
 
 module.exports = nextConfig;
