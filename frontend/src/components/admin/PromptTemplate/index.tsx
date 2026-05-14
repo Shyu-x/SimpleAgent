@@ -11,8 +11,9 @@
  * - 模板预览与测试
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
+import { useAdminPolling } from '@/hooks/useAdminSSE';
 
 // ============ 类型定义 ============
 
@@ -55,36 +56,28 @@ interface TemplateTestResult {
 // ============ 主组件 ============
 
 export default function PromptTemplatePage() {
-  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<PromptTemplate | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
-  const fetchTemplates = useCallback(async () => {
-    try {
-      const { data, error } = await fetchApi<{ data?: { templates: any[] }; templates?: any[] }>('/api/admin/prompts');
-      if (error) throw new Error(error.message);
-      // 后端返回 { success: true, data: { templates: [...] } } 其中模板内容在 template 字段
-      const rawTemplates = data?.data?.templates || data?.templates || [];
-      // 映射 template -> content 以匹配前端接口
-      const mappedTemplates: PromptTemplate[] = rawTemplates.map((t) => ({
+  // SSE 订阅 templates 数据
+  const { data: templatesData, loading, refresh: refreshTemplates } = useAdminPolling<PromptTemplate[]>({
+    endpoint: '/api/admin/prompts',
+    parser: (res) => {
+      const rawTemplates = res?.data?.data?.templates || res?.data?.templates || [];
+      return rawTemplates.map((t: any) => ({
         ...t,
-        content: t.template, // 后端用 template，前端用 content
+        content: t.template,
       }));
-      setTemplates(mappedTemplates);
-    } catch (err) {
-      console.error('Failed to fetch templates:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    interval: 30000,
+  });
 
-  useEffect(() => {
-    fetchTemplates();
-  }, [fetchTemplates]);
+  const templates = templatesData || [];
+
+  const fetchTemplates = refreshTemplates;
 
   const createTemplate = async (template: Partial<PromptTemplate>) => {
     try {

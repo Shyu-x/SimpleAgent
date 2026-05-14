@@ -11,8 +11,9 @@
  * - 工具统计（成功率、延迟分布）
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchApi, fetchStream } from '@/lib/apiClient';
+import { useAdminPolling } from '@/hooks/useAdminSSE';
 
 // ============ 类型定义 ============
 
@@ -73,30 +74,16 @@ type TabType = 'list' | 'register' | 'detail' | 'test' | 'stats';
 
 export default function ToolRegistryPage() {
   const [activeTab, setActiveTab] = useState<TabType>('list');
-  const [categories, setCategories] = useState<ToolCategory[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  // SSE 订阅 categories 数据
+  const { data: categoriesData, loading, refresh } = useAdminPolling<ToolCategory[]>({
+    endpoint: '/api/admin/tools/categories',
+    parser: (res) => res?.data?.data?.categories || [],
+    interval: 30000,
+  });
 
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await fetchApi<{ success: boolean; data: { categories: { id: string; name: string; icon: string; count: number }[] } }>('/api/admin/tools/categories');
-      if (error) {
-        console.error('Failed to fetch categories:', error);
-        setCategories([]);
-      } else if (data?.data?.categories) {
-        setCategories(data.data.categories);
-      }
-    } catch (err) {
-      console.error('Failed to fetch categories:', err);
-      setCategories([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const categories = categoriesData;
+  const fetchCategories = refresh;
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: 'list', label: '工具列表', icon: '🛠️' },

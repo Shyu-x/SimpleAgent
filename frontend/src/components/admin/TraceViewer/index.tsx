@@ -11,8 +11,9 @@
  * - 慢请求与错误标识
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
+import { useAdminPolling } from '@/hooks/useAdminSSE';
 
 // ============ 类型定义 ============
 
@@ -81,9 +82,7 @@ interface TraceFilter {
 // ============ 主组件 ============
 
 export default function TraceViewerPage() {
-  const [traces, setTraces] = useState<Trace[]>([]);
   const [stats, setStats] = useState<TraceStats | null>(null);
-  const [loading, setLoading] = useState(true);
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null);
   const [filter, setFilter] = useState<TraceFilter>({
     status: 'all',
@@ -94,59 +93,49 @@ export default function TraceViewerPage() {
   });
   const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
 
-  const fetchTraces = useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      if (filter.status !== 'all') params.set('status', filter.status);
-      if (filter.type !== 'all') params.set('type', filter.type);
-      if (filter.durationRange !== 'all') params.set('duration', filter.durationRange);
-      if (filter.timeRange !== 'all') params.set('timeRange', filter.timeRange);
+  // SSE 订阅 traces 数据
+  const { data: tracesData, loading: tracesLoading, refresh: refreshTraces } = useAdminPolling<Trace[]>({
+    endpoint: `/api/admin/traces?status=${filter.status !== 'all' ? filter.status : ''}&type=${filter.type !== 'all' ? filter.type : ''}&duration=${filter.durationRange !== 'all' ? filter.durationRange : ''}&timeRange=${filter.timeRange !== 'all' ? filter.timeRange : ''}`,
+    parser: (res) => res?.data?.data?.traces || res?.data?.traces || [],
+    interval: 15000,
+  });
 
-      const { data, error } = await fetchApi<{ data?: { traces: Trace[] }; traces?: Trace[] }>(`/api/admin/traces?${params}`);
-      if (error) throw new Error(error.message);
-      // 后端返回 { success: true, data: { traces: [], total, limit, offset, hasMore } }
-      setTraces(data?.data?.traces || data?.traces || []);
-    } catch (err) {
-      console.error('Failed to fetch traces:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
+  // SSE 订阅 stats 数据
+  const { data: statsData, loading: statsLoading, refresh: refreshStats } = useAdminPolling<TraceStats | null>({
+    endpoint: '/api/admin/traces/stats',
+    parser: (res) => {
+      const data = res?.data;
+      if (data?.overview) {
+        return {
+          totalTraces: data.overview.totalTraces,
+          avgDuration: parseInt(data.performance?.avgDuration) || 0,
+          successRate: 1 - (parseFloat(data.overview.errorRate) / 100),
+          slowTraces: 0,
+          errorTraces: data.overview.errorCount,
+          tracesByType: data.distribution?.byOperation || {},
+          durationDistribution: []
+        };
+      }
+      return data || null;
+    },
+    interval: 15000,
+  });
+
+  const traces = tracesData || [];
+  const loading = tracesLoading || statsLoading;
+
+  // 同步 stats
+  useEffect(() => {
+    if (statsData) setStats(statsData);
+  }, [statsData]);
+
+  const fetchTraces = useCallback(async () => {
+    await refreshTraces();
+  }, [refreshTraces]);
 
   const fetchStats = useCallback(async () => {
-    try {
-      const { data, error } = await fetchApi<{ data?: TraceStats; overview?: TraceStats }>('/api/admin/traces/stats');
-      if (error) throw new Error(error.message);
-      // 后端返回 { success: true, data: { overview, recent, performance, distribution } }
-      const statsData = (data as { data?: TraceStats })?.data || data;
-      if ((statsData as TraceStats)?.overview) {
-        const overview = (statsData as TraceStats).overview as unknown as { totalTraces: number; errorRate: string; errorCount: number };
-        setStats({
-          totalTraces: overview.totalTraces,
-          avgDuration: parseInt((statsData as TraceStats).performance?.avgDuration as unknown as string) || 0,
-          successRate: 1 - (parseFloat(overview.errorRate) / 100),
-          slowTraces: 0,
-          errorTraces: overview.errorCount,
-          tracesByType: (statsData as TraceStats).distribution?.byOperation || {},
-          durationDistribution: []
-        });
-      } else {
-        setStats(statsData as TraceStats);
-      }
-    } catch (err) {
-      console.error('Failed to fetch stats:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTraces();
-    fetchStats();
-    const interval = setInterval(() => {
-      fetchTraces();
-      fetchStats();
-    }, 15000);
-    return () => clearInterval(interval);
-  }, [fetchTraces, fetchStats]);
+    await refreshStats();
+  }, [refreshStats]);
 
   const filteredTraces = traces.filter((t) => {
     if (filter.searchQuery) {

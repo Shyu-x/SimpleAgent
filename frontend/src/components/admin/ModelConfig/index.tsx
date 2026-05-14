@@ -12,7 +12,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
-import { useAdminSSE } from '@/hooks/useAdminSSE';
+import { useAdminPolling } from '@/hooks/useAdminSSE';
 
 // ============ 类型定义 ============
 
@@ -60,14 +60,14 @@ export default function ModelConfigPage() {
   const [activeTab, setActiveTab] = useState<'list' | 'stats'>('list');
 
   // SSE 订阅 models 数据
-  const { data: modelsData, loading: modelsLoading, refresh: refreshModels } = useAdminSSE<ModelConfig[]>({
+  const { data: modelsData, loading: modelsLoading, refresh: refreshModels } = useAdminPolling<ModelConfig[]>({
     endpoint: '/api/admin/models',
     parser: (res) => res?.data?.data?.models || [],
     interval: 30000,
   });
 
   // SSE 订阅 stats 数据
-  const { data: statsData, loading: statsLoading, refresh: refreshStats } = useAdminSSE<ModelStats | null>({
+  const { data: statsData, loading: statsLoading, refresh: refreshStats } = useAdminPolling<ModelStats | null>({
     endpoint: '/api/admin/models/stats',
     parser: (res) => res?.data?.data || null,
     interval: 30000,

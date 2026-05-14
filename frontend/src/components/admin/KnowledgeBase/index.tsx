@@ -11,8 +11,9 @@
  * - 统计面板（文档数、分块数、调用量）
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchApi } from '@/lib/apiClient';
+import { useAdminPolling } from '@/hooks/useAdminSSE';
 
 // ============ 类型定义 ============
 
@@ -51,24 +52,16 @@ type TabType = 'documents' | 'upload' | 'index' | 'search' | 'stats';
 
 export default function KnowledgeBasePage() {
   const [activeTab, setActiveTab] = useState<TabType>('documents');
-  const [stats, setStats] = useState<IndexStats | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  // SSE 订阅 stats 数据
+  const { data: statsData, loading, refresh } = useAdminPolling<IndexStats | null>({
+    endpoint: '/api/admin/knowledge/stats',
+    parser: (res) => res?.data?.data || null,
+    interval: 30000,
+  });
 
-  const fetchStats = async () => {
-    setLoading(true);
-    // 后端返回 { success: true, data: { totalDocuments, totalChunks, indexSize, status, ... } }
-    const { data, error } = await fetchApi<{ success: boolean; data: IndexStats }>('/api/admin/knowledge/stats');
-    if (error) {
-      console.error('Failed to fetch stats:', error);
-    } else if (data?.data) {
-      setStats(data.data);
-    }
-    setLoading(false);
-  };
+  const stats = statsData;
+  const fetchStats = refresh;
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: 'documents', label: '文档列表', icon: '📄' },
