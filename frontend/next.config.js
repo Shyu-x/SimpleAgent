@@ -6,6 +6,12 @@ const backendOrigin =
 
 const nextConfig = {
   reactStrictMode: true,
+  //poweredByHeader: false,
+  // Experimental features for better DX
+  experimental: {
+    // Optimize package imports for faster HMR
+    optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],
+  },
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -15,6 +21,7 @@ const nextConfig = {
     // Remove console.log in production
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  // API proxy to backend
   async rewrites() {
     return [
       {
@@ -37,6 +44,10 @@ const nextConfig = {
       },
     ];
   },
-}
+  // Log level for development
+  loglies: false,
+  // Enable strict mode for development
+  reactStrictMode: true,
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

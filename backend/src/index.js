@@ -7,12 +7,12 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const { TracingService, tracingMiddleware } = require('./services/tracing');
 const { initializeDatabase, closeDatabase } = require('./services/database');
-const ToolRegistry = require('./services/tools/toolRegistry');
+const { createDefaultToolRegistry } = require('./services/tools');
 const { createLogger } = require('./infra/logger/AgentLogger');
 const logger = createLogger('index');
 
-// 创建全局工具注册表
-const globalToolRegistry = new ToolRegistry();
+// 创建全局工具注册表（包含30+工具）
+const globalToolRegistry = createDefaultToolRegistry();
 
 // 创建追踪服务实例
 const tracingService = new TracingService({
@@ -114,10 +114,6 @@ async function startServer() {
   // 全链路追踪中间件
   app.use(tracingMiddleware(tracingService));
 
-  // 请求指标收集中间件
-  const { requestMetricsMiddleware } = require('./middleware/metricsMiddleware');
-  app.use(requestMetricsMiddleware());
-
   // 安全中间件：基本请求验证
   app.use((req, _res, next) => {
     // 记录请求 - 仅在非生产环境
@@ -126,6 +122,17 @@ async function startServer() {
     }
     next();
   });
+
+  // 健康检查 - 使用监控模块的 HealthCheckManager
+  const healthController = require('./infra/monitoring/health.controller');
+  const prometheusService = require('./infra/monitoring/prometheus.service').getPrometheusService();
+  const gatewayService = require('./infra/monitoring/gateway.service').getGatewayService();
+
+  // 请求指标收集中间件（需要 prometheusService 和 gatewayService）
+  const { requestMetricsMiddleware, setPrometheusService, setGatewayService } = require('./middleware/metricsMiddleware');
+  setPrometheusService(prometheusService);
+  setGatewayService(gatewayService);
+  app.use(requestMetricsMiddleware());
 
   // 加载路由
   const chatRoutes = require('./routes/chat');
@@ -167,17 +174,34 @@ async function startServer() {
   const metricsRoutes = require('./routes/metrics');
   const memoryRoutes = require('./routes/memory');
   const adminIntentRoutes = require('./routes/admin/intent');
+  const adminStreamRoutes = require('./routes/admin/stream');
   const missionControlRoutes = require('./routes/missionControl');
+  const executionRoutes = require('./routes/execution');
+  const modularRoutes = require('./routes/modular');
+  const alertsRoutes = require('./routes/alerts');
+
+  // 模块化架构初始化
+  const moduleConfig = require('./config/module.config');
+  const eventBus = require('./common/event-bus');
+  const dataRouter = require('./config/data-isolation');
+
+  // 验证模块依赖关系
+  const validation = moduleConfig.validateDependencies();
+  if (!validation.valid) {
+    logger.warn('模块依赖验证存在警告:', validation.errors);
+  }
 
   // Routes
   app.use('/api/chat', chatRoutes);
   app.use('/api/config', configRoutes);
+  app.use('/api/modular', modularRoutes);
   app.use('/api/admin/models', adminModelRoutes);
   app.use('/api/admin/prompts', adminPromptRoutes);
   app.use('/api/admin/traces', adminTraceRoutes);
   app.use('/api/admin/knowledge', adminKnowledgeRoutes);
   app.use('/api/admin/tools', adminToolRoutes);
   app.use('/api/admin/intent', adminIntentRoutes);
+  app.use('/api/admin/stream', adminStreamRoutes);
   app.use('/api/admin/stats', adminStatsRoutes);
   app.use('/api/sessions', sessionsRoutes);
   app.use('/api/v1', proxyRoutes);
@@ -211,6 +235,8 @@ async function startServer() {
   app.use('/api/metrics', metricsRoutes); // 性能指标 API
   app.use('/api/memory', memoryRoutes); // 记忆系统 API
   app.use('/api/mission', missionControlRoutes); // MissionControl API
+  app.use('/api/execution', executionRoutes); // 执行历史 API
+  app.use('/api/alerts', alertsRoutes); // Alerts API
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -225,9 +251,37 @@ async function startServer() {
     res.send(swaggerSpec);
   });
 
-  // Health check
+  // 健康检查 - 使用监控模块的 HealthCheckManager (已在前面初始化)
+  // 挂载健康检查路由
+  app.use('/health', healthController);
+
+  // 挂载 Prometheus 指标路由
+  app.use('/metrics', prometheusService.createRouter());
+
+  // 保留简单健康检查（向后兼容）
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // 网关降级状态查询
+  app.get('/api/gateway/status', (_req, res) => {
+    res.json(gatewayService.getStatus());
+  });
+
+  app.post('/api/gateway/degrade', (req, res) => {
+    const { level, reason } = req.body;
+    const { DegradationLevel, DegradationReason } = require('./infra/monitoring/gateway.service');
+    const validLevels = Object.values(DegradationLevel);
+    if (!validLevels.includes(level)) {
+      return res.status(400).json({ error: '无效的降级级别', validLevels });
+    }
+    gatewayService.triggerDegradation(level, reason || DegradationReason.MANUAL_TRIGGER);
+    res.json({ success: true, message: `已手动降级至 ${level}`, status: gatewayService.getStatus() });
+  });
+
+  app.post('/api/gateway/recover', (_req, res) => {
+    gatewayService.recover();
+    res.json({ success: true, message: '已手动恢复', status: gatewayService.getStatus() });
   });
 
   // 404 处理 - 统一响应格式
