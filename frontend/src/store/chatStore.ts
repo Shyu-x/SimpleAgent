@@ -192,6 +192,8 @@ export const useChatStore = create<ChatState>()(
         set((state) => ({
           conversations: [newConversation, ...state.conversations],
           activeConversationId: id,
+          // 修复：创建新对话时也添加到 activeConversationIds（支持多窗口模式）
+          activeConversationIds: [...state.activeConversationIds, id].slice(-4),
         }));
         return id;
       },
@@ -529,18 +531,33 @@ export const useChatStore = create<ChatState>()(
           if (data) {
             try {
               const parsed = JSON.parse(data);
-              if (parsed.state) {
-                set((state) => ({
-                  ...state,
-                  ...parsed.state,
-                  hasHydrated: true,
-                }));
+              // Zustand persist 存储格式: { state: { ... }, version: number }
+              // 恢复时需要处理 state 嵌套结构，以及修复 activeConversationId 指向不存在对话的问题
+              const stateToRestore = parsed.state || parsed;
+              if (stateToRestore) {
+                set((state) => {
+                  const restoredConversations = stateToRestore.conversations || [];
+                  let restoredActiveId = stateToRestore.activeConversationId || null;
+
+                  // 修复：如果恢复的 activeConversationId 不存在于对话列表中，则设置为 null
+                  if (restoredActiveId && !restoredConversations.some(c => c.id === restoredActiveId)) {
+                    restoredActiveId = null;
+                  }
+
+                  return {
+                    ...state,
+                    ...stateToRestore,
+                    activeConversationId: restoredActiveId,
+                    hasHydrated: true,
+                  };
+                });
+                return;
               }
             } catch (e) {
               console.error('Failed to rehydrate:', e);
             }
           }
-          // 标记已恢复
+          // 标记已恢复（即使没有数据也要标记，防止无限等待）
           set({ hasHydrated: true });
         }
       },
@@ -596,6 +613,7 @@ export const useChatStore = create<ChatState>()(
         focusMode: state.focusMode,
         settings: state.settings,
         enabledFeatures: state.enabledFeatures,
+        showWelcomeGuide: state.showWelcomeGuide,
         // 仅持久化 baseURL 和 model，不持久化 apiKey（安全考虑）
         apiConfig: {
           baseURL: state.apiConfig.baseURL,
