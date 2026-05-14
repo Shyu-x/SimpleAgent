@@ -23,9 +23,30 @@ const nextConfig = {
   // API proxy to backend
   async rewrites() {
     return [
+      // 代理 /api/* 路径
       {
         source: '/api/:path*',
         destination: `${backendOrigin}/api/:path*`,
+      },
+      // 代理 MiniMax 相关路径 (前端使用 /minimax 而非 /api/minimax)
+      {
+        source: '/minimax/:path*',
+        destination: `${backendOrigin}/minimax/:path*`,
+      },
+      // 代理 MCP 相关路径
+      {
+        source: '/mcp/:path*',
+        destination: `${backendOrigin}/mcp/:path*`,
+      },
+      // 代理 n8n 相关路径
+      {
+        source: '/n8n/:path*',
+        destination: `${backendOrigin}/n8n/:path*`,
+      },
+      // 代理检查点路径
+      {
+        source: '/checkpoint/:path*',
+        destination: `${backendOrigin}/checkpoint/:path*`,
       },
     ];
   },
