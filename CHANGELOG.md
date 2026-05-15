@@ -1,4 +1,4 @@
-# AI Chat 玩具 - 更新日志
+# SimpleAgent - 更新日志
 
 **Sprint #4 完成日期**: 2026-05-15
 
