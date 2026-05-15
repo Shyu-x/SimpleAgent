@@ -6,6 +6,8 @@ const backendOrigin =
 
 const nextConfig = {
   reactStrictMode: true,
+  // Output standalone for Docker
+  output: 'standalone',
   // Disable Turbopack for build - use Webpack
   experimental: {
     // Optimize package imports for faster HMR
