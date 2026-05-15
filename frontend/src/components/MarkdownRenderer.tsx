@@ -22,15 +22,21 @@ let highlighter: Highlighter | null = null;
 let highlighterInitPromise: Promise<Highlighter> | null = null;
 const HIGHLIGHT_DEBOUNCE_MS = 90;
 
+// 常用语言子集 (减少 bundle 大小 ~500KB)
+// 仅加载最常用的语言，其他语言 fallback 到纯文本
+const COMMON_LANGS = [
+  'javascript', 'typescript', 'python', 'java', 'cpp', 'go', 'rust',
+  'html', 'css', 'json', 'yaml', 'bash', 'shell', 'sql', 'jsx', 'tsx'
+];
+
 async function getHighlighter(): Promise<Highlighter> {
   if (highlighter) return highlighter;
 
   if (!highlighterInitPromise) {
     highlighterInitPromise = createHighlighter({
       themes: ['github-dark', 'github-light'],
-      langs: ['javascript', 'typescript', 'python', 'java', 'cpp', 'c', 'go', 'rust', 'ruby', 'php', 'html', 'css', 'json', 'yaml', 'markdown', 'bash', 'shell', 'sql', 'xml', 'swift', 'kotlin', 'scala', 'r', 'matlab', 'julia', 'lua', 'perl', 'haskell', 'elixir', 'erlang', 'clojure', 'fsharp', 'ocaml', 'dart', 'vue', 'svelte', 'jsx', 'tsx', 'jsx', 'tsx'],
+      langs: COMMON_LANGS,
     }).catch((err) => {
-      // 重置 promise 以便重试
       highlighterInitPromise = null;
       throw err;
     });
@@ -197,8 +203,12 @@ const CodeBlock = memo(function CodeBlock({
         const hl = await getHighlighter();
         if (cancelled) return;
 
+        const lang = language || 'text';
+        // 未知语言 fallback 到纯文本显示
+        const isKnownLang = lang !== 'text' && COMMON_LANGS.includes(lang);
+
         const html = hl.codeToHtml(children, {
-          lang: language || 'text',
+          lang: isKnownLang ? lang : 'text',
           theme: resolveShikiTheme(),
         });
         if (!cancelled) {
