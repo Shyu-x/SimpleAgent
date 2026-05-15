@@ -67,26 +67,25 @@ docs/源码详细分析报告.md
 # PlantUML source files
 docs/README_*.puml
 
-# Test results and reports
-tests/量化分析结果/
-tests/量化测试结果/
-tests/压测结果/
-tests/参数评估结果/
-tests/多对照实验结果/
-tests/对照实验_完整/
-tests/对照实验_快速/
-tests/*报告*.md
-tests/*报告*.html
-tests/*优化*.md
-tests/*改进*.md
-tests/NLP测试语料集.md
-tests/超大规模NLP测试语料集.md
-backend/tests/量化分析结果/
+# Test data and results
+tests/
+test-results/
+backend/tests/
+frontend/tests/
+frontend/test-results/
+docs/learning/
+docs/test-results/
+
+# Backend data
+backend/data/
+data/
+
+# Runtime metrics
+metrics_*.json
+*.metrics.json
 
 # Backend test scripts
 backend/tests/量化分析_runner.js
-backend/tests/*_test.js
-backend/tests/*.test.js
 
 # Excalidraw design files
 *.excalidraw
@@ -111,8 +110,5 @@ docs/CI-CD-*.md
 docs/services-split-report.md
 
 # Test scripts
-frontend/tests/
-frontend/test-results/
-test-results/
 frontend/e2e_*.py
 frontend/playwright.config.ts
