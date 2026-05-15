@@ -15,6 +15,9 @@
  */
 
 const { SearchChannel, SearchResult } = require('../SearchChannel');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('VectorSearchChannel');
 
 class VectorSearchChannel extends SearchChannel {
   constructor(config = {}) {
@@ -65,7 +68,7 @@ class VectorSearchChannel extends SearchChannel {
       if (!this.degradedToMemory) {
         const health = await this.qdrantRouter.healthCheck();
         if (!health.success) {
-          console.warn(`[VectorSearchChannel] Qdrant 健康检查失败，降级到内存模式`);
+          logger.warn(`Qdrant 健康检查失败，降级到内存模式`);
           this.degradedToMemory = true;
         }
       }
@@ -74,7 +77,7 @@ class VectorSearchChannel extends SearchChannel {
         try {
           return await this._searchWithQdrant(query, options);
         } catch (error) {
-          console.warn(`[VectorSearchChannel] Qdrant 不可用，降级到内存模式: ${error.message}`);
+          logger.warn(`Qdrant 不可用，降级到内存模式`, { error: error.message });
           this.degradedToMemory = true;
         }
       }
@@ -82,7 +85,7 @@ class VectorSearchChannel extends SearchChannel {
 
     // 降级到内存模式
     if (this.degradedToMemory || this.vectorDbType === 'memory') {
-      console.log('[VectorSearchChannel] 使用内存向量存储模式');
+      logger.debug('使用内存向量存储模式');
       return this._searchWithMemory(query, options);
     }
 
@@ -100,7 +103,7 @@ class VectorSearchChannel extends SearchChannel {
       });
 
       if (!result.success) {
-        console.error(`[VectorSearchChannel] Qdrant搜索失败: ${result.error}`);
+        logger.error(`Qdrant搜索失败`, { error: result.error });
         return [];
       }
 
@@ -116,7 +119,7 @@ class VectorSearchChannel extends SearchChannel {
         },
       }));
     } catch (error) {
-      console.error(`[VectorSearchChannel] Qdrant搜索异常: ${error.message}`);
+      logger.error(`Qdrant搜索异常`, { error: error.message });
       return [];
     }
   }
@@ -201,7 +204,7 @@ class VectorSearchChannel extends SearchChannel {
         vector: embedResult.embedding.slice(0, 5) + '...',
       };
     } catch (error) {
-      console.error(`[VectorSearchChannel] 添加文档到Qdrant失败: ${error.message}`);
+      logger.error(`添加文档到Qdrant失败`, { error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -365,7 +368,7 @@ class VectorSearchChannel extends SearchChannel {
    */
   _cosineSimilarity(a, b) {
     if (a.length !== b.length) {
-      throw new Error(`Vector dimension mismatch: ${a.length} vs ${b.length}`);
+      throw AppError.internalError(`Vector dimension mismatch: ${a.length} vs ${b.length}`);
     }
 
     let dotProduct = 0;

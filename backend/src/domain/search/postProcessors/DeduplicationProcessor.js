@@ -3,6 +3,8 @@
  * 计算文本间的 Jaccard 相似度，去除重复或高度相似的结果
  */
 const PostProcessor = require('./PostProcessor');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('DeduplicationProcessor');
 
 class DeduplicationProcessor extends PostProcessor {
   constructor(options = {}) {
@@ -83,7 +85,7 @@ class DeduplicationProcessor extends PostProcessor {
     selected.sort((a, b) => a - b);
     const deduplicated = selected.map(i => results[i]);
 
-    console.log(`[DeduplicationProcessor] 原始 ${results.length} 条，去重后 ${deduplicated.length} 条`);
+    logger.debug(`原始 ${results.length} 条，去重后 ${deduplicated.length} 条`);
 
     return deduplicated;
   }

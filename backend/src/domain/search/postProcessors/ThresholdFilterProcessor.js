@@ -3,6 +3,8 @@
  * 根据相关性分数阈值过滤结果，支持绝对阈值和相对阈值
  */
 const PostProcessor = require('./PostProcessor');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('ThresholdFilterProcessor');
 
 class ThresholdFilterProcessor extends PostProcessor {
   constructor(options = {}) {
@@ -56,7 +58,7 @@ class ThresholdFilterProcessor extends PostProcessor {
       });
       // 确保至少保留 minKeep 条
       if (filtered.length < minKeep && results.length >= minKeep) {
-        console.warn(`[ThresholdFilterProcessor] 绝对阈值过滤后结果过少，回退到保留 top ${minKeep} 条`);
+        logger.debug(`绝对阈值过滤后结果过少，回退到保留 top ${minKeep} 条`);
         filtered = results.slice(0, minKeep);
       }
     }
@@ -80,8 +82,8 @@ class ThresholdFilterProcessor extends PostProcessor {
       }
     }
 
-    console.log(
-      `[ThresholdFilterProcessor] 原始 ${results.length} 条，` +
+    logger.debug(
+      `原始 ${results.length} 条，` +
       `过滤后 ${filtered.length} 条` +
       (absoluteThreshold !== null ? ` (绝对阈值 >= ${absoluteThreshold})` : '') +
       (topN !== null ? ` (topN = ${topN})` : '')

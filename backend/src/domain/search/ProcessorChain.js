@@ -2,6 +2,9 @@
  * 处理器链 - 责任链模式编排多个后处理器
  * 支持按优先级排序、同步/异步执行、处理器跳过与短路
  */
+const createLogger = require('../../common/logger');
+const logger = createLogger('ProcessorChain');
+
 class ProcessorChain {
   constructor() {
     this.processors = [];
@@ -50,17 +53,17 @@ class ProcessorChain {
 
     for (const processor of sorted) {
       if (!processor.shouldProcess(context)) {
-        console.log(`[ProcessorChain] 跳过处理器: ${processor.name} (shouldProcess = false)`);
+        logger.debug(`跳过处理器: ${processor.name} (shouldProcess = false)`);
         continue;
       }
 
       const ctxWithResults = { ...context, results: currentResults };
 
       try {
-        console.log(`[ProcessorChain] 执行处理器: ${processor.name}`);
+        logger.debug(`执行处理器: ${processor.name}`);
         currentResults = await processor.process(currentResults, ctxWithResults);
       } catch (err) {
-        console.error(`[ProcessorChain] 处理器 ${processor.name} 出错:`, err.message);
+        logger.error(`处理器 ${processor.name} 出错`, { error: err.message });
         // 单个处理器失败不影响后续处理器，继续执行
       }
     }
@@ -100,9 +103,9 @@ class ProcessorChain {
    */
   describe() {
     const sorted = [...this.processors].sort((a, b) => a.getPriority() - b.getPriority());
-    console.log('[ProcessorChain] 处理器链配置:');
+    logger.debug('处理器链配置');
     sorted.forEach((p, i) => {
-      console.log(`  ${i + 1}. [${p.name}] priority=${p.getPriority()} options=${JSON.stringify(p.options)}`);
+      logger.debug(`  ${i + 1}. [${p.name}] priority=${p.getPriority()} options=${JSON.stringify(p.options)}`);
     });
   }
 }

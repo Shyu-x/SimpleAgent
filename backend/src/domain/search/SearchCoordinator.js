@@ -28,6 +28,9 @@ const DeduplicationProcessor = require('./postProcessors/DeduplicationProcessor'
 const RerankerProcessor = require('./postProcessors/RerankerProcessor');
 const ThresholdFilterProcessor = require('./postProcessors/ThresholdFilterProcessor');
 const { Reranker } = require('../rag/Reranker');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('SearchCoordinator');
 
 /**
  * 线程池执行器 - 控制并发数量的并行执行器
@@ -181,7 +184,7 @@ class SearchCoordinator {
    */
   registerChannel(channel) {
     if (!channel || !channel.name) {
-      throw new Error('Invalid channel: must have a name');
+      throw AppError.validationError('name', 'Invalid channel: must have a name');
     }
     this.channels.set(channel.name, channel);
     this._stats.channelStats.set(channel.name, {
@@ -307,7 +310,7 @@ class SearchCoordinator {
 
     // 如果没有可用通道，返回空结果
     if (targetChannels.length === 0) {
-      console.warn('[SearchCoordinator] 没有可用的检索通道');
+      logger.warn('没有可用的检索通道');
       return {
         query,
         results: [],
@@ -394,7 +397,7 @@ class SearchCoordinator {
     const healthyChannels = channels.filter(ch => ch.enabled && ch.isHealthy());
 
     if (healthyChannels.length === 0) {
-      console.warn('[SearchCoordinator] 没有健康的通道可执行并行检索');
+      logger.warn('没有健康的通道可执行并行检索');
       return [];
     }
 
@@ -416,7 +419,8 @@ class SearchCoordinator {
     channelResults
       .filter(r => r.status === 'rejected')
       .forEach((r, idx) => {
-        console.error(`[SearchCoordinator] 通道 ${healthyChannels[idx]?.name} 执行失败:`, r.reason?.message);
+        const channelName = healthyChannels[idx]?.name;
+        logger.error(`通道 ${channelName} 执行失败`, { error: r.reason?.message });
       });
 
     // 并行检索完成 - operational info
@@ -456,7 +460,7 @@ class SearchCoordinator {
           break;
         }
       } catch (error) {
-        console.error(`[SearchCoordinator] 通道 ${channel.name} 执行失败:`, error.message);
+        logger.error(`通道 ${channel.name} 执行失败`, { error: error.message });
       }
     }
 
@@ -519,7 +523,7 @@ class SearchCoordinator {
         stats.totalLatency += Date.now() - channelStart;
       }
 
-      console.error(`[SearchCoordinator] 通道 ${channel.name} 检索失败:`, error.message);
+      logger.error(`通道 ${channel.name} 检索失败`, { error: error.message });
 
       return {
         channel: channel.name,
@@ -558,7 +562,7 @@ class SearchCoordinator {
       // 后处理流水线完成 - operational info
       return processedResults;
     } catch (error) {
-      console.error('[SearchCoordinator] 后处理流水线执行异常:', error.message);
+      logger.error('后处理流水线执行异常', { error: error.message });
       return results;
     }
   }
@@ -593,7 +597,7 @@ class SearchCoordinator {
       // 领域层重排序完成 - operational info
       return rerankedResults;
     } catch (error) {
-      console.error('[SearchCoordinator] 领域层重排序异常:', error.message);
+      logger.error('领域层重排序异常', { error: error.message });
       return results;
     }
   }

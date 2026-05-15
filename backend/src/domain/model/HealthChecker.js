@@ -7,6 +7,10 @@
  */
 
 const { TimeoutError } = require('../../infra/circuitBreaker/CircuitBreaker');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+
+const logger = createLogger('HealthChecker');
 
 /**
  * 健康状态枚举
@@ -40,7 +44,7 @@ class HealthChecker {
    */
   constructor(options = {}) {
     if (!options.healthCheckFn) {
-      throw new Error('healthCheckFn is required');
+      throw AppError.validationError('healthCheckFn', 'healthCheckFn is required');
     }
 
     this.healthCheckFn = options.healthCheckFn;
@@ -183,11 +187,11 @@ class HealthChecker {
       try {
         await this.check();
       } catch (err) {
-        console.error('Health check error:', err);
+        logger.error('Health check error', { error: err.message });
       }
     }, this.interval);
 
-    console.log(`[HealthChecker] Started with interval: ${this.interval}ms`);
+    logger.info(`Started with interval: ${this.interval}ms`);
   }
 
   /**
@@ -205,7 +209,7 @@ class HealthChecker {
       this._timer = null;
     }
 
-    console.log('[HealthChecker] Stopped');
+    logger.info('Stopped');
   }
 
   /**
@@ -369,7 +373,7 @@ class ModelHealthCheckerFactory {
       healthCheckFn,
       ...options.checkOptions,
       onStatusChange: (from, to, details) => {
-        console.log(`[ModelHealthChecker:${modelName}] ${from} -> ${to}`);
+        logger.debug(`模型 ${modelName} 状态变化: ${from} -> ${to}`, details);
         options.onStatusChange?.(from, to, details);
       }
     });

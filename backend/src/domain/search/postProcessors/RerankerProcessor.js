@@ -3,6 +3,8 @@
  * 调用 LLM 评估各结果与查询的相关性，返回重排后的结果
  */
 const PostProcessor = require('./PostProcessor');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('RerankerProcessor');
 
 class RerankerProcessor extends PostProcessor {
   constructor(options = {}) {
@@ -45,14 +47,14 @@ class RerankerProcessor extends PostProcessor {
     const { batchSize = 5, topK = 10 } = this.options;
 
     if (!query) {
-      console.warn('[RerankerProcessor] 缺少 query 参数，跳过重排');
+      logger.debug('缺少 query 参数，跳过重排');
       return results;
     }
 
     // 获取 LLM 客户端
     const llm = this._getLLMClient(context);
     if (!llm) {
-      console.warn('[RerankerProcessor] 未配置 LLM 客户端，跳过重排');
+      logger.debug('未配置 LLM 客户端，跳过重排');
       return results;
     }
 
@@ -70,10 +72,10 @@ class RerankerProcessor extends PostProcessor {
         return rest;
       });
 
-      console.log(`[RerankerProcessor] 重排完成，保留 ${reranked.length} 条结果`);
+      logger.debug(`重排完成，保留 ${reranked.length} 条结果`);
       return reranked;
     } catch (err) {
-      console.error('[RerankerProcessor] 重排失败:', err.message);
+      logger.error('重排失败', { error: err.message });
       return results; // 出错时返回原始结果
     }
   }

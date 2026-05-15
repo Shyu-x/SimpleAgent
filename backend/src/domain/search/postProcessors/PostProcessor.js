@@ -6,6 +6,7 @@ class PostProcessor {
   constructor(options = {}) {
     this.options = options;
     this.name = this.constructor.name;
+    this.AppError = require('../../common/errors/AppError');
   }
 
   /**
@@ -15,7 +16,7 @@ class PostProcessor {
    * @returns {Promise<Array>} 处理后的结果
    */
   async process(results, context) {
-    throw new Error(`[${this.name}] 子类必须实现 process 方法`);
+    throw this.AppError.internalError(`[${this.name}] 子类必须实现 process 方法`);
   }
 
   /**

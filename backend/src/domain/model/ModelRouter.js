@@ -9,6 +9,9 @@
 const { CircuitBreaker, CircuitState } = require('../../infra/circuitBreaker/CircuitBreaker');
 const { CircuitBreakerFactory, Presets } = require('../../infra/circuitBreaker/CircuitBreakerFactory');
 const { HealthChecker, HealthStatus } = require('./HealthChecker');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('ModelRouter');
 
 /**
  * 路由策略枚举
@@ -62,7 +65,7 @@ class ModelRouter {
    */
   constructor(options = {}) {
     if (!options.models || options.models.length === 0) {
-      throw new Error('At least one model is required');
+      throw AppError.internalError('At least one model is required');
     }
 
     this._models = options.models.map((m, index) => ({
@@ -150,7 +153,7 @@ class ModelRouter {
         this._stats.fallbackRequests++;
         return await fallbackFn();
       }
-      throw new Error('All models are unavailable');
+      throw AppError.internalError('All models are unavailable');
     }
 
     // 按策略排序候选模型
@@ -229,7 +232,7 @@ class ModelRouter {
   async callDirect(modelName, prompt, options = {}) {
     const model = this._models.find(m => m.name === modelName);
     if (!model) {
-      throw new Error(`Model not found: ${modelName}`);
+      throw AppError.notFound(`Model ${modelName}`);
     }
 
     const breaker = this._circuitBreakers.get(modelName);
@@ -291,7 +294,7 @@ class ModelRouter {
    */
   setStrategy(strategy) {
     if (!Object.values(RouterStrategy).includes(strategy)) {
-      throw new Error(`Invalid strategy: ${strategy}`);
+      throw AppError.validationError('strategy', `Invalid strategy: ${strategy}`);
     }
     this._strategy = strategy;
   }
@@ -316,7 +319,7 @@ class ModelRouter {
   startHealthCheck(modelName, options = {}) {
     const model = this._models.find(m => m.name === modelName);
     if (!model) {
-      throw new Error(`Model not found: ${modelName}`);
+      throw AppError.notFound(`Model ${modelName}`);
     }
 
     const checker = new HealthChecker({
@@ -330,7 +333,7 @@ class ModelRouter {
       },
       ...options,
       onStatusChange: (from, to, details) => {
-        console.log(`[ModelRouter:${modelName}] Health: ${from} -> ${to}`);
+        logger.debug(`模型 ${modelName} 健康状态变化: ${from} -> ${to}`, details);
       }
     });
 
