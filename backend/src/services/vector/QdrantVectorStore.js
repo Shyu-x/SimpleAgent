@@ -11,6 +11,7 @@
 
 const { createLogger } = require('../../infra/logger/AgentLogger');
 const logger = createLogger('QdrantVectorStore');
+const AppError = require('../../common/errors/AppError');
 
 class QdrantVectorStore {
   constructor(options = {}) {
@@ -136,7 +137,7 @@ class QdrantVectorStore {
 
       if (!createResponse.ok) {
         const error = await createResponse.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       logger.info(`生产级集合创建成功: ${this.collectionName}`);
@@ -171,7 +172,7 @@ class QdrantVectorStore {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       // 更新本地配置
@@ -205,7 +206,7 @@ class QdrantVectorStore {
 
         if (!response.ok) {
           const error = await response.text();
-          throw new Error(error);
+          throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
         }
 
         this.quantizationConfig.enabled = false;
@@ -231,7 +232,7 @@ class QdrantVectorStore {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       // 更新本地配置
@@ -341,7 +342,7 @@ class QdrantVectorStore {
         logger.info(`连接成功: ${this.url}`);
         return { success: true };
       } else {
-        throw new Error(`HTTP ${response.status}`);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', `HTTP ${response.status}`);
       }
     } catch (error) {
       logger.error(`连接失败: ${error.message}`);
@@ -382,7 +383,7 @@ class QdrantVectorStore {
 
       if (!createResponse.ok) {
         const error = await createResponse.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       logger.info(`集合创建成功: ${this.collectionName}`);
@@ -437,7 +438,7 @@ class QdrantVectorStore {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       return {
@@ -476,7 +477,7 @@ class QdrantVectorStore {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       return {
@@ -517,7 +518,7 @@ class QdrantVectorStore {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       const data = await response.json();
@@ -555,7 +556,7 @@ class QdrantVectorStore {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       return { success: true, deletedCount: ids.length };
@@ -577,7 +578,7 @@ class QdrantVectorStore {
 
       if (!response.ok && response.status !== 404) {
         const error = await response.text();
-        throw new Error(error);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', error);
       }
 
       logger.info(`集合已删除: ${this.collectionName}`);
@@ -599,7 +600,7 @@ class QdrantVectorStore {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', `HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -648,7 +649,7 @@ class QdrantVectorStore {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', `HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -682,7 +683,7 @@ class QdrantVectorStore {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', `HTTP ${response.status}`);
       }
 
       const data = await response.json();

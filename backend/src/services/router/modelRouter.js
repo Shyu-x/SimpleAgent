@@ -15,6 +15,7 @@ const {
   getMultiModelRouter,
   MINIMAX_MODELS
 } = require('./MultiModelRouter');
+const AppError = require('../../common/errors/AppError');
 
 // 使用 MultiModelRouter 中导出的 MINIMAX_MODELS
 // 默认模型
@@ -425,10 +426,20 @@ class MiniMaxRouter extends EventEmitter {
   async callAPI(modelId, request) {
     const apiKey = process.env.MINIMAX_API_KEY;
     if (!apiKey) {
-      throw new Error('MINIMAX_API_KEY not configured');
+      throw AppError.internalError('MINIMAX_API_KEY not configured');
     }
 
     const baseUrl = process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/anthropic';
+    const startTime = Date.now();
+
+    // 获取指标采集器
+    let collector = null;
+    try {
+      const { getMetricsCollector } = require('../infra/metrics');
+      collector = getMetricsCollector();
+    } catch (e) {
+      // 指标采集器未初始化
+    }
 
     // 获取模型熔断器
     const breaker = breakerFactory.get(`model_${modelId}`, {
@@ -462,7 +473,17 @@ class MiniMaxRouter extends EventEmitter {
         signal: AbortSignal.timeout(120000)
       });
 
+      // 记录模型 API 耗时
+      const apiLatency = Date.now() - startTime;
+      if (collector) {
+        collector.recordHistogram('model_api_duration_seconds', apiLatency / 1000, { model: modelId });
+        collector.incrementCounter('model_requests_total', { model: modelId, status: response.status });
+      }
+
       if (!response.ok) {
+        if (collector) {
+          collector.incrementCounter('model_errors_total', { model: modelId, status: response.status });
+        }
         let errorText = await response.text();
         let errorMessage = `MiniMax API Error ${response.status}`;
 
@@ -488,14 +509,27 @@ class MiniMaxRouter extends EventEmitter {
           errorMessage = `MiniMax服务错误: ${errorMessage}`;
         }
 
-        throw new Error(errorMessage);
+        throw AppError.internalError(errorMessage);
       }
 
       if (request.stream) {
         return response.body;
       }
 
-      return await response.json();
+      const result = await response.json();
+
+      // 记录 token 消耗（非流式响应）
+      if (result && collector) {
+        const inputTokens = result.usage?.input_tokens || 0;
+        const outputTokens = result.usage?.output_tokens || 0;
+        const totalTokens = inputTokens + outputTokens;
+        if (totalTokens > 0) {
+          collector.incrementCounter('model_tokens_total', { model: modelId }, totalTokens);
+          collector.recordHistogram('model_tokens_per_request', totalTokens, { model: modelId });
+        }
+      }
+
+      return result;
     }, () => {
       // 降级响应：熔断期间返回结构化错误
       return {

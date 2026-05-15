@@ -4,6 +4,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../common/errors/AppError');
 
 /**
  * 工具执行优先级
@@ -157,7 +158,7 @@ class ToolScheduler extends EventEmitter {
    */
   async callTool(toolName, input, timeout) {
     // 子类需要重写此方法
-    throw new Error('Tool executor not set');
+    throw AppError.internalError('Tool executor not set');
   }
 
   /**

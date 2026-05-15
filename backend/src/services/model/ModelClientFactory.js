@@ -9,6 +9,7 @@
  */
 
 const MiniMaxChatClient = require('./clients/MiniMaxChatClient');
+const AppError = require('../../common/errors/AppError');
 
 // 客户端注册表
 const clientRegistry = new Map();
@@ -37,7 +38,7 @@ function createClient(provider, options = {}) {
 
   if (!ClientClass) {
     const available = Array.from(clientRegistry.keys()).join(', ');
-    throw new Error(`Unknown provider: ${provider}. Available: ${available}`);
+    throw AppError.internalError(`Unknown provider: ${provider}. Available: ${available}`);
   }
 
   return new ClientClass(options);

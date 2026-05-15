@@ -4,6 +4,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../common/errors/AppError');
 
 // 技能类型
 const SkillType = {
@@ -522,7 +523,7 @@ class SkillSystem extends EventEmitter {
     const skillId = skill.id || generateId();
 
     if (this.skills.has(skillId)) {
-      throw new Error(`Skill already exists: ${skillId}`);
+      throw AppError.internalError(`Skill already exists: ${skillId}`);
     }
 
     const skillData = {
@@ -630,13 +631,13 @@ class SkillSystem extends EventEmitter {
   async execute(skillId, context = {}) {
     const skill = this.skills.get(skillId);
     if (!skill) {
-      throw new Error(`Skill not found: ${skillId}`);
+      throw AppError.toolError('TOOL_NOT_FOUND', `Skill not found: ${skillId}`);
     }
 
     // 验证上下文
     const validation = this.validateContext(skillId, context);
     if (!validation.valid) {
-      throw new Error(validation.error);
+      throw AppError.validationError('validation', validation.error);
     }
 
     // 检查缓存
@@ -882,7 +883,7 @@ class SkillSystem extends EventEmitter {
   update(skillId, updates) {
     const skill = this.skills.get(skillId);
     if (!skill) {
-      throw new Error(`Skill not found: ${skillId}`);
+      throw AppError.toolError('TOOL_NOT_FOUND', `Skill not found: ${skillId}`);
     }
 
     Object.assign(skill, updates, { updatedAt: Date.now() });

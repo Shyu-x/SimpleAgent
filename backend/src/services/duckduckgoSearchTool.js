@@ -6,6 +6,7 @@
 const { createLogger } = require('../infra/logger/AgentLogger');
 
 const logger = createLogger('DuckDuckGoSearchTool');
+const AppError = require('../common/errors/AppError');
 
 class DuckDuckGoSearchTool {
   constructor(options = {}) {
@@ -192,7 +193,7 @@ class DuckDuckGoSearchTool {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          throw AppError.internalError(`HTTP ${response.status}`);
         }
 
         const html = await response.text();

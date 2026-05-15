@@ -15,6 +15,7 @@
  */
 
 const { SearchChannel, SearchResult } = require('./SearchChannel');
+const AppError = require('../../common/errors/AppError');
 
 class SearchCoordinator {
   constructor(options = {}) {
@@ -28,7 +29,7 @@ class SearchCoordinator {
    */
   registerChannel(channel) {
     if (!(channel instanceof SearchChannel)) {
-      throw new Error('Channel must be instance of SearchChannel');
+      throw AppError.validationError('SearchChannel', 'Channel must be instance of SearchChannel');
     }
     this.channels.set(channel.name, channel);
     return this;

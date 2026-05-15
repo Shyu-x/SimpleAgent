@@ -4,6 +4,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../common/errors/AppError');
 
 // 生成简单UUID
 const generateId = () => {
@@ -239,7 +240,7 @@ class MultiModelRouter extends EventEmitter {
         }));
 
       if (candidateModels.length === 0) {
-        throw new Error('No available models');
+        throw AppError.internalError('No available models');
       }
     }
 
@@ -487,7 +488,7 @@ class MultiModelRouter extends EventEmitter {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`API Error: ${response.status} - ${errorText}`);
+      throw AppError.internalError(`API Error: ${response.status} - ${errorText}`);
     }
 
     if (stream) {

@@ -13,6 +13,7 @@
 
 const EventEmitter = require('events');
 const { v4: uuidv4 } = require('uuid');
+const AppError = require('../common/errors/AppError');
 
 /**
  * 协调模式枚举
@@ -302,7 +303,7 @@ class CollaborationTask {
 
     // 检测循环依赖
     if (result.length !== this.tasks.length) {
-      throw new Error('Circular dependency detected');
+      throw AppError.internalError('Circular dependency detected');
     }
 
     return result;
@@ -330,7 +331,7 @@ class CollaborationTask {
       }
 
       if (level.length === 0 && remaining.length > 0) {
-        throw new Error('Unable to resolve task order - possible circular dependency');
+        throw AppError.internalError('Unable to resolve task order - possible circular dependency');
       }
 
       levels.push(level);
@@ -616,7 +617,7 @@ class MultiAgentCoordinator extends EventEmitter {
       });
 
       if (!success) {
-        throw new Error(`Failed to delegate task to ${agentId}`);
+        throw AppError.internalError(`Failed to delegate task to ${agentId}`);
       }
 
       // 等待结果

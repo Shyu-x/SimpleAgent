@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
 const { EventEmitter } = require('events');
+const AppError = require('../../common/errors/AppError');
 
 // 预定义的事件类型
 const EventTypes = {
@@ -419,7 +420,7 @@ class TraceService extends EventEmitter {
     }
 
     if (!traceObj) {
-      throw new Error('Trace not found or not provided');
+      throw AppError.notFound('Trace');
     }
 
     // 检查span数量限制

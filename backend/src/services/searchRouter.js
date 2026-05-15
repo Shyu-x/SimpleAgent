@@ -4,6 +4,7 @@
  */
 
 const axios = require('axios');
+const AppError = require('../common/errors/AppError');
 
 // 搜索源配置
 const SEARCH_PROVIDERS = {
@@ -154,7 +155,7 @@ class SearchRouter {
         result = await this.searchDuckDuckGo(query);
         break;
       default:
-        throw new Error(`Unknown provider: ${provider}`);
+        throw AppError.internalError(`Unknown provider: ${provider}`);
     }
 
     // 存入缓存
@@ -240,7 +241,7 @@ class SearchRouter {
         };
       }
 
-      throw new Error('MiniMax API 不可用');
+      throw AppError.internalError('MiniMax API 不可用');
     } catch (error) {
       console.error('[SearchRouter] MiniMax search error:', error.message);
       throw error;

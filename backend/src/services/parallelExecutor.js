@@ -4,6 +4,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../common/errors/AppError');
 
 // 任务状态
 const TASK_STATUS = {
@@ -92,7 +93,7 @@ class ParallelExecutor extends EventEmitter {
    */
   async execute() {
     if (this.isRunning) {
-      throw new Error('Already running');
+      throw AppError.internalError('Already running');
     }
 
     this.isRunning = true;
@@ -286,7 +287,7 @@ class ParallelExecutor extends EventEmitter {
     while (Date.now() - startTime < timeout) {
       const task = this.results.get(id);
       if (!task) {
-        throw new Error(`Task ${id} not found`);
+        throw AppError.notFound(`Task ${id}`);
       }
 
       if (task.status === TASK_STATUS.COMPLETED) {
@@ -300,7 +301,7 @@ class ParallelExecutor extends EventEmitter {
       await this._wait(100);
     }
 
-    throw new Error(`Task ${id} timeout`);
+    throw AppError.internalError(`Task ${id} timeout`);
   }
 
   /**

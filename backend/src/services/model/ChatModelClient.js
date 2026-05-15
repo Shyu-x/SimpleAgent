@@ -3,6 +3,8 @@
  * 统一的聊天模型客户端接口，支持多种模型提供商
  */
 
+const AppError = require('../../common/errors/AppError');
+
 /**
  * 聊天结果回调接口
  * @callback ChatResultCallback
@@ -47,7 +49,7 @@ class ChatModelClient {
    * @returns {Promise<Object>} 聊天结果
    */
   async chat(modelId, messages, options = {}) {
-    throw new Error('chat() must be implemented by subclass');
+    throw AppError.internalError('chat() must be implemented by subclass');
   }
 
   /**
@@ -58,7 +60,7 @@ class ChatModelClient {
    * @returns {Promise<void>}
    */
   async chatStream(modelId, messages, options = {}) {
-    throw new Error('chatStream() must be implemented by subclass');
+    throw AppError.internalError('chatStream() must be implemented by subclass');
   }
 
   /**
@@ -68,7 +70,7 @@ class ChatModelClient {
    * @returns {Promise<number[][]>} 嵌入向量
    */
   async embed(texts, options = {}) {
-    throw new Error('embed() must be implemented by subclass');
+    throw AppError.internalError('embed() must be implemented by subclass');
   }
 
   /**
@@ -77,7 +79,7 @@ class ChatModelClient {
    * @returns {Promise<ModelHealth>} 健康状态
    */
   async getStatus(modelId) {
-    throw new Error('getStatus() must be implemented by subclass');
+    throw AppError.internalError('getStatus() must be implemented by subclass');
   }
 
   /**
@@ -129,7 +131,7 @@ class MiniMaxChatModelClient extends ChatModelClient {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`MiniMax API error: ${response.status} - ${error}`);
+      throw AppError.internalError(`MiniMax API error: ${response.status} - ${error}`);
     }
 
     const data = await response.json();
@@ -167,7 +169,7 @@ class MiniMaxChatModelClient extends ChatModelClient {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`MiniMax API error: ${response.status} - ${error}`);
+      throw AppError.internalError(`MiniMax API error: ${response.status} - ${error}`);
     }
 
     const reader = response.body.getReader();

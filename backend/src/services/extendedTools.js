@@ -6,6 +6,7 @@
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
+const AppError = require('../common/errors/AppError');
 
 /**
  * Arxiv论文搜索工具
@@ -304,7 +305,7 @@ class WeatherTool {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw AppError.internalError(`HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -618,7 +619,7 @@ class ExtendedToolRegistry {
   async execute(name, args) {
     const tool = this.tools.get(name);
     if (!tool) {
-      throw new Error(`Tool not found: ${name}`);
+      throw AppError.toolError('TOOL_NOT_FOUND', `Tool not found: ${name}`);
     }
     return await tool.execute(args);
   }

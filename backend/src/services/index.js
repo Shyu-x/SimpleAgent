@@ -55,6 +55,9 @@ const {
   TOOL_CATEGORIES
 } = require('./tools');
 
+// 聊天服务
+const chatService = require('./chatService');
+
 /**
  * 创建增强版 Agent
  */
@@ -219,5 +222,8 @@ module.exports = {
 
   // 工具函数
   healthCheck,
-  getSystemStats
+  getSystemStats,
+
+  // 聊天服务
+  chatService
 };

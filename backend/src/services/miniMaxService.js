@@ -4,6 +4,7 @@
  */
 
 const MINIMAX_API_HOST = process.env.MINIMAX_API_HOST || 'https://api.minimaxi.com';
+const AppError = require('../common/errors/AppError');
 
 class MiniMaxService {
   /**
@@ -16,12 +17,12 @@ class MiniMaxService {
   async generateImage(prompt, aspectRatio = '1:1', apiKey) {
     const key = apiKey || process.env.MINIMAX_API_KEY;
     if (!key) {
-      throw new Error('MiniMax API Key 未配置');
+      throw AppError.internalError('MiniMax API Key 未配置');
     }
 
     const validRatios = ['1:1', '16:9', '9:16', '3:4', '4:3'];
     if (!validRatios.includes(aspectRatio)) {
-      throw new Error(`aspect_ratio 必须为 ${validRatios.join('|')} 之一`);
+      throw AppError.validationError('aspectRatio', `aspect_ratio 必须为 ${validRatios.join('|')} 之一`);
     }
 
     const response = await fetch(`${MINIMAX_API_HOST}/v1/image_generation`, {
@@ -36,16 +37,16 @@ class MiniMaxService {
     const data = await response.json();
 
     if (data.base_resp?.status_code && data.base_resp.status_code !== 0) {
-      throw new Error(data.base_resp.status_msg || '图片生成失败');
+      throw AppError.internalError(data.base_resp.status_msg || '图片生成失败');
     }
 
     if (!response.ok) {
-      throw new Error(data.error?.message || '请求失败');
+      throw AppError.internalError(data.error?.message || '请求失败');
     }
 
     const imageUrl = data.data?.image_urls?.[0] || data.data?.[0]?.url || data.url || data.base64;
     if (!imageUrl) {
-      throw new Error('图片生成结果无效，未返回图片URL');
+      throw AppError.internalError('图片生成结果无效，未返回图片URL');
     }
 
     return { success: true, image_url: imageUrl, revised_prompt: data.revised_prompt, created_at: data.created_at };
@@ -61,7 +62,7 @@ class MiniMaxService {
   async synthesizeSpeech(text, voiceId = 'male-qn-qingse', apiKey) {
     const key = apiKey || process.env.MINIMAX_API_KEY;
     if (!key) {
-      throw new Error('MiniMax API Key 未配置');
+      throw AppError.internalError('MiniMax API Key 未配置');
     }
 
     const response = await fetch(`${MINIMAX_API_HOST}/v1/t2a_v2`, {
@@ -80,7 +81,7 @@ class MiniMaxService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: { message: '请求失败' } }));
-      throw new Error(error.error?.message || '请求失败');
+      throw AppError.internalError(error.error?.message || '请求失败');
     }
 
     const buffer = await response.arrayBuffer();

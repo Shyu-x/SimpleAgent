@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const AppError = require('../common/errors/AppError');
 
 // 任务状态枚举
 const TaskStatus = {
@@ -108,7 +109,7 @@ class MissionService {
     const { name, description, priority, assignedAgent } = data;
 
     if (!name) {
-      throw new Error('name is required');
+      throw AppError.validationError('name', 'name is required');
     }
 
     const now = Date.now();
@@ -311,7 +312,7 @@ class MissionService {
     const { name, role, avatar, capabilities } = data;
 
     if (!name) {
-      throw new Error('name is required');
+      throw AppError.validationError('name', 'name is required');
     }
 
     const now = Date.now();

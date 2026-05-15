@@ -4,6 +4,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../common/errors/AppError');
 
 // Agent类型
 const AgentType = {
@@ -84,7 +85,7 @@ class ReActAgent extends EventEmitter {
 
     const toolRegistry = this.toolRegistry || { get: (name) => this.tools.get(name), execute: async (name, args) => {
       const tool = this.tools.get(name);
-      if (!tool) throw new Error(`Tool not found: ${name}`);
+      if (!tool) throw AppError.toolError('TOOL_NOT_FOUND', `Tool not found: ${name}`);
       return await tool.execute(args);
     }};
 
@@ -335,7 +336,7 @@ class PlanExecuteAgent extends EventEmitter {
       const toolRegistry = this.toolRegistry || {
         execute: async (name, args) => {
           const tool = this.tools.get(name);
-          if (!tool) throw new Error(`Tool not found: ${name}`);
+          if (!tool) throw AppError.toolError('TOOL_NOT_FOUND', `Tool not found: ${name}`);
           return await tool.execute(args);
         }
       };
@@ -649,7 +650,7 @@ class Text2SQLAgent extends EventEmitter {
       // 2. 验证SQL
       const validation = this._validateSQL(sql);
       if (!validation.valid) {
-        throw new Error(`SQL validation failed: ${validation.error}`);
+        throw AppError.internalError(`SQL validation failed: ${validation.error}`);
       }
 
       // 3. 执行SQL（如果配置了数据库）
@@ -743,7 +744,7 @@ class AgentFactory {
       case AgentType.TEXT2SQL:
         return new Text2SQLAgent(options);
       default:
-        throw new Error(`Unknown agent type: ${type}`);
+        throw AppError.internalError(`Unknown agent type: ${type}`);
     }
   }
 }

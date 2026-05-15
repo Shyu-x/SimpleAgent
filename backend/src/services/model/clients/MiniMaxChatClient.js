@@ -5,6 +5,7 @@
  */
 
 const { ChatModelClient, ModelOptions, StreamEventType } = require('../ChatModelClient');
+const AppError = require('../../../common/errors/AppError');
 
 class MiniMaxChatClient extends ChatModelClient {
   constructor(options = {}) {
@@ -47,7 +48,7 @@ class MiniMaxChatClient extends ChatModelClient {
     const modelId = model || this.defaultModel;
 
     if (!this.apiKey) {
-      throw new Error('MINIMAX_API_KEY not configured');
+      throw AppError.internalError('MINIMAX_API_KEY not configured');
     }
 
     const response = await fetch(`${this.baseUrl}/v1/messages`, {
@@ -78,7 +79,7 @@ class MiniMaxChatClient extends ChatModelClient {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`MiniMax API Error ${response.status}: ${error}`);
+      throw AppError.internalError(`MiniMax API Error ${response.status}: ${error}`);
     }
 
     return await response.json();

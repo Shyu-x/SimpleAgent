@@ -5,6 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const AppError = require('../../common/errors/AppError');
 
 class DocumentPipeline {
   constructor(options = {}) {
@@ -41,7 +42,7 @@ class DocumentPipeline {
     const parser = this.parsers.get(ext);
 
     if (!parser) {
-      throw new Error(`Unsupported file type: ${ext}`);
+      throw AppError.validationError('file type', `Unsupported file type: ${ext}`);
     }
 
     // 1. 解析文档
@@ -77,7 +78,7 @@ class DocumentPipeline {
       return data.text;
     } catch (error) {
       console.error('PDF解析失败:', error.message);
-      throw new Error(`PDF解析失败: ${error.message}`);
+      throw AppError.internalError(`PDF解析失败: ${error.message}`);
     }
   }
 

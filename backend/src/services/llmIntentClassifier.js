@@ -5,6 +5,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../common/errors/AppError');
 
 // 意图类型
 const INTENT_TYPES = {
@@ -369,7 +370,7 @@ class LLMIntentClassifier extends EventEmitter {
    */
   async _callLLM(prompt) {
     if (!this.modelRouter) {
-      throw new Error('No model router available');
+      throw AppError.internalError('No model router available');
     }
 
     const messages = [
@@ -392,7 +393,7 @@ class LLMIntentClassifier extends EventEmitter {
       return result.content;
     }
 
-    throw new Error('Invalid LLM response');
+    throw AppError.internalError('Invalid LLM response');
   }
 
   /**
@@ -414,7 +415,7 @@ class LLMIntentClassifier extends EventEmitter {
       try {
         return JSON.parse(fixed);
       } catch {
-        throw new Error('Failed to parse JSON response');
+        throw AppError.internalError('Failed to parse JSON response');
       }
     }
   }

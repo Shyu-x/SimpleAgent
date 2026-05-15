@@ -5,6 +5,7 @@
 
 const { Agent, Task, Crew, AGENT_TEMPLATES, TASK_TEMPLATES } = require('../multiagent');
 const MiniMaxChatClient = require('./model/clients/MiniMaxChatClient');
+const AppError = require('../common/errors/AppError');
 
 // ============================================
 // 状态存储 (内存中)
@@ -157,7 +158,7 @@ async function executeCrew({ crewId, agents, tasks, process }) {
 async function executeEngineTask(sessionId, task, context = {}) {
   const engine = enhancedEngines.get(sessionId);
   if (!engine) {
-    throw new Error('Engine not found');
+    throw AppError.notFound('Engine');
   }
   return await engine.execute(task, context);
 }
@@ -167,7 +168,7 @@ async function executeEngineTask(sessionId, task, context = {}) {
  */
 function pauseEngine(sessionId) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   engine.pause();
   return { success: true, message: 'Engine paused' };
 }
@@ -177,7 +178,7 @@ function pauseEngine(sessionId) {
  */
 function resumeEngine(sessionId) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   engine.resume();
   return { success: true, message: 'Engine resumed' };
 }
@@ -187,7 +188,7 @@ function resumeEngine(sessionId) {
  */
 function checkpointEngine(sessionId) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   const checkpoint = engine.checkpointManager.save(sessionId, engine.getState());
   return { checkpointId: checkpoint.id, message: 'Checkpoint created successfully' };
 }
@@ -197,7 +198,7 @@ function checkpointEngine(sessionId) {
  */
 function listEngineCheckpoints(sessionId) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   return engine.checkpointManager.list(sessionId);
 }
 
@@ -206,7 +207,7 @@ function listEngineCheckpoints(sessionId) {
  */
 function confirmEngineRequest(sessionId, confirmationId, approved, modifiedInput) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   return engine.respondToConfirmation(confirmationId, approved, modifiedInput);
 }
 
@@ -215,7 +216,7 @@ function confirmEngineRequest(sessionId, confirmationId, approved, modifiedInput
  */
 function getEngineStatus(sessionId) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   return { state: engine.getState(), status: engine.getState().status };
 }
 
@@ -224,7 +225,7 @@ function getEngineStatus(sessionId) {
  */
 function getEngineMemoryStats(sessionId) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   return engine.memory.getStats();
 }
 
@@ -233,7 +234,7 @@ function getEngineMemoryStats(sessionId) {
  */
 async function searchEngineMemory(sessionId, query, options) {
   const engine = enhancedEngines.get(sessionId);
-  if (!engine) throw new Error('Engine not found');
+  if (!engine) throw AppError.notFound('Engine');
   return await engine.memory.search(query, options || {});
 }
 
@@ -243,7 +244,7 @@ async function searchEngineMemory(sessionId, query, options) {
 async function restoreFromCheckpoint(sessionId, checkpointId) {
   const engine = enhancedEngines.get(sessionId);
   if (!engine) {
-    throw new Error('Engine not found');
+    throw AppError.notFound('Engine');
   }
   return await engine.restoreFromCheckpoint(checkpointId);
 }
@@ -293,7 +294,7 @@ function getHealthStatus() {
  */
 function createAgent({ role, goal, backstory, tools, provider, model }) {
   if (!role || !goal) {
-    throw new Error('Missing role or goal');
+    throw AppError.validationError('role or goal', 'Missing role or goal');
   }
   return new Agent({
     role,
@@ -310,7 +311,7 @@ function createAgent({ role, goal, backstory, tools, provider, model }) {
  */
 function createTask({ description, expectedOutput, agentId, context, tools }) {
   if (!description) {
-    throw new Error('Missing description');
+    throw AppError.validationError('description', 'Missing description');
   }
   return new Task({
     description,

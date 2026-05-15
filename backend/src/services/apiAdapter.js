@@ -2,6 +2,7 @@
 // 统一多平台调用格式，支持OpenAI兼容接口
 
 // MiniMax 渠道配置 - MiniMax 单一架构
+const AppError = require('../common/errors/AppError');
 const channels = [
   {
     id: 'minimax',
@@ -57,7 +58,7 @@ class APIAdapter {
   static adaptRequest(channelId, openaiRequest) {
     const channel = ChannelService.getChannel(channelId);
     if (!channel) {
-      throw new Error(`渠道 ${channelId} 不存在`);
+      throw AppError.notFound(`渠道 ${channelId}`);
     }
 
     const { model, messages, stream, temperature, max_tokens } = openaiRequest;

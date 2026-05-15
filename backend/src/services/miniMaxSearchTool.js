@@ -4,6 +4,7 @@
  */
 
 const { withRetry, withTimeout } = require('../utils/retry');
+const AppError = require('../common/errors/AppError');
 
 class MiniMaxSearchTool {
   constructor(options = {}) {
@@ -281,7 +282,7 @@ class MiniMaxSearchTool {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`API错误 ${response.status}: ${errorText}`);
+        throw AppError.internalError(`API错误 ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();

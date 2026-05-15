@@ -7,6 +7,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const { createLogger } = require('../infra/logger/AgentLogger');
 const logger = createLogger('FileCheckpointManager');
+const AppError = require('../common/errors/AppError');
 
 class FileCheckpointManager {
   constructor(options = {}) {
@@ -155,7 +156,7 @@ class FileCheckpointManager {
       const checkpoint = JSON.parse(data);
 
       if (checkpointId && checkpoint.id !== checkpointId) {
-        throw new Error(`Checkpoint ID mismatch: expected ${checkpointId}, got ${checkpoint.id}`);
+        throw AppError.internalError(`Checkpoint ID mismatch: expected ${checkpointId}, got ${checkpoint.id}`);
       }
 
       logger.info(`恢复检查点: ${checkpoint.id}`);

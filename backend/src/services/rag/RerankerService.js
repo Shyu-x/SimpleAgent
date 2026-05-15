@@ -3,6 +3,9 @@
  * 使用MiniMax模型对检索结果进行相关性重排序
  */
 
+const createLogger = require('../../common/logger');
+const logger = createLogger('Reranker');
+
 class RerankerService {
   constructor(options = {}) {
     this.enabled = options.enabled !== false;
@@ -28,7 +31,7 @@ class RerankerService {
         return await this._llmRerank(query, results, rerankTopK);
       }
     } catch (error) {
-      console.warn('[Reranker] LLM rerank failed, using original order:', error.message);
+      logger.warn(`LLM rerank failed, using original order: ${error.message}`);
     }
 
     // 回退：使用原始分数排序

@@ -12,6 +12,7 @@
 class SearchChannel {
   constructor(options = {}) {
     this.name = options.name || 'unknown';
+    this.AppError = require('../../common/errors/AppError');
     this.weight = options.weight || 1.0;
     this.timeout = options.timeout || 30000;
     this.enabled = options.enabled !== false;
@@ -24,7 +25,7 @@ class SearchChannel {
    * @returns {Promise<SearchResult[]>}
    */
   async search(query, options = {}) {
-    throw new Error(`SearchChannel[${this.name}].search() must be implemented`);
+    throw this.AppError.internalError(`SearchChannel[${this.name}].search() must be implemented`);
   }
 
   /**

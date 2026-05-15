@@ -18,6 +18,7 @@
 const EventEmitter = require('events');
 const { breakerFactory } = require('../../common/CircuitBreaker');
 const { ProbeBufferingCallback } = require('../../infra/sse/ProbeBufferingCallback');
+const AppError = require('../../common/errors/AppError');
 
 // ==================== 模型配置 ====================
 
@@ -503,7 +504,7 @@ class MultiModelRouter extends EventEmitter {
           () => this._createDegradedResponse()
         );
       } else {
-        throw new Error(`Unknown provider: ${model.provider}`);
+        throw AppError.internalError(`Unknown provider: ${model.provider}`);
       }
 
       return {
@@ -540,7 +541,7 @@ class MultiModelRouter extends EventEmitter {
           () => null
         );
       } else {
-        throw new Error(`Unknown provider: ${model.provider}`);
+        throw AppError.internalError(`Unknown provider: ${model.provider}`);
       }
 
       if (!stream) {
@@ -560,7 +561,7 @@ class MultiModelRouter extends EventEmitter {
   async _callMiniMaxAPI(modelId, request) {
     const apiKey = process.env.MINIMAX_API_KEY;
     if (!apiKey) {
-      throw new Error('MINIMAX_API_KEY not configured');
+      throw AppError.internalError('MINIMAX_API_KEY not configured');
     }
 
     const baseUrl = process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/anthropic';
@@ -590,7 +591,7 @@ class MultiModelRouter extends EventEmitter {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`MiniMax API Error ${response.status}: ${error}`);
+      throw AppError.internalError(`MiniMax API Error ${response.status}: ${error}`);
     }
 
     if (request.stream) {
@@ -607,7 +608,7 @@ class MultiModelRouter extends EventEmitter {
   async _callMiniMaxAPIStream(modelId, request) {
     const apiKey = process.env.MINIMAX_API_KEY;
     if (!apiKey) {
-      throw new Error('MINIMAX_API_KEY not configured');
+      throw AppError.internalError('MINIMAX_API_KEY not configured');
     }
 
     const baseUrl = process.env.MINIMAX_BASE_URL || 'https://api.minimaxi.com/anthropic';
@@ -637,7 +638,7 @@ class MultiModelRouter extends EventEmitter {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`MiniMax API Error ${response.status}: ${error}`);
+      throw AppError.internalError(`MiniMax API Error ${response.status}: ${error}`);
     }
 
     return response.body;

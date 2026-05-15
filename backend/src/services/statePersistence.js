@@ -8,6 +8,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const { createLogger } = require('../infra/logger/AgentLogger');
 const logger = createLogger('StatePersistence');
+const AppError = require('../common/errors/AppError');
 
 // 默认存储路径
 const DEFAULT_STORAGE_PATH = path.join(__dirname, '../../data/agent-states');
@@ -127,7 +128,7 @@ class StatePersistence {
   async createCheckpoint(sessionId, state) {
     const session = await this.loadSession(sessionId);
     if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
+      throw AppError.agentError('SESSION_NOT_FOUND', `Session not found: ${sessionId}`);
     }
 
     const checkpointId = `cp_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
@@ -171,7 +172,7 @@ class StatePersistence {
   async restoreFromCheckpoint(sessionId, checkpointId = null) {
     const session = await this.loadSession(sessionId);
     if (!session) {
-      throw new Error(`Session not found: ${sessionId}`);
+      throw AppError.agentError('SESSION_NOT_FOUND', `Session not found: ${sessionId}`);
     }
 
     // 找到要恢复的检查点
@@ -184,7 +185,7 @@ class StatePersistence {
     }
 
     if (!checkpoint) {
-      throw new Error(`Checkpoint not found: ${checkpointId || 'latest'}`);
+      throw AppError.notFound(`Checkpoint ${checkpointId || 'latest'}`);
     }
 
     // 更新会话状态

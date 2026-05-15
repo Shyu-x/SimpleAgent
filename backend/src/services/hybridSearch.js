@@ -9,6 +9,7 @@ class HybridSearch {
     this.vectorSearch = options.vectorSearch || null;
     this.fullTextSearch = options.fullTextSearch || null;
     this.intentSearch = options.intentSearch || null;
+    this.AppError = require('../common/errors/AppError');
 
     // 检索配置
     this.defaultTopK = options.topK || 5;
@@ -127,21 +128,21 @@ class HybridSearch {
    * 向量检索 (当未配置向量搜索服务时抛出错误)
    */
   mockVectorSearch(query, knowledgeBaseId, filters) {
-    throw new Error('向量搜索服务未配置，请配置 QdrantVectorStore 或其他向量搜索服务');
+    throw this.AppError.internalError('向量搜索服务未配置，请配置 QdrantVectorStore 或其他向量搜索服务');
   }
 
   /**
    * 全文检索 (当未配置全文搜索服务时抛出错误)
    */
   mockFullTextSearch(query, knowledgeBaseId, filters) {
-    throw new Error('全文搜索服务未配置，请配置全文搜索引擎');
+    throw this.AppError.internalError('全文搜索服务未配置，请配置全文搜索引擎');
   }
 
   /**
    * 意图检索 (当未配置意图搜索服务时抛出错误)
    */
   mockIntentSearch(query, knowledgeBaseId, intent) {
-    throw new Error('意图搜索服务未配置，请配置意图分类服务');
+    throw this.AppError.internalError('意图搜索服务未配置，请配置意图分类服务');
   }
 
   /**
@@ -330,7 +331,7 @@ class HybridSearch {
  */
 class VectorSearchInterface {
   async search(query, options) {
-    throw new Error('Not implemented');
+    throw this.AppError.internalError('Not implemented');
   }
 }
 
@@ -339,7 +340,7 @@ class VectorSearchInterface {
  */
 class FullTextSearchInterface {
   async search(query, options) {
-    throw new Error('Not implemented');
+    throw this.AppError.internalError('Not implemented');
   }
 }
 
@@ -348,7 +349,7 @@ class FullTextSearchInterface {
  */
 class IntentSearchInterface {
   async search(query, options) {
-    throw new Error('Not implemented');
+    throw this.AppError.internalError('Not implemented');
   }
 }
 

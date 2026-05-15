@@ -4,6 +4,7 @@
  */
 
 const { AgentError, ErrorCodes } = require('./errorHandler');
+const AppError = require('../common/errors/AppError');
 
 /**
  * 工具权限级别
@@ -245,7 +246,7 @@ class EnhancedToolRegistry {
    */
   register(tool, options = {}) {
     if (!tool.name || !tool.execute) {
-      throw new Error('Tool must have name and execute function');
+      throw AppError.validationError('name and execute', 'Tool must have name and execute function');
     }
 
     const toolConfig = {

@@ -13,6 +13,7 @@ class MemoryService {
   constructor(options = {}) {
     this.maxMessages = options.maxMessages || 100;
     this.maxTokens = options.maxTokens || 4000;
+    this.AppError = require('../common/errors/AppError');
     this.compressionThreshold = options.compressionThreshold || 3000;
     // 压缩阈值（双维度）
     this.compressionRatio = options.compressionRatio || 0.8;
@@ -689,7 +690,7 @@ ${conversation}
     try {
       messages = typeof data === 'string' ? JSON.parse(data) : data;
     } catch (error) {
-      throw new Error('无效的数据格式');
+      throw this.AppError.validationError('data format', '无效的数据格式');
     }
 
     if (mode === 'replace') {
