@@ -106,6 +106,71 @@
 | 2.4.0 | Phase 1架构收尾 | 路由简化、业务逻辑迁移、日志规范化 | ✅ 已完成 |
 | 2.4.1 | Bug修复 | 编译错误、样式加载、SSE流式响应完善 | ✅ 已完成 |
 | 2.4.2 | 安全强化 | CSRF防护、请求签名、安全代码注入修复 | ✅ 已完成 |
+| 2.5.0 | Sprint #5 | API集成测试100%通过、日志规范化、同步改异步 | ✅ 已完成 |
+
+---
+
+## [2.5.0] Sprint #5 优化 (2026-05-15)
+
+### API集成测试 ✅
+
+| 指标 | 数值 |
+|------|------|
+| 总测试数 | 35 |
+| 通过率 | 100% |
+| 总耗时 | 0.09s |
+
+**测试覆盖模块**: health, chat, agent, admin, rag, search, metrics, memory, hitl, a2a, mission
+
+### Bug修复 ✅
+
+**AppError.serviceUnavailable 修复**
+- **文件**: `src/routes/admin/stats.js` 等
+- **问题**: `AppError.serviceUnavailable` 方法不存在
+- **修复**: 使用 `Errors.unavailable()` 替代
+
+**fs.promises 导入修复**
+- **文件**: `src/routes/admin/stream.js`
+- **问题**: `fs.promises` 未正确导入
+- **修复**: 正确导入并使用
+
+### 性能优化 ✅
+
+**数据库连接池**
+- PostgreSQL 连接池上限: 10 → 50
+- **commit**: `e2a517e` - perf(database): increase PostgreSQL connection pool max
+
+**同步改异步**
+- `missionService` 同步改异步，避免阻塞事件循环
+- **commit**: `85431ff`
+
+**统一缓存**
+- Redis + memory fallback 统一导出
+- **commit**: `b1f906a`
+
+### 日志规范化完成 ✅
+
+| 模块 | 完成度 |
+|------|--------|
+| Admin Routes | 100% |
+| Search Tools | 100% |
+| HITL/SSE | 100% |
+| Chat/Memories | 100% |
+| Router | 100% |
+| ErrorHandler | 100% |
+| RateLimiter | 100% |
+
+### 提交记录
+
+| 提交 | 描述 |
+|------|------|
+| `3f2a90c` | fix(tests): correct health check endpoint |
+| `85431ff` | refactor(missionService): 同步改异步 |
+| `d62b387` | test(pressure): add performance pressure test |
+| `d38535b` | refactor(routes): replace console.* in admin/model and rag |
+| `e2a517e` | perf(database): increase PostgreSQL connection pool max |
+| `b1f906a` | feat(cache): add unifiedCache export |
+| `8ff813d` | refactor(logging): replace console.* in errorHandler and rate-limiter |
 
 ---
 

@@ -10,16 +10,41 @@ AI Chat 玩具项目采用多层次测试策略：
 | API测试 | Jest + Supertest | HTTP端点测试 |
 | 集成测试 | Jest | 多模块协作 |
 | E2E测试 | Playwright | 浏览器自动化 |
+| 压力测试 | 自定义脚本 | 并发/性能测试 |
 
-## 测试统计
+---
 
-| 阶段 | 测试数 | 通过率 |
-|------|--------|--------|
-| P0 单元测试 | 245 | 100% |
-| P1 Admin API | 12 | 100% |
-| P2 RAG | 17 | 81% |
-| P4 E2E | 25 | 76% |
-| **总计** | **303** | **~90%** |
+## 最新测试结果 (2026-05-15)
+
+### API 集成测试 - 100% 通过
+
+| 指标 | 数值 |
+|------|------|
+| 总测试数 | 35 |
+| 通过 | 35 |
+| 失败 | 0 |
+| 通过率 | **100%** |
+| 总耗时 | 0.09s |
+
+**测试覆盖**:
+
+| 模块 | 通过/总计 | 关键端点 |
+|------|----------|----------|
+| health | 3/3 | /api/health, /health, /api/gateway/status |
+| chat | 3/3 | /api/sessions, /api/config, /api/conversations |
+| agent | 3/3 | /api/mcp/status, /api/minimax/status, /api/tools |
+| admin | 9/9 | /api/admin/models, /api/admin/tools, /api/admin/prompts, /api/admin/traces, /api/admin/intent/tree, /api/admin/knowledge/* |
+| rag | 4/4 | /api/rag/kb, /api/rag/stats, /api/qdrant/* |
+| search | 3/3 | /api/search, /api/search/config, /api/search/health |
+| metrics | 2/2 | /api/alerts, /api/metrics |
+| memory | 2/2 | /api/memory, /api/memory/stats |
+| hitl | 2/2 | /api/hitl/health, /api/hitl/pending |
+| a2a | 2/2 | /api/a2a/agents, /api/a2a/coordination/modes |
+| mission | 2/2 | /api/mission/tasks, /api/mission/stats |
+
+---
+
+## 历史测试统计
 
 ## P0 模块覆盖率
 

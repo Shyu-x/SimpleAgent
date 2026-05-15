@@ -26,7 +26,22 @@ import {
 } from 'lucide-react';
 import { useMissionControlStore } from './store';
 import type { MissionEvent, EventType } from './types';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+
+// Recharts 动态导入 - 减少 bundle 大小 ~700KB
+// 图表组件只有在 showStats 为 true 时才加载
+import dynamic from 'next/dynamic';
+
+const BarChartComponent = dynamic(
+  () => import('./BarChartComponent'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-20 flex items-center justify-center">
+        <div className="animate-pulse text-xs text-slate-500">加载图表...</div>
+      </div>
+    )
+  }
+);
 
 // 事件类型分类
 type EventCategory = 'all' | 'task' | 'agent' | 'system';
@@ -206,29 +221,7 @@ const StatsChart = memo(function StatsChart({
         <span className="text-xs text-slate-400">{title}</span>
       </div>
       <div className="h-20">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-            <XAxis
-              dataKey="time"
-              tick={{ fontSize: 8, fill: '#64748b' }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis hide />
-            <Tooltip
-              contentStyle={{
-                background: 'rgba(10, 10, 15, 0.9)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '6px',
-                fontSize: '11px'
-              }}
-              labelStyle={{ color: '#94a3b8' }}
-              itemStyle={{ color: '#3b82f6' }}
-            />
-            <Bar dataKey="count" fill="#3b82f6" radius={[2, 2, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <BarChartComponent data={data} />
       </div>
     </div>
   );
