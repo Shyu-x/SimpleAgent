@@ -422,7 +422,7 @@ function saveReport(report, scenarioName) {
  */
 async function healthCheck() {
   try {
-    const result = await request(`${config.api.baseUrl}/health`);
+    const result = await request(`${config.api.baseUrl}/api/health`);
     return result.status === 200;
   } catch {
     return false;
