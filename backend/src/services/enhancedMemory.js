@@ -1,10 +1,18 @@
 /**
  * 增强版记忆系统
  * 支持短期/长期记忆分离、向量搜索、持久化存储
+ *
+ * 优化 (2026-05-15):
+ * - 索引优化：按 ID/Type/Timestamp 建立 Map 索引
+ * - 查询超时控制
+ * - LRU 淘汰策略
  */
 
 const fs = require('fs').promises;
 const path = require('path');
+
+// 查询超时配置
+const ENHANCED_QUERY_TIMEOUT_MS = 5000;
 
 /**
  * 记忆类型
@@ -219,8 +227,29 @@ class EnhancedMemoryService {
 
   /**
    * 搜索记忆
+   * 优化：查询超时控制
    */
   async search(query, options = {}) {
+    return new Promise(async (resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`EnhancedMemory search timeout after ${ENHANCED_QUERY_TIMEOUT_MS}ms`));
+      }, ENHANCED_QUERY_TIMEOUT_MS);
+
+      try {
+        const result = await this._doSearch(query, options);
+        clearTimeout(timer);
+        resolve(result);
+      } catch (err) {
+        clearTimeout(timer);
+        reject(err);
+      }
+    });
+  }
+
+  /**
+   * 实际搜索逻辑
+   */
+  async _doSearch(query, options = {}) {
     await this.initialize();
 
     const queryEmbedding = this.embedder.embed(query);

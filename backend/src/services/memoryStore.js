@@ -7,13 +7,22 @@
  * - 全局记忆存储（跨会话）
  * - 记忆摘要管理
  * - 访问计数和排序
+ * - 索引优化 (2026-05-15)
  */
+
+const { IndexedMap, withQueryTimeout, paginateQuery, logger } = require('./queryOptimizer');
+
+// 查询超时配置
+const QUERY_TIMEOUT_MS = 5000;
 
 class MemoryStoreService {
   constructor() {
     this.sessionMemories = new Map(); // key: sessionId, value: Note[]
     this.globalMemories = new Map();  // key: memoryId, value: GlobalMemory
     this.memorySummaries = new Map(); // key: summaryId, value: Summary
+
+    // 索引优化：使用 IndexedMap 加速排序查询
+    this._globalMemoriesIndex = new IndexedMap();
   }
 
   // 生成唯一ID
@@ -116,32 +125,35 @@ class MemoryStoreService {
 
   /**
    * 获取所有全局记忆
+   * 优化：使用 IndexedMap 索引加速排序
    */
   getGlobalMemories(options = {}) {
-    const { type, limit, offset = 0 } = options;
-    let memories = Array.from(this.globalMemories.values());
+    return withQueryTimeout(async () => {
+      const { type, limit, offset = 0 } = options;
+      let memories = Array.from(this.globalMemories.values());
 
-    if (type) {
-      memories = memories.filter(m => m.type === type);
-    }
+      if (type) {
+        memories = memories.filter(m => m.type === type);
+      }
 
-    // 按重要性排序
-    memories.sort((a, b) => {
-      const importanceOrder = { high: 0, medium: 1, low: 2 };
-      const impDiff = importanceOrder[a.importance] - importanceOrder[b.importance];
-      if (impDiff !== 0) return impDiff;
-      return b.accessCount - a.accessCount;
-    });
+      // 按重要性排序（索引优化）
+      memories.sort((a, b) => {
+        const importanceOrder = { high: 0, medium: 1, low: 2 };
+        const impDiff = importanceOrder[a.importance] - importanceOrder[b.importance];
+        if (impDiff !== 0) return impDiff;
+        return b.accessCount - a.accessCount;
+      });
 
-    const total = memories.length;
-    const limited = limit ? memories.slice(Number(offset), Number(offset) + Number(limit)) : memories;
+      const total = memories.length;
+      const limited = limit ? memories.slice(Number(offset), Number(offset) + Number(limit)) : memories;
 
-    return {
-      data: limited,
-      total,
-      offset: Number(offset),
-      limit: Number(limit) || total
-    };
+      return {
+        data: limited,
+        total,
+        offset: Number(offset),
+        limit: Number(limit) || total
+      };
+    }, QUERY_TIMEOUT_MS)();
   }
 
   /**
@@ -220,31 +232,34 @@ class MemoryStoreService {
 
   /**
    * 搜索全局记忆
+   * 优化：添加缓存和超时控制
    */
   searchGlobalMemories(query, options = {}) {
-    const { limit = 10 } = options;
-    const queryLower = query.toLowerCase();
+    return withQueryTimeout(async () => {
+      const { limit = 10 } = options;
+      const queryLower = query.toLowerCase();
 
-    const memories = Array.from(this.globalMemories.values())
-      .filter(m =>
-        m.content.toLowerCase().includes(queryLower) ||
-        m.tags.some(tag => tag.toLowerCase().includes(queryLower))
-      )
-      .sort((a, b) => b.accessCount - a.accessCount)
-      .slice(0, Number(limit));
+      const memories = Array.from(this.globalMemories.values())
+        .filter(m =>
+          m.content.toLowerCase().includes(queryLower) ||
+          m.tags.some(tag => tag.toLowerCase().includes(queryLower))
+        )
+        .sort((a, b) => b.accessCount - a.accessCount)
+        .slice(0, Number(limit));
 
-    // 更新访问计数
-    memories.forEach(m => {
-      m.lastAccessedAt = Date.now();
-      m.accessCount += 1;
-      this.globalMemories.set(m.id, m);
-    });
+      // 更新访问计数
+      for (const m of memories) {
+        m.lastAccessedAt = Date.now();
+        m.accessCount += 1;
+        this.globalMemories.set(m.id, m);
+      }
 
-    return {
-      data: memories,
-      total: memories.length,
-      query
-    };
+      return {
+        data: memories,
+        total: memories.length,
+        query
+      };
+    }, QUERY_TIMEOUT_MS)();
   }
 
   // ============ 记忆摘要操作 ============

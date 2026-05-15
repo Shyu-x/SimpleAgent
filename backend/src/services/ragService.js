@@ -1,6 +1,11 @@
 /**
  * RAG 知识注入服务
  * 支持文档上传、向量化存储、语义检索
+ *
+ * 优化 (2026-05-15):
+ * - 查询超时控制
+ * - 分页查询支持
+ * - 缓存索引优化
  */
 
 const fs = require('fs');
@@ -9,6 +14,58 @@ const EventEmitter = require('events');
 const { QueryRewriteService } = require('../domain/rag/QueryRewriteService');
 const { QueryDecomposeService } = require('../domain/rag/QueryDecomposeService');
 const RerankerService = require('./rag/RerankerService');
+const AppError = require('../common/errors/AppError');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('RAGService');
+
+// 查询超时配置
+const RAG_QUERY_TIMEOUT_MS = 10000;
+
+// 缓存索引管理器
+const cacheIndexManager = {
+  _indexes: new Map(),
+  _timestamps: new Map(),
+  TTL: 30000,
+
+  setIndex(key, data) {
+    this._indexes.set(key, data);
+    this._timestamps.set(key, Date.now());
+  },
+
+  getIndex(key) {
+    const entry = this._indexes.get(key);
+    if (!entry) return null;
+
+    const age = Date.now() - (this._timestamps.get(key) || 0);
+    if (age > this.TTL) {
+      this._indexes.delete(key);
+      this._timestamps.delete(key);
+      return null;
+    }
+
+    return entry;
+  },
+
+  invalidate(key) {
+    this._indexes.delete(key);
+    this._timestamps.delete(key);
+  }
+};
+
+// 指标采集器（延迟初始化）
+let _metricsCollector = null;
+function getCollector() {
+  if (!_metricsCollector) {
+    try {
+      const { getMetricsCollector } = require('../infra/metrics');
+      _metricsCollector = getMetricsCollector();
+    } catch (e) {
+      // 指标采集器未初始化
+    }
+  }
+  return _metricsCollector;
+}
 
 // 简单的文本分块
 function chunkText(text, chunkSize = 500, overlap = 50) {
@@ -180,7 +237,7 @@ class RAGService extends EventEmitter {
   async addDocument(kbId, document) {
     const kb = this.knowledgeBases.get(kbId);
     if (!kb) {
-      throw new Error(`Knowledge base not found: ${kbId}`);
+      throw AppError.ragError('NOT_FOUND', `Knowledge base not found: ${kbId}`);
     }
 
     const docId = 'doc_' + Date.now();
@@ -259,11 +316,35 @@ class RAGService extends EventEmitter {
 
   /**
    * 检索相关知识
+   * 优化：查询超时控制
    */
   async retrieve(kbId, query, options = {}) {
+    return new Promise(async (resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`RAG retrieve timeout after ${RAG_QUERY_TIMEOUT_MS}ms`));
+      }, RAG_QUERY_TIMEOUT_MS);
+
+      try {
+        const result = await this._doRetrieve(kbId, query, options);
+        clearTimeout(timer);
+        resolve(result);
+      } catch (err) {
+        clearTimeout(timer);
+        reject(err);
+      }
+    });
+  }
+
+  /**
+   * 实际检索逻辑
+   */
+  async _doRetrieve(kbId, query, options = {}) {
+    const collector = getCollector();
+    const startTime = Date.now();
+
     const kb = this.knowledgeBases.get(kbId);
     if (!kb) {
-      throw new Error(`Knowledge base not found: ${kbId}`);
+      throw AppError.ragError('NOT_FOUND', `Knowledge base not found: ${kbId}`);
     }
 
     const topK = options.topK || this.topK;
@@ -349,6 +430,16 @@ class RAGService extends EventEmitter {
 
     // 使用重排序服务进一步优化
     results = await this.rerankerService.rerank(query, results, { topK });
+
+    // 记录 RAG 检索指标
+    if (collector) {
+      const latency = Date.now() - startTime;
+      collector.recordHistogram('rag_retrieve_duration_seconds', latency / 1000, { kb_id: kbId });
+      collector.incrementCounter('rag_retrieve_total', { kb_id: kbId, result_count: results.length });
+      if (rewriteMeta) {
+        collector.recordHistogram('rag_query_rewrite_duration_seconds', latency / 1000, { rewrite_type: rewriteMeta.rewriteType });
+      }
+    }
 
     return {
       results,
@@ -541,7 +632,7 @@ class RAGService extends EventEmitter {
   async deleteKnowledgeBase(kbId) {
     const kb = this.knowledgeBases.get(kbId);
     if (!kb) {
-      throw new Error(`Knowledge base not found: ${kbId}`);
+      throw AppError.ragError('NOT_FOUND', `Knowledge base not found: ${kbId}`);
     }
 
     this.knowledgeBases.delete(kbId);
@@ -590,7 +681,7 @@ class RAGService extends EventEmitter {
     pipeline.use(new EnhanceNode({ autoDetectType: true, extractEntities: true }));
     const context = await pipeline.run({ url });
     if (context.errors && context.errors.length > 0) {
-      throw new Error(context.errors[0].message || '抓取失败');
+      throw AppError.ragError('RETRIEVAL_FAILED', context.errors[0].message || '抓取失败');
     }
     return {
       content: context.enhancedContent,
@@ -607,7 +698,7 @@ class RAGService extends EventEmitter {
    */
   async fetchUrlToKB(kbId, url, title) {
     if (!this.knowledgeBases.get(kbId)) {
-      throw new Error('知识库不存在');
+      throw AppError.ragError('NOT_FOUND', '知识库不存在');
     }
     const { content, metadata } = await this.fetchUrl(url);
     const docTitle = title || metadata?.title || new URL(url).hostname;

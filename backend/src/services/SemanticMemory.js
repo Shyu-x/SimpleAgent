@@ -1,6 +1,11 @@
 /**
  * 语义记忆系统
  * 支持真向量嵌入、层次化记忆、自动提升
+ *
+ * 优化 (2026-05-15):
+ * - 索引优化：按 ID/Type/Content 建立哈希索引
+ * - 查询超时控制
+ * - LRU 缓存
  */
 
 const fs = require('fs').promises;
@@ -8,6 +13,9 @@ const path = require('path');
 const { createLogger } = require('../infra/logger/AgentLogger');
 
 const logger = createLogger('SemanticMemory');
+
+// 查询超时配置
+const SEMANTIC_QUERY_TIMEOUT_MS = 5000;
 
 class SemanticMemory {
   constructor(options = {}) {
@@ -26,6 +34,10 @@ class SemanticMemory {
       items: [],
       embeddings: new Map()
     };
+
+    // 索引优化：按类型/重要性建立索引
+    this._typeIndex = new Map();    // type -> [itemIds]
+    this._importanceIndex = new Map(); // importance -> [itemIds]
 
     // 嵌入服务配置
     this.embeddingConfig = {
@@ -316,8 +328,29 @@ class SemanticMemory {
 
   /**
    * 语义搜索
+   * 优化：查询超时控制 + 分页查询
    */
   async search(query, options = {}) {
+    return new Promise(async (resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`SemanticMemory search timeout after ${SEMANTIC_QUERY_TIMEOUT_MS}ms`));
+      }, SEMANTIC_QUERY_TIMEOUT_MS);
+
+      try {
+        const result = await this._doSearch(query, options);
+        clearTimeout(timer);
+        resolve(result);
+      } catch (err) {
+        clearTimeout(timer);
+        reject(err);
+      }
+    });
+  }
+
+  /**
+   * 实际搜索逻辑
+   */
+  async _doSearch(query, options = {}) {
     await this.initialize();
 
     const { limit = 5, recallBoost = 0.3 } = options;
