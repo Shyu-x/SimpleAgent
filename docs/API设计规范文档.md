@@ -1,7 +1,7 @@
 # AI Chat 玩具 - API 设计规范文档
 
-> 版本: v1.0.0
-> 日期: 2026-03-21
+> 版本: v1.1.0
+> 日期: 2026-05-15
 > 状态: 正式发布
 
 ---
@@ -56,7 +56,7 @@
 
 #### 发送消息
 ```
-POST /api/v1/chat/send
+POST /api/chat/send
 ```
 
 **请求头**:
@@ -71,7 +71,7 @@ X-Trace-Id: {traceId}
 {
   "conversationId": "conv_abc123",
   "message": "你好，请介绍一下你自己",
-  "modelId": "MiniMax-M2.7-highspeed",
+  "modelId": "MiniMax-M2.7",
   "stream": true,
   "options": {
     "temperature": 0.7,
@@ -87,11 +87,11 @@ HTTP/1.1 200 OK
 Content-Type: text/event-stream
 X-Trace-Id: abc123
 
-event: message
-data: {"type": "message", "content": "你好"}
+event: chunk
+data: {"type": "chunk", "content": "你好"}
 
-event: message
-data: {"type": "message", "content": "，我是"}
+event: chunk
+data: {"type": "chunk", "content": "，我是"}
 
 event: done
 data: {"type": "done", "usage": {"inputTokens": 50, "outputTokens": 200}}
@@ -104,14 +104,14 @@ data: {"type": "error", "code": "4103", "message": "LLM 请求限流"}
 
 #### 创建会话
 ```
-POST /api/v1/conversations
+POST /api/conversations
 ```
 
 **请求体**:
 ```json
 {
   "title": "技术讨论",
-  "modelId": "MiniMax-M2.7-highspeed",
+  "modelId": "MiniMax-M2.7",
   "metadata": {
     "source": "web"
   }
@@ -125,7 +125,7 @@ POST /api/v1/conversations
   "data": {
     "id": "conv_abc123",
     "title": "技术讨论",
-    "modelId": "MiniMax-M2.7-highspeed",
+    "modelId": "MiniMax-M2.7",
     "createdAt": "2026-03-21T10:30:00.000Z",
     "updatedAt": "2026-03-21T10:30:00.000Z",
     "messageCount": 0
@@ -137,7 +137,7 @@ POST /api/v1/conversations
 
 #### 获取会话列表
 ```
-GET /api/v1/conversations?page=1&pageSize=20&keyword=技术
+GET /api/conversations?page=1&pageSize=20&keyword=技术
 ```
 
 **响应**:
@@ -149,7 +149,7 @@ GET /api/v1/conversations?page=1&pageSize=20&keyword=技术
       {
         "id": "conv_abc123",
         "title": "技术讨论",
-        "modelId": "MiniMax-M2.7-highspeed",
+        "modelId": "MiniMax-M2.7",
         "messageCount": 15,
         "createdAt": "2026-03-21T10:30:00.000Z",
         "updatedAt": "2026-03-21T11:00:00.000Z"
@@ -169,7 +169,7 @@ GET /api/v1/conversations?page=1&pageSize=20&keyword=技术
 
 #### 获取会话详情
 ```
-GET /api/v1/conversations/{conversationId}
+GET /api/conversations/{conversationId}
 ```
 
 **响应**:
@@ -179,7 +179,7 @@ GET /api/v1/conversations/{conversationId}
   "data": {
     "id": "conv_abc123",
     "title": "技术讨论",
-    "modelId": "MiniMax-M2.7-highspeed",
+    "modelId": "MiniMax-M2.7",
     "messages": [
       {
         "id": "msg_001",
@@ -191,7 +191,7 @@ GET /api/v1/conversations/{conversationId}
         "id": "msg_002",
         "role": "assistant",
         "content": "你好，我是 AI Chat...",
-        "model": "MiniMax-M2.7-highspeed",
+        "model": "MiniMax-M2.7",
         "usage": {
           "inputTokens": 50,
           "outputTokens": 200
@@ -209,7 +209,7 @@ GET /api/v1/conversations/{conversationId}
 
 #### 删除会话
 ```
-DELETE /api/v1/conversations/{conversationId}
+DELETE /api/conversations/{conversationId}
 ```
 
 **响应**:
@@ -223,7 +223,7 @@ HTTP/1.1 204 No Content
 
 #### 创建 Agent
 ```
-POST /api/v1/agents
+POST /api/agents
 ```
 
 **请求体**:
@@ -231,7 +231,7 @@ POST /api/v1/agents
 {
   "name": "代码审查助手",
   "description": "自动审查代码质量和安全问题",
-  "modelId": "MiniMax-M2.7-highspeed",
+  "modelId": "MiniMax-M2.7",
   "tools": ["web_search", "file_read", "code_review"],
   "maxIterations": 10,
   "timeout": 60000,
@@ -248,7 +248,7 @@ POST /api/v1/agents
     "id": "agent_abc123",
     "name": "代码审查助手",
     "description": "自动审查代码质量和安全问题",
-    "modelId": "MiniMax-M2.7-highspeed",
+    "modelId": "MiniMax-M2.7",
     "tools": ["web_search", "file_read", "code_review"],
     "maxIterations": 10,
     "timeout": 60000,
@@ -261,7 +261,7 @@ POST /api/v1/agents
 
 #### 执行 Agent
 ```
-POST /api/v1/agents/{agentId}/execute
+POST /api/agents/{agentId}/execute
 ```
 
 **请求体**:
@@ -292,8 +292,8 @@ data: {"type": "tool_result", "tool": "file_read", "success": true, "output": ".
 event: thought
 data: {"type": "thought", "content": "文件已读取，现在开始审查...", "iteration": 2}
 
-event: message
-data: {"type": "message", "content": "审查结果：该文件存在以下问题..."}
+event: chunk
+data: {"type": "chunk", "content": "审查结果：该文件存在以下问题..."}
 
 event: checkpoint
 data: {"type": "checkpoint", "checkpointId": "cp_001", "state": {...}}
@@ -309,14 +309,14 @@ data: {"type": "error", "code": "3205", "message": "Agent 执行超时"}
 
 #### 获取 Agent 列表
 ```
-GET /api/v1/agents?page=1&pageSize=20&status=running
+GET /api/agents?page=1&pageSize=20&status=running
 ```
 
 ---
 
 #### 获取 Agent 执行历史
 ```
-GET /api/v1/agents/{agentId}/history?page=1&pageSize=20
+GET /api/agents/{agentId}/history?page=1&pageSize=20
 ```
 
 ---
@@ -325,7 +325,7 @@ GET /api/v1/agents/{agentId}/history?page=1&pageSize=20
 
 #### 创建知识库
 ```
-POST /api/v1/kbs
+POST /api/kbs
 ```
 
 **请求体**:
@@ -344,7 +344,7 @@ POST /api/v1/kbs
 
 #### 上传文档
 ```
-POST /api/v1/kbs/{kbId}/documents
+POST /api/kbs/{kbId}/documents
 Content-Type: multipart/form-data
 
 file: (binary)
@@ -371,7 +371,7 @@ description: 详细介绍各功能模块
 
 #### 获取文档处理状态
 ```
-GET /api/v1/kbs/{kbId}/documents/{documentId}/status
+GET /api/kbs/{kbId}/documents/{documentId}/status
 ```
 
 **响应**:
@@ -394,7 +394,7 @@ GET /api/v1/kbs/{kbId}/documents/{documentId}/status
 
 #### 检索知识库
 ```
-POST /api/v1/kbs/{kbId}/search
+POST /api/kbs/{kbId}/search
 ```
 
 **请求体**:
@@ -441,7 +441,7 @@ POST /api/v1/kbs/{kbId}/search
 
 #### 创建确认请求
 ```
-POST /api/v1/hitl/requests
+POST /api/hitl/requests
 ```
 
 **请求体**:
@@ -475,7 +475,7 @@ POST /api/v1/hitl/requests
 
 #### 确认请求 SSE 订阅
 ```
-GET /api/v1/hitl/subscribe/{sessionId}
+GET /api/hitl/subscribe/{sessionId}
 ```
 
 **SSE 事件**:
@@ -491,7 +491,7 @@ data: {"requestId": "hitl_abc123", "approved": true, "userId": "user_xxx", "time
 
 #### 响应确认请求
 ```
-POST /api/v1/hitl/requests/{requestId}/respond
+POST /api/hitl/requests/{requestId}/respond
 ```
 
 **请求体**:
@@ -508,7 +508,7 @@ POST /api/v1/hitl/requests/{requestId}/respond
 
 #### 注册 Agent
 ```
-POST /api/v1/a2a/agents/register
+POST /api/a2a/agents/register
 ```
 
 **请求体**:
@@ -528,7 +528,7 @@ POST /api/v1/a2a/agents/register
 
 #### 发送任务
 ```
-POST /api/v1/a2a/tasks/send
+POST /api/a2a/tasks/send
 ```
 
 **请求体**:
@@ -561,7 +561,7 @@ POST /api/v1/a2a/tasks/send
 
 #### 订阅任务结果
 ```
-GET /api/v1/a2a/tasks/{taskId}/subscribe
+GET /api/a2a/tasks/{taskId}/subscribe
 ```
 
 ---
@@ -578,7 +578,7 @@ GET /api/v1/a2a/tasks/{taskId}/subscribe
   "detail": "message 字段不能为空",
   "traceId": "abc123def456",
   "timestamp": "2026-03-21T10:30:00.000Z",
-  "path": "/api/v1/chat/send",
+  "path": "/api/chat/send",
   "errors": [
     {
       "field": "message",
@@ -600,7 +600,7 @@ GET /api/v1/a2a/tasks/{taskId}/subscribe
   "detail": "Agent: agent_abc123, iterations: 10/10",
   "traceId": "abc123def456",
   "timestamp": "2026-03-21T10:30:00.000Z",
-  "path": "/api/v1/agents/agent_abc123/execute",
+  "path": "/api/agents/agent_abc123/execute",
   "suggestion": "请尝试减少任务复杂度或增加 timeout 配置"
 }
 ```
@@ -614,7 +614,7 @@ GET /api/v1/a2a/tasks/{taskId}/subscribe
   "message": "请求过于频繁",
   "traceId": "abc123def456",
   "timestamp": "2026-03-21T10:30:00.000Z",
-  "path": "/api/v1/chat/send",
+  "path": "/api/chat/send",
   "retryAfter": 5,
   "blockedBy": "user"
 }
@@ -627,7 +627,7 @@ GET /api/v1/a2a/tasks/{taskId}/subscribe
 ### 4.1 实时对话
 
 ```
-WS /api/v1/ws/chat?token={jwt}
+WS /api/ws/chat?token={jwt}
 ```
 
 **消息格式**:
@@ -665,8 +665,7 @@ WS /api/v1/ws/chat?token={jwt}
 ### 5.1 版本策略
 
 ```
-- URL 路径版本: /api/v1/, /api/v2/
-- 主要版本 (v1, v2): 不兼容变更
+- 统一路径: /api/ (无版本前缀)
 - 次要版本: 向后兼容的功能添加
 - 补丁版本: 内部变更，不影响 API
 ```
@@ -674,25 +673,17 @@ WS /api/v1/ws/chat?token={jwt}
 ### 5.2 版本兼容性
 
 ```javascript
-// 中间件版本检查
-function versionCheck(req, res, next) {
-  const version = req.headers['api-version'] || 'v1';
-
-  if (!['v1'].includes(version)) {
-    return res.status(400).json({
-      success: false,
-      code: '2003',
-      message: `API 版本 ${version} 不支持`
-    });
-  }
-
-  req.apiVersion = version;
+// 中间件版本检查 (保留用于未来扩展)
+function apiVersionCheck(req, res, next) {
+  // 当前版本: v1 (无版本前缀)
+  // 未来版本可通过 header 或路径参数扩展
+  req.apiVersion = 'v1';
   next();
 }
 ```
 
 ---
 
-**文档更新日期**: 2026-03-21
-**下次审查**: 2026-04-21
+**文档更新日期**: 2026-05-15
+**下次审查**: 2026-06-15
 **负责人**: AI Team
