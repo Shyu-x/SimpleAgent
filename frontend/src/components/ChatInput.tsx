@@ -259,10 +259,10 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (input.trim().length >= 3) {
-        const intent = detectIntent(input);
+        const detected = detectIntent(input);
         // 仅在高置信度时显示提示
-        if (intent.confidence >= 0.6 && intent.type !== 'conversation') {
-          setDetectedIntent(intent);
+        if (detected && detected.confidence >= 0.6 && detected.type !== 'conversation') {
+          setDetectedIntent(detected);
           setShowIntentBanner(true);
         } else {
           setShowIntentBanner(false);
