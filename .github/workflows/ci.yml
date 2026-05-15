@@ -12,6 +12,7 @@ on:
 env:
   NODE_VERSION: '20'
   NEXT_TELEMETRY_DISABLED: '1'
+  REPO_LOWER: ${{ github.repository && github.repository.toLowerCase() }}
 
 jobs:
   lint:
@@ -115,7 +116,7 @@ jobs:
         with:
           context: ./backend
           push: false
-          tags: ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+          tags: ghcr.io/${{ env.REPO_LOWER }}/backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -124,7 +125,7 @@ jobs:
         with:
           context: ./frontend
           push: false
-          tags: ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+          tags: ghcr.io/${{ env.REPO_LOWER }}/frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
