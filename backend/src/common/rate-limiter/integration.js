@@ -11,6 +11,11 @@
  * ```
  */
 
+const createLogger = require('../logger');
+
+// 创建限流器专用日志器
+const logger = createLogger('RateLimiter');
+
 // ============ 内存限流器实现 ============
 
 class MemoryRateLimiter {
@@ -182,7 +187,7 @@ function createRateLimiterMiddleware(options = {}) {
       next();
     } catch (error) {
       // 限流器出错不应阻止请求
-      console.error('[RateLimiter] 限流检查失败:', error.message);
+      logger.error('限流检查失败', { error: error.message });
       next();
     }
   };

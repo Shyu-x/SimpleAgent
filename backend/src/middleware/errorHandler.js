@@ -8,6 +8,10 @@
 
 const AppError = require('../common/errors/AppError');
 const { errorResponse, successResponse } = require('../common/response');
+const createLogger = require('../common/logger');
+
+// 创建错误处理器专用日志器
+const logger = createLogger('ErrorHandler');
 
 /**
  * 整数错误码到字符串错误码的映射
@@ -169,12 +173,12 @@ function errorHandler(err, req, res, next) {
 
     // 根据错误类型设置日志级别
     if (err.isServerError()) {
-      console.error(`[${err.code}] ${err.message}`, {
+      logger.error(`[${err.code}] ${err.message}`, {
         ...logData,
         stack: err.stack,
       });
     } else {
-      console.warn(`[${err.code}] ${err.message}`, logData);
+      logger.warn(`[${err.code}] ${err.message}`, logData);
     }
 
     return res.status(err.status).json({
@@ -190,7 +194,7 @@ function errorHandler(err, req, res, next) {
 
   // 处理 ValidationError (来自 express-validator 等)
   if (err.name === 'ValidationError') {
-    console.warn('[VALIDATION_ERROR]', err.message, logData);
+    logger.warn('[VALIDATION_ERROR]', err.message, logData);
 
     return res.status(400).json({
       success: false,
@@ -205,7 +209,7 @@ function errorHandler(err, req, res, next) {
 
   // 处理 JSON 解析错误
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    console.warn('[JSON_PARSE_ERROR]', err.message, logData);
+    logger.warn('[JSON_PARSE_ERROR]', err.message, logData);
 
     return res.status(400).json({
       success: false,
@@ -220,7 +224,7 @@ function errorHandler(err, req, res, next) {
 
   // 处理 Mongoose/ MongoDB 错误
   if (err.name === 'MongoServerError' || err.name === 'MongooseError') {
-    console.error('[DATABASE_ERROR]', err.message, { ...logData, stack: err.stack });
+    logger.error('[DATABASE_ERROR]', err.message, { ...logData, stack: err.stack });
 
     let message = '数据库操作失败';
     let code = 6100;
@@ -244,7 +248,7 @@ function errorHandler(err, req, res, next) {
 
   // 处理 JWT 错误
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
-    console.warn('[AUTH_ERROR]', err.message, logData);
+    logger.warn('[AUTH_ERROR]', err.message, logData);
 
     const code = err.name === 'TokenExpiredError' ? 2002 : 2001;
 
@@ -261,7 +265,7 @@ function errorHandler(err, req, res, next) {
 
   // 处理业务错误 (带 statusCode)
   if (err.statusCode || err.status) {
-    console.warn('[BUSINESS_ERROR]', err.message, logData);
+    logger.warn('[BUSINESS_ERROR]', err.message, logData);
 
     return res.status(err.statusCode || err.status).json({
       success: false,
@@ -275,7 +279,7 @@ function errorHandler(err, req, res, next) {
   }
 
   // 未知错误 (服务器内部错误)
-  console.error('[INTERNAL_ERROR]', err.message, {
+  logger.error('[INTERNAL_ERROR]', err.message, {
     ...logData,
     stack: err.stack,
     name: err.name,
