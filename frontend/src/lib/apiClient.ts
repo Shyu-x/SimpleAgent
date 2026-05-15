@@ -634,21 +634,28 @@ function sleep(ms: number): Promise<void> {
  * 设置认证 Token
  */
 export function setAuthToken(token: string): void {
-  sessionStorage.setItem(TOKEN_KEY, token);
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  }
 }
 
 /**
  * 获取当前认证 Token
  */
 export function getAuthToken(): string | null {
-  return sessionStorage.getItem(TOKEN_KEY);
+  if (typeof window !== 'undefined') {
+    return sessionStorage.getItem(TOKEN_KEY);
+  }
+  return null;
 }
 
 /**
  * 清除认证 Token
  */
 export function clearAuthToken(): void {
-  sessionStorage.removeItem(TOKEN_KEY);
+  if (typeof window !== 'undefined') {
+    sessionStorage.removeItem(TOKEN_KEY);
+  }
 }
 
 // ============ 便捷请求方法 ============
