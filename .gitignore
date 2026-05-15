@@ -83,6 +83,7 @@ data/
 # Runtime metrics
 metrics_*.json
 *.metrics.json
+backend/data/metrics/metrics_latest.json
 
 # Backend test scripts
 backend/tests/量化分析_runner.js
