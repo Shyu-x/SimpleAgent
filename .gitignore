@@ -99,3 +99,22 @@ backend/tests/*.test.js
 # 临时文件
 tmp/
 temp/
+
+# 运行时指标文件
+backend/data/metrics/metrics_*.json
+
+# CI/CD 和 Sprint 文档
+.github/
+docs/SPRINT-*.md
+docs/ARCHITECTURE-REVIEW.md
+docs/TROUBLESHOOTING.md
+docs/TESTING.md
+docs/CI-CD-*.md
+docs/services-split-report.md
+
+# 测试脚本
+frontend/tests/
+frontend/test-results/
+test-results/
+frontend/e2e_*.py
+frontend/playwright.config.ts
