@@ -15,6 +15,8 @@
 const express = require('express');
 const router = express.Router();
 const { AgentLogger } = require('../../infra/logger/AgentLogger');
+const { AppError, Errors } = require('../../common/errors');
+const { sendError } = require('../../middleware/errorHandler');
 
 const logger = new AgentLogger('admin-tool');
 
@@ -24,7 +26,7 @@ const logger = new AgentLogger('admin-tool');
 function getRegistry(req) {
   const registry = req.app.get('toolRegistry');
   if (!registry) {
-    throw new Error('Tool registry not initialized');
+    throw Errors.unavailable('Tool registry not initialized');
   }
   return registry;
 }

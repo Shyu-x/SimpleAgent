@@ -17,6 +17,8 @@ const router = express.Router();
 const { MiniMaxRouter, MINIMAX_MODELS, DEFAULT_MODEL } = require('../../services/router/modelRouter');
 const { MiniMaxChatModelClient } = require('../../domain/model/ChatModelClient');
 const { breakerFactory } = require('../../common/CircuitBreaker');
+const { AppError, Errors } = require('../../common/errors');
+const { sendError } = require('../../middleware/errorHandler');
 const config = require('../../config');
 
 // 获取实际模型列表的辅助函数
@@ -72,7 +74,7 @@ router.get('/platform', async (req, res) => {
     });
 
     if (!response.ok) {
-      throw new Error(`MiniMax API 返回错误: ${response.status}`);
+      throw Errors.apiError(`MiniMax API 返回错误: ${response.status}`);
     }
 
     const data = await response.json();

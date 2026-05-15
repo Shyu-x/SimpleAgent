@@ -8,8 +8,10 @@
 const express = require('express');
 const router = express.Router();
 const { AgentLogger } = require('../../infra/logger/AgentLogger');
+const { Errors } = require('../../common/errors');
 const path = require('path');
 const fsSync = require('fs');
+const fsPromises = fsSync.promises;
 
 const logger = new AgentLogger('admin-stream');
 
@@ -38,7 +40,7 @@ function setCached(key, value) {
 function getRegistry(req) {
   const registry = req.app.get('toolRegistry');
   if (!registry) {
-    throw new Error('Tool registry not initialized');
+    throw Errors.unavailable('Tool registry not initialized');
   }
   return registry;
 }
@@ -97,7 +99,7 @@ async function getKnowledgeBaseStatsAsync() {
       return [];
     }
 
-    const files = (await fs.promises.readdir(dataDir)).filter(f => f.endsWith('.json'));
+    const files = (await fsPromises.readdir(dataDir)).filter(f => f.endsWith('.json'));
 
     const batchSize = 20;
     for (let i = 0; i < files.length; i += batchSize) {
@@ -106,7 +108,7 @@ async function getKnowledgeBaseStatsAsync() {
         batch.map(async (file) => {
           try {
             const filePath = path.join(dataDir, file);
-            const content = await fs.promises.readFile(filePath, 'utf-8');
+            const content = await fsPromises.readFile(filePath, 'utf-8');
             const data = JSON.parse(content);
             const name = data.name || file.replace('.json', '');
             return { name, docCount: data.documents?.length || 0 };

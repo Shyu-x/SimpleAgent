@@ -14,6 +14,7 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
 const { AgentLogger } = require('../../infra/logger/AgentLogger');
+const { AppError } = require('../../common/errors');
 
 const logger = new AgentLogger('admin-stats');
 
@@ -54,7 +55,7 @@ const TOOL_CACHE_TTL = 60; // 工具注册表60秒缓存
 function getRegistry(req) {
   const registry = req.app.get('toolRegistry');
   if (!registry) {
-    throw new Error('Tool registry not initialized');
+    throw Errors.unavailable('Tool registry not initialized');
   }
   return registry;
 }
