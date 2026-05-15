@@ -1,15 +1,35 @@
 'use client';
 
-import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import { memo, useMemo, useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
 import { createHighlighter, type Highlighter } from 'shiki';
 import DOMPurify from 'dompurify';
 import { Check, Copy, Eye, X, ZoomIn, ZoomOut, Maximize2, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './code-highlight.css';
+
+// Katex 动态导入 - 只在检测到数学公式时加载 (~500KB 节省)
+// 仅加载核心渲染器，不加载完整 Katex 库
+const MATH_PATTERN = /(?:\$|`(?:```)?math|\\\[|\\\(|\\begin\{)/;
+
+let remarkMathLazy: any = null;
+let rehypeKatexLazy: any = null;
+let katexLazy: any = null;
+
+async function loadKatex() {
+  if (!remarkMathLazy) {
+    const [remarkMathModule, rehypeKatexModule, katexModule] = await Promise.all([
+      import('remark-math'),
+      import('rehype-katex'),
+      import('katex'),
+    ]);
+    remarkMathLazy = remarkMathModule.default;
+    rehypeKatexLazy = rehypeKatexModule.default;
+    katexLazy = katexModule.default;
+  }
+  return { remarkMath: remarkMathLazy, rehypeKatex: rehypeKatexLazy, katex: katexLazy };
+}
 
 interface MarkdownRendererProps {
   content: string;
