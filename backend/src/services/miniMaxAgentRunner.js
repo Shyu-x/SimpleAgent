@@ -10,6 +10,7 @@ const fs = require('fs').promises;
 const { exec, spawn } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
+const AppError = require('../common/errors/AppError');
 
 const EXECUTION_TIMEOUT = 60000; // 60秒执行超时
 
@@ -93,7 +94,7 @@ class BaseTool {
   }
 
   async execute(input) {
-    throw new Error('子类必须实现 execute 方法');
+    throw AppError.internalError('子类必须实现 execute 方法');
   }
 }
 
@@ -271,7 +272,7 @@ class FileListTool extends BaseTool {
 }
 
 /**
- * Shell 执行工具
+ * Shell 执行工具 - 安全增强版
  */
 class ShellTool extends BaseTool {
   constructor(workspaceDir = './workspace') {
@@ -297,34 +298,124 @@ class ShellTool extends BaseTool {
     this.workspaceDir = path.resolve(workspaceDir);
   }
 
-  async execute(input) {
+  /**
+   * 安全检查：检测危险命令模式
+   */
+  _isSafeCommand(command) {
+    const dangerousPatterns = [
+      /[;&|`$()]/,           // Shell 元字符
+      /\|\|/,                // 或运算符
+      /&&/,                   // 与运算符
+      />>/,                   // 输出重定向
+      /2>&1/,                 // 错误重定向
+      /\$\{[^}]+\}/,         // Shell 变量展开
+      /\$\w+/,                // Shell 变量
+      /\.\.\//,              // 路径遍历
+      /\brm\s+-rf\b/,        // 递归删除
+      /\bdel\s+.*\/[sqf]/i,  // Windows 删除
+      /\bshutdown\b/i,       // 系统关机
+      /\breboot\b/i,         // 系统重启
+      /\bkill\s+-9\b/,       // 强制终止
+    ];
+
+    for (const pattern of dangerousPatterns) {
+      if (pattern.test(command)) {
+        return { safe: false, reason: `检测到危险模式: ${pattern.toString()}` };
+      }
+    }
+
+    // 命令长度限制
+    if (command.length > 1000) {
+      return { safe: false, reason: '命令过长' };
+    }
+
+    return { safe: true };
+  }
+
+  /**
+   * 安全的命令执行（使用 spawn 代替 exec，避免 shell 解析）
+   */
+  async _safeSpawn(cmd, args, options) {
+    const { spawn } = require('child_process');
     return new Promise((resolve) => {
-      const timeout = input.timeout || 30000;
+      const child = spawn(cmd, args, {
+        cwd: options.cwd,
+        env: { ...process.env },
+        timeout: options.timeout,
+        maxBuffer: 10 * 1024 * 1024,
+        windowsHide: true
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout?.on('data', (data) => {
+        stdout += data.toString();
+        // 限制输出大小
+        if (stdout.length > 100000) {
+          stdout = stdout.slice(-100000) + '\n... (truncated)';
+          child.kill();
+        }
+      });
+
+      child.stderr?.on('data', (data) => {
+        stderr += data.toString();
+        if (stderr.length > 10000) {
+          stderr = stderr.slice(-10000) + '\n... (truncated)';
+        }
+      });
+
       const timer = setTimeout(() => {
-        resolve(new ToolResult(false, '', `命令执行超时 (${timeout}ms)`));
-      }, timeout);
+        child.kill();
+        resolve(new ToolResult(false, '', `命令执行超时 (${options.timeout}ms)`));
+      }, options.timeout + 1000);
 
-      try {
-        exec(input.command, {
-          cwd: this.workspaceDir,
-          maxBuffer: 10 * 1024 * 1024, // 10MB
-          encoding: 'utf-8'
-        }, (error, stdout, stderr) => {
-          clearTimeout(timer);
+      child.on('close', (code) => {
+        clearTimeout(timer);
+        let result = '';
+        if (stdout) result += stdout;
+        if (stderr) result += `\n[STDERR]\n${stderr}`;
+        resolve(new ToolResult(code === 0, result.trim()));
+      });
 
-          if (error && !stdout) {
-            resolve(new ToolResult(false, '', `错误: ${error.message}`));
-          } else {
-            let result = '';
-            if (stdout) result += stdout;
-            if (stderr) result += `\n[STDERR]\n${stderr}`;
-            resolve(new ToolResult(true, result.trim()));
-          }
-        });
-      } catch (error) {
+      child.on('error', (error) => {
         clearTimeout(timer);
         resolve(new ToolResult(false, '', error.message));
+      });
+    });
+  }
+
+  async execute(input) {
+    const { command, timeout = 30000 } = input;
+
+    // 安全检查
+    const safetyCheck = this._isSafeCommand(command);
+    if (!safetyCheck.safe) {
+      return new ToolResult(false, '', `安全检查失败: ${safetyCheck.reason}`);
+    }
+
+    // 解析命令（简单处理空格分隔）
+    const parts = command.trim().split(/\s+/);
+    if (parts.length === 0) {
+      return new ToolResult(false, '', '命令为空');
+    }
+
+    const cmd = parts[0];
+    const args = parts.slice(1);
+
+    // 防止目录遍历超出 workspace
+    const safeWorkspace = this.workspaceDir;
+    const resolvePath = (p) => {
+      const resolved = path.resolve(safeWorkspace, p);
+      if (!resolved.startsWith(safeWorkspace)) {
+        return safeWorkspace; // 超出范围，使用 workspace 目录
       }
+      return resolved;
+    };
+
+    return this._safeSpawn(cmd, args, {
+      cwd: safeWorkspace,
+      timeout
     });
   }
 }
@@ -372,7 +463,7 @@ class WebSearchTool extends BaseTool {
       });
 
       if (!response.ok) {
-        throw new Error(`Search API error: ${response.status}`);
+        throw AppError.internalError(`Search API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -537,7 +628,7 @@ ${this.tools.map(t => `- **${t.name}**: ${t.description}`).join('\n')}
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(`API Error ${response.status}: ${error}`);
+        throw AppError.internalError(`API Error ${response.status}: ${error}`);
       }
 
       if (stream) {

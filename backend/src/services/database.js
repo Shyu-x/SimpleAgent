@@ -95,6 +95,11 @@ const prisma = {
   conversation: {
     findMany: async (options = {}) => {
       const { where = {}, orderBy = {}, take = 50, skip = 0, select = {} } = options;
+
+      // 边界检查：防止大规模查询导致数据库过载
+      const safeTake = Math.min(Math.max(1, take), 1000);  // 1-1000
+      const safeSkip = Math.max(0, skip);  // >= 0
+
       let query = 'SELECT * FROM conversations WHERE 1=1';
       const params = [];
 
@@ -110,7 +115,7 @@ const prisma = {
         }
       }
 
-      query += ` ORDER BY updated_at DESC LIMIT ${take} OFFSET ${skip}`;
+      query += ` ORDER BY updated_at DESC LIMIT ${safeTake} OFFSET ${safeSkip}`;
 
       const result = await pool.query(query, params);
       return result.rows.map(row => ({
@@ -207,6 +212,11 @@ const prisma = {
   message: {
     findMany: async (options = {}) => {
       const { where = {}, orderBy = {}, take = 100, skip = 0 } = options;
+
+      // 边界检查：防止大规模查询导致数据库过载
+      const safeTake = Math.min(Math.max(1, take), 1000);  // 1-1000
+      const safeSkip = Math.max(0, skip);  // >= 0
+
       let query = 'SELECT * FROM messages WHERE 1=1';
       const params = [];
 
@@ -222,7 +232,7 @@ const prisma = {
         }
       }
 
-      query += ` ORDER BY created_at ASC LIMIT ${take} OFFSET ${skip}`;
+      query += ` ORDER BY created_at ASC LIMIT ${safeTake} OFFSET ${safeSkip}`;
 
       const result = await pool.query(query, params);
       return result.rows.map(row => ({
@@ -271,6 +281,11 @@ const prisma = {
   globalMemory: {
     findMany: async (options = {}) => {
       const { where = {}, take = 50, skip = 0 } = options;
+
+      // 边界检查：防止大规模查询导致数据库过载
+      const safeTake = Math.min(Math.max(1, take), 1000);  // 1-1000
+      const safeSkip = Math.max(0, skip);  // >= 0
+
       let query = 'SELECT * FROM global_memories WHERE 1=1';
       const params = [];
 
@@ -283,7 +298,7 @@ const prisma = {
         query += ` AND type = $${params.length}`;
       }
 
-      query += ` ORDER BY importance DESC, updated_at DESC LIMIT ${take} OFFSET ${skip}`;
+      query += ` ORDER BY importance DESC, updated_at DESC LIMIT ${safeTake} OFFSET ${safeSkip}`;
 
       const result = await pool.query(query, params);
       return result.rows.map(row => ({

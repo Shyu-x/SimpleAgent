@@ -3,11 +3,21 @@
  * 提供请求验证、XSS防护、速率限制、API Key验证和角色权限控制等安全功能
  */
 
-const rateLimit = new Map();
+const crypto = require('crypto');
 
 // IP 速率限制 (简单的内存实现)
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1分钟
 const MAX_REQUESTS_PER_WINDOW = 100;
+
+// CSRF Token 配置
+const CSRF_SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
+const CSRF_TOKEN_HEADER = 'x-csrf-token';
+const CSRF_HEADER_HEADER = 'x-csrf-header';
+
+// 请求签名配置
+const SIGNATURE_HEADER = 'x-request-signature';
+const SIGNATURE_ALGORITHM = 'sha256';
+const SIGNATURE_EXPIRES_MS = 5 * 60 * 1000; // 5分钟
 
 // API Key 配置
 const API_KEYS = new Map();
@@ -26,6 +36,19 @@ const PROTECTED_PATHS = [
   '/api/qdrant/documents',
   '/api/admin',
 ];
+
+// 不需要 CSRF 验证的路径
+const CSRF_EXEMPT_PATHS = [
+  '/api/chat',
+  '/api/search',
+  '/api/a2a/subscribe',
+  '/api/hitl/subscribe',
+  '/health',
+  '/favicon.ico'
+];
+
+// 速率限制存储
+const rateLimit = new Map();
 
 function rateLimitMiddleware(req, res, next) {
   const ip = req.ip || req.connection.remoteAddress || 'unknown';
@@ -301,6 +324,160 @@ if (process.env.QDRANT_API_KEY) {
   registerApiKey(process.env.QDRANT_API_KEY, 'admin');
 }
 
+/**
+ * CSRF 防护中间件
+ * 使用双重提交 Cookie 模式防止 CSRF 攻击
+ */
+function csrfMiddleware(req, res, next) {
+  // 检查是否豁免
+  const path = req.path;
+  if (CSRF_EXEMPT_PATHS.some(p => path.startsWith(p))) {
+    return next();
+  }
+
+  // 只对状态修改请求进行 CSRF 检查
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next();
+  }
+
+  // 获取 Cookie 中的 CSRF Token
+  const cookieToken = req.cookies?.csrf_token;
+  // 获取请求头中的 CSRF Token
+  const headerToken = req.headers[CSRF_TOKEN_HEADER];
+
+  // 验证 Token 存在且匹配
+  if (!cookieToken || !headerToken) {
+    return res.status(403).json({
+      error: 'CSRF token missing',
+      code: 'CSRF_TOKEN_MISSING',
+    });
+  }
+
+  if (cookieToken !== headerToken) {
+    return res.status(403).json({
+      error: 'CSRF token mismatch',
+      code: 'CSRF_TOKEN_MISMATCH',
+    });
+  }
+
+  next();
+}
+
+/**
+ * CSRF Token 生成中间件
+ * 为 GET 请求生成并设置 CSRF Token 到 Cookie
+ */
+function csrfTokenGenerator(req, res, next) {
+  // 只对 GET 请求生成 Token
+  if (req.method !== 'GET') {
+    return next();
+  }
+
+  // 检查是否豁免
+  const path = req.path;
+  if (CSRF_EXEMPT_PATHS.some(p => path.startsWith(p))) {
+    return next();
+  }
+
+  // 生成安全的随机 Token
+  const token = crypto.randomBytes(32).toString('hex');
+
+  // 设置 HttpOnly Cookie（前端 JavaScript 无法访问）
+  res.cookie('csrf_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000 // 24小时
+  });
+
+  // 同时在响应头中返回 Token（供前端读取）
+  res.setHeader(CSRF_TOKEN_HEADER, token);
+
+  next();
+}
+
+/**
+ * 请求签名验证中间件
+ * 防止请求篡改和重放攻击
+ */
+function requestSignatureMiddleware(req, res, next) {
+  // 检查是否豁免
+  const path = req.path;
+  if (CSRF_EXEMPT_PATHS.some(p => path.startsWith(p))) {
+    return next();
+  }
+
+  const signature = req.headers[SIGNATURE_HEADER];
+  if (!signature) {
+    // 无签名头时跳过（向后兼容）
+    return next();
+  }
+
+  try {
+    // 签名格式: timestamp.signature
+    const parts = signature.split('.');
+    if (parts.length !== 2) {
+      return res.status(401).json({
+        error: 'Invalid signature format',
+        code: 'INVALID_SIGNATURE_FORMAT',
+      });
+    }
+
+    const [timestampStr, sig] = parts;
+    const timestamp = parseInt(timestampStr, 10);
+
+    // 检查时间戳有效性（防止重放攻击）
+    if (Date.now() - timestamp > SIGNATURE_EXPIRES_MS) {
+      return res.status(401).json({
+        error: 'Signature expired',
+        code: 'SIGNATURE_EXPIRED',
+      });
+    }
+
+    // 重建签名内容
+    const method = req.method;
+    const url = req.originalUrl;
+    const body = req.body ? JSON.stringify(req.body) : '';
+
+    const signatureContent = `${method}:${url}:${body}:${timestampStr}`;
+    const expectedSignature = crypto
+      .createHmac(SIGNATURE_ALGORITHM, CSRF_SECRET)
+      .update(signatureContent)
+      .digest('hex');
+
+    // 常数时间比较，防止时序攻击
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSignature))) {
+      return res.status(401).json({
+        error: 'Invalid signature',
+        code: 'INVALID_SIGNATURE',
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      error: 'Signature verification failed',
+      code: 'SIGNATURE_VERIFICATION_FAILED',
+    });
+  }
+}
+
+/**
+ * 生成请求签名（客户端使用）
+ */
+function generateRequestSignature(method, url, body = {}) {
+  const timestamp = Date.now().toString();
+  const bodyStr = Object.keys(body).length > 0 ? JSON.stringify(body) : '';
+  const content = `${method}:${url}:${bodyStr}:${timestamp}`;
+
+  const signature = crypto
+    .createHmac(SIGNATURE_ALGORITHM, CSRF_SECRET)
+    .update(content)
+    .digest('hex');
+
+  return `${timestamp}.${signature}`;
+}
+
 module.exports = {
   rateLimitMiddleware,
   inputLimitMiddleware,
@@ -309,6 +486,10 @@ module.exports = {
   apiKeyMiddleware,
   roleMiddleware,
   configurableRateLimitMiddleware,
+  csrfMiddleware,
+  csrfTokenGenerator,
+  requestSignatureMiddleware,
+  generateRequestSignature,
   registerApiKey,
   removeApiKey,
   listApiKeys,

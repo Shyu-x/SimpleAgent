@@ -4,6 +4,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../common/errors/AppError');
 
 // 工作流节点类型
 const NODE_TYPES = {
@@ -106,7 +107,7 @@ class WorkflowEngine extends EventEmitter {
    */
   async execute(context = {}, startNodeId = null) {
     if (this.isRunning) {
-      throw new Error('Workflow already running');
+      throw AppError.internalError('Workflow already running');
     }
 
     this.executionId = `wf_${Date.now()}_${Math.random()}`;
@@ -128,7 +129,7 @@ class WorkflowEngine extends EventEmitter {
       if (startNodeId) {
         currentNode = this.nodes.get(startNodeId);
         if (!currentNode) {
-          throw new Error(`Start node not found: ${startNodeId}`);
+          throw AppError.notFound(`Start node ${startNodeId}`);
         }
       }
 
@@ -209,7 +210,7 @@ class WorkflowEngine extends EventEmitter {
    */
   async resume() {
     if (!this.executionId) {
-      throw new Error('No execution to resume');
+      throw AppError.internalError('No execution to resume');
     }
 
     this.isRunning = true;
@@ -273,7 +274,7 @@ class WorkflowEngine extends EventEmitter {
           break;
 
         default:
-          throw new Error(`Unknown node type: ${node.type}`);
+          throw AppError.internalError(`Unknown node type: ${node.type}`);
       }
 
       node.status = NODE_STATUS.COMPLETED;
@@ -300,13 +301,13 @@ class WorkflowEngine extends EventEmitter {
    */
   async _executeTask(node) {
     if (!this.toolRegistry) {
-      throw new Error('Tool registry not configured');
+      throw AppError.internalError('Tool registry not configured');
     }
 
     const { tool, params, expression } = node.task || {};
 
     if (!tool) {
-      throw new Error('Task node missing tool configuration');
+      throw AppError.validationError('tool configuration', 'Task node missing tool configuration');
     }
 
     // 解析参数
@@ -333,7 +334,7 @@ class WorkflowEngine extends EventEmitter {
     const condition = node.condition;
 
     if (!condition) {
-      throw new Error('Condition node missing condition configuration');
+      throw AppError.validationError('condition configuration', 'Condition node missing condition configuration');
     }
 
     // 解析条件表达式
@@ -441,7 +442,7 @@ class WorkflowEngine extends EventEmitter {
     const { fn, args } = node.config;
 
     if (!fn) {
-      throw new Error('Function node missing function configuration');
+      throw AppError.validationError('function configuration', 'Function node missing function configuration');
     }
 
     // 解析参数
@@ -452,7 +453,7 @@ class WorkflowEngine extends EventEmitter {
     if (typeof fn === 'function') {
       result = await fn(resolvedArgs, this.variables);
     } else {
-      throw new Error('Invalid function configuration');
+      throw AppError.internalError('Invalid function configuration');
     }
 
     // 设置输出变量
@@ -493,23 +494,125 @@ class WorkflowEngine extends EventEmitter {
   }
 
   /**
-   * 简单表达式求值
+   * 安全表达式求值 - 使用有限数学运算子集
+   * 避免使用 new Function()，改用安全的 AST 解析
    */
   _evaluateExpression(expr) {
-    // 安全起见，只支持简单的比较
+    // 安全起见，只支持简单的比较和基本数学运算
     const varPattern = /\{(\w+)\}/g;
     let resolvedExpr = expr.replace(varPattern, (match, varName) => {
       const value = this.variables.get(varName);
-      return typeof value === 'string' ? `"${value}"` : value;
+      if (value === null || value === undefined) {
+        return 'null';
+      }
+      if (typeof value === 'string') {
+        // 转义字符串中的特殊字符，防止注入
+        const escaped = value
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"')
+          .replace(/'/g, "\\'")
+          .replace(/\n/g, '\\n')
+          .replace(/\r/g, '\\r');
+        return `"${escaped}"`;
+      }
+      return String(value);
     });
 
-    // 使用Function进行安全求值
+    // 使用安全的表达式解析器替代 new Function()
     try {
-      const fn = new Function(`return ${resolvedExpr}`);
-      return fn();
+      return this._safeEval(resolvedExpr);
     } catch {
       return false;
     }
+  }
+
+  /**
+   * 安全表达式求值器 - 仅支持基本比较和数学运算
+   * 白名单方式：只允许预定义的运算符和函数
+   */
+  _safeEval(expr) {
+    // 清理空白字符
+    const cleaned = expr.trim();
+
+    // 预定义的安全常量
+    const SAFE_CONSTANTS = {
+      'true': true,
+      'false': false,
+      'null': null,
+      'undefined': undefined,
+      'Math.PI': Math.PI,
+      'Math.E': Math.E,
+      'Infinity': Infinity,
+      'NaN': NaN
+    };
+
+    // 如果是常量，直接返回
+    if (SAFE_CONSTANTS[cleaned] !== undefined) {
+      return SAFE_CONSTANTS[cleaned];
+    }
+
+    // 安全比较运算符模式
+    const comparisonPattern = /^([\w.]+)\s*(===|==|!==|!=|>=|<=|>|<)\s*([\w.'"]+)$/;
+    const match = cleaned.match(comparisonPattern);
+
+    if (match) {
+      const [, left, op, right] = match;
+
+      // 解析值
+      const leftVal = this._parseValue(left);
+      const rightVal = this._parseValue(right);
+
+      // 执行比较
+      switch (op) {
+        case '===': return leftVal === rightVal;
+        case '==': return leftVal == rightVal;
+        case '!==': return leftVal !== rightVal;
+        case '!=': return leftVal != rightVal;
+        case '>=': return leftVal >= rightVal;
+        case '<=': return leftVal <= rightVal;
+        case '>': return leftVal > rightVal;
+        case '<': return leftVal < rightVal;
+      }
+    }
+
+    // 如果不匹配安全模式，拒绝执行
+    return false;
+  }
+
+  /**
+   * 安全解析值 - 仅支持数字、布尔和简单标识符
+   */
+  _parseValue(val) {
+    const trimmed = val.trim();
+
+    // 数字
+    if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+      return parseFloat(trimmed);
+    }
+
+    // 布尔
+    if (trimmed === 'true') return true;
+    if (trimmed === 'false') return false;
+    if (trimmed === 'null') return null;
+    if (trimmed === 'undefined') return undefined;
+
+    // 安全常量
+    if (trimmed === 'Math.PI') return Math.PI;
+    if (trimmed === 'Math.E') return Math.E;
+
+    // 变量引用（从 variables Map 获取）
+    const varVal = this.variables.get(trimmed);
+    if (varVal !== undefined) {
+      return varVal;
+    }
+
+    // 带引号的字符串
+    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+        (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+      return trimmed.slice(1, -1);
+    }
+
+    return trimmed;
   }
 
   /**
