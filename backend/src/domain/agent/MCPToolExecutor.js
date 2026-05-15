@@ -14,6 +14,8 @@
 
 const { AppError } = require('../../common/errors');
 const { withTimeout } = require('../../utils/retry');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('MCPToolExecutor');
 
 /**
  * MCP工具调用结构
@@ -157,7 +159,7 @@ class MCPToolExecutor {
       return tools;
 
     } catch (error) {
-      console.error(`MCP list tools failed for ${mcpConfig.name}:`, error.message);
+      logger.error(`MCP list tools failed for ${mcpConfig.name}`, { error: error.message });
       return [];
     }
   }
@@ -184,7 +186,7 @@ class MCPToolExecutor {
       };
 
     } catch (error) {
-      console.error(`MCP get tool schema failed:`, error.message);
+      logger.error('MCP get tool schema failed', { error: error.message });
       return null;
     }
   }
@@ -297,7 +299,7 @@ class MCPToolExecutor {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+          throw AppError.internalError(`HTTP error: ${response.status} ${response.statusText}`);
         }
 
         return response.json();
@@ -342,7 +344,7 @@ class MCPToolExecutor {
             pending.resolve(response);
           }
         } catch (e) {
-          console.error('WebSocket message parse error:', e);
+          logger.error('WebSocket message parse error', { error: e.message });
         }
       };
 
@@ -353,7 +355,7 @@ class MCPToolExecutor {
       ws.onclose = () => {
         pendingRequests.forEach(p => p.reject(new Error('WebSocket closed')));
         pendingRequests.clear();
-      });
+      };
 
       // 超时处理
       setTimeout(() => {
@@ -376,7 +378,7 @@ class MCPToolExecutor {
       return connection.sendRequest(request);
     }
 
-    throw new Error('Unsupported connection type');
+    throw AppError.internalError('Unsupported connection type');
   }
 
   /**
@@ -464,7 +466,7 @@ class MCPToolExecutor {
           conn.close();
         }
       } catch (e) {
-        console.warn(`Failed to close connection ${key}:`, e.message);
+        logger.warn(`Failed to close connection ${key}`, { error: e.message });
       }
     }
     this.connections.clear();

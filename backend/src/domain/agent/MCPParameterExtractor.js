@@ -12,6 +12,9 @@
  * @date 2026-04-01
  */
 
+const createLogger = require('../../../common/logger');
+const logger = createLogger('MCPParameterExtractor');
+
 /**
  * 参数提取结果
  * @typedef {Object} ExtractionResult
@@ -425,7 +428,7 @@ class MCPParameterExtractor {
         };
       }
     } catch (error) {
-      console.warn(`[MCPParameterExtractor] LLM 提取失败:`, error.message);
+      logger.warn('LLM 提取失败', { error: error.message });
     }
 
     return { success: false };

@@ -9,6 +9,8 @@
 const { MCPToolRegistry, createMCPToolRegistry } = require('./MCPToolRegistry');
 const { MCPParameterExtractor, createParameterExtractor } = require('./MCPParameterExtractor');
 const { ToolExecutor, ToolErrorType } = require('./ToolExecutor');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('MCPToolIntegration');
 
 /**
  * MCP 工具集成器
@@ -63,7 +65,7 @@ class MCPToolIntegration {
     }
 
     this._initialized = true;
-    console.log(`[MCPToolIntegration] 初始化完成，已发现 ${this.registry.tools.size} 个工具`);
+    logger.info(`初始化完成，已发现 ${this.registry.tools.size} 个工具`);
   }
 
   /**
@@ -103,7 +105,7 @@ class MCPToolIntegration {
         // 检查必需参数
         if (extractionResult.missing && extractionResult.missing.length > 0) {
           const missingNames = extractionResult.missing.map(m => m.name).join(', ');
-          console.warn(`[MCPToolIntegration] 参数缺失: ${missingNames}`);
+          logger.warn(`参数缺失`, { missing: missingNames });
         }
       }
 

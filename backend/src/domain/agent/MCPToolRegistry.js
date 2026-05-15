@@ -15,6 +15,8 @@
 const fs = require('fs');
 const path = require('path');
 const { glob } = require('glob');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('MCPToolRegistry');
 
 // 工具目录路径
 const TOOLS_DIR = path.join(__dirname, '../../services/tools');
@@ -104,12 +106,12 @@ class MCPToolRegistry {
       this.discovered = true;
       this.discoveryTime = Date.now();
 
-      console.log(`[MCPToolRegistry] 发现 ${discoveredTools.length} 个工具 (本地: ${localTools.length}, MCP: ${mcpTools.length})`);
+      logger.info(`发现 ${discoveredTools.length} 个工具 (本地: ${localTools.length}, MCP: ${mcpTools.length})`);
 
       return discoveredTools;
 
     } catch (error) {
-      console.error('[MCPToolRegistry] 工具扫描失败:', error.message);
+      logger.error('工具扫描失败', { error: error.message });
       throw error;
     }
   }
@@ -137,12 +139,12 @@ class MCPToolRegistry {
             tools.push(metadata);
           }
         } catch (err) {
-          console.warn(`[MCPToolRegistry] 加载工具失败 ${file}:`, err.message);
+          logger.warn(`加载工具失败 ${file}`, { error: err.message });
         }
       }
 
     } catch (error) {
-      console.error('[MCPToolRegistry] 扫描本地工具失败:', error.message);
+      logger.error('扫描本地工具失败', { error: error.message });
     }
 
     return tools;
@@ -182,7 +184,7 @@ class MCPToolRegistry {
       return metadata;
 
     } catch (error) {
-      console.warn(`[MCPToolRegistry] 提取工具元信息失败 ${toolPath}:`, error.message);
+      logger.warn(`提取工具元信息失败 ${toolPath}`, { error: error.message });
       return null;
     }
   }
@@ -210,7 +212,7 @@ class MCPToolRegistry {
         server.tools = mcpTools;
         server.lastSync = Date.now();
       } catch (error) {
-        console.warn(`[MCPToolRegistry] MCP 服务器 ${serverName} 工具发现失败:`, error.message);
+        logger.warn(`MCP 服务器 ${serverName} 工具发现失败`, { error: error.message });
       }
     }
 
@@ -236,7 +238,7 @@ class MCPToolRegistry {
    */
   registerTool(tool) {
     if (!tool.name) {
-      throw new Error('工具必须具有名称');
+      throw AppError.validationError('name', '工具必须具有名称');
     }
 
     const metadata = {
@@ -507,7 +509,7 @@ class MCPToolRegistry {
   async refreshMCPServer(serverName) {
     const server = this.mcpConnections.get(serverName);
     if (!server) {
-      throw new Error(`MCP 服务器未注册: ${serverName}`);
+      throw AppError.internalError(`MCP 服务器未注册: ${serverName}`);
     }
 
     const tools = await this._listMCPServerTools(server.config);

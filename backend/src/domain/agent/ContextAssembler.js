@@ -22,6 +22,8 @@
 
 const EventEmitter = require('events');
 const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('ContextAssembler');
 
 // Token 估算平均值（中文约 2 字符/token，英文约 4 字符/token）
 const AVG_CHARS_PER_TOKEN = 3;
@@ -236,7 +238,7 @@ class ContextAssembler extends EventEmitter {
         });
         this._addItem('memory', memories, maxTokens);
       } catch (error) {
-        console.warn('[ContextAssembler] Memory service error:', error.message);
+        logger.warn('Memory service error', { error: error.message });
         // 后备：直接使用传入的消息
         this._addContextArray('memory', messages, maxTokens);
       }
@@ -270,7 +272,7 @@ class ContextAssembler extends EventEmitter {
           this._addContextArray('knowledge', docs, maxTokens);
         }
       } catch (error) {
-        console.warn('[ContextAssembler] Knowledge service error:', error.message);
+        logger.warn('Knowledge service error', { error: error.message });
         this._addContextArray('knowledge', typeof docs === 'string' ? [] : docs, maxTokens);
       }
     } else {

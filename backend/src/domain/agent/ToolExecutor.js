@@ -14,6 +14,8 @@
 
 const { AppError } = require('../../common/errors');
 const { withTimeout, withRetry, TimeoutConfig } = require('../../utils/retry');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('ToolExecutor');
 
 /**
  * 工具执行错误类型
@@ -377,7 +379,7 @@ class ToolExecutor {
       if (typeof fn === 'function') {
         return await fn(params);
       }
-      throw new Error('Invalid tool function');
+      throw AppError.validationError('function', 'Invalid tool function');
     };
 
     if (maxRetries > 0) {
@@ -386,7 +388,7 @@ class ToolExecutor {
           maxRetries,
           retryDelay,
           onRetry: (err, attempt) => {
-            console.warn(`Tool execution retry ${attempt}:`, err.message);
+            logger.warn(`Tool execution retry ${attempt}`, { error: err.message });
           }
         }),
         timeout

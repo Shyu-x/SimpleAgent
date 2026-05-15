@@ -16,6 +16,9 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../../common/logger');
+const logger = createLogger('IntentRouter');
 
 /**
  * 路由目标类型
@@ -79,23 +82,23 @@ class IntentRouter extends EventEmitter {
    */
   _registerDefaultHandlers() {
     this.registerHandler(RouteTarget.RAG, async (context) => {
-      if (!this.ragPipeline) throw new Error('RAG pipeline not configured');
+      if (!this.ragPipeline) throw AppError.internalError('RAG pipeline not configured');
       return await this.ragPipeline.query(context.query, context.options);
     });
 
     this.registerHandler(RouteTarget.TOOL, async (context) => {
-      if (!this.toolExecutor) throw new Error('Tool executor not configured');
+      if (!this.toolExecutor) throw AppError.internalError('Tool executor not configured');
       const toolCall = { name: context.subIntent, parameters: context.params || {} };
       return await this.toolExecutor.execute(toolCall, context);
     });
 
     this.registerHandler(RouteTarget.CHAT, async (context) => {
-      if (!this.chatModel) throw new Error('Chat model not configured');
+      if (!this.chatModel) throw AppError.internalError('Chat model not configured');
       return await this.chatModel.chat({ messages: context.messages, ...context.options });
     });
 
     this.registerHandler(RouteTarget.TASK, async (context) => {
-      if (!this.taskOrchestrator) throw new Error('Task orchestrator not configured');
+      if (!this.taskOrchestrator) throw AppError.internalError('Task orchestrator not configured');
       return await this.taskOrchestrator.execute(context.task, context);
     });
   }
@@ -139,7 +142,7 @@ class IntentRouter extends EventEmitter {
       });
 
     } catch (error) {
-      console.error('[IntentRouter] Route error:', error);
+      logger.error('Route error', { error: error.message });
       return this._buildDecision({
         target: RouteTarget.CHAT,
         intent: 'chat',
@@ -168,7 +171,7 @@ class IntentRouter extends EventEmitter {
 
     const handlers = decision.handlers;
     if (!handlers || handlers.length === 0) {
-      throw new Error(`No handlers registered for target: ${decision.target}`);
+      throw AppError.internalError(`No handlers registered for target: ${decision.target}`);
     }
 
     let result;
