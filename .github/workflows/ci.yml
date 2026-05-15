@@ -6,13 +6,12 @@ on:
   pull_request:
     branches: [main, master]
   schedule:
-    - cron: '0 2 * * *'  # Daily security scan at 2 AM
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 env:
   NODE_VERSION: '20'
   NEXT_TELEMETRY_DISABLED: '1'
-  REPO_LOWER: ${{ github.repository && github.repository.toLowerCase() }}
 
 jobs:
   lint:
@@ -112,22 +111,24 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: false
-          tags: ghcr.io/${{ env.REPO_LOWER }}/backend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker buildx build \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --tag "ghcr.io/${REPO_LOWER}/backend:${{ github.sha }}" \
+            ./backend
+        shell: bash
 
       - name: Build Frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: false
-          tags: ghcr.io/${{ env.REPO_LOWER }}/frontend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          docker buildx build \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --tag "ghcr.io/${REPO_LOWER}/frontend:${{ github.sha }}" \
+            ./frontend
+        shell: bash
 
   security:
     name: Security Scan
