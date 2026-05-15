@@ -505,5 +505,7 @@ module.exports = {
   toolRegistryCache,
   ragResultCache,
   promptTemplateCache,
-  cacheManager
+  cacheManager,
+  // 导出统一缓存层 (Redis + 本地回退)
+  unifiedCache: require('./unifiedCache')
 };
