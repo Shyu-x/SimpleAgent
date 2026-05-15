@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文档详细说明 GitLab CI/CD 流水线的部署流程，包括各阶段的任务、触发条件和回滚操作。
+本文档详细说明 GitHub Actions 流水线的部署流程，包括各阶段的任务、触发条件和回滚操作。
 
 ## 部署流程图
 
@@ -15,27 +15,13 @@
 │                              │                                  │
 │                              ▼                                  │
 │                    ┌─────────────────┐                         │
-│                    │  deploy:staging  │  (自动/手动)             │
+│                    │  deploy-staging │  (自动)                  │
 │                    └─────────────────┘                         │
 │                              │                                  │
 │                              ▼                                  │
 │                    ┌─────────────────┐                         │
-│                    │ healthcheck     │  (自动验证)              │
-│                    └─────────────────┘                         │
-│                              │                                  │
-│                              ▼                                  │
-│                    ┌─────────────────┐                         │
-│                    │ deploy:canary   │  (10% -> 50% -> 100%)   │
-│                    └─────────────────┘                         │
-│                              │                                  │
-│                              ▼                                  │
-│                    ┌─────────────────┐                         │
-│                    │ healthcheck      │  (最终验证)              │
-│                    └─────────────────┘                         │
-│                              │                                  │
-│                              ▼                                  │
-│                    ┌─────────────────┐                         │
-│                    │ ✓ 部署完成      │                         │
+│                    │     release     │  (自动)                  │
+│                    │ (创建 GitHub Release + Docker)            │
 │                    └─────────────────┘                         │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -45,14 +31,15 @@
 
 ### 执行内容
 
-1. **Commitlint** - 校验提交信息格式
-2. **ESLint** - 代码规范检查
-3. **JSON Schema** - package.json 语法校验
+1. **ESLint** - JavaScript 代码规范检查
+2. **Prettier** - 代码格式检查
+3. **TypeScript Check** - 前端类型检查
+4. **Commit Message** - 提交信息格式校验
 
 ### 触发条件
 
-- 所有分支的 push 和 MR 事件
-- 文件变化检测: `backend/**`
+- 所有分支的 push 和 PR 事件
+- 文件变化检测: `backend/**`, `frontend/**`
 
 ### 失败处理
 
@@ -64,26 +51,17 @@
 
 ### 执行内容
 
-1. **Jest 单元测试** - 按模块隔离
-2. **覆盖率收集** - 生成 lcov 报告
-3. **JUnit 报告** - 生成 XML 报告
+1. **Jest 单元测试** - 后端测试
+2. **架构测试** - 后端架构检查
+3. **综合 API 测试** - 后端 API 验证
 
-### 模块级并行测试
+### 并行测试
 
 | Job | 触发条件 | 独立执行 |
 |-----|----------|----------|
-| `test:backend` | backend/src/** 变化 | 是 |
-| `test:frontend:unit` | frontend/src/** 变化 | 是 |
-| `test:frontend:e2e` | main/develop/MR | 是 |
-| `test:integration` | main/develop/MR | 是 |
-
-### 覆盖率要求
-
-```yaml
-coverage:
-  line: 70%    # 代码行覆盖率
-  branch: 60%   # 分支覆盖率
-```
+| `backend-test` | backend/src/** 变化 | 是 |
+| `frontend-typecheck` | frontend/src/** 变化 | 是 |
+| `e2e-test` | (已禁用) 需要服务运行 | - |
 
 ### 失败处理
 
@@ -95,37 +73,28 @@ coverage:
 
 ### 执行内容
 
-1. **Docker 镜像构建** - 使用 BuildKit
-2. **缓存优化** - 使用 --cache-from
-3. **镜像推送** - 推送到 GitLab Registry
+1. **Backend 构建验证** - 语法检查 + PM2 安装
+2. **Frontend Next.js 构建** - npm run build
+3. **Artifact 上传** - 保存构建产物
 
 ### 模块级构建
 
-| Job | Docker 镜像 | 标签 |
-|-----|-------------|------|
-| `build:backend` | `registry.gitlab.com/ai-chat-backend/backend` | SHA, latest |
-| `build:order` | `registry.gitlab.com/ai-chat-backend/order` | SHA, latest |
-| `build:user` | `registry.gitlab.com/ai-chat-backend/user` | SHA, latest |
-| `build:payment` | `registry.gitlab.com/ai-chat-backend/payment` | SHA, latest |
+| Job | 说明 | 产物 |
+|-----|------|------|
+| `backend-build` | 后端代码验证 + 打包 | backend-build artifact |
+| `frontend-build` | 前端 Next.js 构建 | frontend-build artifact |
 
-### 构建缓存策略
+### 构建产物
 
-```dockerfile
-# 使用多阶段构建
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --cache /tmp/.npm
-COPY . .
-RUN npm run build
+```
+backend-build/
+  └── src/
+  └── package.json
+  └── ecosystem.config.js
 
-# 生产镜像
-FROM node:20-alpine
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 30000
-CMD ["node", "dist/index.js"]
+frontend-build/
+  └── .next/
+  └── public/
 ```
 
 ### 失败处理
@@ -138,16 +107,17 @@ CMD ["node", "dist/index.js"]
 
 ### 执行内容
 
-1. **Trivy 容器扫描** - 镜像漏洞检测
-2. **npm audit** - 依赖安全扫描
-3. **SAST** - 静态代码安全分析
+1. **npm audit** - 依赖安全扫描
+2. **Secrets 检查** - 代码中敏感信息检测
 
 ### 扫描配置
 
 ```yaml
-severity:
-  - HIGH
-  - CRITICAL
+- name: Install audit
+  run: npx audit --audit-level=moderate || echo "安全扫描完成"
+
+- name: Check for secrets
+  run: grep -r "password\|secret\|api_key" --include="*.js" backend/src/
 ```
 
 ### 失败处理
@@ -158,117 +128,121 @@ severity:
 
 ## 阶段 5: Deploy Staging (部署预发)
 
-### 部署策略
+### 部署配置
 
 ```yaml
-deploy:staging:
-  when: manual  # 可配置为 automatic
+deploy-staging:
+  needs: [backend-build, frontend-build]
+  if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
   environment:
-    name: staging/backend
-    url: https://staging.chat.toy
+    name: staging
+    url: https://staging.simpleagent.example.com
 ```
 
-### Kubernetes 滚动更新
+### SSH 部署步骤
 
 ```bash
-# 滚动更新命令
-kubectl set image deployment/ai-chat-backend backend=<new-image> -n ai-chat-staging
+# 1. 配置 SSH Agent
+- uses: webfactory/ssh-agent@v0.8.0
+  with:
+    ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
 
-# 等待滚动完成
-kubectl rollout status deployment/ai-chat-backend -n ai-chat-staging --timeout=10m
+# 2. 部署到服务器
+- name: Deploy to staging
+  run: |
+    # 复制文件到服务器
+    scp -r backend/ user@staging:/opt/ai-chat/backend/
+    scp -r frontend/.next/ user@staging:/opt/ai-chat/frontend/
+
+    # 重启服务
+    ssh user@staging "pm2 restart all"
 ```
 
 ### 健康检查
 
 ```bash
 # 验证健康端点
-curl -f https://staging.chat.toy/health
+curl -f https://staging.simpleagent.example.com/health
 ```
 
 ### 失败处理
 
 ```
-部署失败 ──▶ 自动回滚 ──▶ 通知开发者 ──▶ 修复后重新触发
+部署失败 ──▶ 记录错误 ──▶ 通知开发者 ──▶ 修复后重新触发
 ```
 
-## 阶段 6: Deploy Production (生产部署)
+## 阶段 6: Release (发布)
 
-### 灰度发布策略
+### 自动创建 Release
 
-```
-┌────────────────────────────────────────────────────────┐
-│                   灰度发布流程                         │
-├────────────────────────────────────────────────────────┤
-│                                                         │
-│  阶段 1: 10% 流量                                       │
-│  ├── 更新 10% Pod                                       │
-│  ├── 等待 60 秒                                         │
-│  ├── 健康检查                                           │
-│  └── 验证业务指标                                       │
-│                        │                                │
-│                        ▼                                │
-│  阶段 2: 50% 流量                                       │
-│  ├── 更新 50% Pod                                       │
-│  ├── 等待 60 秒                                         │
-│  ├── 健康检查                                           │
-│  └── 验证业务指标                                       │
-│                        │                                │
-│                        ▼                                │
-│  阶段 3: 100% 流量                                      │
-│  ├── 更新 100% Pod                                      │
-│  ├── 健康检查                                           │
-│  └── 验证业务指标                                       │
-│                                                         │
-└────────────────────────────────────────────────────────┘
-```
-
-### 手动触发
+触发条件: 合并到 master/main 分支
 
 ```yaml
-deploy:production:
-  when: manual  # 必须手动触发
+release:
+  needs: [backend-build, frontend-build]
+  if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+  permissions:
+    contents: write
 ```
 
-### 回滚策略
+### Release 内容
+
+- **版本号**: `YYYY.MM.DD-<short-sha>` (如 `2026.05.15-abc1234`)
+- **Changelog**: 最近 15 条 commit 记录
+- **Tag**: `v<version>`
+
+### Docker 镜像构建 (已配置待启用)
 
 ```bash
-# 回滚到上一个版本
-kubectl rollout undo deployment/ai-chat-backend -n ai-chat-production
+# 构建后端镜像
+docker build -t ghcr.io/username/backend:$VERSION ./backend
 
-# 回滚到指定版本
-kubectl rollout undo deployment/ai-chat-backend -n ai-chat-production --to-revision=3
+# 构建前端镜像
+docker build -t ghcr.io/username/frontend:$VERSION ./frontend
+
+# 推送镜像
+docker push ghcr.io/username/backend:$VERSION
+docker push ghcr.io/username/frontend:$VERSION
 ```
 
-## 回滚流水线
+## 回滚操作
 
-### 回滚 job
+### PM2 回滚
 
-| Job | 环境 | 触发方式 |
-|-----|------|----------|
-| `rollback:staging` | Staging | 手动 |
-| `rollback:production` | Production | 手动 |
-| `rollback:staging:order` | Staging | 手动 |
-| `rollback:staging:user` | Staging | 手动 |
-| `rollback:staging:payment` | Staging | 手动 |
-
-### 回滚流程
-
-```
-发现问题 ──▶ 人工确认 ──▶ 触发回滚 Job ──▶ 自动回滚到上一版本 ──▶ 验证 ──▶ 完成
+```bash
+# SSH 到服务器后
+pm2 list                      # 查看所有进程
+pm2 logs <app-id>             # 查看最近日志
+pm2 rollback <app-id>         # 回滚到上一版本
+pm2 rollback <app-id> <version>  # 回滚到指定版本
 ```
 
-### 自动回滚触发条件
+### 手动部署恢复
 
-1. **健康检查失败** - 连续 3 次健康检查失败
-2. **错误率超标** - 5 分钟内错误率 > 5%
-3. **响应延迟** - P99 响应时间 > 5s
+```bash
+# 从 Git 拉取并重新部署
+ssh user@staging-server << 'EOF'
+  cd /opt/ai-chat
+  git checkout <previous-tag-or-commit>
+  npm ci --production
+  pm2 restart all
+EOF
+```
+
+### 回滚检查清单
+
+- [ ] 确认回滚版本
+- [ ] 通知相关人员
+- [ ] 验证服务启动
+- [ ] 检查健康端点
+- [ ] 确认日志无异常
 
 ## 环境矩阵
 
-| 环境 | 集群 | Namespace | 域名 |
-|------|------|-----------|------|
-| Staging | staging-cluster | ai-chat-staging | staging.chat.toy |
-| Production | production-cluster | ai-chat-production | chat.toy |
+| 环境 | 触发条件 | URL | 说明 |
+|------|----------|-----|------|
+| Staging | master/main push | staging.simpleagent.example.com | 自动部署 |
+| Production | 手动 | chat.toy | 需手动部署 |
 
 ## 发布检查清单
 
@@ -278,7 +252,6 @@ kubectl rollout undo deployment/ai-chat-backend -n ai-chat-production --to-revis
 - [ ] 代码审查已通过
 - [ ] 安全扫描无高危漏洞
 - [ ] Staging 环境验证通过
-- [ ] 备份已创建
 - [ ] 回滚方案已确认
 
 ### 发布后检查
@@ -291,56 +264,57 @@ kubectl rollout undo deployment/ai-chat-backend -n ai-chat-production --to-revis
 
 ## 通知配置
 
-### Slack 通知
+### GitHub Actions 内置通知
+
+- PR 状态自动更新
+- Actions 页面显示状态
+- Email 通知 (可配置)
+
+### Slack 集成 (可选)
 
 ```yaml
-notify:pipeline:failure:
-  script:
-    - curl -X POST $SLACK_WEBHOOK_URL \
-        -H 'Content-type: application/json' \
-        --data '{"text": "Pipeline Failed: '${CI_PIPELINE_URL}'"}'
+- name: Notify Slack
+  if: failure()
+  run: |
+    curl -X POST $SLACK_WEBHOOK_URL \
+      -H 'Content-type: application/json' \
+      --data '{"text": "Workflow Failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
 ```
-
-### 通知触发条件
-
-| 事件 | 通知方式 |
-|------|----------|
-| 流水线失败 | Slack |
-| 部署成功 | Slack |
-| 健康检查失败 | Slack + Email |
-| 安全扫描发现高危 | 安全团队邮件 |
 
 ## 常见问题
 
 ### 1. 构建缓存失效
 
 ```bash
-# 清除缓存重新构建
-docker build --no-cache -t <image> .
+# 强制清除缓存重新构建
+# 在 workflow 中添加
+- name: Clear npm cache
+  run: npm cache clean --force
 ```
 
 ### 2. 部署超时
 
 ```bash
-# 检查 Pod 状态
-kubectl get pods -n ai-chat-staging
-kubectl describe pod <pod-name> -n ai-chat-staging
+# 检查服务器状态
+ssh user@staging "pm2 status"
 
-# 查看日志
-kubectl logs <pod-name> -n ai-chat-staging
+# 查看错误日志
+ssh user@staging "pm2 logs --lines 100"
 ```
 
 ### 3. 健康检查失败
 
 ```bash
 # 手动检查健康端点
-curl -v https://staging.chat.toy/health
+curl -v https://staging.simpleagent.example.com/health
 
-# 检查 Pod 健康探针配置
-kubectl get deployment ai-chat-backend -n ai-chat-staging -o yaml | grep -A 20 readinessProbe
+# 检查 PM2 配置
+ssh user@staging "pm2 list"
+ssh user@staging "pm2 show backend"
 ```
 
 ## 相关文档
 
-- [.gitlab-ci.yml 详解](./gitlab-ci-reference.md)
+- [.github/workflows/ci-cd.yml](./workflow-reference.md)
 - [模块划分说明](./MODULES.md)
+- [环境变量配置](./ENVIRONMENT.md)

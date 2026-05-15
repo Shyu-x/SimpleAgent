@@ -2,161 +2,228 @@
 
 ## 概述
 
-本文档说明 GitLab CI/CD 流水线所需的环境变量配置，以及如何在本地验证 CI 配置。
+本文档说明 GitHub Actions 流水线所需的环境变量配置，以及如何在本地验证 CI 配置。
 
-## GitLab CI/CD 变量配置
+## GitHub Secrets 配置
 
-### 1. 进入变量配置页面
+### 1. 进入 Secrets 配置页面
 
-1. 登录 GitLab
-2. 进入项目 `Settings > CI/CD > Variables`
-3. 点击 `Add variable` 添加新变量
+1. 登录 GitHub
+2. 进入仓库 `Settings > Secrets and variables > Actions`
+3. 点击 `New repository secret` 添加新 Secret
 
-### 2. 必需变量
+### 2. 必需 Secrets
 
-| 变量 | 说明 | 示例值 |
-|------|------|--------|
-| `DOCKER_REGISTRY` | Docker 镜像仓库地址 | `registry.gitlab.com` |
-| `K8S_STAGING_CLUSTER` | Staging K8s 集群上下文 | `staging-cluster` |
-| `K8S_PRODUCTION_CLUSTER` | Production K8s 集群上下文 | `production-cluster` |
+| Secret | 说明 | 示例值 |
+|--------|------|--------|
+| `STAGING_SSH_KEY` | Staging 服务器 SSH 私钥 | `-----BEGIN OPENSSH PRIVATE KEY-----\n...` |
 
-### 3. 可选变量
+### 3. 可选 Secrets
 
-| 变量 | 说明 | 示例值 |
-|------|------|--------|
+| Secret | 说明 | 示例值 |
+|--------|------|--------|
+| `DOCKER_REGISTRY` | Docker 镜像仓库地址 | `ghcr.io/username` |
 | `SLACK_WEBHOOK_URL` | Slack 通知 Webhook | `https://hooks.slack.com/services/xxx` |
-| `K8S_NAMESPACE_STAGING` | Staging 命名空间 | `ai-chat-staging` |
-| `K8S_NAMESPACE_PRODUCTION` | Production 命名空间 | `ai-chat-production` |
 
-### 4. 保护变量
-
-建议将以下变量设置为 `Protected`（仅在 protected branches/tags 可用）：
-
-- `K8S_PRODUCTION_CLUSTER`
-- `DOCKER_REGISTRY`（写入权限）
-
-### 5. 变量配置示例
-
-```
-Key: DOCKER_REGISTRY
-Value: registry.gitlab.com
-Protect variable: ✓
-Mask variable: ✗
-```
-
-## Kubernetes 配置
-
-### 获取集群凭证
+### 4. 配置 SSH Key 用于部署
 
 ```bash
-# 查看可用上下文
-kubectl config get-contexts
+# 1. 生成 SSH 密钥对 (在本地机器)
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f github-actions-key
 
-# 切换到目标集群
-kubectl config use-context <context-name>
+# 2. 将公钥添加到目标服务器
+cat github-actions-key.pub >> ~/.ssh/authorized_keys
 
-# 验证连接
-kubectl get nodes
-kubectl get namespaces
+# 3. 将私钥内容添加到 GitHub Secrets
+# Settings > Secrets and variables > Actions > New repository secret
+# Name: STAGING_SSH_KEY
+# Secret: [粘贴私钥内容]
 ```
 
-### 创建 Kubernetes Secret（用于镜像拉取）
+### 5. Secret 命名规范
+
+```
+STAGING_SSH_KEY      # Staging 环境 SSH 私钥
+PRODUCTION_SSH_KEY   # Production 环境 SSH 私钥 (可选)
+DOCKER_REGISTRY      # Docker 镜像仓库地址 (可选)
+```
+
+## 环境变量矩阵
+
+| 环境 | 用途 | 配置位置 |
+|------|------|----------|
+| `development` | 本地开发 | `.env` 文件 |
+| `staging` | 预发测试 | GitHub Secrets (SSH Key) |
+| `production` | 生产环境 | GitHub Secrets + Server Config |
+
+## GitHub Actions 环境变量
+
+### workflow 文件中的 env
+
+```yaml
+# .github/workflows/ci-cd.yml
+env:
+  NODE_VERSION: '20.x'
+  PM2_VERSION: 'latest'
+```
+
+### 运行时环境变量
+
+| 变量 | 说明 | 设置位置 |
+|------|------|----------|
+| `GITHUB_REF` | 分支/标签引用 | 自动设置 |
+| `GITHUB_SHA` | 提交 SHA | 自动设置 |
+| `GITHUB_REPOSITORY` | 仓库名称 | 自动设置 |
+| `GITHUB_ACTOR` | 触发用户 | 自动设置 |
+
+## 前端环境变量
+
+### 构建时变量
+
+```yaml
+# .github/workflows/ci-cd.yml
+- name: Build Next.js
+  run: npm run build
+  env:
+    NEXT_TELEMETRY_DISABLED: '1'  # 禁用 Next.js 遥测
+    NEXT_PUBLIC_BACKEND_URL: ${{ secrets.FRONTEND_BACKEND_URL }}  # 如果需要
+```
+
+### 可用变量 (Next.js)
+
+| 变量 | 说明 | 限制 |
+|------|------|------|
+| `NEXT_PUBLIC_*` | 客户端可见 | 只能前缀 `NEXT_PUBLIC_` |
+| `NEXT_TELEMETRY_DISABLED` | 禁用遥测 | 构建时有效 |
+
+## 后端环境变量
+
+### 生产环境配置
 
 ```bash
-# 创建 Pull Secret
-kubectl create secret docker-registry gitlab-regcred \
-  --docker-server=registry.gitlab.com \
-  --docker-username=gitlab-ci-token \
-  --docker-password=$CI_JOB_TOKEN \
-  --namespace=ai-chat-staging
+# 服务器上的 .env 文件
+MINIMAX_API_KEY=your_api_key_here
+NODE_ENV=production
+PORT=30000
+
+# Redis 配置 (可选)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Qdrant 配置 (可选)
+VECTOR_DB_TYPE=qdrant
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
 ```
 
 ## 本地验证 CI 配置
 
-### 1. 安装 GitLab Runner
+### 1. 模拟 GitHub Actions 环境
 
 ```bash
-# 下载 GitLab Runner
-curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash
+# 设置模拟环境变量
+export GITHUB_REF=refs/heads/main
+export GITHUB_SHA=$(git rev-parse HEAD)
+export GITHUB_REPOSITORY=username/repo-name
 
-# 注册 Runner
-sudo gitlab-runner register \
-  --url https://gitlab.com/ \
-  --registration-token <token> \
-  --executor docker \
-  --docker-image docker:24.0.7 \
-  --description "docker-runner"
+# 运行后端测试
+cd backend && npm test
+
+# 运行前端构建
+cd frontend && npm run build
 ```
 
 ### 2. 验证 YAML 语法
 
 ```bash
-# 使用 gitlab-runner 本地执行（需要 Docker）
-gitlab-runner exec docker test:backend
-
-# 或使用yamllint检查语法
-pip install yamllint
-yamllint .gitlab-ci.yml
+# 使用 actionlint 检查 GitHub Actions YAML
+# 安装: pip install actionlint
+actionlint .github/workflows/*.yml
 ```
 
-### 3. 本地模拟流水线
+### 3. 本地测试 Jobs
+
+由于 GitHub Actions 无法本地运行，可以使用 Docker 模拟：
 
 ```bash
-# 创建 .env 文件
-cat > .env << EOF
-DOCKER_REGISTRY=registry.gitlab.com
-DOCKER_IMAGE_PREFIX=ai-chat
-K8S_NAMESPACE_STAGING=ai-chat-staging
-K8S_NAMESPACE_PRODUCTION=ai-chat-production
-EOF
+# 模拟 backend-lint job
+docker run --rm -v $(pwd)/backend:/app -w /app node:20-alpine sh -c "
+  npm ci && npm run lint && node --check src/index.js
+"
 
-# 运行本地测试
-docker run --rm -v $(pwd):/workspace node:20-alpine sh -c "
-  cd /workspace/backend && npm ci && npm test
+# 模拟 frontend-lint job
+docker run --rm -v $(pwd)/frontend:/app -w /app node:20-alpine sh -c "
+  npm ci && npm run lint || true
 "
 ```
 
-## 环境矩阵
+## 服务器部署配置
 
-| 环境 | 集群 | Namespace | 域名 |
-|------|------|-----------|------|
-| Staging | staging-cluster | ai-chat-staging | staging.chat.toy |
-| Production | production-cluster | ai-chat-production | chat.toy |
+### SSH 连接
+
+```bash
+# 测试 SSH 连接
+ssh -i ~/.ssh/staging_key user@staging-server
+
+# 部署脚本示例
+#!/bin/bash
+# deploy.sh
+ssh -i $STAGING_SSH_KEY user@staging-server << 'EOF'
+  cd /opt/ai-chat
+  git pull origin main
+  npm ci --production
+  pm2 restart backend
+EOF
+```
+
+### PM2 配置
+
+```bash
+# 常用 PM2 命令
+pm2 list                    # 查看进程列表
+pm2 logs --lines 50         # 查看最近日志
+pm2 monit                   # 实时监控
+pm2 save                    # 保存进程列表
+pm2 startup                 # 设置开机自启
+
+# 环境变量
+pm2 start ecosystem.config.js --env production
+```
 
 ## 常见问题
 
-### 1. Runner 没有 dind 标签
+### 1. Secrets 不可用
 
 ```bash
-# 查看 Runner 标签
-gitlab-runner list
-
-# 添加标签
-gitlab-runner tags edit <runner-name> --tags docker,dind
+# 检查 workflow 是否正确引用 secrets
+# 正确的写法:
+secrets.STAGING_SSH_KEY
+# 错误的写法:
+$STAGING_SSH_KEY  # 这是环境变量，不是 secrets
 ```
 
-### 2. Docker build 失败
+### 2. SSH 连接失败
 
 ```bash
-# 检查 Docker-in-Docker 配置
-docker info | grep "Docker Root Dir"
-
-# 确认 dind 服务已启动
-docker ps | grep docker:dind
+# 确认私钥格式正确 (应该是 -----BEGIN OPENSSH PRIVATE KEY-----)
+# 确认公钥已添加到服务器 ~/.ssh/authorized_keys
+# 确认 SSH 权限正确
+chmod 600 ~/.ssh/private_key
 ```
 
-### 3. Kubernetes 部署失败
+### 3. 环境变量未传递
 
 ```bash
-# 验证 kubectl 配置
-kubectl config current-context
-
-# 检查权限
-kubectl auth can-i create deployment --as=system:serviceaccount:default:default
+# 在 job 中正确使用 env
+- name: Build
+  run: npm run build
+  env:
+    NEXT_TELEMETRY_DISABLED: '1'
+    MY_SECRET: ${{ secrets.MY_SECRET }}
 ```
 
 ## 相关文档
 
-- [.gitlab-ci.yml 详解](./gitlab-ci-reference.md)
+- [.github/workflows/ci-cd.yml](./workflow-reference.md)
 - [部署流程](./DEPLOYMENT.md)
 - [模块划分](./MODULES.md)
