@@ -241,10 +241,21 @@ class AlertManager {
       // 更新规则状态
       this._updateRuleState(rule, triggered);
 
-      // 如果触发且满足持续时间，创建告警
-      if (triggered && rule.currentState === 'firing') {
+      // 如果触发且状态为 pending 或 firing，创建告警
+      // pending 状态表示已达到持续时间要求
+      // 但如果规则已经有活跃告警，不再创建新的（避免重复触发）
+      if (triggered && (rule.currentState === 'pending' || rule.currentState === 'firing')) {
         // 检查冷却时间
         if (rule.lastResolved && Date.now() - rule.lastResolved < rule.cooldown) {
+          continue;
+        }
+
+        // 检查是否已经有该规则的活跃告警
+        const hasActiveAlert = Array.from(this._alerts.values()).some(
+          (a) => a.ruleId === rule.id && a.status === AlertManager.STATUS.FIRING
+        );
+        if (hasActiveAlert && rule.currentState === 'firing') {
+          // 已有活跃告警且状态为 firing，不再创建新的
           continue;
         }
 
@@ -402,6 +413,9 @@ class AlertManager {
    * @private
    */
   _createAlert(rule, value) {
+    // 获取该规则已创建的告警数量（用于避免重复触发）
+    const ruleAlertCount = Array.from(this._alerts.values()).filter(a => a.ruleId === rule.id && a.status === AlertManager.STATUS.FIRING).length;
+
     return {
       id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ruleId: rule.id,
@@ -422,6 +436,8 @@ class AlertManager {
       acknowledgedBy: null,
       resolvedAt: null,
       resolvedBy: null,
+      // 标记该告警是第几次触发（用于避免重复触发）
+      _ruleAlertCount: ruleAlertCount,
     };
   }
 

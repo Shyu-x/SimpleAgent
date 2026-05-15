@@ -14,6 +14,7 @@
 
 const { withRetry, withTimeout, TimeoutConfig } = require('../../utils/retry');
 const EventEmitter = require('events');
+const AppError = require('../../common/errors/AppError');
 
 // 错误分类
 const ModelErrorType = {
@@ -71,14 +72,14 @@ class BaseChatModelClient extends EventEmitter {
    * 同步调用 - 子类实现
    */
   async chat(messages, options = {}) {
-    throw new Error('chat() must be implemented by subclass');
+    throw AppError.internalError('chat() must be implemented by subclass');
   }
 
   /**
    * 流式调用 - 子类实现
    */
   async chatStream(messages, options = {}, callback = null) {
-    throw new Error('chatStream() must be implemented by subclass');
+    throw AppError.internalError('chatStream() must be implemented by subclass');
   }
 
   /**
@@ -87,7 +88,7 @@ class BaseChatModelClient extends EventEmitter {
   async invoke(messages, options = {}) {
     // 检查熔断器
     if (this._isCircuitOpen()) {
-      throw new Error(`Circuit breaker is OPEN for ${this.name}`);
+      throw AppError.internalError(`Circuit breaker is OPEN for ${this.name}`);
     }
 
     try {
@@ -119,7 +120,7 @@ class BaseChatModelClient extends EventEmitter {
    */
   async invokeStream(messages, options = {}, callback = null) {
     if (this._isCircuitOpen()) {
-      throw new Error(`Circuit breaker is OPEN for ${this.name}`);
+      throw AppError.internalError(`Circuit breaker is OPEN for ${this.name}`);
     }
 
     const streamingCb = callback || new StreamingCallback();
@@ -349,7 +350,7 @@ class ChatModelClientFactory {
       //   return new AnthropicChatModelClient(options);
 
       default:
-        throw new Error(`Unknown model client type: ${type}`);
+        throw AppError.internalError(`Unknown model client type: ${type}`);
     }
   }
 

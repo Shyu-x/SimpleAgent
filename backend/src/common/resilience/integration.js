@@ -16,6 +16,7 @@
  */
 
 const { CircuitBreaker: InfraCircuitBreaker } = require('../../infra/circuitBreaker/CircuitBreaker');
+const AppError = require('../../common/errors/AppError');
 
 // 预设配置
 const PRESETS = {
@@ -76,7 +77,7 @@ function getBreaker(name, options = {}) {
 function getBreakerWithPreset(name, preset, overrides = {}) {
   const presetConfig = PRESETS[preset];
   if (!presetConfig) {
-    throw new Error(`未知预设: ${preset}，可用预设: ${Object.keys(PRESETS).join(', ')}`);
+    throw AppError.validationError('preset', `未知预设: ${preset}，可用预设: ${Object.keys(PRESETS).join(', ')}`);
   }
   return getBreaker(name, { ...presetConfig, ...overrides });
 }

@@ -13,6 +13,7 @@
 class SearchChannel {
   constructor(config = {}) {
     this.name = config.name || 'base_channel';
+    this.AppError = require('../../common/errors/AppError');
     this.weight = config.weight || 1.0;           // 检索结果权重
     this.enabled = config.enabled !== false;       // 是否启用
     this.timeout = config.timeout || 30000;        // 超时时间(ms)
@@ -32,7 +33,7 @@ class SearchChannel {
    * @returns {Promise<SearchResult[]>} 检索结果列表
    */
   async search(query, options = {}) {
-    throw new Error('search() must be implemented by subclass');
+    throw this.AppError.internalError('search() must be implemented by subclass');
   }
 
   /**

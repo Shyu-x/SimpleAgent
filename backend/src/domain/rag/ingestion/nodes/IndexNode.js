@@ -14,6 +14,7 @@
  */
 
 const { IngestionNode } = require('../IngestionNode');
+const AppError = require('../../common/errors/AppError');
 
 class IndexNode extends IngestionNode {
   constructor(options = {}) {
@@ -39,7 +40,7 @@ class IndexNode extends IngestionNode {
     const { chunks, parsedMetadata } = context;
 
     if (!chunks || chunks.length === 0) {
-      throw new Error('没有可索引的chunks');
+      throw AppError.ragError('INDEX_FAILED', '没有可索引的chunks');
     }
 
     this.logger.info(`[IndexNode] 开始索引 ${chunks.length} 个chunks`);
@@ -48,7 +49,7 @@ class IndexNode extends IngestionNode {
     const chunksWithEmbedding = chunks.filter((c) => c.embedding);
 
     if (chunksWithEmbedding.length === 0) {
-      throw new Error('没有chunks包含embedding，请先执行EmbeddingNode');
+      throw AppError.ragError('INDEX_FAILED', '没有chunks包含embedding，请先执行EmbeddingNode');
     }
 
     // 按索引类型处理
@@ -214,7 +215,7 @@ class IndexNode extends IngestionNode {
       });
 
       if (!response.ok) {
-        throw new Error(`Vector DB错误: ${response.status}`);
+        throw AppError.ragError('VECTOR_SEARCH_FAILED', `Vector DB错误: ${response.status}`);
       }
 
       const result = await response.json();
@@ -291,10 +292,10 @@ class IndexNode extends IngestionNode {
    */
   async _postValidate(result, context) {
     if (result.indexedChunkCount === 0) {
-      throw new Error('没有成功索引任何chunk');
+      throw AppError.ragError('INDEX_FAILED', '没有成功索引任何chunk');
     }
     if (!result.indexMetadata) {
-      throw new Error('索引元数据缺失');
+      throw AppError.ragError('INDEX_FAILED', '索引元数据缺失');
     }
   }
 }

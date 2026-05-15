@@ -8,6 +8,7 @@
 
 const { CircuitBreaker } = require('./CircuitBreaker');
 const { CircuitState } = require('./CircuitState');
+const AppError = require('../../common/errors/AppError');
 
 /**
  * 熔断器配置预设
@@ -124,7 +125,7 @@ class CircuitBreakerFactory {
   getWithPreset(name, preset, overrides = {}) {
     const presetConfig = Presets[preset];
     if (!presetConfig) {
-      throw new Error(`Unknown preset: ${preset}. Available: ${Object.keys(Presets).join(', ')}`);
+      throw AppError.validationError('preset', `Unknown preset: ${preset}. Available: ${Object.keys(Presets).join(', ')}`);
     }
 
     return this.get(name, this._mergeConfig(presetConfig, overrides));

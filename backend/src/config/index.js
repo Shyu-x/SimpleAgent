@@ -13,6 +13,7 @@
  * @type {Object}
  */
 const DEFAULT_CONFIG = {
+  AppError: require('../common/errors/AppError'),
   /**
    * 模型配置
    * @property {string} provider - 模型提供商 (minimax/openai/anthropic等)
@@ -233,7 +234,7 @@ function validateConfig() {
   if (errors.length > 0) {
     const errorMsg = errors.join('\n');
     console.error(`统一配置中心验证失败:\n${errorMsg}`);
-    throw new Error(`配置验证失败:\n${errorMsg}`);
+    throw this.AppError.validationError('config', `配置验证失败:\n${errorMsg}`);
   }
 
   return true;

@@ -14,6 +14,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('./errors/AppError');
 
 // 熔断器状态
 const CircuitState = {
@@ -66,7 +67,7 @@ class CircuitBreaker extends EventEmitter {
       if (fallback) {
         return fallback();
       }
-      throw new Error(`CircuitBreaker [${this.name}] is ${this.state}`);
+      throw AppError.internalError(`CircuitBreaker [${this.name}] is ${this.state}`);
     }
 
     // 执行操作

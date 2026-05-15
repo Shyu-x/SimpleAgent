@@ -16,6 +16,7 @@
  */
 
 const { IngestionNode } = require('../IngestionNode');
+const AppError = require('../../common/errors/AppError');
 
 // 标签权重配置（用于正文提取）
 const TAG_WEIGHTS = {
@@ -148,13 +149,13 @@ class UrlFetchNode extends IngestionNode {
     try {
       // 支持相对路径
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        throw new Error('URL必须以 http:// 或 https:// 开头');
+        throw AppError.validationError('url', 'URL必须以 http:// 或 https:// 开头');
       }
       const urlObj = new URL(url);
 
       // 只支持HTTP/HTTPS协议
       if (!['http:', 'https:'].includes(urlObj.protocol)) {
-        throw new Error('只支持 HTTP/HTTPS 协议');
+        throw AppError.validationError('protocol', '只支持 HTTP/HTTPS 协议');
       }
 
       return urlObj;
@@ -188,26 +189,26 @@ class UrlFetchNode extends IngestionNode {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`HTTP错误: ${response.status} ${response.statusText}`);
+        throw AppError.internalError(`HTTP错误: ${response.status} ${response.statusText}`);
       }
 
       // 检查内容长度
       const contentLength = parseInt(response.headers.get('content-length') || '0', 10);
       if (contentLength > this.options.maxContentLength) {
-        throw new Error(`内容过长: ${contentLength} bytes`);
+        throw AppError.validationError('content length', `内容过长: ${contentLength} bytes`);
       }
 
       const html = await response.text();
 
       if (html.length > this.options.maxContentLength) {
-        throw new Error(`内容过长: ${html.length} characters`);
+        throw AppError.validationError('html length', `内容过长: ${html.length} characters`);
       }
 
       return html;
     } catch (error) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
-        throw new Error(`请求超时: ${this.options.timeout}ms`);
+        throw AppError.internalError(`请求超时: ${this.options.timeout}ms`);
       }
       throw error;
     }
@@ -615,10 +616,10 @@ class UrlFetchNode extends IngestionNode {
    */
   async _postValidate(result, context) {
     if (!result.rawContent || result.rawContent.length === 0) {
-      throw new Error('抓取后内容为空');
+      throw AppError.ragError('RETRIEVAL_FAILED', '抓取后内容为空');
     }
     if (result.rawContent.length < 100) {
-      throw new Error('抓取后内容过短，可能抓取失败');
+      throw AppError.ragError('RETRIEVAL_FAILED', '抓取后内容过短，可能抓取失败');
     }
     if (result.fetchMetadata && !result.fetchMetadata.title) {
       this.logger.warn(`[${this.name}] 无法提取标题`);

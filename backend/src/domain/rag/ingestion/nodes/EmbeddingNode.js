@@ -15,6 +15,7 @@
  */
 
 const { IngestionNode } = require('../IngestionNode');
+const AppError = require('../../common/errors/AppError');
 
 class EmbeddingNode extends IngestionNode {
   constructor(options = {}) {
@@ -40,7 +41,7 @@ class EmbeddingNode extends IngestionNode {
     const { chunks } = context;
 
     if (!chunks || chunks.length === 0) {
-      throw new Error('没有可向量化的chunks');
+      throw AppError.ragError('EMBEDDING_FAILED', '没有可向量化的chunks');
     }
 
     this.logger.info(`[EmbeddingNode] 开始向量化 ${chunks.length} 个chunks`);
@@ -162,7 +163,7 @@ class EmbeddingNode extends IngestionNode {
         });
 
         if (!response.ok) {
-          throw new Error(`Embedding API错误: ${response.status}`);
+          throw AppError.ragError('EMBEDDING_FAILED', `Embedding API错误: ${response.status}`);
         }
 
         const data = await response.json();
@@ -279,10 +280,10 @@ class EmbeddingNode extends IngestionNode {
    */
   async _postValidate(result, context) {
     if (result.embeddingCount === 0) {
-      throw new Error('没有成功生成任何embedding');
+      throw AppError.ragError('EMBEDDING_FAILED', '没有成功生成任何embedding');
     }
     if (result.embeddingDimension === 0) {
-      throw new Error('Embedding维度无效');
+      throw AppError.ragError('EMBEDDING_FAILED', 'Embedding维度无效');
     }
     // 警告：部分失败
     if (result.failedChunks && result.failedChunks.length > 0) {

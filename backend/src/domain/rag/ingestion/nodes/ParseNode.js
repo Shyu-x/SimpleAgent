@@ -14,6 +14,7 @@
  */
 
 const { IngestionNode } = require('../IngestionNode');
+const AppError = require('../../common/errors/AppError');
 
 class ParseNode extends IngestionNode {
   constructor(options = {}) {
@@ -225,10 +226,10 @@ class ParseNode extends IngestionNode {
    */
   async _postValidate(result, context) {
     if (!result.parsedContent || result.parsedContent.length === 0) {
-      throw new Error('解析后内容为空');
+      throw AppError.ragError('PARSE_FAILED', '解析后内容为空');
     }
     if (result.wordCount === 0) {
-      throw new Error('无法计算词数，可能内容无效');
+      throw AppError.ragError('PARSE_FAILED', '无法计算词数，可能内容无效');
     }
   }
 }

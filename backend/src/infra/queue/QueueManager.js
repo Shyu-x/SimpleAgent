@@ -11,6 +11,7 @@
  */
 
 const { EventEmitter } = require('events');
+const AppError = require('../../common/errors/AppError');
 
 // 优先级常量
 const PRIORITY = {
@@ -114,7 +115,7 @@ class QueueManager extends EventEmitter {
     // 检查队列满
     if (this.size() >= this.maxSize) {
       this.emit('queueFull', { request, size: this.size() });
-      throw new Error(`队列已满 (${this.maxSize})`);
+      throw AppError.internalError(`队列已满 (${this.maxSize})`);
     }
 
     const item = new QueueItem(request, {
@@ -243,11 +244,11 @@ class QueueManager extends EventEmitter {
   async process(id, handler) {
     const item = this.getStatus(id);
     if (!item) {
-      throw new Error(`任务 ${id} 不存在`);
+      throw AppError.notFound(`任务 ${id}`);
     }
 
     if (item.status !== REQUEST_STATUS.PENDING) {
-      throw new Error(`任务 ${id} 状态不是 PENDING`);
+      throw AppError.validationError('status', `任务 ${id} 状态不是 PENDING`);
     }
 
     // 检查并发限制

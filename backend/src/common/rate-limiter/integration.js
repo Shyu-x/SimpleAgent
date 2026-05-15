@@ -19,6 +19,7 @@ class MemoryRateLimiter {
     this.windowMs = options.windowMs || 60000;
     this.keyPrefix = options.keyPrefix || 'ratelimit:';
     this._store = new Map();
+    this.AppError = require('../../common/errors/AppError');
   }
 
   _getKey(identifier, scope = 'global') {
@@ -118,7 +119,7 @@ function getLimiter(name, options = null) {
   if (!_limiters.has(name)) {
     const config = options || RATE_LIMIT_PRESETS[name];
     if (!config) {
-      throw new Error(`限流器 "${name}" 不存在，可用预设: ${Object.keys(RATE_LIMIT_PRESETS).join(', ')}`);
+      throw this.AppError.internalError(`限流器 "${name}" 不存在，可用预设: ${Object.keys(RATE_LIMIT_PRESETS).join(', ')}`);
     }
     _limiters.set(name, new MemoryRateLimiter(config));
   }

@@ -18,6 +18,7 @@
  */
 
 const { IngestionNode } = require('../IngestionNode');
+const AppError = require('../../common/errors/AppError');
 
 class EnhanceNode extends IngestionNode {
   constructor(options = {}) {
@@ -465,13 +466,13 @@ class EnhanceNode extends IngestionNode {
    */
   async _postValidate(result, context) {
     if (!result.enhancedContent || result.enhancedContent.length === 0) {
-      throw new Error('增强后内容为空');
+      throw AppError.ragError('PARSE_FAILED', '增强后内容为空');
     }
     if (!result.contentType) {
-      throw new Error('无法识别内容类型');
+      throw AppError.ragError('PARSE_FAILED', '无法识别内容类型');
     }
     if (!result.enhancedMetadata) {
-      throw new Error('元数据增强失败');
+      throw AppError.ragError('PARSE_FAILED', '元数据增强失败');
     }
   }
 }

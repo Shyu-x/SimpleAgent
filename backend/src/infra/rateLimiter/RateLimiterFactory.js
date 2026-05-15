@@ -77,7 +77,7 @@ class RateLimiterFactory {
       const finalConfig = config || preset;
 
       if (!finalConfig) {
-        throw new Error(`限流器 "${name}" 不存在, 可用预设: ${Object.keys(RateLimiterFactory.PRESETS).join(', ')}`);
+        throw AppError.internalError(`限流器 "${name}" 不存在, 可用预设: ${Object.keys(RateLimiterFactory.PRESETS).join(', ')}`);
       }
 
       RateLimiterFactory._instances.set(cacheKey, new QueueRateLimiter(finalConfig));
@@ -249,7 +249,7 @@ class RateLimiterFactory {
     } else if (limiterOrPreset instanceof QueueRateLimiter) {
       limiter = limiterOrPreset;
     } else {
-      throw new Error('limiterOrPreset 必须是预设名称或 QueueRateLimiter 实例');
+      throw AppError.validationError('limiterOrPreset', 'limiterOrPreset 必须是预设名称或 QueueRateLimiter 实例');
     }
 
     // 默认标识符解析器

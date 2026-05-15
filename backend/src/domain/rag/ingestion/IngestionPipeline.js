@@ -192,7 +192,7 @@ class IngestionPipeline {
 
       // 并行组失败不中断主流程（可配置）
       if (failures.length > 0 && this.options.failOnParallelError) {
-        throw new Error(`并行组 ${groupName} 执行失败`);
+        throw AppError.internalError(`并行组 ${groupName} 执行失败`);
       }
     }
   }

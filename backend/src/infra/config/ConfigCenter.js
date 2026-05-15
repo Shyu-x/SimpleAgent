@@ -11,6 +11,7 @@
 const { EventEmitter } = require('events');
 const fs = require('fs').promises;
 const path = require('path');
+const AppError = require('../../common/errors/AppError');
 
 class ConfigCenter extends EventEmitter {
   constructor(options = {}) {
@@ -244,7 +245,7 @@ class ConfigCenter extends EventEmitter {
     if (rules.required) {
       for (const field of rules.required) {
         if (!(field in config)) {
-          throw new Error(`配置缺少必需字段: ${field}`);
+          throw AppError.validationError(field, `配置缺少必需字段: ${field}`);
         }
       }
     }
@@ -253,7 +254,7 @@ class ConfigCenter extends EventEmitter {
     if (rules.types) {
       for (const [field, expectedType] of Object.entries(rules.types)) {
         if (field in config && typeof config[field] !== expectedType) {
-          throw new Error(`配置字段 ${field} 类型错误，期望 ${expectedType}`);
+          throw AppError.validationError(field, `配置字段 ${field} 类型错误，期望 ${expectedType}`);
         }
       }
     }
@@ -264,10 +265,10 @@ class ConfigCenter extends EventEmitter {
         if (field in config) {
           const value = config[field];
           if (min !== undefined && value < min) {
-            throw new Error(`配置字段 ${field} 小于最小值 ${min}`);
+            throw AppError.validationError(field, `配置字段 ${field} 小于最小值 ${min}`);
           }
           if (max !== undefined && value > max) {
-            throw new Error(`配置字段 ${field} 大于最大值 ${max}`);
+            throw AppError.validationError(field, `配置字段 ${field} 大于最大值 ${max}`);
           }
         }
       }
@@ -384,7 +385,7 @@ class ConfigCenter extends EventEmitter {
   async exportToFile(configType, filePath = null) {
     const config = this.configs.get(configType);
     if (!config) {
-      throw new Error(`配置类型 ${configType} 不存在`);
+      throw AppError.validationError('configType', `配置类型 ${configType} 不存在`);
     }
 
     const outputPath = filePath || path.join(this.configDir, `${configType}.json`);

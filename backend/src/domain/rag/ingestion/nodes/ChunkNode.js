@@ -13,6 +13,7 @@
  */
 
 const { IngestionNode } = require('../IngestionNode');
+const AppError = require('../../common/errors/AppError');
 
 class ChunkNode extends IngestionNode {
   constructor(options = {}) {
@@ -369,10 +370,10 @@ class ChunkNode extends IngestionNode {
    */
   async _postValidate(result, context) {
     if (!result.chunks || result.chunks.length === 0) {
-      throw new Error('分块结果为空');
+      throw AppError.ragError('CHUNK_FAILED', '分块结果为空');
     }
     if (result.totalTokensEstimate <= 0) {
-      throw new Error('Token估算结果无效');
+      throw AppError.ragError('CHUNK_FAILED', 'Token估算结果无效');
     }
   }
 }

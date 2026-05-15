@@ -11,6 +11,7 @@
 class IngestionNode {
   constructor(name, options = {}) {
     this.name = name;
+    this.AppError = require('../../common/errors/AppError');
     this.options = {
       retryCount: 3,
       retryDelay: 1000,
@@ -88,7 +89,7 @@ class IngestionNode {
    * @returns {Promise<Object>}
    */
   async _process(context) {
-    throw new Error(`${this.name} 必须实现 _process 方法`);
+    throw this.AppError.internalError(`${this.name} 必须实现 _process 方法`);
   }
 
   /**
