@@ -24,8 +24,11 @@ const RERANK_STRATEGIES = {
   CROSS_ENCODER: 'cross_encoder_rerank',     // Cross-Encoder重排序
   BM25: 'bm25_score_boost',                  // BM25分数增强
   SEMANTIC: 'semantic_similarity',           // 语义相似度
-  DIVERSITY: 'diversity_boost'              // 多样性提升
+  DIVERSITY: 'diversity_boost'               // 多样性提升
 };
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('Reranker');
 
 /**
  * 重排序结果元数据
@@ -59,7 +62,7 @@ class BaseRerankStrategy {
    * @returns {Promise<Array>} 添加策略分数后的结果
    */
   async rerank(query, results) {
-    throw new Error('rerank() must be implemented by subclass');
+    throw AppError.internalError('rerank() must be implemented by subclass');
   }
 
   /**
@@ -143,7 +146,7 @@ class CrossEncoderRerankStrategy extends BaseRerankStrategy {
       ];
 
     } catch (error) {
-      console.warn('[CrossEncoderRerank] 重排序失败:', error.message);
+      logger.warn('CrossEncoder重排序失败', { error: error.message });
       return results;
     }
   }
@@ -178,7 +181,7 @@ ${items}
         return scores.sort((a, b) => a.index - b.index).map(s => s.relevance);
       }
     } catch {
-      console.warn('[CrossEncoderRerank] JSON解析失败');
+      logger.warn('CrossEncoder JSON解析失败');
     }
     return [];
   }
@@ -366,7 +369,7 @@ class SemanticRerankStrategy extends BaseRerankStrategy {
       });
 
     } catch (error) {
-      console.warn('[SemanticRerank] 重排序失败:', error.message);
+      logger.warn('Semantic重排序失败', { error: error.message });
       return results;
     }
   }
@@ -670,7 +673,7 @@ class Reranker {
       return topResults;
 
     } catch (error) {
-      console.error('[Reranker] 重排序异常:', error);
+      logger.error('重排序异常', { error: error.message });
       // 出错时返回原始分数排序结果
       return results
         .sort((a, b) => b.score - a.score)

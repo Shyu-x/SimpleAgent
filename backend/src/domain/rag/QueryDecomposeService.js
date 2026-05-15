@@ -20,6 +20,8 @@
 
 const { MiniMaxChatClient } = require('../../services/model');
 const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('QueryDecomposeService');
 
 /**
  * 拆分类型枚举
@@ -152,7 +154,7 @@ class QueryDecomposeService {
       };
     } catch (error) {
       this.stats.failures++;
-      console.error('[QueryDecomposeService] Decompose error:', error);
+      logger.error('Decompose error', { error: error.message });
 
       // 降级：返回原始查询作为单一子问题
       return {
@@ -194,7 +196,7 @@ class QueryDecomposeService {
 
       return quickResult;
     } catch (error) {
-      console.warn('[QueryDecomposeService] canDecompose error:', error);
+      logger.warn('canDecompose error', { error: error.message });
       return {
         shouldDecompose: false,
         reasoning: '检测过程异常，默认不拆分',
@@ -284,7 +286,7 @@ ${includeSourceAttribution ? '6. 在合适位置标注子问题来源（如"关�
         sourceAttributions,
       };
     } catch (error) {
-      console.error('[QueryDecomposeService] Merge error:', error);
+      logger.error('Merge error', { error: error.message });
 
       // 降级：简单拼接
       const simpleMerge = subQuestions
@@ -415,7 +417,7 @@ ${includeSourceAttribution ? '6. 在合适位置标注子问题来源（如"关�
         type: parsed.decompose_type || null,
       };
     } catch (error) {
-      console.warn('[QueryDecomposeService] LLM detect failed, falling back to quick detect:', error.message);
+      logger.warn('LLM detect failed, falling back to quick detect', { error: error.message });
       return this._quickDetect(query);
     }
   }
@@ -557,7 +559,7 @@ ${includeSourceAttribution ? '6. 在合适位置标注子问题来源（如"关�
       if (visited.has(sq.id)) return;
       if (visiting.has(sq.id)) {
         // 循环依赖：放在当前顺序
-        console.warn('[QueryDecomposeService] Circular dependency detected:', sq.id);
+        logger.warn('Circular dependency detected', { id: sq.id });
         return;
       }
 

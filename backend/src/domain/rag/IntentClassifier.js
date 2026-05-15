@@ -22,6 +22,7 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../../common/errors/AppError');
 
 // ==================== 常量定义 ====================
 
@@ -1051,7 +1052,7 @@ ${contextText}
       try {
         return JSON.parse(fixed);
       } catch {
-        throw new Error('JSON解析失败');
+        throw AppError.internalError('JSON解析失败');
       }
     }
   }

@@ -1,10 +1,11 @@
 /**
- * QueryRewriteService - 问题重写/补全上下文服务
+ * QueryRewriteService - 问题重写/补全上下文服务 (DI版本)
  *
  * 企业级设计：
  * - 补全上下文：利用会话历史恢复省略信息（代词、缩写等）
  * - 省略信息恢复：从上文中推断缺失的主语、宾语、时态
  * - 语义增强：对模糊查询进行语义扩展，提高检索召回率
+ * - 依赖注入：通过 DI 容器解析依赖，符合分层架构
  *
  * 使用场景：
  * - 用户说"它的缺点是什么" -> 需要从上文推断"它"指代什么
@@ -12,15 +13,18 @@
  * - 用户说"更便宜" -> 需要语义扩展为"价格更低、性价比更高"等
  *
  * @example
- * const service = new QueryRewriteService({ modelClient });
+ * // DI 容器注册
+ * container.register('modelClient', MiniMaxChatClient)
+ *   .singleton()
+ *   .inject({ apiKey: 'env:MINIMAX_API_KEY' });
+ *
+ * container.register('queryRewriteService', QueryRewriteService)
+ *   .inject({ modelClient: 'modelClient' });
+ *
+ * // 解析使用
+ * const service = container.resolve('queryRewriteService');
  * const rewritten = await service.rewrite('它的优势是什么', { messages: [...] });
- * const expanded = await service.expand('机器学习');
  */
-
-const { MiniMaxChatClient } = require('../../services/model');
-const AppError = require('../../common/errors/AppError');
-const createLogger = require('../../common/logger');
-const logger = createLogger('QueryRewriteService');
 
 /**
  * 重写类型枚举
@@ -45,28 +49,35 @@ const CONFIDENCE_THRESHOLDS = {
   LOW: 0.3,
 };
 
+/**
+ * QueryRewriteService
+ *
+ * 支持通过 DI 容器注入依赖：
+ * @param {Object} options - 依赖配置（由 DI 容器注入）
+ * @param {Object} options.modelClient - ChatModelClient 实例
+ * @param {string} options.defaultModel - 默认模型
+ * @param {boolean} options.enableContextCompletion - 启用上下文补全
+ * @param {boolean} options.enableSemanticExpansion - 启用语义扩展
+ * @param {number} options.maxHistoryMessages - 最大历史消息数
+ * @param {number} options.confidenceThreshold - 置信度阈值
+ */
 class QueryRewriteService {
   /**
-   * @param {Object} options
-   * @param {Object} options.modelClient - ChatModelClient 实例（可选）
-   * @param {string} options.defaultModel - 默认模型（默认 MiniMax-M2.7）
-   * @param {boolean} options.enableContextCompletion - 启用上下文补全（默认 true）
-   * @param {boolean} options.enableSemanticExpansion - 启用语义扩展（默认 true）
-   * @param {number} options.maxHistoryMessages - 最大历史消息数（默认 10）
-   * @param {number} options.confidenceThreshold - 置信度阈值（默认 0.5）
+   * 构造函数接受 DI 注入的依赖
+   *
+   * @param {Object} options - DI 依赖对象
+   * @param {Object} [options.modelClient] - 模型客户端（可选，用于兼容旧代码）
+   * @param {string} [options.defaultModel='MiniMax-M2.7'] - 默认模型
+   * @param {boolean} [options.enableContextCompletion=true] - 启用上下文补全
+   * @param {boolean} [options.enableSemanticExpansion=true] - 启用语义扩展
+   * @param {number} [options.maxHistoryMessages=10] - 最大历史消息数
+   * @param {number} [options.confidenceThreshold=0.5] - 置信度阈值
    */
   constructor(options = {}) {
-    // 模型客户端
-    if (options.modelClient) {
-      this.modelClient = options.modelClient;
-    } else {
-      this.modelClient = new MiniMaxChatClient({
-        apiKey: options.apiKey || process.env.MINIMAX_API_KEY,
-        baseUrl: options.baseUrl || process.env.MINIMAX_BASE_URL,
-        defaultModel: options.defaultModel || 'MiniMax-M2.7',
-      });
-    }
+    // 模型客户端 - 优先使用注入的依赖，否则兼容旧代码模式
+    this.modelClient = options.modelClient || null;
 
+    // 配置参数 - 支持注入或直接传入
     this.defaultModel = options.defaultModel || 'MiniMax-M2.7';
     this.enableContextCompletion = options.enableContextCompletion !== false;
     this.enableSemanticExpansion = options.enableSemanticExpansion !== false;
@@ -164,7 +175,7 @@ class QueryRewriteService {
       };
     } catch (error) {
       this.stats.failures++;
-      logger.error('Rewrite error', { error: error.message });
+      console.error('[QueryRewriteService] Rewrite error:', error);
 
       // 降级：返回原始查询
       return {
@@ -187,6 +198,10 @@ class QueryRewriteService {
    * @returns {Promise<Object>} { query: string, expansions: string[], confidence: number }
    */
   async expand(query, options = {}) {
+    if (!this.modelClient) {
+      throw new Error('[QueryRewriteService] modelClient not injected. Please use DI container or provide modelClient in constructor.');
+    }
+
     const maxExpansions = options.maxExpansions || 5;
 
     try {
@@ -230,7 +245,7 @@ class QueryRewriteService {
         confidence: expansions.length > 0 ? 0.8 : 0.5,
       };
     } catch (error) {
-      logger.error('Expand error', { error: error.message });
+      console.error('[QueryRewriteService] Expand error:', error);
       return {
         query,
         expansions: [],
@@ -247,6 +262,10 @@ class QueryRewriteService {
    * @returns {Promise<Object>} { query: string, filledParts: Object, confidence: number }
    */
   async complete(query, messages = []) {
+    if (!this.modelClient) {
+      throw new Error('[QueryRewriteService] modelClient not injected. Please use DI container or provide modelClient in constructor.');
+    }
+
     if (!query || query.trim() === '') {
       return { query, filledParts: {}, confidence: 1.0 };
     }
@@ -303,7 +322,7 @@ ${contextSummary}
         confidence: parsed.confidence || 0.5,
       };
     } catch (error) {
-      logger.error('Complete error', { error: error.message });
+      console.error('[QueryRewriteService] Complete error:', error);
       return { query, filledParts: {}, confidence: 0.3 };
     }
   }
@@ -458,7 +477,7 @@ ${contextSummary}
       try {
         return JSON.parse(fixed);
       } catch {
-        throw new AppError('BIZ_INVALID_INPUT', '无法解析LLM响应', { response: response.substring(0, 200) });
+        throw new Error(`[QueryRewriteService] Failed to parse JSON: ${response.substring(0, 200)}`);
       }
     }
   }
