@@ -20,6 +20,8 @@ const { breakerFactory } = require('../../common/CircuitBreaker');
 const { AppError, Errors } = require('../../common/errors');
 const { sendError } = require('../../middleware/errorHandler');
 const config = require('../../config');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+const logger = createLogger('admin-model');
 
 // 获取实际模型列表的辅助函数
 function getAvailableModelsFromAPI() {
@@ -90,7 +92,7 @@ router.get('/platform', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('获取平台模型列表失败:', error);
+    logger.error('获取平台模型列表失败:', { error: error.message, stack: error.stack });
     res.status(500).json({
       success: false,
       error: error.message || '获取模型列表失败'

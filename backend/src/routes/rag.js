@@ -28,7 +28,7 @@ const initializeRAGService = async () => {
 };
 
 // 启动时初始化
-initializeRAGService().catch(err => console.error('RAG初始化失败:', err));
+initializeRAGService().catch(err => logger.error('RAG初始化失败:', { error: err.message, stack: err.stack }));
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => { const uploadDir = './data/rag/uploads'; if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true }); cb(null, uploadDir); },
