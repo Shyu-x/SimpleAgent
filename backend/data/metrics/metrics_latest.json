@@ -1,11 +1,9 @@
 {
-  "timestamp": "2026-05-15T10:49:40.240Z",
+  "timestamp": "2026-05-15T12:59:38.724Z",
   "counters": {
     "http_requests_total": {
-      "endpoint=\"/api/chat\",method=\"POST\",status=\"400\"": 3,
-      "endpoint=\"/api/chat\",status=\"200\"": 7,
-      "endpoint=\"/api/chat\",status=\"404\"": 1,
-      "endpoint=\"/api/chat\",method=\"POST\",status=\"404\"": 1
+      "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 1,
+      "method=\"GET\",module=\"unknown\",path=\"/api/health\",status=\"200\"": 1
     }
   },
   "gauges": {
@@ -19,7 +17,7 @@
       "{}": 0
     },
     "http_requests_active": {
-      "{}": 7
+      "{}": 0
     },
     "http_requests_total": {
       "{}": 0
@@ -34,13 +32,15 @@
       "{}": 0
     },
     "model_errors_total": {
-      "{}": 0
+      "{}": 0,
+      "model=\"minimax\"": 0
     },
     "tool_calls_total": {
       "{}": 0
     },
     "tool_errors_total": {
-      "{}": 0
+      "{}": 0,
+      "tool=\"unknown\"": 0
     },
     "tool_duration_seconds": {
       "{}": 0
@@ -50,48 +50,51 @@
     },
     "queue_capacity": {
       "{}": 0
+    },
+    "circuit_breaker_state": {
+      "circuit=\"default\"": 0
     }
   },
   "histograms": {
     "http_request_duration_seconds": {
-      "endpoint=\"/api/chat\",method=\"POST\"": {
-        "count": 4,
-        "sum": 0.015,
-        "mean": 0.00375,
+      "endpoint=\"/api/health\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
         "buckets": {
-          "1": 4,
-          "5": 4,
-          "10": 4,
-          "0.005": 3,
-          "0.01": 3,
-          "0.025": 4,
-          "0.05": 4,
-          "0.1": 4,
-          "0.25": 4,
-          "0.5": 4,
-          "2.5": 4
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
         }
       },
-      "endpoint=\"/api/chat\"": {
-        "count": 8,
-        "sum": 0.018,
-        "mean": 0.00225,
+      "method=\"GET\",path=\"/api/health\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
         "buckets": {
-          "1": 8,
-          "5": 8,
-          "10": 8,
-          "0.005": 7,
-          "0.01": 7,
-          "0.025": 8,
-          "0.05": 8,
-          "0.1": 8,
-          "0.25": 8,
-          "0.5": 8,
-          "2.5": 8
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
         }
       }
     }
   },
   "summaries": {},
-  "activeRequests": 7
+  "activeRequests": 0
 }
