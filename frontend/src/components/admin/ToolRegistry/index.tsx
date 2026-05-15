@@ -14,6 +14,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchApi, fetchStream } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
+import { FallbackUI } from '@/components/FallbackUI';
 
 // ============ 类型定义 ============
 
@@ -82,7 +84,7 @@ export default function ToolRegistryPage() {
     interval: 30000,
   });
 
-  const categories = categoriesData;
+  const categories = categoriesData || [];
   const fetchCategories = refresh;
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
@@ -94,59 +96,61 @@ export default function ToolRegistryPage() {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
-      {/* 顶部标题栏 */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">工具管理</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              注册、配置、测试与监控所有 Agent 工具
-            </p>
-          </div>
-          <button
-            onClick={() => setActiveTab('register')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-          >
-            注册新工具
-          </button>
-        </div>
-      </div>
-
-      {/* 标签页导航 */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6">
-        <div className="flex gap-1">
-          {tabs.map((tab) => (
+    <ErrorBoundary moduleName="ToolRegistryPage" fallback={<FallbackUI moduleName="工具管理" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+        {/* 顶部标题栏 */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">工具管理</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                注册、配置、测试与监控所有 Agent 工具
+              </p>
+            </div>
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
+              onClick={() => setActiveTab('register')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
             >
-              <span className="mr-1.5">{tab.icon}</span>
-              {tab.label}
+              注册新工具
             </button>
-          ))}
+          </div>
+        </div>
+
+        {/* 标签页导航 */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6">
+          <div className="flex gap-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <span className="mr-1.5">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 内容区域 */}
+        <div className="flex-1 overflow-auto p-6">
+          {loading ? (
+            <LoadingSkeleton />
+          ) : (
+            <>
+              {activeTab === 'list' && <ToolList categories={categories} onRefresh={fetchCategories} />}
+              {activeTab === 'register' && <ToolRegister onSuccess={() => { setActiveTab('list'); fetchCategories(); }} />}
+              {activeTab === 'test' && <ToolTester />}
+              {activeTab === 'stats' && <ToolStatsPanel categories={categories} />}
+            </>
+          )}
         </div>
       </div>
-
-      {/* 内容区域 */}
-      <div className="flex-1 overflow-auto p-6">
-        {loading ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
-            {activeTab === 'list' && <ToolList categories={categories} onRefresh={fetchCategories} />}
-            {activeTab === 'register' && <ToolRegister onSuccess={() => { setActiveTab('list'); fetchCategories(); }} />}
-            {activeTab === 'test' && <ToolTester />}
-            {activeTab === 'stats' && <ToolStatsPanel categories={categories} />}
-          </>
-        )}
-      </div>
-    </div>
+    </ErrorBoundary>
   );
 }
 

@@ -7,7 +7,7 @@
  */
 
 const AppError = require('../common/errors/AppError');
-const { errorResponse: sendError, successResponse: sendSuccess } = require('../common/response');
+const { errorResponse, successResponse } = require('../common/response');
 
 /**
  * 整数错误码到字符串错误码的映射
@@ -380,6 +380,72 @@ function safeErrorResponse(message, requestId = null) {
   };
 }
 
+/**
+ * 统一的错误响应辅助函数
+ * 供路由层直接使用
+ */
+
+/**
+ * 统一的错误响应格式
+ * @param {Response} res - Express Response 对象
+ * @param {number} status - HTTP 状态码
+ * @param {number} code - 错误码 (1000-9999)
+ * @param {string} message - 错误消息
+ * @param {object} [details] - 额外详情
+ * @returns {Response}
+ */
+function sendError(res, status, code, message, details = null) {
+  const response = {
+    success: false,
+    data: null,
+    error: {
+      code: intToStringCode(code),
+      message,
+      ...(details && { details }),
+    },
+    timestamp: getTimestamp(),
+  };
+
+  return res.status(status).json(response);
+}
+
+/**
+ * 成功响应辅助函数
+ * @param {Response} res
+ * @param {any} data
+ * @param {string} [message]
+ * @returns {Response}
+ */
+function sendSuccess(res, data, message = null) {
+  const response = {
+    success: true,
+    data,
+    ...(message && { message }),
+    timestamp: getTimestamp(),
+  };
+
+  return res.status(200).json(response);
+}
+
+/**
+ * 从 AppError 获取响应
+ * @param {AppError} err
+ * @returns {object}
+ */
+function getErrorResponse(err) {
+  return {
+    success: false,
+    data: null,
+    error: {
+      code: intToStringCode(err.code),
+      message: err.message,
+      type: err.type,
+      ...(err.details && { details: err.details }),
+    },
+    timestamp: getTimestamp(),
+  };
+}
+
 module.exports = {
   errorHandler,
   notFoundHandler,
@@ -387,4 +453,7 @@ module.exports = {
   formatErrorLog,
   safeErrorResponse,
   generateRequestId,
+  sendError,
+  sendSuccess,
+  getErrorResponse,
 };

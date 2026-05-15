@@ -597,4 +597,44 @@ router.post('/reindex', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/admin/knowledge/bases/{id}:
+ *   delete:
+ *     tags: [knowledge]
+ *     summary: 删除知识库
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 知识库ID
+ *     responses:
+ *       200:
+ *         description: 删除成功
+ *       404:
+ *         description: 知识库不存在
+ */
+router.delete('/bases/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const kb = ragService.knowledgeBases.get(id);
+    if (!kb) {
+      return res.status(404).json({ success: false, error: '知识库不存在' });
+    }
+
+    await ragService.deleteKnowledgeBase(id);
+
+    res.json({
+      success: true,
+      data: { kbId: id, name: kb.name }
+    });
+  } catch (error) {
+    logger.error('Delete knowledge base error', { error: error.message, stack: error.stack });
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;

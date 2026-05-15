@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { searchRouter } = require('../services/searchRouter');
 const { AgentLogger } = require('../infra/logger/AgentLogger');
+const AppError = require('../common/errors/AppError');
 
 const logger = new AgentLogger('searchEnhanced');
 
@@ -36,7 +37,7 @@ router.post('/fetch', async (req, res) => {
     const response = await fetch(`https://r.jina.ai/${encodeURIComponent(url)}`, {
       headers: { 'Accept': 'application/json', 'X-Return-Format': 'markdown' }
     });
-    if (!response.ok) throw new Error('Fetch failed');
+    if (!response.ok) throw AppError.internalError('Fetch failed');
     const data = await response.json();
     ok(res, { url, content: data.content || data.data?.[0]?.content, title: data.title || data.data?.[0]?.title, query });
   } catch (error) {

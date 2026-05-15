@@ -8,7 +8,8 @@
  * @date 2026-04-01 (添加超时控制和参数验证)
  */
 
-// 默认超时配置（毫秒）
+const createLogger = require('../../common/logger');
+const logger = createLogger('ToolRegistry');
 const DEFAULT_TIMEOUT = 30000; // 30秒
 const TOOL_TIMEOUTS = {
   web_search: 15000,
@@ -128,7 +129,7 @@ class ToolRegistry {
    */
   register(tool) {
     if (!tool.name || !tool.execute) {
-      throw new Error('Tool must have name and execute function');
+      throw AppError.validationError('name and execute', 'Tool must have name and execute function');
     }
 
     this.tools.set(tool.name, {
@@ -611,7 +612,7 @@ class ToolRegistry {
           };
         }
       } catch (error) {
-        console.warn('LLM tool selection failed:', error.message);
+        logger.warn(`LLM tool selection failed: ${error.message}`);
       }
     }
 
@@ -644,7 +645,7 @@ class ToolRegistry {
           }];
         }
       } catch (error) {
-        console.warn('Semantic search failed:', error.message);
+        logger.warn(`Semantic search failed: ${error.message}`);
       }
     }
 

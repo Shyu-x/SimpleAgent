@@ -28,7 +28,22 @@ const { A2AService, A2A_MESSAGE_TYPES, A2A_TASK_STATUS } = require('./a2aService
 const { AgentLogger, formatConsole } = require('./AgentLogger');
 const { withRetry, withTimeout, sleep, TimeoutConfig } = require('../utils/retry');
 const SessionNoteTool = require('./tools/SessionNoteTool');
+const AppError = require('../common/errors/AppError');
 const { createTokenManager } = require('./agent/TokenManager');
+
+// 指标采集器（延迟初始化）
+let _metricsCollector = null;
+function getCollector() {
+  if (!_metricsCollector) {
+    try {
+      const { getMetricsCollector } = require('../infra/metrics');
+      _metricsCollector = getMetricsCollector();
+    } catch (e) {
+      // 指标采集器未初始化
+    }
+  }
+  return _metricsCollector;
+}
 const MiniMaxSearchTool = require('./miniMaxSearchTool');
 const DuckDuckGoSearchTool = require('./duckduckgoSearchTool');
 const GitHubTool = require('./tools/githubTool');
@@ -687,6 +702,9 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     const session = await this.persistence.createSession(task, context);
     this.sessionId = session.id;
 
+    // 记录执行开始时间（用于指标统计）
+    this._executionStartTime = Date.now();
+
     // 启动日志记录 (借鉴 MiniMax Mini-Agent)
     this.logger.startNewRun();
     // Agent log file path - operational info
@@ -887,6 +905,23 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       } catch (err) {
         console.warn('[AgentEngine] 语义记忆存储失败:', err.message);
       }
+
+      // 记录 Agent 执行指标
+      const collector = getCollector();
+      if (collector) {
+        const iterations = results.iterations || this.state.iteration;
+        const toolCallsCount = results.toolCalls ? results.toolCalls.length : 0;
+        const totalTokens = this.apiTotalTokens || 0;
+        const duration = Date.now() - (this._executionStartTime || Date.now());
+
+        collector.recordAgentExecution({
+          iterations,
+          toolCalls: toolCallsCount,
+          tokens: totalTokens,
+          duration,
+          success: results.success !== false && !results.error
+        });
+      }
     }
 
     this.state.history = [...results.toolCalls];
@@ -947,7 +982,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     }
 
     if (!restoredState) {
-      throw new Error(`Failed to restore session: ${sessionId}`);
+      throw AppError.internalError(`Failed to restore session: ${sessionId}`);
     }
 
     this.sessionId = sessionId;
@@ -1645,7 +1680,7 @@ ${contextText}
    */
   async _callLLM(prompt) {
     if (!this.modelRouter) {
-      throw new Error('No model router available');
+      throw AppError.internalError('No model router available');
     }
 
     const messages = [
@@ -1667,7 +1702,7 @@ ${contextText}
       return result.content;
     }
 
-    throw new Error('Invalid LLM response');
+    throw AppError.internalError('Invalid LLM response');
   }
 
   /**
@@ -1675,7 +1710,7 @@ ${contextText}
    */
   _parseJSONResponse(response) {
     if (!response || typeof response !== 'string') {
-      throw new Error('Invalid response type: expected string');
+      throw AppError.internalError('Invalid response type: expected string');
     }
 
     try {
@@ -1687,7 +1722,7 @@ ${contextText}
 
       // 验证解析结果
       if (!parsed || typeof parsed !== 'object') {
-        throw new Error('Invalid JSON structure: expected object');
+        throw AppError.internalError('Invalid JSON structure: expected object');
       }
 
       return parsed;
@@ -1870,7 +1905,7 @@ ${context.customPrompt || ''}
    */
   async delegateToAgent(targetAgentId, task, options = {}) {
     if (!this.a2aService) {
-      throw new Error('A2A service not available. Call registerToA2A first.');
+      throw AppError.internalError('A2A service not available. Call registerToA2A first.');
     }
 
     const { priority = 0, timeout = 5 * 60 * 1000 } = options;

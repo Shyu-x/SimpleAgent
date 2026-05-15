@@ -10,7 +10,8 @@
  * - 查看工具调用统计
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useAdminPolling, type CollectionInfo } from '@/hooks/useAdminSSE';
 
 interface Tool {
   name: string;
@@ -22,26 +23,21 @@ interface Tool {
   config: Record<string, unknown>;
 }
 
+interface ToolsResponse {
+  tools: Tool[];
+}
+
 export default function ToolManagement() {
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
 
-  useEffect(() => {
-    fetchTools();
-  }, []);
+  // 使用通用 Admin Polling Hook
+  const { data: toolsData, loading, error, refresh } = useAdminPolling<ToolsResponse>({
+    endpoint: '/api/admin/tools',
+    parser: (res) => res || { tools: [] },
+    interval: 30000,
+  });
 
-  const fetchTools = async () => {
-    try {
-      const res = await fetch('/api/admin/tools');
-      const data = await res.json();
-      setTools(data.tools || []);
-    } catch (err) {
-      console.error('Failed to fetch tools:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const tools = toolsData?.tools || [];
 
   const toggleTool = async (toolName: string, enabled: boolean) => {
     try {
@@ -50,7 +46,7 @@ export default function ToolManagement() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled })
       });
-      fetchTools();
+      refresh();
     } catch (err) {
       console.error('Failed to toggle tool:', err);
     }
@@ -64,7 +60,15 @@ export default function ToolManagement() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">工具管理</h1>
-        <span className="text-gray-500">{tools.length} 个工具</span>
+        <div className="flex items-center gap-4">
+          <span className="text-gray-500">{tools.length} 个工具</span>
+          <button
+            onClick={() => refresh()}
+            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
+          >
+            刷新
+          </button>
+        </div>
       </div>
 
       <div className="bg-white border rounded-lg overflow-hidden">

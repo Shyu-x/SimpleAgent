@@ -14,6 +14,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchApi } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
+import { FallbackUI } from '@/components/FallbackUI';
 
 // ============ 类型定义 ============
 
@@ -72,72 +74,74 @@ export default function KnowledgeBasePage() {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
-      {/* 顶部标题栏 */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">知识库管理</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              管理文档、索引配置与检索测试
-            </p>
-          </div>
-          {stats && (
-            <div className="flex gap-4 text-sm">
-              <div className="text-center px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded">
-                <div className="text-lg font-bold text-blue-600">{stats.totalDocuments}</div>
-                <div className="text-gray-500">文档</div>
-              </div>
-              <div className="text-center px-3 py-1 bg-green-50 dark:bg-green-900/30 rounded">
-                <div className="text-lg font-bold text-green-600">{stats.totalChunks}</div>
-                <div className="text-gray-500">分块</div>
-              </div>
-              <div className="text-center px-3 py-1 bg-purple-50 dark:bg-purple-900/30 rounded">
-                <div className="text-lg font-bold text-purple-600">
-                  {formatBytes(stats.indexSize)}
-                </div>
-                <div className="text-gray-500">索引大小</div>
-              </div>
+    <ErrorBoundary moduleName="KnowledgeBasePage" fallback={<FallbackUI moduleName="知识库管理" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+        {/* 顶部标题栏 */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">知识库管理</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                管理文档、索引配置与检索测试
+              </p>
             </div>
+            {stats && (
+              <div className="flex gap-4 text-sm">
+                <div className="text-center px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded">
+                  <div className="text-lg font-bold text-blue-600">{stats.totalDocuments}</div>
+                  <div className="text-gray-500">文档</div>
+                </div>
+                <div className="text-center px-3 py-1 bg-green-50 dark:bg-green-900/30 rounded">
+                  <div className="text-lg font-bold text-green-600">{stats.totalChunks}</div>
+                  <div className="text-gray-500">分块</div>
+                </div>
+                <div className="text-center px-3 py-1 bg-purple-50 dark:bg-purple-900/30 rounded">
+                  <div className="text-lg font-bold text-purple-600">
+                    {formatBytes(stats.indexSize)}
+                  </div>
+                  <div className="text-gray-500">索引大小</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 标签页导航 */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6">
+          <div className="flex gap-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                }`}
+              >
+                <span className="mr-1.5">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 内容区域 */}
+        <div className="flex-1 overflow-auto p-6">
+          {loading ? (
+            <LoadingSkeleton />
+          ) : (
+            <>
+              {activeTab === 'documents' && <DocumentList onRefresh={fetchStats} />}
+              {activeTab === 'upload' && <DocumentUpload onSuccess={fetchStats} />}
+              {activeTab === 'index' && <IndexManager stats={stats} onRefresh={fetchStats} />}
+              {activeTab === 'search' && <SearchPanel />}
+              {activeTab === 'stats' && <StatsPanel stats={stats} />}
+            </>
           )}
         </div>
       </div>
-
-      {/* 标签页导航 */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6">
-        <div className="flex gap-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-            >
-              <span className="mr-1.5">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 内容区域 */}
-      <div className="flex-1 overflow-auto p-6">
-        {loading ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
-            {activeTab === 'documents' && <DocumentList onRefresh={fetchStats} />}
-            {activeTab === 'upload' && <DocumentUpload onSuccess={fetchStats} />}
-            {activeTab === 'index' && <IndexManager stats={stats} onRefresh={fetchStats} />}
-            {activeTab === 'search' && <SearchPanel />}
-            {activeTab === 'stats' && <StatsPanel stats={stats} />}
-          </>
-        )}
-      </div>
-    </div>
+    </ErrorBoundary>
   );
 }
 
@@ -175,14 +179,22 @@ function DocumentList({ onRefresh }: { onRefresh: () => void }) {
     }
   };
 
-  const deleteDocument = async (id: string, kbId: string) => {
+  const deleteDocument = async (id: string, kbId?: string) => {
     if (!confirm('确定要删除该文档吗？')) return;
+    if (!kbId) {
+      console.error('kbId is required for deletion');
+      return;
+    }
     await fetchApi(`/api/admin/knowledge/docs/${id}?kbId=${encodeURIComponent(kbId)}`, { method: 'DELETE' });
     fetchDocuments();
     onRefresh();
   };
 
-  const reindexDocument = async (kbId: string) => {
+  const reindexDocument = async (kbId?: string) => {
+    if (!kbId) {
+      console.error('kbId is required for reindex');
+      return;
+    }
     await fetchApi('/api/admin/knowledge/reindex', {
       method: 'POST',
       body: JSON.stringify({ kbId })
@@ -256,7 +268,7 @@ function DocumentList({ onRefresh }: { onRefresh: () => void }) {
                         <span className="font-medium text-gray-900 dark:text-white">{doc.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatBytes(doc.size)}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{formatBytes(doc.size ?? 0)}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-400">{doc.chunks}</td>
                     <td className="px-4 py-3">
                       <StatusBadge status={doc.status} />
@@ -810,8 +822,8 @@ function LoadingSkeleton() {
 
 // ============ 工具函数 ============
 
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+function formatBytes(bytes?: number): string {
+  if (!bytes || bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));

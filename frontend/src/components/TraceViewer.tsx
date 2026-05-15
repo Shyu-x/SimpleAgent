@@ -8,11 +8,25 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Clock, AlertCircle, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
+// Trace 数据接口
+interface Trace {
+  traceId: string;
+  operationName: string;
+  status: 'ok' | 'error' | 'started';
+  duration?: number;
+  tags?: Record<string, unknown>;
+}
+
 export default function TraceViewer() {
-  const [traces, setTraces] = useState([]);
-  const [selectedTrace, setSelectedTrace] = useState(null);
+  const [traces] = useState<Trace[]>([]); // Reserved for future trace list API
+  const [selectedTrace, setSelectedTrace] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<{
+    total?: number;
+    completed?: number;
+    avgDuration?: string;
+    errorRate?: number;
+  } | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
 
   // 获取追踪数据
@@ -20,9 +34,17 @@ export default function TraceViewer() {
     setLoading(true);
     try {
       const response = await fetch('/api/admin/traces/stats');
-      const data = await response.json();
-      if (data.success) {
-        setStats(data);
+      const json = await response.json();
+      if (json.success && json.data) {
+        const overview = json.data.overview || {};
+        const performance = json.data.performance || {};
+        // 映射后端数据到前端期望的格式
+        setStats({
+          total: overview.totalTraces || 0,
+          completed: overview.totalTraces ? overview.totalTraces - (overview.errorCount || 0) : 0,
+          avgDuration: performance.avgDuration || '0ms',
+          errorRate: parseFloat((overview.errorRate || '0%').replace('%', '')) / 100,
+        });
       }
     } catch (error) {
       console.error('Failed to fetch traces:', error);

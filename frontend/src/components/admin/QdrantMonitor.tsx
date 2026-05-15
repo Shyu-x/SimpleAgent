@@ -13,6 +13,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
 import { SafeAdminWrapper } from './SafeAdminWrapper';
+import { useAdminPolling, type QdrantStatus, type CollectionInfo } from '@/hooks/useAdminSSE';
 import {
   Database,
   Wifi,
@@ -24,21 +25,6 @@ import {
   ChevronUp,
   Layers,
 } from 'lucide-react';
-
-interface QdrantStatus {
-  success: boolean;
-  healthy: boolean;
-  status: string;
-  collection: string;
-}
-
-interface CollectionInfo {
-  name: string;
-  vectorsCount: number;
-  pointsCount: number;
-  status: string;
-  indexed: boolean;
-}
 
 interface QdrantStats {
   rowCount: number;
@@ -59,87 +45,67 @@ const defaultStats: SearchStats = {
 };
 
 export default function QdrantMonitor() {
-  const [status, setStatus] = useState<QdrantStatus | null>(null);
   const [collections, setCollections] = useState<CollectionInfo[]>([]);
   const [stats, setStats] = useState<QdrantStats | null>(null);
   const [searchStats, setSearchStats] = useState<SearchStats>(defaultStats);
   const [degradeCount, setDegradeCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedCollections, setExpandedCollections] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    fetchQdrantData();
-    const interval = setInterval(fetchQdrantData, 15000);
-    return () => clearInterval(interval);
-  }, []);
+  // 使用通用 Admin SSE Hook 获取 Qdrant 状态和集合
+  const { data: qdrantStatus, loading, error, refresh: refreshStatus } = useAdminPolling<QdrantStatus>({
+    endpoint: '/api/qdrant/status',
+    parser: (res) => res || { success: false, healthy: false, status: 'unknown', collection: 'chat_documents' },
+    interval: 15000,
+  });
 
+  // 单独获取集合列表
+  const { data: collectionsData, refresh: refreshCollections } = useAdminPolling<{ collections: string[] }>({
+    endpoint: '/api/qdrant/collections',
+    parser: (res) => res || { collections: [] },
+    interval: 30000,
+  });
+
+  // 当集合列表更新时，获取每个集合的详细信息
+  useEffect(() => {
+    if (collectionsData?.collections) {
+      Promise.all(
+        collectionsData.collections.map(async (name: string) => {
+          try {
+            const infoRes = await fetchApi<{
+              success: boolean;
+              info: { vectors_count?: number; points_count?: number; status?: string; indexed?: boolean };
+            }>(`/api/qdrant/collections/${name}`);
+            return {
+              name,
+              vectorsCount: infoRes.data?.info?.vectors_count ?? 0,
+              pointsCount: infoRes.data?.info?.points_count ?? 0,
+              status: infoRes.data?.info?.status ?? 'unknown',
+              indexed: infoRes.data?.info?.indexed ?? false,
+            } as CollectionInfo;
+          } catch {
+            return {
+              name,
+              vectorsCount: 0,
+              pointsCount: 0,
+              status: 'error',
+              indexed: false,
+            } as CollectionInfo;
+          }
+        })
+      ).then(setCollections).catch(() => {
+        setCollections([]);
+      });
+    }
+  }, [collectionsData]);
+
+  // 手动刷新
   const fetchQdrantData = async () => {
     try {
-      // 获取状态
-      const [statusRes, collectionsRes] = await Promise.all([
-        fetchApi<{ success: boolean; healthy: boolean; status: string; collection: string }>('/api/qdrant/status'),
-        fetchApi<{ success: boolean; collections: string[] }>('/api/qdrant/collections'),
-      ]);
-
-      if (statusRes.error) throw new Error(statusRes.error.message);
-
-      setStatus({
-        success: statusRes.data?.success ?? false,
-        healthy: statusRes.data?.healthy ?? false,
-        status: statusRes.data?.status ?? 'unknown',
-        collection: statusRes.data?.collection ?? 'chat_documents',
-      });
-
-      // 获取集合列表
-      if (collectionsRes.data?.collections) {
-        const collectionInfos = await Promise.all(
-          collectionsRes.data.collections.map(async (name) => {
-            try {
-              const infoRes = await fetchApi<{
-                success: boolean;
-                info: { vectors_count?: number; points_count?: number; status?: string; indexed?: boolean };
-              }>(`/api/qdrant/collections/${name}`);
-              return {
-                name,
-                vectorsCount: infoRes.data?.info?.vectors_count ?? 0,
-                pointsCount: infoRes.data?.info?.points_count ?? 0,
-                status: infoRes.data?.info?.status ?? 'unknown',
-                indexed: infoRes.data?.info?.indexed ?? false,
-              } as CollectionInfo;
-            } catch {
-              return {
-                name,
-                vectorsCount: 0,
-                pointsCount: 0,
-                status: 'error',
-                indexed: false,
-              } as CollectionInfo;
-            }
-          })
-        );
-        setCollections(collectionInfos);
-
-        // 获取主要集合的统计
-        if (collectionInfos.length > 0) {
-          const statsRes = await fetchApi<QdrantStats>(`/api/qdrant/stats/${collectionInfos[0].name}`);
-          if (statsRes.data) {
-            setStats({
-              rowCount: statsRes.data.rowCount ?? 0,
-              collectionName: statsRes.data.collectionName ?? collectionInfos[0].name,
-              dimension: statsRes.data.dimension ?? 1024,
-            });
-          }
-        }
-      }
-
-      setError(null);
+      await refreshStatus();
+      await refreshCollections();
+      setDegradeCount(0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      // 模拟降级次数（实际应该从后端获取）
       setDegradeCount((prev) => prev + 1);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -183,7 +149,7 @@ export default function QdrantMonitor() {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
           <AlertTriangle size={16} />
-          <span>{error}</span>
+          <span>{String(error)}</span>
         </div>
       )}
 
@@ -191,9 +157,9 @@ export default function QdrantMonitor() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatusCard
           title="连接状态"
-          value={status?.healthy ? '正常' : '异常'}
-          icon={status?.healthy ? <Wifi size={18} className="text-green-600" /> : <WifiOff size={18} className="text-red-600" />}
-          color={status?.healthy ? 'green' : 'red'}
+          value={qdrantStatus?.healthy ? '正常' : '异常'}
+          icon={qdrantStatus?.healthy ? <Wifi size={18} className="text-green-600" /> : <WifiOff size={18} className="text-red-600" />}
+          color={qdrantStatus?.healthy ? 'green' : 'red'}
         />
         <StatusCard
           title="集合数量"

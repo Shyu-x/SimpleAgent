@@ -114,18 +114,18 @@ const ExecutionStepItem: React.FC<{
         {/* 元数据展示 */}
         {item.metadata && Object.keys(item.metadata).length > 0 && (
           <div className="mt-2 text-sm text-gray-600">
-            {item.metadata.intent && (
-              <div>意图: <span className="font-medium">{String(item.metadata.intent)}</span></div>
-            )}
-            {item.metadata.tool && (
-              <div>工具: <span className="font-medium">{String(item.metadata.tool)}</span></div>
-            )}
-            {item.metadata.model && (
-              <div>模型: <span className="font-medium">{String(item.metadata.model)}</span></div>
-            )}
-            {item.metadata.error && (
-              <div className="text-red-600">错误: {String(item.metadata.error)}</div>
-            )}
+            {item.metadata.intent ? (
+              <div>意图: <span className="font-medium">{String(item.metadata.intent as string)}</span></div>
+            ) : null}
+            {item.metadata.tool ? (
+              <div>工具: <span className="font-medium">{String(item.metadata.tool as string)}</span></div>
+            ) : null}
+            {item.metadata.model ? (
+              <div>模型: <span className="font-medium">{String(item.metadata.model as string)}</span></div>
+            ) : null}
+            {item.metadata.error ? (
+              <div className="text-red-600">错误: {String(item.metadata.error as string)}</div>
+            ) : null}
           </div>
         )}
       </div>

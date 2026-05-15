@@ -25,6 +25,8 @@ import type {
   IntentNodeUpdateRequest
 } from '@/types/intent';
 import { INTENT_LEVEL_COLORS } from '@/types/intent';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
+import { FallbackUI } from '@/components/FallbackUI';
 
 // 层级名称常量
 const LEVEL_NAMES: Record<IntentLevel, string> = {
@@ -270,7 +272,8 @@ export default function IntentTreeEditorPage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+    <ErrorBoundary moduleName="IntentTreeEditor" fallback={<FallbackUI moduleName="意图树编辑器" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
       {/* 顶部标题栏 */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
@@ -442,6 +445,7 @@ export default function IntentTreeEditorPage() {
         />
       )}
     </div>
+    </ErrorBoundary>
   );
 }
 

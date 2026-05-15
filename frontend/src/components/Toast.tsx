@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef, useMemo, memo } from 'react';
 import { Check, X, Info, AlertTriangle, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -237,4 +237,4 @@ export function useToast() {
 }
 
 // 导入 memo
-import { memo } from 'react';
+// (memo is now imported at the top)

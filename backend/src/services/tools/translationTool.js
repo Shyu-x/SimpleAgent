@@ -3,6 +3,7 @@
  * 支持多种语言之间的翻译
  */
 
+const AppError = require('../../common/errors/AppError');
 class TranslationTool {
   constructor(options = {}) {
     this.name = 'translation';
@@ -68,7 +69,7 @@ class TranslationTool {
       });
 
       if (!response.ok) {
-        throw new Error(`Translation API error: ${response.status}`);
+        throw AppError.internalError(`Translation API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -88,7 +89,7 @@ class TranslationTool {
           signal: AbortSignal.timeout(this.timeout)
         });
 
-        if (!response.ok) throw new Error('MyMemory API error');
+        if (!response.ok) throw AppError.internalError('MyMemory API error');
 
         const data = await response.json();
 

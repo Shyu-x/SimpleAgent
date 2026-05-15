@@ -14,6 +14,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
+import { FallbackUI } from '@/components/FallbackUI';
 
 // ============ 类型定义 ============
 
@@ -151,103 +153,105 @@ export default function PromptTemplatePage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* 页面标题 */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Prompt 模板</h1>
-        <button
-          onClick={() => {
-            setSelectedTemplate(null);
-            setIsEditing(true);
-          }}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          新建模板
-        </button>
-      </div>
-
-      {/* 筛选器 */}
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-64">
-          <input
-            type="text"
-            placeholder="搜索模板..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat === 'all' ? '全部分类' : cat}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* 模板列表 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 左侧：模板列表 */}
-        <div className="lg:col-span-1 space-y-3">
-          {filteredTemplates.map((template) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              isSelected={selectedTemplate?.id === template.id}
-              onSelect={() => {
-                setSelectedTemplate(template);
-                setIsEditing(false);
-                setShowVersionHistory(false);
-              }}
-            />
-          ))}
-          {filteredTemplates.length === 0 && (
-            <div className="text-center py-8 text-gray-400">
-              {searchQuery || categoryFilter !== 'all'
-                ? '没有找到匹配的模板'
-                : '暂无模板，点击新建模板开始'}
-            </div>
-          )}
+    <ErrorBoundary moduleName="PromptTemplatePage" fallback={<FallbackUI moduleName="Prompt模板" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <div className="p-6 space-y-6">
+        {/* 页面标题 */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Prompt 模板</h1>
+          <button
+            onClick={() => {
+              setSelectedTemplate(null);
+              setIsEditing(true);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            新建模板
+          </button>
         </div>
 
-        {/* 右侧：详情/编辑面板 */}
-        <div className="lg:col-span-2 bg-white border rounded-lg">
-          {isEditing ? (
-            <TemplateEditor
-              template={selectedTemplate}
-              onSave={(id, data) => selectedTemplate ? updateTemplate(selectedTemplate.id, data) : createTemplate(data)}
-              onCancel={() => {
-                setIsEditing(false);
-                if (!selectedTemplate) setSelectedTemplate(null);
-              }}
+        {/* 筛选器 */}
+        <div className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-64">
+            <input
+              type="text"
+              placeholder="搜索模板..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          ) : selectedTemplate ? (
-            showVersionHistory ? (
-              <VersionHistoryPanel
-                templateId={selectedTemplate.id}
-                onBack={() => setShowVersionHistory(false)}
+          </div>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat === 'all' ? '全部分类' : cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 模板列表 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左侧：模板列表 */}
+          <div className="lg:col-span-1 space-y-3">
+            {filteredTemplates.map((template) => (
+              <TemplateCard
+                key={template.id}
+                template={template}
+                isSelected={selectedTemplate?.id === template.id}
+                onSelect={() => {
+                  setSelectedTemplate(template);
+                  setIsEditing(false);
+                  setShowVersionHistory(false);
+                }}
               />
-            ) : (
-              <TemplateDetail
+            ))}
+            {filteredTemplates.length === 0 && (
+              <div className="text-center py-8 text-gray-400">
+                {searchQuery || categoryFilter !== 'all'
+                  ? '没有找到匹配的模板'
+                  : '暂无模板，点击新建模板开始'}
+              </div>
+            )}
+          </div>
+
+          {/* 右侧：详情/编辑面板 */}
+          <div className="lg:col-span-2 bg-white border rounded-lg">
+            {isEditing ? (
+              <TemplateEditor
                 template={selectedTemplate}
-                onEdit={() => setIsEditing(true)}
-                onDelete={() => deleteTemplate(selectedTemplate.id)}
-                onShowHistory={() => setShowVersionHistory(true)}
+                onSave={(id, data) => selectedTemplate ? updateTemplate(selectedTemplate.id, data) : createTemplate(data)}
+                onCancel={() => {
+                  setIsEditing(false);
+                  if (!selectedTemplate) setSelectedTemplate(null);
+                }}
               />
-            )
-          ) : (
-            <div className="flex items-center justify-center h-96 text-gray-400">
-              选择一个模板查看详情
-            </div>
-          )}
+            ) : selectedTemplate ? (
+              showVersionHistory ? (
+                <VersionHistoryPanel
+                  templateId={selectedTemplate.id}
+                  onBack={() => setShowVersionHistory(false)}
+                />
+              ) : (
+                <TemplateDetail
+                  template={selectedTemplate}
+                  onEdit={() => setIsEditing(true)}
+                  onDelete={() => deleteTemplate(selectedTemplate.id)}
+                  onShowHistory={() => setShowVersionHistory(true)}
+                />
+              )
+            ) : (
+              <div className="flex items-center justify-center h-96 text-gray-400">
+                选择一个模板查看详情
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }
 

@@ -7,6 +7,8 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { TokenManager, createTokenManager } = require('./TokenManager');
+const createLogger = require('../../common/logger');
+const logger = createLogger('MemoryWindowManager');
 
 class MemoryWindowManager {
   /**
@@ -40,7 +42,7 @@ class MemoryWindowManager {
 
     this.initialized = false;
 
-    console.log(`[MemoryWindowManager] 初始化完成，模型: ${this.model}, Token预算: ${this.maxTokens}`);
+    logger.info(`初始化完成，模型: ${this.model}, Token预算: ${this.maxTokens}`);
   }
 
   /**
@@ -63,9 +65,9 @@ class MemoryWindowManager {
       } catch {}
 
       this.initialized = true;
-      console.log('[MemoryWindowManager] 初始化完成，窗口大小:', this.windowSize, 'Token预算:', this.maxTokens);
+      logger.info(`初始化完成，窗口大小: ${this.windowSize}, Token预算: ${this.maxTokens}`);
     } catch (error) {
-      console.error('[MemoryWindowManager] 初始化失败:', error);
+      logger.error(`初始化失败: ${error.message}`);
     }
   }
 
@@ -223,7 +225,7 @@ class MemoryWindowManager {
     this.summaries.set(sessionId, summaryMsg);
     await this._persistSummaries();
 
-    console.log(`[MemoryWindowManager] 会话${sessionId}摘要完成，原始${toSummarize.length}条消息，摘要Token:${this._estimateTokens(summaryMsg.content)}`);
+    logger.info(`会话${sessionId}摘要完成，原始${toSummarize.length}条消息，摘要Token: ${this._estimateTokens(summaryMsg.content)}`);
 
     return {
       summarized: true,
@@ -296,7 +298,7 @@ class MemoryWindowManager {
       const obj = Object.fromEntries(this.summaries);
       await fs.writeFile(summaryPath, JSON.stringify(obj, null, 2));
     } catch (error) {
-      console.error('[MemoryWindowManager] 摘要持久化失败:', error);
+      logger.error(`摘要持久化失败: ${error.message}`);
     }
   }
 

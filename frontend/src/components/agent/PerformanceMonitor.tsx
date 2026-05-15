@@ -32,33 +32,33 @@ import { API_ENDPOINTS } from '@/lib/apiConfig';
 // 性能指标
 export interface PerformanceMetrics {
   avgResponseTime: number;
-  minResponseTime: number;
-  maxResponseTime: number;
-  p95ResponseTime: number;
-  p99ResponseTime: number;
+  minResponseTime?: number;
+  maxResponseTime?: number;
+  p95ResponseTime?: number;
+  p99ResponseTime?: number;
   requestsPerMinute: number;
-  tokensPerMinute: number;
+  tokensPerMinute?: number;
   successRate: number;
   errorRate: number;
-  cpuUsage: number;
-  memoryUsage: number;
-  avgIterations: number;
-  avgToolCalls: number;
-  totalCost: number;
-  costPerRequest: number;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  avgIterations?: number;
+  avgToolCalls?: number;
+  totalCost?: number;
+  costPerRequest?: number;
 }
 
 // Agent 执行指标
 export interface AgentExecutionMetrics {
-  currentIteration: number;
-  maxIterations: number;
+  currentIteration?: number;
+  maxIterations?: number;
   toolCallCount: number;
-  totalTokens: number;
-  inputTokens: number;
-  outputTokens: number;
-  estimatedMemoryMB: number;
+  totalTokens?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  estimatedMemoryMB?: number;
   executionDuration: number;
-  thinkingSteps: number;
+  thinkingSteps?: number;
 }
 
 // 告警
@@ -495,20 +495,21 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     }
 
     // Token
-    if (agent.totalTokens > ALERT_THRESHOLDS.tokenCritical) {
+    const totalTokens = agent.totalTokens ?? 0;
+    if (totalTokens > ALERT_THRESHOLDS.tokenCritical) {
       addAlert({
         type: 'token', level: 'critical',
         title: 'Token 消耗过高',
-        message: `单次执行消耗 ${agent.totalTokens.toLocaleString()} tokens，建议优化提示词或减少上下文`,
-        value: agent.totalTokens,
+        message: `单次执行消耗 ${totalTokens.toLocaleString()} tokens，建议优化提示词或减少上下文`,
+        value: totalTokens,
         threshold: ALERT_THRESHOLDS.tokenCritical,
       });
-    } else if (agent.totalTokens > ALERT_THRESHOLDS.tokenWarning) {
+    } else if (totalTokens > ALERT_THRESHOLDS.tokenWarning) {
       addAlert({
         type: 'token', level: 'warning',
         title: 'Token 消耗偏高',
-        message: `已使用 ${agent.totalTokens.toLocaleString()} tokens，注意控制上下文长度`,
-        value: agent.totalTokens,
+        message: `已使用 ${totalTokens.toLocaleString()} tokens，注意控制上下文长度`,
+        value: totalTokens,
         threshold: ALERT_THRESHOLDS.tokenWarning,
       });
     }
@@ -533,20 +534,21 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     }
 
     // 迭代次数
-    if (agent.currentIteration > ALERT_THRESHOLDS.iterationCritical) {
+    const currentIteration = agent.currentIteration ?? 0;
+    if (currentIteration > ALERT_THRESHOLDS.iterationCritical) {
       addAlert({
         type: 'iteration', level: 'critical',
         title: '迭代次数过多',
-        message: `已完成 ${agent.currentIteration} 次迭代，已达到上限，可能无法收敛`,
-        value: agent.currentIteration,
+        message: `已完成 ${currentIteration} 次迭代，已达到上限，可能无法收敛`,
+        value: currentIteration,
         threshold: ALERT_THRESHOLDS.iterationCritical,
       });
-    } else if (agent.currentIteration > ALERT_THRESHOLDS.iterationWarning) {
+    } else if (currentIteration > ALERT_THRESHOLDS.iterationWarning) {
       addAlert({
         type: 'iteration', level: 'warning',
         title: '迭代次数偏多',
-        message: `已迭代 ${agent.currentIteration} 次，建议检查 Agent 收敛性`,
-        value: agent.currentIteration,
+        message: `已迭代 ${currentIteration} 次，建议检查 Agent 收敛性`,
+        value: currentIteration,
         threshold: ALERT_THRESHOLDS.iterationWarning,
       });
     }
@@ -648,8 +650,10 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     }
 
     // 输入/输出比例建议
-    if (agent.inputTokens > 0) {
-      const ioRatio = agent.outputTokens / agent.inputTokens;
+    if ((agent.inputTokens ?? 0) > 0) {
+      const inputTokens = agent.inputTokens ?? 0;
+      const outputTokens = agent.outputTokens ?? 0;
+      const ioRatio = outputTokens / inputTokens;
       if (ioRatio > 3) {
         newSuggestions.push({
           id: 'balance-io',
@@ -657,7 +661,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
           priority: 'low',
           title: '输入/输出比例失衡',
           description: `当前输出是输入的 ${ioRatio.toFixed(1)} 倍，可能存在冗余回复，建议精简输出格式要求`,
-          potentialSaving: `预计节省 ${(agent.outputTokens * 0.15).toLocaleString()} tokens`,
+          potentialSaving: `预计节省 ${(outputTokens * 0.15).toLocaleString()} tokens`,
         });
       }
     }
@@ -816,16 +820,99 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     setExecutionHistory([]);
   }, []);
 
-  // 定时刷新
+  // SSE 连接用于实时数据
   useEffect(() => {
-    const interval = setInterval(refreshData, refreshInterval);
-    return () => clearInterval(interval);
-  }, [refreshData, refreshInterval]);
+    // 使用后端 /api/admin/stream SSE 端点
+    const eventSource = new EventSource(`${API_ENDPOINTS.base}/api/admin/stream`);
+
+    eventSource.onopen = () => {
+      console.log('[PerformanceMonitor] SSE connected');
+    };
+
+    eventSource.addEventListener('stats', (e) => {
+      try {
+        const message = JSON.parse(e.data);
+        // 后端发送格式: { type: 'stats', data: {...} }
+        const data = message.data;
+        refreshDataFromSSE(data);
+      } catch (error) {
+        console.error('[PerformanceMonitor] SSE parse error:', error);
+      }
+    });
+
+    eventSource.onerror = (error) => {
+      console.error('[PerformanceMonitor] SSE error:', error);
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
+  // 从 SSE 数据刷新
+  const refreshDataFromSSE = useCallback((data: {
+    totalRequests?: number;
+    successRate?: number;
+    avgLatency?: number;
+    activeSessions?: number;
+    modelCalls?: Array<{ model: string; count: number }>;
+    toolCalls?: Array<{ tool: string; count: number }>;
+  }) => {
+    if (!data) return;
+
+    // 更新性能指标
+    setMetrics(prev => {
+      const base = prev || { successRate: 0, errorRate: 0, avgResponseTime: 0, requestsPerMinute: 0 };
+      return {
+        ...base,
+        successRate: data.successRate ?? base.successRate,
+        errorRate: data.successRate !== undefined ? Math.max(0, 1 - data.successRate) : base.errorRate,
+        avgResponseTime: data.avgLatency ?? base.avgResponseTime,
+        requestsPerMinute: data.totalRequests ?? base.requestsPerMinute,
+      };
+    });
+
+    // 更新实时状态
+    setRealTimeStatus(prev => ({
+      ...prev,
+      activeAgents: data.activeSessions ?? prev.activeAgents,
+      status: 'healthy',
+      lastUpdated: Date.now(),
+    }));
+
+    // 更新时间序列
+    const currentAvgLatency = data.avgLatency ?? 0;
+    setResponseTimeData(prev => {
+      const newPoint: TimeSeriesPoint = { timestamp: Date.now(), value: currentAvgLatency };
+      return [...prev.slice(-59), newPoint];
+    });
+
+    setThroughputData(prev => {
+      const newPoint: TimeSeriesPoint = { timestamp: Date.now(), value: data.totalRequests ?? 0 };
+      return [...prev.slice(-59), newPoint];
+    });
+
+    // 更新工具调用历史
+    const toolCalls = data.toolCalls ?? [];
+    const totalToolCalls = toolCalls.reduce((sum: number, t: { count: number }) => sum + t.count, 0);
+    setToolCallHistory(prev => [...prev.slice(-19), totalToolCalls]);
+
+    // 更新 Agent 执行指标
+    setAgentMetrics(prev => {
+      const base = prev || { toolCallCount: 0, executionDuration: 0 };
+      return {
+        ...base,
+        toolCallCount: totalToolCalls,
+        executionDuration: currentAvgLatency,
+      };
+    });
+  }, []);
 
   // 阈值检查 - 仅当有真实数据时执行
   useEffect(() => {
     if (agentMetrics && metrics) {
-      checkThresholds(agentMetrics, metrics.memoryUsage);
+      checkThresholds(agentMetrics, metrics.memoryUsage ?? 0);
     }
   }, [agentMetrics, metrics, checkThresholds]);
 
@@ -847,13 +934,14 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
 
   // 内存估算颜色
   const memoryColor = useMemo(() => {
+    if (!metrics?.memoryUsage) return 'hsl(var(--success-500))';
     if (metrics.memoryUsage > 80) return 'hsl(var(--destructive))';
     if (metrics.memoryUsage > 60) return 'hsl(var(--warning-500))';
     return 'hsl(var(--success-500))';
-  }, [metrics.memoryUsage]);
+  }, [metrics?.memoryUsage]);
 
   // 迭代进度颜色
-  const iterationProgress = (agentMetrics.currentIteration / agentMetrics.maxIterations) * 100;
+  const iterationProgress = agentMetrics ? ((agentMetrics.currentIteration ?? 0) / (agentMetrics.maxIterations ?? 1)) * 100 : 0;
   const iterationColor = useMemo(() => {
     if (iterationProgress > 90) return 'hsl(var(--destructive))';
     if (iterationProgress > 70) return 'hsl(var(--warning-500))';
@@ -1043,9 +1131,9 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
                   <Coins size={12} className="text-primary" />
                   <span className="text-xs text-muted-foreground">Token</span>
                 </div>
-                <div className="text-xl font-bold">{agentMetrics.totalTokens.toLocaleString()}</div>
+                <div className="text-xl font-bold">{(agentMetrics.totalTokens ?? 0).toLocaleString()}</div>
                 <div className="text-[10px] text-muted-foreground">
-                  IN {agentMetrics.inputTokens.toLocaleString()} / OUT {agentMetrics.outputTokens.toLocaleString()}
+                  IN {(agentMetrics.inputTokens ?? 0).toLocaleString()} / OUT {(agentMetrics.outputTokens ?? 0).toLocaleString()}
                 </div>
               </div>
             </div>
@@ -1064,7 +1152,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
                   <motion.div
                     className="h-full rounded-full"
                     style={{ backgroundColor: memoryColor }}
-                    animate={{ width: `${Math.min(100, metrics.memoryUsage)}%` }}
+                    animate={{ width: `${Math.min(100, metrics?.memoryUsage ?? 0)}%` }}
                     transition={{ duration: 0.5 }}
                   />
                 </div>
@@ -1072,7 +1160,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
               <div className="flex flex-col items-end">
                 <span className="text-xs text-muted-foreground">系统内存</span>
                 <span className="text-xs font-medium" style={{ color: memoryColor }}>
-                  {metrics.memoryUsage.toFixed(0)}%
+                  {(metrics?.memoryUsage ?? 0).toFixed(0)}%
                 </span>
               </div>
             </div>
@@ -1138,7 +1226,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
               <div className="p-3 rounded-lg bg-muted/30">
                 <MiniLineChart data={tokenData} color="hsl(var(--warning-500))" height={55} showArea />
                 <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
-                  <span>当前: {agentMetrics.totalTokens.toLocaleString()}</span>
+                  <span>当前: {(agentMetrics.totalTokens ?? 0).toLocaleString()}</span>
                   <span>峰值: {Math.max(...tokenData.map(d => d.value), 0).toLocaleString()}</span>
                 </div>
               </div>
@@ -1148,20 +1236,20 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
           {/* 资源使用 */}
           <div className="grid grid-cols-4 gap-2 p-4 border-b">
             <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-              <ProgressRing value={metrics.cpuUsage} color={metrics.cpuUsage > 80 ? 'hsl(var(--destructive))' : metrics.cpuUsage > 60 ? 'hsl(var(--warning-500))' : 'hsl(var(--success-500))'} label="CPU" size={56} strokeWidth={6} />
+              <ProgressRing value={metrics?.cpuUsage ?? 0} color={(metrics?.cpuUsage ?? 0) > 80 ? 'hsl(var(--destructive))' : (metrics?.cpuUsage ?? 0) > 60 ? 'hsl(var(--warning-500))' : 'hsl(var(--success-500))'} label="CPU" size={56} strokeWidth={6} />
             </div>
             <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-              <ProgressRing value={metrics.memoryUsage} color={memoryColor} label="内存" size={56} strokeWidth={6} />
+              <ProgressRing value={metrics?.memoryUsage ?? 0} color={memoryColor} label="内存" size={56} strokeWidth={6} />
             </div>
             <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-              <div className="text-lg font-bold">{metrics.avgIterations.toFixed(1)}</div>
+              <div className="text-lg font-bold">{(metrics?.avgIterations ?? 0).toFixed(1)}</div>
               <div className="text-[10px] text-muted-foreground">平均迭代</div>
-              <div className="text-[10px] text-muted-foreground">工具 {metrics.avgToolCalls.toFixed(1)}</div>
+              <div className="text-[10px] text-muted-foreground">工具 {(metrics?.avgToolCalls ?? 0).toFixed(1)}</div>
             </div>
             <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
-              <div className="text-lg font-bold">${metrics.totalCost.toFixed(2)}</div>
+              <div className="text-lg font-bold">${(metrics?.totalCost ?? 0).toFixed(2)}</div>
               <div className="text-[10px] text-muted-foreground">总成本</div>
-              <div className="text-[10px] text-muted-foreground">${metrics.costPerRequest.toFixed(4)}/req</div>
+              <div className="text-[10px] text-muted-foreground">${(metrics?.costPerRequest ?? 0).toFixed(4)}/req</div>
             </div>
           </div>
 

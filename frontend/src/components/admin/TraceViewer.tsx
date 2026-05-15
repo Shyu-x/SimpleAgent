@@ -10,15 +10,16 @@
  * - 慢请求标识
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface Trace {
   id: string;
-  timestamp: string;
+  timestamp: number;
   duration: number;
-  status: 'success' | 'error' | 'partial';
+  status: 'success' | 'error' | 'partial' | 'running';
+  serviceName: string;
+  operationName: string;
   steps: TraceStep[];
-  metadata: Record<string, unknown>;
 }
 
 interface TraceStep {
@@ -40,18 +41,83 @@ export default function TraceViewer() {
   const [loading, setLoading] = useState(true);
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null);
   const [filter, setFilter] = useState<'all' | 'slow' | 'error'>('all');
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
+    // 初始加载
     fetchTraces();
-    const interval = setInterval(fetchTraces, 10000);
-    return () => clearInterval(interval);
+
+    // 建立 SSE 连接
+    const connectSSE = () => {
+      const eventSource = new EventSource('/api/admin/traces/subscribe');
+      eventSourceRef.current = eventSource;
+
+      eventSource.onopen = () => {
+        console.log('Trace SSE 连接已建立');
+        setLoading(false);
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+
+          if (message.type === 'traces_update') {
+            // 转换后端数据格式为前端格式
+            const transformedTraces: Trace[] = (message.data || []).map((t: Record<string, unknown>) => ({
+              id: t.traceId as string,
+              timestamp: t.startTime as number,
+              duration: t.duration as number,
+              status: t.status as 'success' | 'error' | 'partial' | 'running',
+              serviceName: t.serviceName as string,
+              operationName: t.operationName as string,
+              steps: []
+            }));
+            setTraces(transformedTraces);
+          }
+        } catch (err) {
+          console.error('解析 SSE 消息失败:', err);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.error('Trace SSE 连接错误:', err);
+        eventSource.close();
+        eventSourceRef.current = null;
+        setLoading(false);
+
+        // 5秒后尝试重连
+        setTimeout(connectSSE, 5000);
+      };
+    };
+
+    connectSSE();
+
+    // 清理函数：组件卸载时关闭 SSE 连接
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
   }, []);
 
   const fetchTraces = async () => {
     try {
       const res = await fetch('/api/admin/traces');
       const data = await res.json();
-      setTraces(data.traces || []);
+      if (data.success && data.data) {
+        // 转换后端数据格式为前端格式
+        const transformedTraces: Trace[] = (data.data.traces || []).map((t: Record<string, unknown>) => ({
+          id: t.traceId as string,
+          timestamp: t.startTime as number,
+          duration: t.duration as number,
+          status: t.status as 'success' | 'error' | 'partial' | 'running',
+          serviceName: t.serviceName as string,
+          operationName: t.operationName as string,
+          steps: []
+        }));
+        setTraces(transformedTraces);
+      }
     } catch (err) {
       console.error('Failed to fetch traces:', err);
     } finally {
@@ -116,6 +182,8 @@ export default function TraceViewer() {
                 <span className="text-xs font-mono">{trace.id.slice(0, 8)}...</span>
                 <DurationBadge duration={trace.duration} />
               </div>
+              <div className="text-sm text-gray-600">{trace.operationName}</div>
+              <div className="text-xs text-gray-400">{trace.serviceName}</div>
               <div className="text-sm text-gray-500">
                 {new Date(trace.timestamp).toLocaleTimeString()}
               </div>
@@ -240,10 +308,11 @@ function DurationBadge({ duration }: { duration: number }) {
 }
 
 function StatusDot({ status }: { status: string }) {
-  const colors = {
+  const colors: Record<string, string> = {
     success: 'bg-green-500',
     error: 'bg-red-500',
-    partial: 'bg-yellow-500'
+    partial: 'bg-yellow-500',
+    running: 'bg-blue-500'
   };
-  return <div className={`w-2 h-2 rounded-full ${colors[status as keyof typeof colors]}`} />;
+  return <div className={`w-2 h-2 rounded-full ${colors[status] || 'bg-gray-400'}`} />;
 }

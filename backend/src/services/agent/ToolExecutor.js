@@ -12,6 +12,21 @@
  */
 
 const EventEmitter = require('events');
+const AppError = require('../../common/errors/AppError');
+
+// 指标采集器（延迟初始化）
+let _metricsCollector = null;
+function getCollector() {
+  if (!_metricsCollector) {
+    try {
+      const { getMetricsCollector } = require('../../infra/metrics');
+      _metricsCollector = getMetricsCollector();
+    } catch (e) {
+      // 指标采集器未初始化
+    }
+  }
+  return _metricsCollector;
+}
 
 /**
  * 工具执行结果
@@ -107,11 +122,26 @@ class ToolExecutor extends EventEmitter {
         const result = await this._executeWithTimeout(tool, params, timeout);
 
         const duration = Date.now() - startTime;
+
+        // 记录工具执行指标
+        const collector = getCollector();
+        if (collector) {
+          collector.recordHistogram('tool_duration_seconds', duration / 1000, { tool: toolName });
+          collector.incrementCounter('tool_calls_total', { tool: toolName, success: 'true' });
+        }
+
         this.emit('tool:success', { toolName, duration, attempt });
 
         return new ToolResult(toolName, true, result, null, duration);
       } catch (error) {
         lastError = error;
+
+        // 记录工具错误指标
+        const collector = getCollector();
+        if (collector) {
+          collector.incrementCounter('tool_errors_total', { tool: toolName, error_type: error.name || 'unknown' });
+        }
+
         this.emit('tool:error', { toolName, error, attempt });
 
         // 如果不是最后一次尝试，等待后重试
@@ -255,7 +285,7 @@ class ToolExecutor extends EventEmitter {
       await this._sleep(100);
     }
 
-    throw new Error(`Dependency ${dependency} did not complete successfully`);
+    throw AppError.internalError(`Dependency ${dependency} did not complete successfully`);
   }
 
   /**

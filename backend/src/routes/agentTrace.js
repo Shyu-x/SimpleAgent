@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const { agentVisualizer } = require('../services/agent/AgentVisualizer');
+const { sendError } = require('../middleware/errorHandler');
 
 // 获取最近轨迹列表
 router.get('/traces', (req, res) => {
@@ -12,7 +13,7 @@ router.get('/traces', (req, res) => {
     const traces = agentVisualizer.getRecentTraces(limit);
     res.json({ success: true, traces, total: agentVisualizer.traces.size });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    sendError(res, 500, 6000, error.message);
   }
 });
 
@@ -20,10 +21,10 @@ router.get('/traces', (req, res) => {
 router.get('/trace/:traceId', (req, res) => {
   try {
     const trace = agentVisualizer.getTrace(req.params.traceId);
-    if (!trace) return res.status(404).json({ success: false, error: '轨迹不存在' });
+    if (!trace) return sendError(res, 404, 6004, '轨迹不存在');
     res.json({ success: true, ...trace.toJSON() });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    sendError(res, 500, 6000, error.message);
   }
 });
 
@@ -31,10 +32,10 @@ router.get('/trace/:traceId', (req, res) => {
 router.get('/trace/:traceId/ascii', (req, res) => {
   try {
     const trace = agentVisualizer.getTrace(req.params.traceId);
-    if (!trace) return res.status(404).json({ success: false, error: '轨迹不存在' });
+    if (!trace) return sendError(res, 404, 6004, '轨迹不存在');
     res.type('text/plain').send(agentVisualizer.generateAsciiTimeline(trace));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    sendError(res, 500, 6000, error.message);
   }
 });
 
@@ -44,7 +45,7 @@ router.delete('/traces', (req, res) => {
     agentVisualizer.clear();
     res.json({ success: true, message: '所有轨迹已清除' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    sendError(res, 500, 6000, error.message);
   }
 });
 
@@ -52,13 +53,13 @@ router.delete('/traces', (req, res) => {
 router.post('/trace', (req, res) => {
   try {
     const { query } = req.body;
-    if (!query) return res.status(400).json({ success: false, error: '缺少 query 参数' });
+    if (!query) return sendError(res, 400, 1001, '缺少 query 参数');
     const traceId = `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const trace = agentVisualizer.createTrace(traceId, query);
     trace.complete();
     res.json({ success: true, traceId, message: '轨迹已创建' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    sendError(res, 500, 6000, error.message);
   }
 });
 

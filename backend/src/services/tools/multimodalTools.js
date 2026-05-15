@@ -6,6 +6,7 @@
 class ImageAnalyzeTool {
   constructor(options = {}) {
     this.name = 'image_analyze';
+    this.AppError = require('../../common/errors/AppError');
     this.description = '分析图片内容，识别物体、场景、文字等';
     this.category = 'multimodal';
     this.timeout = options.timeout || 30000;
@@ -91,7 +92,7 @@ class ImageAnalyzeTool {
     const model = process.env.VISION_MODEL || 'claude-3-sonnet-20240229';
 
     if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY or CLAUDE_API_KEY not configured');
+      throw this.AppError.internalError('ANTHROPIC_API_KEY or CLAUDE_API_KEY not configured');
     }
 
     const messages = [
@@ -127,7 +128,7 @@ class ImageAnalyzeTool {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(`Vision API error: ${error}`);
+        throw this.AppError.internalError(`Vision API error: ${error}`);
       }
 
       const data = await response.json();
@@ -150,7 +151,7 @@ class ImageAnalyzeTool {
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY not configured');
+      throw this.AppError.internalError('OPENAI_API_KEY not configured');
     }
 
     const messages = [
@@ -181,7 +182,7 @@ class ImageAnalyzeTool {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`OpenAI Vision API error: ${error}`);
+      throw this.AppError.internalError(`OpenAI Vision API error: ${error}`);
     }
 
     const data = await response.json();
@@ -279,7 +280,7 @@ class SpeechToTextTool {
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY not configured for Whisper');
+      throw this.AppError.internalError('OPENAI_API_KEY not configured for Whisper');
     }
 
     // 转换base64为ArrayBuffer
@@ -308,7 +309,7 @@ class SpeechToTextTool {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`Whisper API error: ${error}`);
+      throw this.AppError.internalError(`Whisper API error: ${error}`);
     }
 
     const data = await response.json();
@@ -363,7 +364,7 @@ class TextToSpeechTool {
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY not configured for TTS');
+      throw this.AppError.internalError('OPENAI_API_KEY not configured for TTS');
     }
 
     // 限制文本长度
@@ -386,7 +387,7 @@ class TextToSpeechTool {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`TTS API error: ${error}`);
+      throw this.AppError.internalError(`TTS API error: ${error}`);
     }
 
     // 获取音频数据并转换为base64

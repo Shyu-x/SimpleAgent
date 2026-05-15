@@ -12,6 +12,9 @@
 
 const EventEmitter = require('events');
 const { MiniMaxChatClient } = require('../model');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('IntentClassifier');
 
 // 意图类型
 const INTENT_TYPES = {
@@ -230,7 +233,7 @@ class IntentClassifier extends EventEmitter {
           }
         } catch (error) {
           this.stats.llmFailures++;
-          console.warn('[IntentClassifier] LLM classification failed, falling back to keywords:', error.message);
+          logger.warn(`LLM classification failed, falling back to keywords: ${error.message}`);
         }
       }
 
@@ -254,7 +257,7 @@ class IntentClassifier extends EventEmitter {
       return this._addClarification(defaultResult, trimmedQuery);
 
     } catch (error) {
-      console.error('[IntentClassifier] Classification error:', error);
+      logger.error(`Classification error: ${error.message}`);
       this._updateLatency(startTime);
       return this._buildResult('chat', 0.2, null, '抱歉，我没有理解您的意思，请问您想了解什么？', 'error');
     }
@@ -493,7 +496,7 @@ class IntentClassifier extends EventEmitter {
       try {
         return JSON.parse(fixed);
       } catch {
-        throw new Error('Failed to parse JSON response');
+        throw AppError.internalError('Failed to parse JSON response');
       }
     }
   }

@@ -11,7 +11,8 @@
  * - 配置检索参数
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useAdminPolling } from '@/hooks/useAdminSSE';
 
 interface KnowledgeBase {
   id: string;
@@ -28,31 +29,24 @@ interface KnowledgeBase {
   };
 }
 
+interface KbStatsResponse {
+  knowledgeBases: KnowledgeBase[];
+}
+
 export default function KnowledgeBaseManagement() {
-  const [kbs, setKbs] = useState<KnowledgeBase[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedKb, setSelectedKb] = useState<KnowledgeBase | null>(null);
 
-  const fetchKBs = async () => {
-    try {
-      // 获取统计信息，包含知识库列表
-      const res = await fetch('/api/admin/knowledge/stats');
-      const data = await res.json();
-      // 从 stats 响应中提取 knowledgeBases
-      setKbs(data.data?.knowledgeBases || []);
-    } catch (err) {
-      console.error('Failed to fetch knowledge bases:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 使用通用 Admin Polling Hook 获取知识库列表
+  const { data: kbsData, loading, error, refresh } = useAdminPolling<KbStatsResponse>({
+    endpoint: '/api/admin/knowledge/stats',
+    parser: (res) => res?.data?.data || { knowledgeBases: [] },
+    interval: 30000,
+  });
 
-  useEffect(() => {
-    fetchKBs();
-  }, []);
+  const kbs = kbsData?.knowledgeBases || [];
 
   const handleUpload = useCallback(async (kbId: string, file: File) => {
     const formData = new FormData();
@@ -78,12 +72,12 @@ export default function KnowledgeBaseManagement() {
 
       setUploadProgress(0);
       setUploadFile(null);
-      fetchKBs();
+      refresh();
     } catch (err) {
       console.error('Upload failed:', err);
       setUploadProgress(0);
     }
-  }, []);
+  }, [refresh]);
 
   const createKB = async (name: string, description: string) => {
     try {
@@ -100,7 +94,7 @@ export default function KnowledgeBaseManagement() {
         })
       });
       setShowCreate(false);
-      fetchKBs();
+      refresh();
     } catch (err) {
       console.error('Failed to create KB:', err);
     }
@@ -114,12 +108,20 @@ export default function KnowledgeBaseManagement() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">知识库管理</h1>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          创建知识库
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => refresh()}
+            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
+          >
+            刷新
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            创建知识库
+          </button>
+        </div>
       </div>
 
       {/* 创建知识库弹窗 */}

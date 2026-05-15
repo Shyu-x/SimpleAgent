@@ -6,6 +6,7 @@
 class UrlShortenerTool {
   constructor(options = {}) {
     this.name = 'url_shortener';
+    this.AppError = require('../../common/errors/AppError');
     this.description = 'URL缩短 - 将长URL转换为短链接';
     this.category = 'utility';
     this.timeout = options.timeout || 10000;
@@ -81,7 +82,7 @@ class UrlShortenerTool {
       { signal: AbortSignal.timeout(this.timeout) }
     );
 
-    if (!response.ok) throw new Error('TinyURL API error');
+    if (!response.ok) throw AppError.internalError('TinyURL API error');
     return await response.text();
   }
 
@@ -91,7 +92,7 @@ class UrlShortenerTool {
       { signal: AbortSignal.timeout(this.timeout) }
     );
 
-    if (!response.ok) throw new Error('is.gd API error');
+    if (!response.ok) throw AppError.internalError('is.gd API error');
     return await response.text();
   }
 
@@ -105,7 +106,7 @@ class UrlShortenerTool {
       signal: AbortSignal.timeout(this.timeout)
     });
 
-    if (!response.ok) throw new Error('clck.ru API error');
+    if (!response.ok) throw AppError.internalError('clck.ru API error');
     return await response.text();
   }
 }

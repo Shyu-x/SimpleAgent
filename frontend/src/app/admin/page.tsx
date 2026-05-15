@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminSSE } from '@/hooks/useAdminSSE';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
+import { FallbackUI } from '@/components/FallbackUI';
 import {
   Database,
   Wifi,
@@ -13,6 +15,18 @@ import {
   ChevronUp,
   Layers,
 } from 'lucide-react';
+
+function AdminDashboardErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
+  return (
+    <FallbackUI
+      moduleName="AdminDashboard"
+      error={error}
+      style="detailed"
+      showRetry={true}
+      onRetry={resetError}
+    />
+  );
+}
 
 interface SystemStats {
   totalRequests: number;
@@ -73,7 +87,11 @@ export default function AdminPage() {
     );
   }
 
-  return <AdminDashboardContent />;
+  return (
+    <ErrorBoundary moduleName="AdminDashboard" fallback={<AdminDashboardErrorFallback error={new Error('仪表盘加载失败')} resetError={() => window.location.reload()} />}>
+      <AdminDashboardContent />
+    </ErrorBoundary>
+  );
 }
 
 function AdminDashboardContent() {

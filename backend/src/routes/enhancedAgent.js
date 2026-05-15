@@ -5,15 +5,16 @@
 const express = require('express');
 const router = express.Router();
 const { AgentOrchestrator } = require('../application/AgentOrchestrator');
+const { sendError } = require('../middleware/errorHandler');
 
 const orchestrator = new AgentOrchestrator();
-const notFound = (res) => res.status(404).json({ success: false, error: 'Session not found' });
-const handleError = (res, error) => res.status(500).json({ success: false, error: error.message });
+const notFound = (res) => sendError(res, 404, 3100, 'Session not found');
+const handleError = (res, error) => sendError(res, 500, 3000, error.message);
 
 // ==================== 执行 ====================
 router.post('/execute', async (req, res) => {
   const { sessionId, task, context = {} } = req.body;
-  if (!task) return res.status(400).json({ success: false, error: 'Task is required' });
+  if (!task) return sendError(res, 400, 1001, 'Task is required');
   try {
     const result = await orchestrator.execute({ sessionId, task, context });
     res.json({ success: true, sessionId: result.sessionId || sessionId, result });
@@ -109,7 +110,7 @@ router.get('/persistence/recoverable', async (_req, res) => {
 
 router.post('/persistence/execute', async (req, res) => {
   const { task, context = {}, resumeSessionId } = req.body;
-  if (!task && !resumeSessionId) return res.status(400).json({ success: false, error: 'Task or resumeSessionId is required' });
+  if (!task && !resumeSessionId) return sendError(res, 400, 1001, 'Task or resumeSessionId is required');
   try {
     const result = await orchestrator.executePersistent({ task, context, resumeSessionId });
     res.json({ success: result.success, result });

@@ -97,7 +97,7 @@ export default function ThinkingChain({ chain, isStreaming, onStepClick }: Think
               key={step.id}
               step={step}
               index={index}
-              isLast={index === visibleSteps.length - 1 && isStreaming}
+              isLast={index === visibleSteps.length - 1 && !!isStreaming}
               onClick={() => onStepClick?.(step)}
             />
           ))}

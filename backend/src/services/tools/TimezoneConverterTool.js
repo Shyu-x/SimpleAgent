@@ -6,6 +6,7 @@
 class TimezoneConverterTool {
   constructor(options = {}) {
     this.name = 'timezone_converter';
+    this.AppError = require('../../common/errors/AppError');
     this.description = '时区转换 - 全球时区之间的时间转换';
     this.category = 'utility';
     this.timeout = options.timeout || 5000;
@@ -134,7 +135,7 @@ class TimezoneConverterTool {
     // 尝试直接解析
     const parsed = new Date(timeStr);
     if (isNaN(parsed.getTime())) {
-      throw new Error('时间格式无效，请使用 YYYY-MM-DD HH:mm 或 HH:mm 格式');
+      throw this.AppError.validationError('time format', '时间格式无效，请使用 YYYY-MM-DD HH:mm 或 HH:mm 格式');
     }
     return parsed;
   }

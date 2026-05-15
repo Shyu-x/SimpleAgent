@@ -36,6 +36,7 @@ export default function AdminLayout({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const isActive = (href: string, exact?: boolean) => {
+    if (!pathname) return false;
     if (exact) return pathname === href;
     return pathname.startsWith(href);
   };

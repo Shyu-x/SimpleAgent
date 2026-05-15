@@ -8,6 +8,7 @@ const router = express.Router();
 const { hitlManager } = require('../hitl');
 const { sseClientManager } = require('../services/hitlSSEService');
 const { AgentLogger } = require('../infra/logger/AgentLogger');
+const { sendError } = require('../middleware/errorHandler');
 
 const logger = new AgentLogger('hitlSSE');
 
@@ -90,7 +91,7 @@ router.get('/sse/clients', (_req, res) => {
  */
 router.post('/sse/broadcast', (req, res) => {
   const { type, data } = req.body;
-  if (!type) return res.status(400).json({ success: false, error: 'Missing type' });
+  if (!type) return sendError(res, 400, 1001, 'Missing type');
   sseClientManager.broadcast({ type, ...data });
   res.json({ success: true, clients: sseClientManager.getClientCount() });
 });

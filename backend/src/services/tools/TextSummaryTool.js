@@ -6,6 +6,7 @@
 class TextSummaryTool {
   constructor(options = {}) {
     this.name = 'text_summary';
+    this.AppError = require('../../common/errors/AppError');
     this.description = '文本摘要 - 对长文本进行自动摘要，支持关键信息提取';
     this.category = 'utility';
     this.timeout = options.timeout || 30000;
@@ -135,7 +136,7 @@ class TextSummaryTool {
   async abstractiveSummary(text, maxLength) {
     // 调用 AI API 进行生成式摘要
     // 这里使用简单的占位实现，实际项目中可以调用 MiniMax API
-    throw new Error('Abstractive summary requires AI API');
+    throw this.AppError.internalError('Abstractive summary requires AI API');
   }
 }
 

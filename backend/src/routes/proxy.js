@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { AgentLogger } = require('../infra/logger/AgentLogger');
+const AppError = require('../common/errors/AppError');
 
 // 导入熔断器
 const { getBreakerWithPreset } = require('../common/resilience/integration');
@@ -77,7 +78,7 @@ router.post('/chat/completions', async (req, res) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API 错误: ${response.status}`);
+      throw AppError.internalError(errorData.error?.message || `API 错误: ${response.status}`);
     }
 
     // 流式响应
@@ -150,7 +151,7 @@ router.post('/chat', async (req, res) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API 错误: ${response.status}`);
+      throw AppError.internalError(errorData.error?.message || `API 错误: ${response.status}`);
     }
     res.json(await response.json());
   }, () => {

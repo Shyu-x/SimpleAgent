@@ -201,14 +201,11 @@ const ActionBar = memo(function ActionBar({
   // 播放提示音
   useEffect(() => {
     const playSound = (type: 'success' | 'error' | 'warning') => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fn = (window as any).missionControlPlayTone as ((type: 'success' | 'error' | 'warning') => void) | undefined;
       fn?.(type);
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).missionControlPlaySound = playSound;
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).missionControlPlaySound;
     };
   }, [soundEnabled]);

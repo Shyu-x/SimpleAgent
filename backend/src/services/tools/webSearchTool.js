@@ -4,6 +4,9 @@
  */
 
 const { getMCPSearchService } = require('../mcpSearchService');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('WebSearchTool');
 
 class WebSearchTool {
   constructor(options = {}) {
@@ -88,7 +91,7 @@ class WebSearchTool {
         totalResults: results.totalResults
       };
     } catch (error) {
-      console.error('[WebSearchTool] 搜索失败:', error.message);
+      logger.error(`搜索失败: ${error.message}`);
 
       // 如果 MCP 服务失败，尝试使用备用搜索
       try {
@@ -116,7 +119,7 @@ class WebSearchTool {
       });
 
       if (!response.ok) {
-        throw new Error(`搜索请求失败: ${response.status}`);
+        throw AppError.internalError(`搜索请求失败: ${response.status}`);
       }
 
       const text = await response.text();
@@ -195,7 +198,7 @@ class WebSearchTool {
 
       return results;
     } catch (error) {
-      console.error('[WebSearchTool] 解析失败:', error);
+      logger.error(`解析失败: ${error.message}`);
       return [];
     }
   }

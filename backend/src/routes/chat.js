@@ -1,7 +1,12 @@
+/**
+ * Chat Routes - 聊天接口层
+ * 纯路由：参数校验 + 响应组装，业务逻辑委托给 services
+ */
 const express = require('express');
 const router = express.Router();
 const SSEService = require('../services/sseService');
 const { AgentLogger } = require('../infra/logger/AgentLogger');
+const chatService = require('../services/chatService');
 
 // 导入熔断器和限流器
 const { getBreakerWithPreset } = require('../common/resilience/integration');
@@ -19,33 +24,13 @@ const minimaxBreaker = getBreakerWithPreset('minimax-api', 'STANDARD', {
 
 const logger = new AgentLogger('chat');
 
-/** 消息格式标准化 */
-const normalizeMessages = (messages, message) => {
-  if (Array.isArray(messages)) return messages;
-  if (typeof message === 'string' && message.trim()) {
-    return [{ role: 'user', content: message.trim() }];
-  }
-  return null;
-};
-
-/** 验证消息数组 */
-const validateMessages = (normalizedMessages) => {
-  if (!normalizedMessages) {
-    return { valid: false, error: { message: 'messages is required and must be an array', type: 'invalid_request_error' } };
-  }
-  if (normalizedMessages.length > 100) {
-    return { valid: false, error: { message: 'Too many messages (max 100)', type: 'invalid_request_error' } };
-  }
-  return { valid: true };
-};
-/** 发送错误响应 */
-const sendError = (res, status, message, type = 'server_error') => {
-  res.status(status).json({ error: { message, type } });
-};
-
 // 应用限流器（每分钟 60 请求）
 router.use(chatRateLimiter);
 
+/**
+ * POST /api/chat
+ * 聊天接口 - 支持 SSE 流式响应
+ */
 router.post('/', async (req, res) => {
   const collector = getMetricsCollector();
   const startTime = Date.now();
@@ -56,15 +41,16 @@ router.post('/', async (req, res) => {
 
   try {
     const { messages, message, model, stream } = req.body;
-    const normalizedMessages = normalizeMessages(messages, message);
-    const validation = validateMessages(normalizedMessages);
-    if (!validation.valid) {
+
+    // 委托给 chatService 处理消息标准化和验证
+    const result = chatService.normalizeAndValidate(messages, message);
+    if (!result.success) {
       collector.endRequest(requestId, 400);
-      return sendError(res, 400, validation.error.message, validation.error.type);
+      return chatService.sendError(res, 400, result.error.message, result.error.type);
     }
 
     if (stream !== false) {
-      req.body.messages = normalizedMessages;
+      req.body.messages = result.data;
 
       // 使用熔断器保护 SSE 调用
       return await minimaxBreaker.execute(
@@ -91,7 +77,7 @@ router.post('/', async (req, res) => {
     const proxyResponse = await fetch(`${origin}/api/v1/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...req.body, messages: normalizedMessages, stream: false })
+      body: JSON.stringify({ ...req.body, messages: result.data, stream: false })
     });
 
     const latency = Date.now() - startTime;
@@ -108,12 +94,20 @@ router.post('/', async (req, res) => {
     collector.recordHistogram('http_request_duration_seconds', latency / 1000, { endpoint: '/api/chat' });
     collector.endRequest(requestId, 500);
     logger.error('Chat error', { error: error.message, stack: error.stack });
-    sendError(res, 500, error.message || 'Internal server error');
+    chatService.sendError(res, 500, error.message || 'Internal server error');
   }
 });
 
+/**
+ * POST /api/chat/stop
+ * 停止聊天
+ */
 router.post('/stop', (req, res) => SSEService.handleStop(req, res));
 
+/**
+ * POST /api/chat/completions
+ * 聊天补全接口
+ */
 router.post('/completions', async (req, res) => {
   const collector = getMetricsCollector();
   const startTime = Date.now();
@@ -122,14 +116,15 @@ router.post('/completions', async (req, res) => {
   collector.startRequest(requestId, { endpoint: '/api/chat/completions', method: 'POST' });
 
   const { messages, message, model } = req.body;
-  const normalizedMessages = normalizeMessages(messages, message);
-  const validation = validateMessages(normalizedMessages);
-  if (!validation.valid) {
+
+  // 委托给 chatService 处理消息标准化和验证
+  const result = chatService.normalizeAndValidate(messages, message);
+  if (!result.success) {
     collector.endRequest(requestId, 400);
-    return sendError(res, 400, validation.error.message, validation.error.type);
+    return chatService.sendError(res, 400, result.error.message, result.error.type);
   }
 
-  req.body = { messages: normalizedMessages, model, stream: false };
+  req.body = { messages: result.data, model, stream: false };
   try {
     // 使用熔断器保护 completions 调用
     await minimaxBreaker.execute(
@@ -159,7 +154,7 @@ router.post('/completions', async (req, res) => {
     collector.recordHistogram('http_request_duration_seconds', latency / 1000, { endpoint: '/api/chat/completions' });
     collector.endRequest(requestId, 500);
     logger.error('Completions route error', { error: error.message, stack: error.stack });
-    sendError(res, 500, error.message || 'Internal server error');
+    chatService.sendError(res, 500, error.message || 'Internal server error');
   }
 });
 

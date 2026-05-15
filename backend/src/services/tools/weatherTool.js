@@ -6,6 +6,7 @@
 class WeatherTool {
   constructor(options = {}) {
     this.name = 'weather';
+    this.AppError = require('../../common/errors/AppError');
     this.description = '查询天气预报 - 支持城市名称或位置';
     this.category = 'information';
     this.timeout = options.timeout || 15000;
@@ -50,7 +51,7 @@ class WeatherTool {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw AppError.internalError(`HTTP ${response.status}`);
       }
 
       const data = await response.json();

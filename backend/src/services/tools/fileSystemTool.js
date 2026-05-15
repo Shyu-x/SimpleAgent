@@ -6,6 +6,7 @@
 const fs = require('fs').promises;
 const fsSync = require('fs');
 const path = require('path');
+const AppError = require('../../common/errors/AppError');
 
 class FileSystemTool {
   constructor(options = {}) {
@@ -52,7 +53,7 @@ class FileSystemTool {
   safePath(filePath) {
     const resolved = path.resolve(this.basePath, filePath);
     if (!resolved.startsWith(this.basePath)) {
-      throw new Error('路径访问被拒绝：不允许访问基础目录外的文件');
+      throw AppError.internalError('路径访问被拒绝：不允许访问基础目录外的文件');
     }
     return resolved;
   }

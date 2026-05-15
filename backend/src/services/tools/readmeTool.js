@@ -8,6 +8,9 @@ const fs = require('fs').promises;
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('ReadmeTool');
 
 class ReadmeTool {
   constructor(options = {}) {
@@ -82,7 +85,7 @@ class ReadmeTool {
           return { success: false, error: `Unknown action: ${action}` };
       }
     } catch (error) {
-      console.error('[ReadmeTool] 执行失败:', error.message);
+      logger.error(`执行失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -276,7 +279,7 @@ class ReadmeTool {
       });
 
       if (!response.ok) {
-        throw new Error(`GitHub API 错误: ${response.status}`);
+        throw AppError.internalError(`GitHub API 错误: ${response.status}`);
       }
 
       const data = await response.json();

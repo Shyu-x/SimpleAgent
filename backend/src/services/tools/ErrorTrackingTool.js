@@ -3,6 +3,9 @@
  * 集成 Sentry.io 风格的错误跟踪
  */
 
+const createLogger = require('../../common/logger');
+const logger = createLogger('ErrorTrackingTool');
+
 class ErrorTrackingTool {
   constructor(options = {}) {
     this.name = 'error_tracking';
@@ -87,7 +90,7 @@ class ErrorTrackingTool {
       try {
         await this.sendToSentry(event);
       } catch (e) {
-        console.error('Failed to send to Sentry:', e.message);
+        logger.error(`Failed to send to Sentry: ${e.message}`);
       }
     }
 

@@ -4,6 +4,8 @@
  */
 
 const EventEmitter = require('events');
+const createLogger = require('../../common/logger');
+const logger = createLogger('AgentVisualizer');
 
 /**
  * 执行步骤类型
@@ -402,7 +404,7 @@ class AgentVisualizer extends EventEmitter {
     const indent = '  '.repeat(step.id.split('_').length - 2);
     const color = this.colors[step.type] || '#666666';
 
-    console.log(`%c${indent}▶ ${step.name}`, `color: ${color}; font-weight: bold`);
+    logger.debug(`${indent}▶ ${step.name}`, { color });
   }
 
   /**
@@ -415,7 +417,7 @@ class AgentVisualizer extends EventEmitter {
     const color = this.colors[step.type] || '#666666';
     const duration = step.duration ? `(${step.duration}ms)` : '';
 
-    console.log(`%c${indent}✓ ${step.name} ${duration}`, `color: ${color}`);
+    logger.info(`${indent}✓ ${step.name} ${duration}`, { color });
   }
 
   /**
@@ -426,7 +428,7 @@ class AgentVisualizer extends EventEmitter {
 
     const indent = '  '.repeat(step.id.split('_').length - 2);
 
-    console.log(`%c${indent}✗ ${step.name}: ${step.error}`, 'color: #ef4444; font-weight: bold');
+    logger.error(`${indent}✗ ${step.name}: ${step.error}`);
   }
 
   /**

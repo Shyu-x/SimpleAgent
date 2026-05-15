@@ -9,6 +9,9 @@
  */
 
 const tiktoken = require('tiktoken');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('TokenManager');
 
 // 编码映射
 const ENCODING_MAP = {
@@ -68,11 +71,11 @@ class TokenManager {
       } else if (typeof tiktoken.from_name === 'function') {
         this.encoding = tiktoken.from_name(encodingName);
       } else {
-        throw new Error('tiktoken API not found');
+        throw AppError.internalError('tiktoken API not found');
       }
-      console.log(`[TokenManager] 初始化完成，编码: ${encodingName}, 模型: ${this.model}`);
+      logger.info(`初始化完成，编码: ${encodingName}, 模型: ${this.model}`);
     } catch (error) {
-      console.warn(`[TokenManager] 编码器初始化失败，使用备用方案: ${error.message}`);
+      logger.warn(`编码器初始化失败，使用备用方案: ${error.message}`);
       this.encoding = null;
     }
   }
@@ -90,7 +93,7 @@ class TokenManager {
         const tokens = this.encoding.encode(text);
         return tokens.length;
       } catch (error) {
-        console.warn(`[TokenManager] Token计数失败: ${error.message}`);
+        logger.warn(`Token计数失败: ${error.message}`);
       }
     }
 
@@ -196,7 +199,7 @@ class TokenManager {
         }
         return decoded;
       } catch (error) {
-        console.warn(`[TokenManager] Token截断失败: ${error.message}`);
+        logger.warn(`Token截断失败: ${error.message}`);
       }
     }
 

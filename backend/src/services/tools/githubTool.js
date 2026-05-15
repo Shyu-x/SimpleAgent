@@ -6,6 +6,8 @@
 
 const { spawn } = require('child_process');
 const { execSync } = require('child_process');
+const createLogger = require('../../common/logger');
+const logger = createLogger('GitHubTool');
 
 class GitHubTool {
   constructor(options = {}) {
@@ -90,7 +92,7 @@ class GitHubTool {
           return { success: false, error: `Unknown action: ${action}` };
       }
     } catch (error) {
-      console.error('[GitHubTool] 执行失败:', error.message);
+      logger.error(`执行失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }

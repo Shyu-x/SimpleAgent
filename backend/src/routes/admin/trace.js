@@ -166,9 +166,120 @@ router.get('/stats', (req, res) => {
 });
 
 /**
+ * SSE Stream Endpoint for Traces
+ * GET /api/admin/traces/subscribe
+ * 实时推送追踪数据和统计
+ */
+router.get('/subscribe', (req, res) => {
+  const clientId = `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no'
+  });
+
+  logger.info('Trace SSE客户端连接', { clientId });
+
+  // 发送连接成功消息
+  res.write(`data: ${JSON.stringify({ type: 'connected', clientId })}\n\n`);
+
+  const PUSH_INTERVAL = 5000;
+  let lastTracesHash = '';
+
+  const getTracesSummary = () => {
+    const traces = Array.from(traceStore.values()).slice(0, 50);
+    const tracesHash = JSON.stringify(traces.map(t => t.traceId + t.status + t.duration));
+
+    const errorTraces = traces.filter(t => t.status === 'error');
+    const avgDuration = traces.length > 0
+      ? Math.round(traces.reduce((sum, t) => sum + t.duration, 0) / traces.length)
+      : 0;
+
+    return {
+      traces: traces.slice(0, 20).map(t => ({
+        traceId: t.traceId,
+        operationName: t.operationName,
+        serviceName: t.serviceName,
+        startTime: t.startTime,
+        endTime: t.endTime,
+        duration: t.duration,
+        status: t.status,
+        totalSpans: t.totalSpans
+      })),
+      stats: {
+        totalTraces: traceStore.size,
+        avgDuration,
+        successRate: traces.length > 0 ? (traces.length - errorTraces.length) / traces.length : 1,
+        slowTraces: traces.filter(t => t.duration > 5000).length,
+        errorTraces: errorTraces.length,
+        tracesByType: traces.reduce((acc, t) => {
+          acc[t.serviceName] = (acc[t.serviceName] || 0) + 1;
+          return acc;
+        }, {})
+      },
+      hash: tracesHash
+    };
+  };
+
+  const pushTraces = () => {
+    try {
+      const summary = getTracesSummary();
+
+      // 只在数据变化时推送完整数据
+      if (summary.hash !== lastTracesHash || lastTracesHash === '') {
+        lastTracesHash = summary.hash;
+        res.write(`data: ${JSON.stringify({
+          type: 'traces_update',
+          data: summary.traces,
+          stats: summary.stats,
+          timestamp: Date.now()
+        })}\n\n`);
+      } else {
+        // 心跳式推送（无数据变化）
+        res.write(`data: ${JSON.stringify({
+          type: 'heartbeat',
+          stats: summary.stats,
+          timestamp: Date.now()
+        })}\n\n`);
+      }
+    } catch (error) {
+      logger.error('推送追踪数据失败', { error: error.message });
+    }
+  };
+
+  // 立即推送一次
+  pushTraces();
+
+  // 设置定时推送
+  const intervalId = setInterval(pushTraces, PUSH_INTERVAL);
+
+  // 心跳保活
+  const heartbeatId = setInterval(() => {
+    try {
+      res.write(`data: ${JSON.stringify({ type: 'heartbeat', timestamp: Date.now() })}\n\n`);
+    } catch (error) {
+      clearInterval(intervalId);
+      clearInterval(heartbeatId);
+      logger.info('Trace SSE客户端断开', { clientId });
+    }
+  }, 30000);
+
+  const cleanup = () => {
+    clearInterval(intervalId);
+    clearInterval(heartbeatId);
+    logger.info('Trace SSE连接清理', { clientId });
+  };
+
+  req.on('close', cleanup);
+  req.on('error', cleanup);
+});
+
+/**
  * GET /api/admin/traces/:traceId
  * 获取追踪详情
- * 注意：此路由必须在 /stats 之后定义
+ * 注意：此路由必须在 /subscribe 之后定义
  */
 router.get('/:traceId', (req, res) => {
   try {

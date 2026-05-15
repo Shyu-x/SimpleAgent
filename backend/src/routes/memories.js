@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const { prisma } = require('../services/database');
 const { AgentLogger } = require('../infra/logger/AgentLogger');
+const { sendError } = require('../middleware/errorHandler');
 
 const logger = new AgentLogger('memories');
 
 const handle = (fn) => async (req, res, next) => {
   try { await fn(req, res); }
-  catch (error) { logger.error('Memory operation failed', { error: error.message, stack: error.stack }); res.status(500).json({ success: false, error: error.message }); }
+  catch (error) { logger.error('Memory operation failed', { error: error.message, stack: error.stack }); sendError(res, 500, 3200, error.message); }
 };
 
 // GET / - 列表
@@ -28,7 +29,7 @@ router.get('/', handle(async (req, res) => {
 // GET /:id - 单个
 router.get('/:id', handle(async (req, res) => {
   const memory = await prisma.globalMemory.findUnique({ where: { id: req.params.id } });
-  if (!memory) return res.status(404).json({ success: false, error: '记忆不存在' });
+  if (!memory) return sendError(res, 404, 3202, '记忆不存在');
   await prisma.globalMemory.update({
     where: { id: req.params.id },
     data: { accessCount: { increment: 1 }, lastAccessedAt: new Date() },
@@ -47,7 +48,7 @@ router.post('/', handle(async (req, res) => {
 router.post('/batch', handle(async (req, res) => {
   const { userId = 'default', memories } = req.body;
   if (!Array.isArray(memories) || memories.length === 0) {
-    return res.status(400).json({ success: false, error: '记忆列表不能为空' });
+    return sendError(res, 400, 1001, '记忆列表不能为空');
   }
   const created = await prisma.globalMemory.createMany({
     data: memories.map(m => ({
@@ -80,7 +81,7 @@ router.delete('/:id', handle(async (req, res) => {
 // GET /search/query - 搜索
 router.get('/search/query', handle(async (req, res) => {
   const { userId = 'default', q, type, limit = 10 } = req.query;
-  if (!q) return res.status(400).json({ success: false, error: '搜索关键词不能为空' });
+  if (!q) return sendError(res, 400, 1001, '搜索关键词不能为空');
   const memories = await prisma.globalMemory.findMany({
     where: { userId, type: type || undefined, OR: [{ content: { contains: q, mode: 'insensitive' } }, { tags: { has: q } }] },
     orderBy: { importance: 'desc' },

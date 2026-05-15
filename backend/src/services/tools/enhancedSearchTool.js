@@ -4,6 +4,9 @@
  */
 
 const { getMCPSearchService } = require('../mcpSearchService');
+const AppError = require('../../common/errors/AppError');
+const createLogger = require('../../common/logger');
+const logger = createLogger('EnhancedSearchTool');
 
 class EnhancedSearchTool {
   constructor(options = {}) {
@@ -90,7 +93,7 @@ class EnhancedSearchTool {
           return { success: false, error: `Unknown action: ${action}` };
       }
     } catch (error) {
-      console.error('[EnhancedSearchTool] 执行失败:', error.message);
+      logger.error(`执行失败: ${error.message}`);
       return { success: false, error: error.message };
     }
   }
@@ -114,7 +117,7 @@ class EnhancedSearchTool {
           return mcpResult;
         }
       } catch (e) {
-        console.warn('[EnhancedSearchTool] MCP 搜索失败:', e.message);
+        logger.warn(`MCP 搜索失败: ${e.message}`);
       }
     }
 
@@ -344,7 +347,7 @@ class EnhancedSearchTool {
       };
     }
 
-    throw new Error(result.error || 'MCP search failed');
+    throw this.AppError.internalError(result.error || 'MCP search failed');
   }
 
   /**
@@ -359,7 +362,7 @@ class EnhancedSearchTool {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw this.AppError.internalError(`HTTP ${response.status}`);
       }
 
       const text = await response.text();
@@ -374,7 +377,7 @@ class EnhancedSearchTool {
         totalResults: results.length
       };
     } catch (error) {
-      throw new Error(`Jina search failed: ${error.message}`);
+      throw this.AppError.internalError(`Jina search failed: ${error.message}`);
     }
   }
 
@@ -391,7 +394,7 @@ class EnhancedSearchTool {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw this.AppError.internalError(`HTTP ${response.status}`);
       }
 
       const html = await response.text();
@@ -406,7 +409,7 @@ class EnhancedSearchTool {
         totalResults: results.length
       };
     } catch (error) {
-      throw new Error(`DuckDuckGo search failed: ${error.message}`);
+      throw this.AppError.internalError(`DuckDuckGo search failed: ${error.message}`);
     }
   }
 

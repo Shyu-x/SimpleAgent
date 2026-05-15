@@ -13,7 +13,10 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
-import { useAdminPolling } from '@/hooks/useAdminSSE';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
+import { FallbackUI } from '@/components/FallbackUI';
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
 
 // ============ 类型定义 ============
 
@@ -93,49 +96,79 @@ export default function TraceViewerPage() {
   });
   const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
 
-  // SSE 订阅 traces 数据
-  const { data: tracesData, loading: tracesLoading, refresh: refreshTraces } = useAdminPolling<Trace[]>({
-    endpoint: `/api/admin/traces?status=${filter.status !== 'all' ? filter.status : ''}&type=${filter.type !== 'all' ? filter.type : ''}&duration=${filter.durationRange !== 'all' ? filter.durationRange : ''}&timeRange=${filter.timeRange !== 'all' ? filter.timeRange : ''}`,
-    parser: (res) => res?.data?.data?.traces || res?.data?.traces || [],
-    interval: 15000,
-  });
+  const [traces, setTraces] = useState<Trace[]>([]);
+  const [tracesLoading, setTracesLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [connected, setConnected] = useState(false);
 
-  // SSE 订阅 stats 数据
-  const { data: statsData, loading: statsLoading, refresh: refreshStats } = useAdminPolling<TraceStats | null>({
-    endpoint: '/api/admin/traces/stats',
-    parser: (res) => {
-      const data = res?.data;
-      if (data?.overview) {
-        return {
-          totalTraces: data.overview.totalTraces,
-          avgDuration: parseInt(data.performance?.avgDuration) || 0,
-          successRate: 1 - (parseFloat(data.overview.errorRate) / 100),
-          slowTraces: 0,
-          errorTraces: data.overview.errorCount,
-          tracesByType: data.distribution?.byOperation || {},
-          durationDistribution: []
-        };
-      }
-      return data || null;
-    },
-    interval: 15000,
-  });
-
-  const traces = tracesData || [];
-  const loading = tracesLoading || statsLoading;
-
-  // 同步 stats
+  // SSE 连接 traces 数据
   useEffect(() => {
-    if (statsData) setStats(statsData);
-  }, [statsData]);
+    let eventSource: EventSource;
+    let reconnectTimeout: ReturnType<typeof setTimeout>;
 
+    const connect = () => {
+      eventSource = new EventSource(`${API_BASE}/api/admin/traces/subscribe`);
+
+      eventSource.onopen = () => {
+        console.log('[TraceViewer] SSE connected');
+        setConnected(true);
+        setTracesLoading(false);
+        setStatsLoading(false);
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'connected') {
+            console.log('[TraceViewer] SSE ready, clientId:', data.clientId);
+          } else if (data.type === 'traces_update' || data.type === 'traces') {
+            setTraces(data.data || []);
+            if (data.stats) setStats(data.stats);
+            setTracesLoading(false);
+            setStatsLoading(false);
+          } else if (data.type === 'stats' && data.stats) {
+            setStats(data.stats);
+            setStatsLoading(false);
+          } else if (data.type === 'heartbeat' && data.stats) {
+            // 心跳包也更新统计
+            setStats(data.stats);
+          }
+        } catch (error) {
+          console.error('[TraceViewer] Failed to parse SSE message:', error);
+        }
+      };
+
+      eventSource.onerror = () => {
+        console.error('[TraceViewer] SSE error');
+        setConnected(false);
+        setTracesLoading(false);
+        setStatsLoading(false);
+        // 5秒后重连
+        reconnectTimeout = setTimeout(() => {
+          eventSource.close();
+          connect();
+        }, 5000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (eventSource) eventSource.close();
+    };
+  }, []);
+
+  // SSE 自动更新，无需手动刷新
   const fetchTraces = useCallback(async () => {
-    await refreshTraces();
-  }, [refreshTraces]);
+    // SSE 自动推送，不需要手动刷新
+  }, []);
 
   const fetchStats = useCallback(async () => {
-    await refreshStats();
-  }, [refreshStats]);
+    // SSE 自动推送，不需要手动刷新
+  }, []);
+
+  const loading = tracesLoading || statsLoading;
 
   const filteredTraces = traces.filter((t) => {
     if (filter.searchQuery) {
@@ -158,185 +191,187 @@ export default function TraceViewerPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* 页面标题 */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">链路追踪</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setViewMode('list')}
-            className={`px-4 py-2 rounded ${
-              viewMode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            列表视图
-          </button>
-          <button
-            onClick={() => setViewMode('timeline')}
-            className={`px-4 py-2 rounded ${
-              viewMode === 'timeline'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            时间线视图
-          </button>
+    <ErrorBoundary moduleName="TraceViewerPage" fallback={<FallbackUI moduleName="链路追踪" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <div className="p-6 space-y-6">
+        {/* 页面标题 */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">链路追踪</h1>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-2 rounded ${
+                viewMode === 'list'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              列表视图
+            </button>
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`px-4 py-2 rounded ${
+                viewMode === 'timeline'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              时间线视图
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* 统计概览 */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <StatCard
-            title="总追踪数"
-            value={stats.totalTraces}
-            icon="📊"
-          />
-          <StatCard
-            title="平均耗时"
-            value={`${stats.avgDuration.toFixed(0)}ms`}
-            icon="⏱️"
-            color="blue"
-          />
-          <StatCard
-            title="成功率"
-            value={`${(stats.successRate * 100).toFixed(1)}%`}
-            icon="✅"
-            color="green"
-          />
-          <StatCard
-            title="慢请求"
-            value={stats.slowTraces}
-            icon="🐌"
-            color="yellow"
-          />
-          <StatCard
-            title="错误"
-            value={stats.errorTraces}
-            icon="❌"
-            color="red"
-          />
-        </div>
-      )}
-
-      {/* 筛选器 */}
-      <div className="bg-white border rounded-lg p-4">
-        <div className="flex flex-wrap gap-4">
-          {/* 搜索框 */}
-          <div className="flex-1 min-w-64">
-            <input
-              type="text"
-              placeholder="搜索 trace ID 或元数据..."
-              value={filter.searchQuery}
-              onChange={(e) =>
-                setFilter((prev) => ({ ...prev, searchQuery: e.target.value }))
-              }
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        {/* 统计概览 */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <StatCard
+              title="总追踪数"
+              value={stats.totalTraces}
+              icon="📊"
+            />
+            <StatCard
+              title="平均耗时"
+              value={`${stats.avgDuration.toFixed(0)}ms`}
+              icon="⏱️"
+              color="blue"
+            />
+            <StatCard
+              title="成功率"
+              value={`${(stats.successRate * 100).toFixed(1)}%`}
+              icon="✅"
+              color="green"
+            />
+            <StatCard
+              title="慢请求"
+              value={stats.slowTraces}
+              icon="🐌"
+              color="yellow"
+            />
+            <StatCard
+              title="错误"
+              value={stats.errorTraces}
+              icon="❌"
+              color="red"
             />
           </div>
+        )}
 
-          {/* 状态筛选 */}
-          <select
-            value={filter.status}
-            onChange={(e) =>
-              setFilter((prev) => ({
-                ...prev,
-                status: e.target.value as TraceFilter['status'],
-              }))
-            }
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">全部状态</option>
-            <option value="success">成功</option>
-            <option value="error">错误</option>
-            <option value="partial">部分成功</option>
-          </select>
+        {/* 筛选器 */}
+        <div className="bg-white border rounded-lg p-4">
+          <div className="flex flex-wrap gap-4">
+            {/* 搜索框 */}
+            <div className="flex-1 min-w-64">
+              <input
+                type="text"
+                placeholder="搜索 trace ID 或元数据..."
+                value={filter.searchQuery}
+                onChange={(e) =>
+                  setFilter((prev) => ({ ...prev, searchQuery: e.target.value }))
+                }
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          {/* 类型筛选 */}
-          <select
-            value={filter.type}
-            onChange={(e) =>
-              setFilter((prev) => ({
-                ...prev,
-                type: e.target.value as TraceFilter['type'],
-              }))
-            }
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">全部类型</option>
-            <option value="chat">聊天</option>
-            <option value="agent">Agent</option>
-            <option value="rag">RAG</option>
-            <option value="tool">工具</option>
-          </select>
+            {/* 状态筛选 */}
+            <select
+              value={filter.status}
+              onChange={(e) =>
+                setFilter((prev) => ({
+                  ...prev,
+                  status: e.target.value as TraceFilter['status'],
+                }))
+              }
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">全部状态</option>
+              <option value="success">成功</option>
+              <option value="error">错误</option>
+              <option value="partial">部分成功</option>
+            </select>
 
-          {/* 耗时筛选 */}
-          <select
-            value={filter.durationRange}
-            onChange={(e) =>
-              setFilter((prev) => ({
-                ...prev,
-                durationRange: e.target.value as TraceFilter['durationRange'],
-              }))
-            }
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">全部耗时</option>
-            <option value="fast">快速 (&lt;500ms)</option>
-            <option value="normal">正常 (500ms-2s)</option>
-            <option value="slow">慢 (2s-5s)</option>
-            <option value="very-slow">极慢 (&gt;5s)</option>
-          </select>
+            {/* 类型筛选 */}
+            <select
+              value={filter.type}
+              onChange={(e) =>
+                setFilter((prev) => ({
+                  ...prev,
+                  type: e.target.value as TraceFilter['type'],
+                }))
+              }
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">全部类型</option>
+              <option value="chat">聊天</option>
+              <option value="agent">Agent</option>
+              <option value="rag">RAG</option>
+              <option value="tool">工具</option>
+            </select>
 
-          {/* 时间范围 */}
-          <select
-            value={filter.timeRange}
-            onChange={(e) =>
-              setFilter((prev) => ({
-                ...prev,
-                timeRange: e.target.value as TraceFilter['timeRange'],
-              }))
-            }
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">全部时间</option>
-            <option value="1h">最近 1 小时</option>
-            <option value="6h">最近 6 小时</option>
-            <option value="24h">最近 24 小时</option>
-            <option value="7d">最近 7 天</option>
-          </select>
+            {/* 耗时筛选 */}
+            <select
+              value={filter.durationRange}
+              onChange={(e) =>
+                setFilter((prev) => ({
+                  ...prev,
+                  durationRange: e.target.value as TraceFilter['durationRange'],
+                }))
+              }
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">全部耗时</option>
+              <option value="fast">快速 (&lt;500ms)</option>
+              <option value="normal">正常 (500ms-2s)</option>
+              <option value="slow">慢 (2s-5s)</option>
+              <option value="very-slow">极慢 (&gt;5s)</option>
+            </select>
+
+            {/* 时间范围 */}
+            <select
+              value={filter.timeRange}
+              onChange={(e) =>
+                setFilter((prev) => ({
+                  ...prev,
+                  timeRange: e.target.value as TraceFilter['timeRange'],
+                }))
+              }
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">全部时间</option>
+              <option value="1h">最近 1 小时</option>
+              <option value="6h">最近 6 小时</option>
+              <option value="24h">最近 24 小时</option>
+              <option value="7d">最近 7 天</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      {/* 主内容区域 */}
-      {viewMode === 'list' ? (
-        <TraceListView
-          traces={filteredTraces}
-          selectedTrace={selectedTrace}
-          onSelect={async (t) => {
-            if (!t) {
-              setSelectedTrace(null);
-              return;
-            }
-            // 获取完整详情（包含 spans）
-            try {
-              const { data } = await fetchApi<{ data?: Trace & { spans: TraceSpan[] } }>(`/api/admin/traces/${t.traceId}`);
-              setSelectedTrace(data?.data || t);
-            } catch {
-              setSelectedTrace(t);
-            }
-          }}
-        />
-      ) : (
-        <TraceTimelineView
-          traces={filteredTraces}
-          selectedTrace={selectedTrace}
-          onSelect={setSelectedTrace}
-        />
-      )}
-    </div>
+        {/* 主内容区域 */}
+        {viewMode === 'list' ? (
+          <TraceListView
+            traces={filteredTraces}
+            selectedTrace={selectedTrace}
+            onSelect={async (t) => {
+              if (!t) {
+                setSelectedTrace(null);
+                return;
+              }
+              // 获取完整详情（包含 spans）
+              try {
+                const { data } = await fetchApi<{ data?: Trace & { spans: TraceSpan[] } }>(`/api/admin/traces/${t.traceId}`);
+                setSelectedTrace(data?.data || t);
+              } catch {
+                setSelectedTrace(t);
+              }
+            }}
+          />
+        ) : (
+          <TraceTimelineView
+            traces={filteredTraces}
+            selectedTrace={selectedTrace}
+            onSelect={setSelectedTrace}
+          />
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }
 

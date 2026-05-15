@@ -54,10 +54,8 @@ const SoundToggle = memo(function SoundToggle({ enabled, onToggle }: SoundToggle
 
   // 导出播放方法到 window
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).missionControlPlayTone = playTone;
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).missionControlPlayTone;
     };
   }, [enabled]);

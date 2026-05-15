@@ -12,20 +12,10 @@
  * - 最近请求追踪
  */
 
-import React, { useState, useEffect } from 'react';
-import { fetchApi } from '@/lib/apiClient';
+import React from 'react';
 import { SafeAdminWrapper } from './SafeAdminWrapper';
 import QdrantMonitor from './QdrantMonitor';
-
-interface SystemStats {
-  totalRequests: number;
-  successRate: number;
-  avgLatency: number;
-  activeSessions: number;
-  modelCalls: { model: string; count: number }[];
-  toolCalls: { tool: string; count: number }[];
-  knowledgeBases: { name: string; docCount: number }[];
-}
+import { useAdminPolling, type SystemStats } from '@/hooks/useAdminSSE';
 
 const defaultStats: SystemStats = {
   totalRequests: 0,
@@ -38,32 +28,14 @@ const defaultStats: SystemStats = {
 };
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<SystemStats>(defaultStats);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // 使用通用 Admin SSE Hook 获取 stats 数据
+  const { data: statsData, loading, error, refresh } = useAdminPolling<SystemStats>({
+    endpoint: '/api/admin/stats',
+    parser: (res) => res?.data?.data || defaultStats,
+    interval: 30000,
+  });
 
-  useEffect(() => {
-    fetchStats();
-    // 定时刷新
-    const interval = setInterval(fetchStats, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchStats = async () => {
-    try {
-      const { data, error: fetchError } = await fetchApi<{ success: boolean; data: SystemStats }>('/api/admin/stats');
-      if (fetchError) throw new Error(fetchError.message);
-      // 后端返回 { success: true, data: {...} }
-      if (data?.data) {
-        setStats(data.data);
-      }
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const stats = statsData || defaultStats;
 
   if (loading) {
     return (
@@ -79,7 +51,7 @@ export default function AdminDashboard() {
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+          {String(error)}
         </div>
       )}
 

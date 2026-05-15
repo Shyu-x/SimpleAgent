@@ -3,6 +3,7 @@
 import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isClient } from '@/lib/ssrStorage';
+import { fetchApi } from '@/lib/apiClient';
 import {
   Package,
   Search,
@@ -642,17 +643,41 @@ const ToolMarketplace = memo(function ToolMarketplace({
     ));
   }, []);
 
-  const handleUpdate = useCallback((id: string) => {
+  const handleUpdate = useCallback(async (id: string) => {
+    // 保存当前状态用于回滚
+    const previousTools = tools;
+    const currentTool = tools.find((t) => t.id === id);
+    if (!currentTool) return;
+
+    // 设置为更新中状态
     setTools((prev) => prev.map((t) =>
       t.id === id ? { ...t, status: 'updating' as ToolStatus } : t
     ));
-    // 模拟更新完成
-    setTimeout(() => {
+
+    try {
+      // 调用后端 API 更新工具配置
+      const result = await fetchApi(`/api/admin/tools/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ enabled: true }),
+        throwOnError: true,
+      });
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+
+      // 更新成功，设置为已启用
       setTools((prev) => prev.map((t) =>
         t.id === id ? { ...t, status: 'enabled' as ToolStatus, lastUpdated: Date.now() } : t
       ));
-    }, 2000);
-  }, []);
+    } catch (error) {
+      console.error('更新工具失败:', error);
+      // 回滚状态
+      setTools((prev) => prev.map((t) =>
+        t.id === id ? { ...t, status: currentTool.status } : t
+      ));
+    }
+  }, [tools]);
 
   // MCP 状态获取
   const fetchMcpStatus = useCallback(async () => {

@@ -13,6 +13,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
+import { ErrorBoundary } from '@/utils/ErrorBoundary';
+import { FallbackUI } from '@/components/FallbackUI';
 
 // ============ 类型定义 ============
 
@@ -124,36 +126,37 @@ export default function ModelConfigPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* 页面标题 */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">模型配置</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab('list')}
-            className={`px-4 py-2 rounded ${
-              activeTab === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            模型列表
-          </button>
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`px-4 py-2 rounded ${
-              activeTab === 'stats'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            统计数据
-          </button>
+    <ErrorBoundary moduleName="ModelConfigPage" fallback={<FallbackUI moduleName="模型配置" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <div className="p-6 space-y-6">
+        {/* 页面标题 */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">模型配置</h1>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab('list')}
+              className={`px-4 py-2 rounded ${
+                activeTab === 'list'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              模型列表
+            </button>
+            <button
+              onClick={() => setActiveTab('stats')}
+              className={`px-4 py-2 rounded ${
+                activeTab === 'stats'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              统计数据
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* 概览卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* 概览卡片 */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <OverviewCard
           title="总模型数"
           value={models.length}
@@ -191,6 +194,7 @@ export default function ModelConfigPage() {
         stats && <ModelStatsView stats={stats} models={models} />
       )}
     </div>
+    </ErrorBoundary>
   );
 }
 

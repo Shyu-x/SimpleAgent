@@ -3,6 +3,7 @@
  * 使用 MiniMax image-01 API 生成图片
  */
 
+const AppError = require('../../common/errors/AppError');
 class ImageGenerationTool {
   constructor(options = {}) {
     this.name = 'image_generation';
@@ -64,7 +65,7 @@ class ImageGenerationTool {
       });
 
       if (!response.ok) {
-        throw new Error(`Image API error: ${response.status}`);
+        throw AppError.internalError(`Image API error: ${response.status}`);
       }
 
       const data = await response.json();
