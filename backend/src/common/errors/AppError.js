@@ -116,6 +116,77 @@ class AppError extends Error {
   };
 
   /**
+   * 可恢复错误码集合 (可自动恢复或降级)
+   */
+  static RECOVERABLE_CODES = new Set([
+    // TOOL 可恢复错误
+    'TOOL_EXEC_FAILED',
+    'TOOL_TIMEOUT',
+    'TOOL_NO_IMPLEMENTATION',
+    'MCP_CONNECT_FAILED',
+    'MCP_REQUEST_FAILED',
+    // RAG 可恢复错误
+    'RETRIEVAL_FAILED',
+    'RERANK_FAILED',
+    'VECTOR_SEARCH_FAILED',
+    'KEYWORD_SEARCH_FAILED',
+    'HYBRID_SEARCH_FAILED',
+    'EMBEDDING_FAILED',
+    // AGENT 可恢复错误
+    'EXECUTION_TIMEOUT',
+    'MEMORY_SAVE_FAILED',
+    'MEMORY_RECALL_FAILED',
+    // INTERNAL 可恢复错误
+    'SERVICE_UNAVAILABLE',
+    'REQUEST_TIMEOUT',
+    'NETWORK_ERROR',
+    'DATABASE_ERROR',
+    'DB_CONNECTION_FAILED',
+    'DB_QUERY_FAILED',
+    'CACHE_ERROR',
+    'REDIS_CONNECTION_FAILED',
+    'EXTERNAL_API_ERROR',
+    'EXTERNAL_API_TIMEOUT',
+    'MODEL_API_ERROR',
+    'MODEL_API_TIMEOUT',
+    'CIRCUIT_BREAKER_OPEN',
+    // 速率限制
+    'RATE_LIMIT_EXCEEDED',
+    'QUOTA_EXCEEDED',
+  ]);
+
+  /**
+   * 可重试错误码集合 (瞬时错误，适合指数退避重试)
+   */
+  static RETRYABLE_CODES = new Set([
+    // TOOL 可重试错误
+    'TOOL_EXEC_FAILED',
+    'TOOL_TIMEOUT',
+    'MCP_REQUEST_FAILED',
+    // RAG 可重试错误
+    'RETRIEVAL_FAILED',
+    'VECTOR_SEARCH_FAILED',
+    'KEYWORD_SEARCH_FAILED',
+    'HYBRID_SEARCH_FAILED',
+    'EMBEDDING_FAILED',
+    'INDEX_FAILED',
+    // INTERNAL 可重试错误
+    'REQUEST_TIMEOUT',
+    'NETWORK_ERROR',
+    'DB_CONNECTION_FAILED',
+    'DB_QUERY_FAILED',
+    'REDIS_CONNECTION_FAILED',
+    'EXTERNAL_API_ERROR',
+    'EXTERNAL_API_TIMEOUT',
+    'MODEL_API_ERROR',
+    'MODEL_API_TIMEOUT',
+    // 速率限制
+    'RATE_LIMIT_EXCEEDED',
+    'QUOTA_EXCEEDED',
+    'LLM_RATE_LIMIT',
+  ]);
+
+  /**
    * 错误码到类型映射 (用于旧码兼容)
    */
   static CODE_TYPE_MAP = {
@@ -362,6 +433,75 @@ class AppError extends Error {
    */
   static internalError(message) {
     return new AppError(AppError.CODES.INTERNAL_ERROR.code, message || '内部服务器错误');
+  }
+
+  // ========== 错误可恢复性判断 ==========
+
+  /**
+   * 判断错误码是否可恢复
+   * @param {string} codeName - 错误码名称 (如 'TOOL_TIMEOUT')
+   * @returns {boolean}
+   */
+  static isRecoverableCode(codeName) {
+    return AppError.RECOVERABLE_CODES.has(codeName);
+  }
+
+  /**
+   * 判断错误码是否可重试
+   * @param {string} codeName - 错误码名称 (如 'TOOL_TIMEOUT')
+   * @returns {boolean}
+   */
+  static isRetryableCode(codeName) {
+    return AppError.RETRYABLE_CODES.has(codeName);
+  }
+
+  /**
+   * 判断当前错误是否可恢复 (基于实例的 code 属性)
+   * @returns {boolean}
+   */
+  isRecoverable() {
+    // 优先使用实例的 code 属性 (字符串形式)
+    if (this.code && typeof this.code === 'string') {
+      return AppError.RECOVERABLE_CODES.has(this.code);
+    }
+    // 数字码需要查找对应的码名称
+    if (this.code && typeof this.code === 'number') {
+      const codeName = this._findCodeName(this.code);
+      return codeName ? AppError.RECOVERABLE_CODES.has(codeName) : false;
+    }
+    return false;
+  }
+
+  /**
+   * 判断当前错误是否可重试 (基于实例的 code 属性)
+   * @returns {boolean}
+   */
+  isRetryable() {
+    // 优先使用实例的 code 属性 (字符串形式)
+    if (this.code && typeof this.code === 'string') {
+      return AppError.RETRYABLE_CODES.has(this.code);
+    }
+    // 数字码需要查找对应的码名称
+    if (this.code && typeof this.code === 'number') {
+      const codeName = this._findCodeName(this.code);
+      return codeName ? AppError.RETRYABLE_CODES.has(codeName) : false;
+    }
+    return false;
+  }
+
+  /**
+   * 根据错误码查找码名称
+   * @param {number} code
+   * @returns {string|null}
+   */
+  _findCodeName(code) {
+    const entries = Object.entries(AppError.CODES);
+    for (const [key, def] of entries) {
+      if (def.code === code) {
+        return key;
+      }
+    }
+    return null;
   }
 }
 

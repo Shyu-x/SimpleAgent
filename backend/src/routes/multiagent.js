@@ -113,8 +113,8 @@ router.post('/tools/execute', async (req, res) => {
 // Recovery
 router.post('/recovery', async (req, res) => {
   try {
-    const { AgentError } = require('../services/errorHandler');
-    const error = new AgentError('Recovery request', req.body.errorCode, req.body.context || {});
+    const AppError = require('../common/errors/AppError');
+    const error = AppError.agentError(req.body.errorCode, 'Recovery request').addDetails(req.body.context || {});
     res.json({ success: true, recovery: await recoveryManager.attemptRecovery(error, req.body.context || {}) });
   } catch (error) { res.status(500).json({ success: false, error: error.message }); }
 });

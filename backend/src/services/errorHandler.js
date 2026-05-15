@@ -37,6 +37,9 @@ const ErrorCodes = {
 
 /**
  * Agent 错误类
+ * @deprecated 请使用 src/common/errors/AppError 代替
+ * @deprecatedSince 2026-05-15
+ * @see AppError
  */
 class AgentError extends Error {
   constructor(message, code, details = {}) {

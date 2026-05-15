@@ -3,7 +3,6 @@
  * 支持工具验证、权限控制、执行超时、结果缓存
  */
 
-const { AgentError, ErrorCodes } = require('./errorHandler');
 const AppError = require('../common/errors/AppError');
 
 /**
@@ -294,11 +293,7 @@ class EnhancedToolRegistry {
     const tool = this.tools.get(toolName);
 
     if (!tool) {
-      throw new AgentError(
-        `Tool not found: ${toolName}`,
-        ErrorCodes.TOOL_NOT_FOUND,
-        { toolName }
-      );
+      throw AppError.toolError('TOOL_NOT_FOUND', `Tool not found: ${toolName}`).addDetails({ toolName });
     }
 
     const startTime = Date.now();
@@ -312,22 +307,21 @@ class EnhancedToolRegistry {
     try {
       // 1. 检查权限
       if (options.permission && !this.checkPermission(toolName, options.permission)) {
-        throw new AgentError(
-          `Permission denied for tool: ${toolName}`,
-          ErrorCodes.TOOL_PERMISSION_DENIED,
-          { toolName, required: tool.permission, provided: options.permission }
-        );
+        throw AppError.toolError('TOOL_PERMISSION_DENIED', `Permission denied for tool: ${toolName}`).addDetails({
+          toolName,
+          required: tool.permission,
+          provided: options.permission
+        });
       }
 
       // 2. 验证输入
       if (tool.validate) {
         const validation = this.validator.validate(toolName, input);
         if (!validation.valid) {
-          throw new AgentError(
-            `Invalid input: ${validation.errors.join(', ')}`,
-            ErrorCodes.INVALID_TOOL_INPUT,
-            { toolName, errors: validation.errors }
-          );
+          throw AppError.toolError('TOOL_PARAM_INVALID', `Invalid input: ${validation.errors.join(', ')}`).addDetails({
+            toolName,
+            errors: validation.errors
+          });
         }
       }
 
@@ -367,15 +361,14 @@ class EnhancedToolRegistry {
       logEntry.duration = Date.now() - startTime;
       this.logExecution(logEntry);
 
-      if (error instanceof AgentError) {
+      if (error instanceof AppError) {
         throw error;
       }
 
-      throw new AgentError(
-        `Tool execution failed: ${error.message}`,
-        ErrorCodes.TOOL_EXECUTION_FAILED,
-        { toolName, originalError: error.message }
-      );
+      throw AppError.toolError('TOOL_EXEC_FAILED', `Tool execution failed: ${error.message}`).addDetails({
+        toolName,
+        originalError: error.message
+      });
     }
   }
 
@@ -385,11 +378,7 @@ class EnhancedToolRegistry {
   async executeWithTimeout(fn, input, timeout) {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
-        reject(new AgentError(
-          `Tool execution timeout after ${timeout}ms`,
-          ErrorCodes.TOOL_TIMEOUT,
-          { timeout }
-        ));
+        reject(AppError.toolError('TOOL_TIMEOUT', `Tool execution timeout after ${timeout}ms`).addDetails({ timeout }));
       }, timeout);
 
       Promise.resolve(fn(input))

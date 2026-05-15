@@ -11,16 +11,9 @@ const { EnhancedAgentEngine, CheckpointManager, DualMemorySystem, HumanInTheLoop
 const MemoryService = require('./memory');
 const { EnhancedMemoryService, MemoryType, MemoryPriority } = require('./enhancedMemory');
 
-// 错误处理
-const {
-  ErrorCodes,
-  AgentError,
-  RetryStrategy,
-  RecoveryManager,
-  GlobalErrorHandler,
-  globalErrorHandler,
-  recoveryManager
-} = require('./errorHandler');
+// 错误处理 (AgentError 已废弃，使用 AppError)
+// eslint-disable-next-line max-len
+const { ErrorCodes, RetryStrategy, RecoveryManager, GlobalErrorHandler, globalErrorHandler, recoveryManager } = require('./errorHandler');
 
 // 状态持久化
 const { StatePersistence, CheckpointStatus } = require('./statePersistence');
@@ -187,9 +180,8 @@ module.exports = {
   TransactionManager,
   createRollbackableOperation,
 
-  // 错误处理
+  // 错误处理 (AgentError 已废弃，使用 AppError)
   ErrorCodes,
-  AgentError,
   RetryStrategy,
   RecoveryManager,
   recoveryManager,
