@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 // 创建连接池
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://chat:chat123@localhost:54320/aichat',
-  max: 10,
+  max: 50,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
 });
