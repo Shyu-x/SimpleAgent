@@ -29,7 +29,7 @@ module.exports = {
     {
       name: 'ai-chat-frontend',
       script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 8080',
+      args: 'start -p 3001',
       cwd: 'C:/Users/Xu/Desktop/chat玩具/frontend',
       instances: 1,
       exec_mode: 'fork',
@@ -41,11 +41,11 @@ module.exports = {
       kill_timeout: 5000,
       env: {
         NODE_ENV: 'development',
-        PORT: 8080
+        PORT: 3001
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT: 8080
+        PORT: 3001
       },
       error_file: './logs/frontend-error.log',
       out_file: './logs/frontend-out.log',
