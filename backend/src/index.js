@@ -125,8 +125,16 @@ async function startServer() {
 
   // 健康检查 - 使用监控模块的 HealthCheckManager
   const healthController = require('./infra/monitoring/health.controller');
-  const prometheusService = require('./infra/monitoring/prometheus.service').getPrometheusService();
+  const { getPrometheusService, PrometheusService } = require('./infra/monitoring/prometheus.service');
+  const { getMetricsCollector } = require('./infra/metrics');
   const gatewayService = require('./infra/monitoring/gateway.service').getGatewayService();
+
+  // 初始化 Prometheus 服务（关联 MetricsCollector）
+  const metricsCollector = getMetricsCollector();
+  const prometheusService = getPrometheusService();
+  if (metricsCollector) {
+    prometheusService.initialize(metricsCollector);
+  }
 
   // 请求指标收集中间件（需要 prometheusService 和 gatewayService）
   const { requestMetricsMiddleware, setPrometheusService, setGatewayService } = require('./middleware/metricsMiddleware');
@@ -175,6 +183,7 @@ async function startServer() {
   const memoryRoutes = require('./routes/memory');
   const adminIntentRoutes = require('./routes/admin/intent');
   const adminStreamRoutes = require('./routes/admin/stream');
+  const adminCacheRoutes = require('./routes/admin/cache');
   const missionControlRoutes = require('./routes/missionControl');
   const executionRoutes = require('./routes/execution');
   const modularRoutes = require('./routes/modular');
@@ -201,6 +210,7 @@ async function startServer() {
   app.use('/api/admin/knowledge', adminKnowledgeRoutes);
   app.use('/api/admin/tools', adminToolRoutes);
   app.use('/api/admin/intent', adminIntentRoutes);
+  app.use('/api/admin/cache', adminCacheRoutes);
   app.use('/api/admin/stream', adminStreamRoutes);
   app.use('/api/admin/stats', adminStatsRoutes);
   app.use('/api/sessions', sessionsRoutes);
