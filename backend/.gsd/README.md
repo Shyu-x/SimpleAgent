@@ -290,43 +290,52 @@ curl -X POST http://localhost:30000/api/rag/search \
 
 | 指标 | 当前值 | 目标值 | 状态 |
 |------|--------|--------|------|
-| 日志规范化 | 130/525 (21.5%) | 100% | 🔄 进行中 |
-| 业务逻辑迁移 | 0% | 100% | ⏳ 待处理 |
-| Mock数据清理 | 0% | 100% | ⏳ 待处理 |
-| 路由代码精简 | ~50% done | 100% | 🔄 进行中 |
+| 日志规范化 | 130处完成 | 100% | 🔄 进行中 |
+| 业务逻辑迁移 | 进行中 | 100% | 🔄 处理中 |
+| 循环依赖 | 存在 | 消除 | ⏳ 待处理 |
+| 测试覆盖率 | 提升中 | 80%+ | 🔄 进行中 |
 
 ### 架构健康评分
 
 - **当前**: 8.25/10
 - **目标**: 8.5/10
 
+### Sprint #5 完成成果
+
+| 成果 | 状态 |
+|------|------|
+| Backend Services AgentLogger 集成 | ✅ 完成 |
+| Routes Admin console.* 替换 | ✅ 完成 |
+| Routes console.* 清理 | ✅ 完成 |
+| Frontend AgentLogger 集成 | ✅ 完成 |
+| Frontend 组件测试 44/44 | ✅ 100% |
+| E2E 测试 71/71 | ✅ 100% |
+| API 集成测试 69/69 | ✅ 100% |
+
 ## 常见恢复场景
 
 ### 场景 1: `/clear` 后恢复对话
 
 ```
-1. 读取 .planning/STATE.md 了解当前进度
-2. 查看最近的 SUMMARY.md 了解完成的工作
-3. 从 check point 继续或重新规划
+1. 读取 .gsd/iteration-state.json 了解当前 Sprint 进度
+2. 查看 .gsd/todo.md 了解待办事项
+3. 检查 .planning/STATE.md 了解项目整体进度
+4. 从 pendingTasks 继续处理
 ```
 
 ### 场景 2: 服务启动失败
 
 ```bash
-# 检查端口占用
-lsof -i :30000
-lsof -i :8080
+# 使用健康检查脚本
+node .gsd/health-check.js
 
-# 检查日志
-tail -f backend/logs/app.log
-tail -f frontend/.next/server/logs
-
-# 重启服务
-pkill -f "node.*backend"
-pkill -f "next"
-
+# 或手动启动
 cd backend && npm run dev &
 cd frontend && npm run dev &
+
+# 验证服务
+curl http://localhost:30000/api/health
+curl http://localhost:8080
 ```
 
 ### 场景 3: 状态文件损坏
@@ -334,9 +343,26 @@ cd frontend && npm run dev &
 ```bash
 # 从 Git 恢复
 git checkout -- .planning/STATE.md
+git checkout -- .gsd/iteration-state.json
 
 # 手动重建（参考最近提交）
 git log --oneline -10
+
+# 查看最近变更
+git log --oneline --since="2026-05-14"
+```
+
+### 场景 4: 从特定检查点继续
+
+```bash
+# 查看迭代状态
+cat .gsd/iteration-state.json
+
+# 根据 pendingTasks 开始工作
+# 例如：解决 Domain层依赖Services层问题
+
+# 完成后更新状态
+echo '{"lastUpdated":"'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'","sprintNumber":6,"completedTasks":[...]}' > .gsd/iteration-state.json
 ```
 
 ## GSD 命令参考
