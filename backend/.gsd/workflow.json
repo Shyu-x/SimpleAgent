@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "sprintInterval": 30,
+  "teamSize": 10,
+  "testThreshold": "100%",
+  "workflow": [
+    "research",
+    "assign_tasks",
+    "execute",
+    "verify",
+    "iterate"
+  ],
+  "phases": {
+    "current": "sprint-ongoing",
+    "healthTarget": 8.5,
+    "currentScore": 8.25
+  }
+}
