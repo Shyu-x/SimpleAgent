@@ -48,13 +48,11 @@ coverage/
 # Project-specific ignores
 # ===========================================
 
-# 项目配置文件（不适合公开）
+# Internal documentation (not suitable for public)
 CLAUDE.md
-
-# 开发文档（内部流程，不上传）
 CHANGELOG.md
 
-# 内部开发文档（整个目录忽略）
+# Development documentation
 docs/AI-Chat开发手记.md
 docs/BROWSER_AUTOMATION_PLAYBOOK.md
 docs/DEPLOYMENT.md
@@ -66,10 +64,10 @@ docs/架构设计方案.md
 docs/架构评估报告_大厂标准.md
 docs/源码详细分析报告.md
 
-# PlantUML 源文件（不需要上传）
+# PlantUML source files
 docs/README_*.puml
 
-# 测试相关（结果、报告、语料）
+# Test results and reports
 tests/量化分析结果/
 tests/量化测试结果/
 tests/压测结果/
@@ -85,25 +83,25 @@ tests/NLP测试语料集.md
 tests/超大规模NLP测试语料集.md
 backend/tests/量化分析结果/
 
-# 后端测试脚本（开发用）
+# Backend test scripts
 backend/tests/量化分析_runner.js
 backend/tests/*_test.js
 backend/tests/*.test.js
 
-# Excalidraw 设计图
+# Excalidraw design files
 *.excalidraw
 
-# Docker 相关（可选保留）
+# Docker files
 .dockerignore
 
-# 临时文件
+# Temporary files
 tmp/
 temp/
 
-# 运行时指标文件
+# Runtime metrics files
 backend/data/metrics/metrics_*.json
 
-# CI/CD 和 Sprint 文档
+# CI/CD and Sprint documentation
 .github/
 docs/SPRINT-*.md
 docs/ARCHITECTURE-REVIEW.md
@@ -112,7 +110,7 @@ docs/TESTING.md
 docs/CI-CD-*.md
 docs/services-split-report.md
 
-# 测试脚本
+# Test scripts
 frontend/tests/
 frontend/test-results/
 test-results/

@@ -1,0 +1,83 @@
+# SimpleAgent
+
+A modern AI conversation platform built with React 19, Next.js 16, and Express.
+
+## License
+
+Copyright (c) 2025-2026 SimpleAgent Contributors
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+## Features
+
+- SSE streaming responses with typewriter effect
+- Multi-modal input (image upload, voice recording)
+- MiniMax Token Plan API integration
+- MCP tool system
+- RAG knowledge base
+- Multi-agent collaboration with A2A protocol
+- HITL human-in-the-loop confirmation
+- Intent detection and clarification
+- Enterprise admin dashboard
+
+## Architecture
+
+```
+backend/src/
+├── application/     # Application orchestration
+├── domain/          # Core business logic (model/rag/agent/search)
+├── infra/           # Infrastructure (metrics/alert/config/queue)
+├── common/          # Common utilities (errors/)
+├── routes/          # API endpoints
+└── services/        # Business logic layer
+
+frontend/src/
+├── app/             # Next.js App Router pages
+├── components/      # React components
+├── stores/          # Zustand state management
+├── hooks/           # Custom React hooks
+└── lib/             # Utilities
+```
+
+## Quick Start
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm start
+# Runs on port 30000
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+# Runs on port 3001
+```
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 19, Next.js 16, Zustand 5 |
+| Backend | Express, Node.js |
+| AI Model | MiniMax M2.7 (Token Plan) |
+| Database | Qdrant (vector), SQLite (metadata) |
+| Infrastructure | Prometheus, Redis |
+
+## Documentation
+
+- [CHANGELOG.md](./CHANGELOG.md) - Version history
+- [docs/](docs/) - Technical documentation
+
+## Contributing
+
+Contributions are welcome. Please read the AGPL-3.0 license terms before submitting pull requests.
