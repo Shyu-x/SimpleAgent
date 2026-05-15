@@ -101,8 +101,8 @@ temp/
 # Runtime metrics files
 backend/data/metrics/metrics_*.json
 
-# CI/CD and Sprint documentation
-.github/
+# CI/CD workflows
+# NOTE: .github/ is now tracked for CI/CD
 docs/SPRINT-*.md
 docs/ARCHITECTURE-REVIEW.md
 docs/TROUBLESHOOTING.md
