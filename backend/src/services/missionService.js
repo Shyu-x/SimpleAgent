@@ -4,8 +4,13 @@
  */
 
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 const path = require('path');
 const AppError = require('../common/errors/AppError');
+const createLogger = require('../common/logger');
+
+// 创建 MissionService 专用日志器
+const logger = createLogger('MissionService');
 
 // 任务状态枚举
 const TaskStatus = {
@@ -56,8 +61,8 @@ class MissionService {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   }
 
-  // 持久化保存
-  save() {
+  // 持久化保存 (异步)
+  async save() {
     try {
       const dataDir = path.dirname(this.storePath);
       if (!fs.existsSync(dataDir)) {
@@ -70,9 +75,9 @@ class MissionService {
         events: this.events.slice(0, 500) // 最多保留500条事件
       };
 
-      fs.writeFileSync(this.storePath, JSON.stringify(data, null, 2), 'utf8');
+      await fsPromises.writeFile(this.storePath, JSON.stringify(data, null, 2), 'utf8');
     } catch (error) {
-      console.error('[MissionService] Save failed:', error.message);
+      logger.error('持久化保存失败', { error: error.message, storePath: this.storePath });
     }
   }
 
@@ -93,10 +98,13 @@ class MissionService {
           this.events = data.events;
         }
 
-        console.log(`[MissionService] Loaded ${this.tasks.size} tasks, ${this.agents.size} agents`);
+        logger.info('数据加载完成', {
+          taskCount: this.tasks.size,
+          agentCount: this.agents.size
+        });
       }
     } catch (error) {
-      console.error('[MissionService] Load failed:', error.message);
+      logger.error('数据加载失败', { error: error.message, storePath: this.storePath });
     }
   }
 
@@ -105,7 +113,7 @@ class MissionService {
   /**
    * 创建任务
    */
-  createTask(data) {
+  async createTask(data) {
     const { name, description, priority, assignedAgent } = data;
 
     if (!name) {
@@ -130,7 +138,7 @@ class MissionService {
 
     this.tasks.set(task.id, task);
     this.addEvent('task_created', { taskId: task.id, message: `新建任务: ${task.name}` });
-    this.save();
+    await this.save();
 
     return task;
   }
@@ -186,7 +194,7 @@ class MissionService {
   /**
    * 更新任务
    */
-  updateTask(id, updates) {
+  async updateTask(id, updates) {
     const task = this.tasks.get(id);
     if (!task) {
       return null;
@@ -218,7 +226,7 @@ class MissionService {
       this.addEvent(eventType, { taskId: id, agentId: task.assignedAgent, message: this.getStatusMessage(updates.status, task.name) });
     }
 
-    this.save();
+    await this.save();
     return task;
   }
 
@@ -245,11 +253,11 @@ class MissionService {
   /**
    * 删除任务
    */
-  deleteTask(id) {
+  async deleteTask(id) {
     const existed = this.tasks.has(id);
     if (existed) {
       this.tasks.delete(id);
-      this.save();
+      await this.save();
     }
     return existed;
   }
@@ -257,7 +265,7 @@ class MissionService {
   /**
    * 执行任务
    */
-  executeTask(id) {
+  async executeTask(id) {
     const task = this.tasks.get(id);
     if (!task) {
       return { success: false, error: 'Task not found' };
@@ -274,7 +282,7 @@ class MissionService {
 
     this.tasks.set(id, task);
     this.addEvent('task_started', { taskId: id, message: `任务开始执行: ${task.name}` });
-    this.save();
+    await this.save();
 
     return { success: true, task };
   }
@@ -282,7 +290,7 @@ class MissionService {
   /**
    * 取消任务
    */
-  cancelTask(id) {
+  async cancelTask(id) {
     const task = this.tasks.get(id);
     if (!task) {
       return { success: false, error: 'Task not found' };
@@ -298,7 +306,7 @@ class MissionService {
 
     this.tasks.set(id, task);
     this.addEvent('task_cancelled', { taskId: id, message: `任务已取消: ${task.name}` });
-    this.save();
+    await this.save();
 
     return { success: true, task };
   }
@@ -308,7 +316,7 @@ class MissionService {
   /**
    * 注册 Agent
    */
-  registerAgent(data) {
+  async registerAgent(data) {
     const { name, role, avatar, capabilities } = data;
 
     if (!name) {
@@ -330,7 +338,7 @@ class MissionService {
 
     this.agents.set(agent.id, agent);
     this.addEvent('agent_status_change', { agentId: agent.id, message: `Agent 注册: ${agent.name}` });
-    this.save();
+    await this.save();
 
     return agent;
   }
@@ -338,7 +346,7 @@ class MissionService {
   /**
    * 更新 Agent
    */
-  updateAgent(id, updates) {
+  async updateAgent(id, updates) {
     const agent = this.agents.get(id);
     if (!agent) {
       return null;
@@ -360,7 +368,7 @@ class MissionService {
       this.addEvent('agent_status_change', { agentId: id, message: `Agent ${agent.name} 状态: ${updates.status}` });
     }
 
-    this.save();
+    await this.save();
     return agent;
   }
 
@@ -389,11 +397,11 @@ class MissionService {
   /**
    * 删除 Agent
    */
-  deleteAgent(id) {
+  async deleteAgent(id) {
     const existed = this.agents.has(id);
     if (existed) {
       this.agents.delete(id);
-      this.save();
+      await this.save();
     }
     return existed;
   }

@@ -55,21 +55,31 @@ router.get('/tasks/:id', (req, res) => {
 });
 
 /** PUT /api/mission/tasks/:id - 更新任务 */
-router.put('/tasks/:id', (req, res) => {
+router.put('/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { name, description, priority, status, assignedAgent, result, error } = req.body;
   const updates = { name, description, priority, status, assignedAgent, result, error };
   Object.keys(updates).forEach(k => updates[k] === undefined && delete updates[k]);
-  const task = missionService.updateTask(id, updates);
-  if (!task) return res.status(404).json({ error: { message: 'Task not found', type: 'not_found' } });
-  ok(res, { task });
+  try {
+    const task = await missionService.updateTask(id, updates);
+    if (!task) return res.status(404).json({ error: { message: 'Task not found', type: 'not_found' } });
+    ok(res, { task });
+  } catch (error) {
+    logger.error('Error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ error: { message: error.message, type: 'server_error' } });
+  }
 });
 
 /** DELETE /api/mission/tasks/:id - 删除任务 */
-router.delete('/tasks/:id', (req, res) => {
-  const deleted = missionService.deleteTask(req.params.id);
-  if (!deleted) return res.status(404).json({ error: { message: 'Task not found', type: 'not_found' } });
-  ok(res, { message: 'Task deleted' });
+router.delete('/tasks/:id', async (req, res) => {
+  try {
+    const deleted = await missionService.deleteTask(req.params.id);
+    if (!deleted) return res.status(404).json({ error: { message: 'Task not found', type: 'not_found' } });
+    ok(res, { message: 'Task deleted' });
+  } catch (error) {
+    logger.error('Error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ error: { message: error.message, type: 'server_error' } });
+  }
 });
 
 /** POST /api/mission/tasks/:id/execute - 执行任务 */
@@ -101,20 +111,30 @@ router.get('/agents/:id', (req, res) => {
 });
 
 /** PUT /api/mission/agents/:id - 更新 Agent */
-router.put('/agents/:id', (req, res) => {
+router.put('/agents/:id', async (req, res) => {
   const { status, currentTask, progress, capabilities } = req.body;
   const updates = { status, currentTask, progress, capabilities };
   Object.keys(updates).forEach(k => updates[k] === undefined && delete updates[k]);
-  const agent = missionService.updateAgent(req.params.id, updates);
-  if (!agent) return res.status(404).json({ error: { message: 'Agent not found', type: 'not_found' } });
-  ok(res, { agent });
+  try {
+    const agent = await missionService.updateAgent(req.params.id, updates);
+    if (!agent) return res.status(404).json({ error: { message: 'Agent not found', type: 'not_found' } });
+    ok(res, { agent });
+  } catch (error) {
+    logger.error('Error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ error: { message: error.message, type: 'server_error' } });
+  }
 });
 
 /** DELETE /api/mission/agents/:id - 删除 Agent */
-router.delete('/agents/:id', (req, res) => {
-  const deleted = missionService.deleteAgent(req.params.id);
-  if (!deleted) return res.status(404).json({ error: { message: 'Agent not found', type: 'not_found' } });
-  ok(res, { message: 'Agent deleted' });
+router.delete('/agents/:id', async (req, res) => {
+  try {
+    const deleted = await missionService.deleteAgent(req.params.id);
+    if (!deleted) return res.status(404).json({ error: { message: 'Agent not found', type: 'not_found' } });
+    ok(res, { message: 'Agent deleted' });
+  } catch (error) {
+    logger.error('Error:', { error: error.message, stack: error.stack });
+    res.status(500).json({ error: { message: error.message, type: 'server_error' } });
+  }
 });
 
 // ========== 事件与统计路由 ==========
