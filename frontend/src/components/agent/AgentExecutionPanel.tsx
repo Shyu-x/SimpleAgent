@@ -414,7 +414,10 @@ function useExecutionHistory() {
 
 // ============ 面板属性 ============
 interface AgentExecutionPanelProps {
-  state: AgentExecutionState;
+  // 任务ID - 用于从任务队列加载执行状态
+  taskId?: string;
+  // 直接传入执行状态（与 taskId 二选一）
+  state?: AgentExecutionState;
   onPause?: () => void;
   onResume?: () => void;
   onStop?: () => void;
@@ -1097,7 +1100,8 @@ const ExecutionStatsPanel = memo(function ExecutionStatsPanel({ stats }: Executi
 
 // 主面板组件
 const AgentExecutionPanel = memo(function AgentExecutionPanel({
-  state,
+  taskId,
+  state: externalState,
   onPause,
   onResume,
   onStop,
@@ -1119,9 +1123,67 @@ const AgentExecutionPanel = memo(function AgentExecutionPanel({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['agents']));
   const [isLogExpanded, setIsLogExpanded] = useState(false);
-  const [localLogs, setLocalLogs] = useState<LogEntry[]>(state.logs || []);
+  const [localLogs, setLocalLogs] = useState<LogEntry[]>([]);
   const [historySearch, setHistorySearch] = useState('');
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
+  const [internalState, setInternalState] = useState<AgentExecutionState | null>(null);
+
+  // 使用外部状态或内部状态
+  const state = externalState || internalState;
+
+  // 如果有 taskId，从任务队列加载状态
+  useEffect(() => {
+    if (taskId) {
+      // 尝试从任务队列 API 加载任务状态
+      fetch(`/api/missionControl/tasks/${taskId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.task) {
+            setInternalState({
+              status: data.task.status === 'completed' ? 'completed' :
+                     data.task.status === 'failed' ? 'error' :
+                     data.task.status === 'running' ? 'running' : 'idle',
+              activeAgent: { id: data.task.agentId || 'agent-1', name: data.task.agentId || 'Agent 1', role: 'agent', status: 'idle' },
+              allAgents: [],
+              logs: [],
+              toolCalls: [],
+              thinkingSteps: [],
+              checkpoints: [],
+              startedAt: data.task.createdAt,
+              currentIteration: 0,
+              maxIterations: 50
+            });
+          }
+        })
+        .catch(() => {
+          // 如果 API 失败，创建空状态
+          setInternalState({
+            status: 'idle',
+            activeAgent: null,
+            allAgents: [],
+            logs: [],
+            toolCalls: [],
+            thinkingSteps: [],
+            checkpoints: [],
+            currentIteration: 0,
+            maxIterations: 50
+          });
+        });
+    } else if (!externalState) {
+      // 没有 taskId 也没有外部状态，创建空状态
+      setInternalState({
+        status: 'idle',
+        activeAgent: null,
+        allAgents: [],
+        logs: [],
+        toolCalls: [],
+        thinkingSteps: [],
+        checkpoints: [],
+        currentIteration: 0,
+        maxIterations: 50
+      });
+    }
+  }, [taskId, externalState]);
 
   // 内部历史 hook（如果外部没有传入历史记录）
   const internalHistory = useExecutionHistory();
@@ -1130,27 +1192,36 @@ const AgentExecutionPanel = memo(function AgentExecutionPanel({
 
   // 同步外部 logs 到本地
   useEffect(() => {
-    if (state.logs) {
+    if (state?.logs) {
       setLocalLogs(state.logs);
     }
-  }, [state.logs]);
+  }, [state?.logs]);
 
   // 监听执行完成，自动保存历史
   useEffect(() => {
-    if ((state.status === 'completed' || state.status === 'error') && state.startedAt) {
-      // 从 toolCalls 或 thinkingSteps 提取任务标题
-      const firstToolCall = state.toolCalls[0];
-      const firstThought = state.thinkingSteps[0];
-      const taskTitle = firstThought?.content?.slice(0, 30) ||
-                       (firstToolCall?.params && JSON.stringify(firstToolCall.params).slice(0, 30)) ||
-                       'Agent 任务';
-      if (onAddHistory) {
-        onAddHistory(state, taskTitle);
-      } else {
-        internalHistory.addRecord(state, taskTitle);
-      }
+    if (!state || (state.status !== 'completed' && state.status !== 'error') || !state.startedAt) {
+      return;
     }
-  }, [state.status, state.startedAt]);
+    // 从 toolCalls 或 thinkingSteps 提取任务标题
+    const firstToolCall = state.toolCalls[0];
+    const firstThought = state.thinkingSteps[0];
+    const taskTitle = firstThought?.content?.slice(0, 30) ||
+                     (firstToolCall?.params && JSON.stringify(firstToolCall.params).slice(0, 30)) ||
+                     'Agent 任务';
+    if (onAddHistory) {
+      onAddHistory(state, taskTitle);
+    } else {
+      internalHistory.addRecord(state, taskTitle);
+    }
+  }, [state?.status, state?.startedAt]);
+
+  if (!state) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-sm text-[hsl(var(--text-muted))]">加载中...</div>
+      </div>
+    );
+  }
 
   const statusStyle = executionStatusStyles[state.status];
 

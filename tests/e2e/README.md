@@ -40,7 +40,7 @@ npx playwright install chromium
 
 ```bash
 export MINIMAX_API_KEY=your_api_key  # 用于视觉分析
-export TEST_BASE_URL=http://localhost:5173
+export TEST_BASE_URL=http://localhost:3001
 export TEST_BACKEND_URL=http://localhost:30000
 ```
 
@@ -142,7 +142,7 @@ jobs:
 ### 服务未启动
 ```bash
 # 检查前端
-curl http://localhost:5173
+curl http://localhost:3001
 
 # 检查后端
 curl http://localhost:30000/api/health

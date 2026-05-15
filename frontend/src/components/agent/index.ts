@@ -145,9 +145,6 @@ export type {
   WorkspaceTab,
 } from './AgentWorkspace';
 
-// DnD 工作流画布
-export { default as DndWorkflowCanvas } from './workflow/DndWorkflowCanvas';
-
 // Mission Control
 export { default as MissionControl } from './MissionControl/MissionControl';
 

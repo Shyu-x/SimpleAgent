@@ -1,8 +1,8 @@
 import sys
 from playwright.sync_api import sync_playwright
 
-FRONTEND_URL = "http://localhost:8080"
-ADMIN_URL = "http://localhost:8080/admin"
+FRONTEND_URL = "http://localhost:3001"
+ADMIN_URL = "http://localhost:3001/admin"
 T = 30000
 
 class UITest:

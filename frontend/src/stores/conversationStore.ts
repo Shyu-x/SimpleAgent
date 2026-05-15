@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Conversation } from '@/types';
+import { useSettingsStore } from './settingsStore';
 
 // SessionStorage 适配器
 const sessionStorageAdapter = {
@@ -39,8 +40,10 @@ export interface ConversationState {
   removeConversationFromWindow: (windowId: string) => void;
 
   // 排序 & 重命名
-  reorderConversations: (draggedId: string, targetId: string) => void;
   updateConversationTitle: (id: string, title: string) => void;
+
+  // 打开对话（支持多窗口）
+  openConversation: (id: string, options?: { targetWindow?: number }) => void;
 
   // 水合
   setHasHydrated: (hasHydrated: boolean) => void;
@@ -136,25 +139,40 @@ export const useConversationStore = create<ConversationState>()(
         });
       },
 
-      reorderConversations: (draggedId: string, targetId: string) => {
-        set((state) => {
-          const newConversations = [...state.conversations];
-          const draggedIndex = newConversations.findIndex((c) => c.id === draggedId);
-          const targetIndex = newConversations.findIndex((c) => c.id === targetId);
-          if (draggedIndex !== -1 && targetIndex !== -1) {
-            const [draggedConv] = newConversations.splice(draggedIndex, 1);
-            newConversations.splice(targetIndex, 0, draggedConv);
-          }
-          return { conversations: newConversations };
-        });
-      },
-
       updateConversationTitle: (id: string, title: string) => {
         set((state) => ({
           conversations: state.conversations.map((conv) =>
             conv.id === id ? { ...conv, title } : conv
           ),
         }));
+      },
+
+      openConversation: (id: string, options?: { targetWindow?: number }) => {
+        const state = get();
+        const { windowLayout } = useSettingsStore.getState().settings;
+        // 单窗口模式：直接切换
+        if (windowLayout === 'single') {
+          set({ activeConversationId: id, activeConversationIds: [id] });
+          return;
+        }
+        // 多窗口模式
+        if (options?.targetWindow !== undefined) {
+          const windowId = state.activeConversationIds[options.targetWindow];
+          if (windowId) {
+            get().assignConversationToWindow(id, windowId);
+          }
+        } else {
+          const maxWindows = windowLayout === 'grid' ? 4 : 2;
+          const hasEmptyWindow = state.activeConversationIds.length < maxWindows;
+          if (hasEmptyWindow) {
+            get().addActiveWindow(id);
+          } else {
+            const firstWindow = state.activeConversationIds[0];
+            if (firstWindow) {
+              get().assignConversationToWindow(id, firstWindow);
+            }
+          }
+        }
       },
 
       setHasHydrated: (hasHydrated: boolean) => set({ hasHydrated }),

@@ -30,12 +30,12 @@ const ToolMarketplace = dynamic(
   () => import('@/components/agent/ToolMarketplace'),
   { ssr: false }
 );
-import { MissionControl } from '@/components/agent';
 import { ToastProvider } from '@/components/Toast';
 import { MobileExperienceProvider, MobileLayout } from '@/components/mobile';
 import KnowledgeBaseManager from '@/components/KnowledgeBaseManager';
 import Settings from '@/components/Settings';
 import { useHITLSSE } from '@/hooks/useHITLSSE';
+import { useWindowHotkeys } from '@/hooks/useWindowHotkeys';
 import HumanConfirmationDialog, { type ConfirmationRequest, type ConfirmationResponse } from '@/components/agent/HumanConfirmationDialog';
 
 type SidePanelContent = 'none' | 'memory' | 'agents' | 'tools' | 'kb' | 'settings';
@@ -84,7 +84,6 @@ export default function Home() {
     setShowWelcomeGuide,
     rehydrate,
     appMode,
-    setAppMode,
     focusMode,
     setFocusMode,
   } = useChatStore();
@@ -117,6 +116,9 @@ export default function Home() {
     onRejected: (checkpoint) => console.log('[Page] Confirmation rejected:', checkpoint.id),
     onTimeout: (checkpoint) => console.log('[Page] Confirmation timeout:', checkpoint.id)
   }), []);
+
+  // 窗口快捷键
+  useWindowHotkeys();
 
   const {
     pendingConfirmations,
@@ -327,23 +329,14 @@ export default function Home() {
                   <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
 
                   {/* Agent 专属入口 - 高亮醒目按钮 */}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setAppMode(appMode === 'agent' ? 'chat' : 'agent')}
-                    className={`relative flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
-                      appMode === 'agent'
-                        ? 'bg-gradient-to-r from-primary/90 to-primary text-primary-foreground shadow-lg'
-                        : 'border border-primary/50 bg-primary/8 text-primary hover:bg-primary/16 hover:border-primary/70'
-                    }`}
-                    title={appMode === 'agent' ? '返回聊天模式' : '进入 Agent 模式'}
+                  <Link
+                    href="/agent"
+                    className="relative flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all border border-primary/50 bg-primary/8 text-primary hover:bg-primary/16 hover:border-primary/70"
+                    title="进入 Agent 模式"
                   >
-                    {appMode === 'agent' && (
-                      <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-accent/20 animate-pulse opacity-60 pointer-events-none" />
-                    )}
-                    <Bot size={14} className={appMode === 'agent' ? 'drop-shadow-sm' : ''} />
+                    <Bot size={14} />
                     <span className="relative">Agent</span>
-                  </motion.button>
+                  </Link>
 
                   <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
 
@@ -417,50 +410,39 @@ export default function Home() {
                 </div>
               </header>
 
-              {/* 桌面端聊天视窗 / Agent 工作区 / 专注模式 */}
-              <div className="flex-1 overflow-hidden px-3 pb-3 pt-2">
-                <div className="h-full overflow-hidden rounded-3xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/82 shadow-xl backdrop-blur">
-                  <AnimatePresence mode="wait">
-                    {focusMode ? (
-                      <motion.div
-                        key="focus-mode"
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                        className="h-full w-full"
-                      >
-                        <FocusModeChat />
-                      </motion.div>
-                    ) : appMode === 'agent' ? (
-                      <motion.div
-                        key="agent-workspace"
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                        className="h-full w-full"
-                      >
-                        <MissionControl className="h-full w-full" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="multi-window-chat"
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.98 }}
-                        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                        className="h-full w-full"
-                      >
-                        <MultiWindowChat
-                          layout={settings.windowLayout || 'single'}
-                          onOpenSidebar={() => setSidebarOpen(true)}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
+              {/* 桌面端聊天视窗 / 专注模式 */}
+                  <div className="flex-1 overflow-hidden px-3 pb-3 pt-2">
+                    <div className="h-full overflow-hidden rounded-3xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/82 shadow-xl backdrop-blur">
+                      <AnimatePresence mode="wait">
+                        {focusMode ? (
+                          <motion.div
+                            key="focus-mode"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            className="h-full w-full"
+                          >
+                            <FocusModeChat />
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="multi-window-chat"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                            className="h-full w-full"
+                          >
+                            <MultiWindowChat
+                              layout={settings.windowLayout || 'single'}
+                              onOpenSidebar={() => setSidebarOpen(true)}
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
             </motion.main>
 
           </LayoutGroup>

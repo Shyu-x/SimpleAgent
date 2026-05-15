@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useState, useEffect, useRef } from 'react';
+import { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { createHighlighter, type Highlighter } from 'shiki';
@@ -9,27 +9,8 @@ import { Check, Copy, Eye, X, ZoomIn, ZoomOut, Maximize2, Minimize2 } from 'luci
 import { motion, AnimatePresence } from 'framer-motion';
 import './code-highlight.css';
 
-// Katex 动态导入 - 只在检测到数学公式时加载 (~500KB 节省)
-// 仅加载核心渲染器，不加载完整 Katex 库
-const MATH_PATTERN = /(?:\$|`(?:```)?math|\\\[|\\\(|\\begin\{)/;
-
-let remarkMathLazy: any = null;
-let rehypeKatexLazy: any = null;
-let katexLazy: any = null;
-
-async function loadKatex() {
-  if (!remarkMathLazy) {
-    const [remarkMathModule, rehypeKatexModule, katexModule] = await Promise.all([
-      import('remark-math'),
-      import('rehype-katex'),
-      import('katex'),
-    ]);
-    remarkMathLazy = remarkMathModule.default;
-    rehypeKatexLazy = rehypeKatexModule.default;
-    katexLazy = katexModule.default;
-  }
-  return { remarkMath: remarkMathLazy, rehypeKatex: rehypeKatexLazy, katex: katexLazy };
-}
+// 数学公式检测正则 - 检测 $...$, $$...$$, \[...\], \(...\), \begin{equation}
+const MATH_PATTERN = /\$(?:\$[\s\S]+?\$|\s*\S[^$]*\S\s*\$)|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\\begin\{(?:equation|align|math)\}/;
 
 interface MarkdownRendererProps {
   content: string;
@@ -48,6 +29,26 @@ const COMMON_LANGS = [
   'javascript', 'typescript', 'python', 'java', 'cpp', 'go', 'rust',
   'html', 'css', 'json', 'yaml', 'bash', 'shell', 'sql', 'jsx', 'tsx'
 ];
+
+// Katex 懒加载模块
+let katexModules: {
+  remarkMath: any;
+  rehypeKatex: any;
+} | null = null;
+
+async function loadKatexModules() {
+  if (!katexModules) {
+    const [remarkMathModule, rehypeKatexModule] = await Promise.all([
+      import('remark-math'),
+      import('rehype-katex'),
+    ]);
+    katexModules = {
+      remarkMath: remarkMathModule.default,
+      rehypeKatex: rehypeKatexModule.default,
+    };
+  }
+  return katexModules;
+}
 
 async function getHighlighter(): Promise<Highlighter> {
   if (highlighter) return highlighter;
@@ -174,7 +175,7 @@ ${html}
               className="p-1.5 rounded hover:bg-muted"
               title="关闭"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
         </div>
@@ -382,9 +383,34 @@ const MarkdownRenderer = memo(function MarkdownRenderer({
   className='',
   onPreviewLink,
 }: MarkdownRendererProps) {
+  // 检测是否有数学公式
+  const hasMath = useMemo(() => MATH_PATTERN.test(content), [content]);
+
+  // 动态加载的插件状态
+  const [mathPlugins, setMathPlugins] = useState<{ remarkPlugins: any[]; rehypePlugins: any[] }>({
+    remarkPlugins: [remarkGfm],
+    rehypePlugins: [],
+  });
+  const [isLoadingMath, setIsLoadingMath] = useState(false);
+
+  // 当检测到数学公式时，懒加载 Katex
+  useEffect(() => {
+    if (hasMath && mathPlugins.rehypePlugins.length === 0 && !isLoadingMath) {
+      setIsLoadingMath(true);
+      loadKatexModules().then(modules => {
+        setMathPlugins({
+          remarkPlugins: [remarkGfm, modules.remarkMath],
+          rehypePlugins: [modules.rehypeKatex],
+        });
+        setIsLoadingMath(false);
+      }).catch(() => {
+        setIsLoadingMath(false);
+      });
+    }
+  }, [hasMath]);
+
   // 安全过滤内容
   const sanitizedContent = useMemo(() => {
-    // 先使用DOMPurify清理HTML
     return DOMPurify.sanitize(content, {
       ALLOWED_TAGS,
       ALLOWED_ATTR,
@@ -392,18 +418,15 @@ const MarkdownRenderer = memo(function MarkdownRenderer({
     });
   }, [content]);
 
-  // 错误边界组件
-  const ErrorFallback = ({ error }: { error: Error }) => (
-    <div className="rounded bg-destructive/10 p-2 text-sm text-destructive">
-      渲染错误: {error.message}
-    </div>
-  );
-
   return (
     <div className={`markdown-content ${className}`}>
+      {/* 数学公式加载提示 */}
+      {hasMath && isLoadingMath && (
+        <div className="text-xs text-muted-foreground mb-2">加载数学公式渲染器...</div>
+      )}
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        remarkPlugins={mathPlugins.remarkPlugins}
+        rehypePlugins={mathPlugins.rehypePlugins}
         components={{
           // 代码块
           code({ className, children, node, ...props }) {
@@ -603,4 +626,3 @@ const MarkdownRenderer = memo(function MarkdownRenderer({
 });
 
 export default MarkdownRenderer;
-

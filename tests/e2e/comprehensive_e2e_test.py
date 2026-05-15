@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright, Page
 
 # 测试配置
 BACKEND_URL = "http://localhost:30000"
-FRONTEND_URL = "http://localhost:8080"
+FRONTEND_URL = "http://localhost:3001"
 TEST_TIMEOUT = 60000  # 60秒
 
 class ComprehensiveE2ETest:

@@ -23,7 +23,7 @@ const { chromium, firefox, webkit } = require('../../frontend/node_modules/playw
 
 const CONFIG = {
   // 服务地址
-  BASE_URL: process.env.TEST_BASE_URL || 'http://localhost:8080',
+  BASE_URL: process.env.TEST_BASE_URL || 'http://localhost:3001',
   BACKEND_URL: process.env.TEST_BACKEND_URL || 'http://localhost:30000',
 
   // API 配置 (留空则跳过视觉分析，节省Token)

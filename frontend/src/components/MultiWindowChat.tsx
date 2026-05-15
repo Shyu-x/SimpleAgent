@@ -4,8 +4,7 @@ import { useChatStore } from '@/store/chatStore';
 import ChatArea from '@/components/ChatArea';
 import { X, Columns, Rows, LayoutGrid, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { useMemo, useState, useCallback } from 'react';
-import MultiWindowDropZone from './MultiWindowDropZone';
+import { useMemo } from 'react';
 
 interface MultiWindowChatProps {
   layout: 'single' | 'horizontal' | 'vertical' | 'grid';
@@ -14,9 +13,6 @@ interface MultiWindowChatProps {
 
 export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowChatProps) {
   const { addActiveWindow, removeActiveWindow, activeConversationIds, conversations, activeConversationId } = useChatStore();
-
-  // 拖拽高亮状态
-  const [highlightedWindow, setHighlightedWindow] = useState<string | null>(null);
 
   // 生成窗口 ID 列表（支持最多4个窗口）
   const windowIds = useMemo(() => {
@@ -31,12 +27,6 @@ export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowCh
     }
     return baseIds;
   }, [activeConversationIds, activeConversationId, layout]);
-
-  // 处理拖拽放置
-  const handleDrop = useCallback((conversationId: string, windowId: string) => {
-    // 将对话分配到指定窗口
-    useChatStore.getState().assignConversationToWindow(conversationId, windowId);
-  }, []);
 
   // 计算窗口样式类名
   const getWindowClassName = (layout: string, windowCount: number, isEmpty: boolean) => {
@@ -91,7 +81,6 @@ export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowCh
             windowIds.map((convId, index) => {
               const conversation = conversations.find(c => c.id === convId);
               const isEmptyWindow = convId.startsWith('empty-') || (!conversation && layout !== 'single');
-              const isHighlighted = highlightedWindow === convId;
 
               const shouldHide = layout === 'single' && index > 0;
 
@@ -126,12 +115,6 @@ export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowCh
                   )}
 
                   <div className="flex-1 overflow-hidden relative">
-                    <MultiWindowDropZone
-                      windowId={convId}
-                      isHighlighted={isHighlighted}
-                      onHighlightChange={(highlighted) => setHighlightedWindow(highlighted ? convId : null)}
-                      onDrop={handleDrop}
-                    >
                       {isEmptyWindow ? (
                         <div className="flex h-full items-center justify-center text-sm text-[hsl(var(--text-muted))]">
                           <div className="flex flex-col items-center gap-3 opacity-60">
@@ -148,13 +131,12 @@ export default function MultiWindowChat({ layout, onOpenSidebar }: MultiWindowCh
                                 d="M12 4.5v15m7.5-7.5h-15"
                               />
                             </svg>
-                            <span>从侧边栏拖拽对话到此处</span>
+                            <span>从侧边栏点击对话</span>
                           </div>
                         </div>
                       ) : (
                         <ChatArea conversationId={convId} onOpenSidebar={onOpenSidebar} />
                       )}
-                    </MultiWindowDropZone>
                   </div>
                 </motion.div>
               );

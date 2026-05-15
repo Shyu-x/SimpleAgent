@@ -5,9 +5,13 @@ module.exports = {
       script: 'src/index.js',
       cwd: 'C:/Users/Xu/Desktop/chat玩具/backend',
       instances: 1,
-      autorestart: true,
+      exec_mode: 'fork',
       watch: false,
+      autorestart: true,
       max_memory_restart: '500M',
+      max_restarts: 10,
+      restart_delay: 1000,
+      kill_timeout: 5000,
       env: {
         NODE_ENV: 'development',
         PORT: 30000
@@ -19,30 +23,35 @@ module.exports = {
       error_file: './logs/backend-error.log',
       out_file: './logs/backend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
-      merge_logs: true
+      merge_logs: true,
+      time: true
     },
     {
       name: 'ai-chat-frontend',
       script: 'node_modules/next/dist/bin/next',
-      args: 'dev -p 3001',
+      args: 'start -p 8080',
       cwd: 'C:/Users/Xu/Desktop/chat玩具/frontend',
       instances: 1,
       exec_mode: 'fork',
-      autorestart: true,
       watch: false,
-      max_memory_restart: '800M',
+      autorestart: true,
+      max_memory_restart: '1G',
+      max_restarts: 10,
+      restart_delay: 1000,
+      kill_timeout: 5000,
       env: {
         NODE_ENV: 'development',
-        PORT: 3001
+        PORT: 8080
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 8080
       },
       error_file: './logs/frontend-error.log',
       out_file: './logs/frontend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
-      merge_logs: true
+      merge_logs: true,
+      time: true
     }
   ]
 };

@@ -4,6 +4,7 @@
 // - 消息操作：useMessageStore (纯函数，需配合 conversationStore)
 // - UI 状态：useUIStore
 // - 设置：useSettingsStore
+// - 记忆/提示词：useMemoryStore
 // - 统一状态：useUnifiedStore (向后兼容)
 // - 向后兼容：useChatStore (从 @/store/chatStore 导入)
 
@@ -17,6 +18,8 @@ export type { Settings, EnabledFeatures, SidePanelContent, AppMode } from './uiS
 
 export { useSettingsStore } from './settingsStore';
 export type { Settings as AppSettings } from './settingsStore';
+
+export { useMemoryStore } from './memoryStore';
 
 export { useUnifiedStore, useChatStore } from './unifiedStore';
 export { validateApiKey, getProviderFromModel } from './settingsStore';

@@ -18,7 +18,7 @@ module.exports = {
     ['list'],
   ],
   use: {
-    baseURL: process.env.TEST_BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.TEST_BASE_URL || 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
