@@ -1,10 +1,19 @@
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import nextTypeScript from 'eslint-config-next/typescript';
+import fs from 'fs';
+import path from 'path';
 
 export default [
   ...nextCoreWebVitals,
   ...nextTypeScript,
   {
+    ignores: [
+      // App Router 项目不需要 pages 目录
+      'src/pages/**/*',
+      // Coverage 目录 (测试覆盖率输出)
+      'coverage/**',
+      '**/coverage/**'
+    ],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',

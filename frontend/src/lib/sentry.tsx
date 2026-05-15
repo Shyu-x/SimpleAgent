@@ -345,7 +345,7 @@ export function withSentryMonitoring<P extends object>(
       <ErrorBoundary
         fallback={({ error, resetError }) => (
           <ErrorFallback
-            error={error}
+            error={error as Error | { message?: string; stack?: string }}
             resetError={resetError}
             module={moduleName}
           />

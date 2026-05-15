@@ -149,7 +149,6 @@ export function createSafeComponent(
  *
  * 注意：由于函数组件更常用，建议使用 withErrorBoundary HOC
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function errorBoundary(options: WithErrorBoundaryOptions = {}): any {
   return function <P extends object>(Component: ComponentType<P>): ComponentType<P> {
     return withErrorBoundary(Component, options);

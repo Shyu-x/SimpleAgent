@@ -26,7 +26,7 @@ interface VirtualListResult {
   containerProps: {
     style: React.CSSProperties;
     onScroll: (e: React.UIEvent<HTMLElement>) => void;
-    ref: React.RefObject<HTMLDivElement>;
+    ref: React.RefObject<HTMLDivElement | null>;
   };
   listProps: {
     style: React.CSSProperties;

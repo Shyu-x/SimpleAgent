@@ -2,10 +2,17 @@
  * 集成测试运行器
  *
  * 运行方式:
- *   node integration/runner.js           # 运行所有集成测试
- *   node integration/runner.js chat      # 只运行聊天 API 测试
- *   node integration/runner.js agent     # 只运行 Agent API 测试
- *   node integration/runner.js search    # 只运行搜索 API 测试
+ *   node integration/runner.js                    # 运行所有集成测试
+ *   node integration/runner.js chat               # 只运行聊天 API 测试
+ *   node integration/runner.js admin              # 只运行管理后台 API 测试
+ *   node integration/runner.js metrics            # 只运行指标 API 测试
+ *   node integration/runner.js hitl               # 只运行 HITL API 测试
+ *   node integration/runner.js mission            # 只运行任务控制 API 测试
+ *   node integration/runner.js memory             # 只运行记忆 API 测试
+ *
+ * Jest 运行:
+ *   npm test -- --testPathPattern=integration/    # 运行所有集成测试
+ *   npm test -- --testPathPattern=integration/chatApi.test.js
  */
 
 const { spawn } = require('child_process');
@@ -13,8 +20,11 @@ const path = require('path');
 
 const testFiles = {
   chat: 'chatApi.test.js',
-  agent: 'agentApi.test.js',
-  search: 'searchApi.test.js'
+  admin: 'adminApi.test.js',
+  metrics: 'metricsApi.test.js',
+  hitl: 'hitlApi.test.js',
+  mission: 'missionApi.test.js',
+  memory: 'memoryApi.test.js'
 };
 
 const testsDir = path.join(__dirname);
@@ -88,6 +98,7 @@ async function main() {
     Object.keys(testFiles).forEach(name => {
       console.log(`  - ${name}: ${testFiles[name]}`);
     });
+    console.log('\nJest 运行: npm test -- --testPathPattern=integration/');
     return;
   }
 

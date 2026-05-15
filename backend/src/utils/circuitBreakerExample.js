@@ -8,12 +8,13 @@
  */
 
 const CircuitBreaker = require('opossum');
+const AppError = require('../common/errors/AppError');
 
 // 模拟的API调用函数
 async function callAPI(params) {
   // 模拟随机失败
   if (Math.random() > 0.7) {
-    throw new Error('API请求失败');
+    throw AppError.internalError('API请求失败');
   }
   return { success: true, data: '响应数据' };
 }

@@ -6,7 +6,7 @@ const backendOrigin =
 
 const nextConfig = {
   reactStrictMode: true,
-  // Experimental features for better DX
+  // Disable Turbopack for build - use Webpack
   experimental: {
     // Optimize package imports for faster HMR
     optimizePackageImports: ['lucide-react', 'recharts', 'framer-motion'],

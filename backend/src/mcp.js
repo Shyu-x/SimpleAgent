@@ -7,6 +7,7 @@
 const { Client } = require('@modelcontextprotocol/sdk/client/index.js');
 const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio.js');
 const EnhancedSearchTool = require('./services/tools/enhancedSearchTool');
+const AppError = require('./common/errors/AppError');
 
 /**
  * MCP 工具定义
@@ -653,7 +654,7 @@ class MCPClientManager {
             });
 
             if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`);
+              throw AppError.internalError(`HTTP ${response.status}`);
             }
 
             const text = await response.text();
