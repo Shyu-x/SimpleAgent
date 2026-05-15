@@ -1,177 +1,170 @@
 # SimpleAgent
 
-A modern AI conversation platform built with React 19, Next.js 16, Zustand 5, and Express.
+现代化 AI 对话平台，基于 React 19 + Next.js 16 + Express 构建。
 
-## License
+[![CI/CD](https://github.com/Shyu-x/SimpleAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/Shyu-x/SimpleAgent/actions)
+[![Node.js](https://img.shields.io/badge/node-18%2B-green?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![Next.js](https://img.shields.io/badge/next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](LICENSE)
 
-Copyright (c) 2025-2026 SimpleAgent Contributors
+## 功能特性
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+- SSE 流式响应，打字机效果
+- MiniMax Token Plan API 集成 (M2.7, VL-01, image-01)
+- 意图检测与澄清机制
+- ReAct Agent 引擎，工具调用
+- RAG 知识库，混合检索 (向量 + 关键词)
+- 多 Agent 协作 (A2A 协议)
+- HITL 人机协作确认
+- 企业级管理后台
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+## 技术架构
 
-You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-## Project Overview
-
-SimpleAgent is a full-stack AI conversation application that demonstrates modern AI application architecture and engineering practices.
-
-Core Features:
-- SSE streaming responses with typewriter effect
-- MiniMax Token Plan API integration (M2.7, VL-01, image-01)
-- Intent detection and clarification
-- ReAct-based Agent engine with tool calling
-- RAG knowledge base with hybrid search (vector + keyword)
-- Session memory management with sliding window
-- Multi-agent collaboration via A2A protocol
-- HITL (Human-In-The-Loop) confirmation system
-- Enterprise admin dashboard
-
-## Architecture
+![架构图](docs/architecture-diagram.png)
 
 ```
 +------------------------------------------------------------------+
-|                         Frontend (Port 3001)                        |
+|                      前端 (Port 3001)                              |
 |   React 19 + Next.js 16 + Zustand 5 + TypeScript                 |
 +------------------------------------------------------------------+
                               SSE
 +------------------------------------------------------------------+
-|                         Backend (Port 30000)                        |
-|   Node.js + Express + Layered Architecture                        |
+|                      后端 (Port 30000)                             |
+|   Node.js + Express + 分层架构                                    |
 +------------------------------------------------------------------+
                               API
 +------------------------------------------------------------------+
-|                      MiniMax API (External)                       |
+|                      MiniMax API (外部服务)                        |
 |   M2.7 / VL-01 / image-01                                        |
 +------------------------------------------------------------------+
 ```
 
-### Backend Architecture (Layered)
+### 后端分层架构
 
 ```
 backend/src/
-├── application/     # Application orchestration
-├── domain/          # Core business logic (model/rag/agent/search)
-├── infra/           # Infrastructure (metrics/alert/config/queue)
-├── common/          # Common utilities (errors/)
-├── routes/          # API endpoints (30+ routes)
-└── services/       # Business logic layer
+├── application/     # 应用编排层
+├── domain/          # 核心业务逻辑 (model/rag/agent/search)
+├── infra/           # 基础设施 (metrics/alert/config/queue)
+├── common/          # 通用工具 (errors/)
+├── routes/          # API 端点 (30+ 路由)
+└── services/        # 业务逻辑层
 ```
 
-## Quick Start
+## 快速开始
 
-### Prerequisites
+### 环境要求
 
 - Node.js 18+
-- npm 9+ or pnpm 8+
+- npm 9+ 或 pnpm 8+
 - MiniMax API Key (Token Plan)
 
-### Backend
+### 后端安装
 
 ```bash
 cd backend
 npm install
 cp ../.env.example .env
-# Edit .env and add your MINIMAX_API_KEY
+# 编辑 .env，添加你的 MINIMAX_API_KEY
 npm start
-# Runs on port 30000
+# 运行在端口 30000
 ```
 
-### Frontend
+### 前端安装
 
 ```bash
 cd frontend
 npm install
 npm run dev
-# Runs on port 3001
+# 运行在端口 3001
 ```
 
-Open http://localhost:3001 in your browser.
+访问 http://localhost:3001
 
-### Environment Variables
+### 环境变量
 
 ```env
-# Backend (.env)
+# 后端 (.env)
 MINIMAX_API_KEY=your_token_plan_api_key
 PORT=30000
 
-# Frontend (.env.local)
+# 前端 (.env.local)
 NEXT_PUBLIC_BACKEND_URL=http://localhost:30000
 ```
 
-## Technology Stack
+## 技术栈
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 19, Next.js 16, Zustand 5, TypeScript |
-| Backend | Express, Node.js, SSE |
-| AI Model | MiniMax M2.7 (Token Plan) |
-| Vector DB | Qdrant (optional), In-memory (default) |
-| Infrastructure | Prometheus metrics, Redis cache |
+| 层次 | 技术 |
+|------|------|
+| 前端 | React 19, Next.js 16, Zustand 5, TypeScript |
+| 后端 | Express, Node.js, SSE |
+| AI 模型 | MiniMax M2.7 (Token Plan) |
+| 向量库 | Qdrant (可选), 内存 (默认) |
+| 基础设施 | Prometheus 指标, Redis 缓存 |
 
-## Features
+## 核心模块
 
-### Intent Detection
+### 意图检测
 
-Five intent types with clarification for low-confidence cases:
-- `tool_use`: Tool execution request
-- `knowledge`: RAG knowledge query
-- `creative`: Creative generation
-- `task`: Task execution
-- `conversation`: General chat
+五种意图类型，低置信度时触发澄清：
+- `tool_use`: 工具执行请求
+- `knowledge`: RAG 知识查询
+- `creative`: 创意生成
+- `task`: 任务执行
+- `conversation`: 日常对话
 
-### Agent Engine
+### Agent 引擎
 
-ReAct (Reasoning + Acting) execution loop:
-- Thought: Analyze current state and goal
-- Action: Select and execute tool or LLM
-- Observation: Process result
-- Loop until completion or max iterations
+ReAct (推理 + 行动) 执行循环：
+- Thought: 分析当前状态和目标
+- Action: 选择并执行工具或 LLM
+- Observation: 处理结果
+- 循环直到完成或达到最大迭代次数
 
-### RAG Pipeline
+### RAG 流水线
 
-1. Query Rewrite - contextualize incomplete queries
-2. Query Decompose - split complex questions
-3. Hybrid Search - vector + keyword retrieval
-4. Reranking - multi-strategy fusion (CrossEncoder, BM25, Semantic, Diversity)
-5. Citation Assembly - source attribution
+1. Query Rewrite - 补全不完整查询
+2. Query Decompose - 拆分复杂问题
+3. Hybrid Search - 向量 + 关键词检索
+4. Reranking - 多策略融合 (CrossEncoder, BM25, Semantic, Diversity)
+5. Citation Assembly - 来源追溯
 
-### Enterprise Features
+### 企业级功能
 
-- Circuit breaker with automatic failover
-- Queue-based rate limiting
-- Prometheus metrics endpoint
-- Configuration hot-reload
-- Priority task queue with SSE notifications
-- Alert management (critical/warning/info)
+- 熔断器，自动故障转移
+- 队列限流
+- Prometheus 指标端点
+- 配置热更新
+- 优先级任务队列
+- 告警管理 (critical/warning/info)
 
-## Documentation
+## 性能指标
 
-- [CLAUDE.md](./CLAUDE.md) - Project instructions and architecture
-- [CHANGELOG.md](./CHANGELOG.md) - Version history
-- [docs/](./docs/) - Technical documentation
+基准测试结果 (2026-03-18):
 
-## Performance Metrics
+| 任务 | 方法 | 准确率 | 延迟 |
+|------|------|--------|------|
+| 意图分类 | 关键词匹配 | 70% | <1ms |
+| 工具选择 | 关键词匹配 | 90% | <1ms |
 
-Based on benchmark tests (2026-03-18):
+| 模式 | 耗时 | 加速比 |
+|------|------|--------|
+| 串行 (10 任务) | 620ms | 1.0x |
+| 并行 4 并发 | 186ms | 3.3x |
 
-| Task | Method | Accuracy | Latency |
-|------|--------|----------|---------|
-| Intent Classification | Keyword Matching | 70% | <1ms |
-| Tool Selection | Keyword Matching | 90% | <1ms |
+## 文档
 
-| Mode | Time | Speedup |
-|------|------|---------|
-| Serial (10 tasks) | 620ms | 1.0x |
-| Parallel 4 concurrent | 186ms | 3.3x |
+- [CLAUDE.md](./CLAUDE.md) - 项目指令和架构
+- [CHANGELOG.md](./CHANGELOG.md) - 版本历史
+- [docs/](docs/) - 技术文档
 
-## Contributing
+## 许可
 
-Contributions are welcome under AGPL-3.0 license terms.
+AGPL-3.0 - 详见 [LICENSE](LICENSE) 文件
 
-## References
+## 参考资源
 
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Next.js 文档](https://nextjs.org/docs)
 - [React 19](https://react.dev)
 - [Model Context Protocol](https://modelcontextprotocol.io)
-- [ReAct: Synergizing Reasoning and Acting](https://arxiv.org/abs/2210.03629)
+- [ReAct: 推理与行动协同](https://arxiv.org/abs/2210.03629)
