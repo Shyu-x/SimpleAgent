@@ -1,6 +1,35 @@
 # SimpleAgent - 更新日志
 
-**Sprint #4 完成日期**: 2026-05-15
+**Sprint #5 完成日期**: 2026-05-16
+
+---
+
+## Sprint #5 变更摘要 (2026-05-16)
+
+### 核心成果
+
+| 类别 | 成果 | 状态 |
+|------|------|------|
+| **CI/CD 流水线** | Lint/Test/Build/Security/Release 全流程 | ✅ 完成 |
+| **许可证** | AGPL-3.0 非商业用途 | ✅ 完成 |
+| **文档规范化** | 无 emoji、中英双语 | ✅ 完成 |
+| **架构图** | mermaid.ink 生成 | ✅ 完成 |
+
+### CI/CD 修复记录
+
+| 问题 | 根因 | 修复 |
+|------|------|------|
+| Docker lowercase tag | 仓库名含大写 | `tr '[:upper:]' '[:lower:]'` |
+| TypeScript null check | detectIntent() 可能返回 null | 添加 null 检查 |
+| Docker standalone 缺失 | next.config.js 未配置 | 添加 `output: 'standalone'` |
+| Security scan permissions | SARIF 上传缺少权限 | `security-events: write` + `@v4` |
+
+### 关键配置
+
+- **.github/workflows/ci.yml**: 完整 CI/CD 流水线
+- **frontend/next.config.js**: `output: 'standalone'` Docker 支持
+- **scripts/generate-diagram.py**: 架构图生成脚本
+- **docs/CI-CD-Debug-Report.md**: CI/CD 调试经验报告
 
 ---
 

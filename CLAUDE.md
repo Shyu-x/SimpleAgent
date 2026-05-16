@@ -4,7 +4,7 @@
 - SimpleAgent - 现代化AI对话平台
 - 技术栈：React 19 + Next.js 16 + Zustand 5 + Express
 - 端口：前端 3001，后端 30000
-- **架构**: MiniMax 单一架构 (v2.5.0+)
+- **架构**: MiniMax 单一架构 (v2.5.1+)
 
 ## MiniMax 单一架构 (2026-03-20)
 
