@@ -66,6 +66,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
   const [showQuickPhrases, setShowQuickPhrases] = useState(false);
   const [localTypingSpeed, setLocalTypingSpeed] = useState(settings.typingSpeed);
   const [customModelInput, setCustomModelInput] = useState('');
+  const [modelSearch, setModelSearch] = useState('');
 
   // 意图检测状态
   const [detectedIntent, setDetectedIntent] = useState<IntentResult | null>(null);
@@ -737,6 +738,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                         type="text"
                         id="model-search"
                         placeholder="搜索模型..."
+                        value={modelSearch}
+                        onChange={(e) => setModelSearch(e.target.value)}
                         className="w-full pl-9 pr-3 py-2 text-sm bg-[hsl(var(--bg-muted))]/50 rounded-lg border border-transparent focus:border-[hsl(var(--border-strong))] outline-none transition-colors"
                       />
                     </div>
@@ -760,7 +763,11 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                         <p className="text-sm text-[hsl(var(--text-muted))]">正在加载模型列表...</p>
                       </div>
                     ) : (
-                      platformModels.map((model) => {
+                      platformModels
+                        .filter((m) =>
+                          (m.display_name || m.id).toLowerCase().includes(modelSearch.toLowerCase())
+                        )
+                        .map((model) => {
                         const info = MODEL_INFO[model.id] || {
                           name: model.display_name || model.id,
                           description: 'MiniMax 智能模型',
