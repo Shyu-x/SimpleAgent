@@ -11,8 +11,12 @@ import {
   Plus,
   X,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Maximize2,
+  Check
 } from 'lucide-react';
+
+import AgentVisualizer from '../AgentVisualizer';
 
 import { useMissionControlStore, initializeAgents, startMission, stopMission } from './store';
 import { useMissionControlAPI } from './useMissionControlAPI';
@@ -33,6 +37,19 @@ import './styles.css';
 export interface MissionControlPropsExtended extends MissionControlProps {
   initialAgents?: Omit<MissionAgent, 'lastHeartbeat'>[];
   initialTasks?: Omit<MissionTask, 'id' | 'createdAt' | 'updatedAt'>[];
+}
+
+// TimelineItem 类型用于 SSE trace 数据
+export interface TimelineItem {
+  id: string;
+  type: string;
+  name: string;
+  status: 'success' | 'running' | 'error' | 'pending';
+  duration: number;
+  depth: number;
+  startTime: number;
+  endTime: number;
+  metadata?: Record<string, unknown>;
 }
 
 type TabType = 'queue' | 'broadcast';
@@ -76,6 +93,14 @@ const MissionControl = memo(function MissionControl({
   const [isPaused, setIsPaused] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('queue');
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Mini 可视化状态
+  const [showMiniViz, setShowMiniViz] = useState(false);
+  const [activeTraceId, setActiveTraceId] = useState<string | null>(null);
+  const [showFullViz, setShowFullViz] = useState(false);
+
+  // SSE trace 数据订阅状态
+  const [traceSteps, setTraceSteps] = useState<TimelineItem[]>([]);
 
   // 连接后端 API
   const {
@@ -138,6 +163,68 @@ const MissionControl = memo(function MissionControl({
       onAllTasksComplete();
     }
   }, [completedTasks, failedTasks, totalTasks, onAllTasksComplete]);
+
+  // 监听任务执行，自动显示 mini 可视化
+  useEffect(() => {
+    const executingTask = tasks.find(t => t.status === 'in_progress' || t.status === 'assigned');
+    if (executingTask?.traceId && !showMiniViz) {
+      setActiveTraceId(executingTask.traceId);
+      setShowMiniViz(true);
+    }
+  }, [tasks, showMiniViz]);
+
+  // 任务完成后自动隐藏 mini 可视化
+  useEffect(() => {
+    const completedCount = tasks.filter(t => t.status === 'completed' || t.status === 'failed').length;
+    if (completedCount > 0 && showMiniViz) {
+      const timer = setTimeout(() => setShowMiniViz(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [tasks, showMiniViz]);
+
+  // SSE 订阅 trace 数据
+  useEffect(() => {
+    if (!activeTraceId) return;
+
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+    const eventSource = new EventSource(
+      `${backendUrl}/api/admin/traces/subscribe/live?traceId=${activeTraceId}`
+    );
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // 跳过心跳和连接消息
+        if (data.type === 'heartbeat' || data.type === 'connected') return;
+
+        // 处理 span_update 事件
+        if (data.type === 'span_update') {
+          const span = data.data;
+          setTraceSteps(prev => [...prev, {
+            id: span.spanId || `span-${Date.now()}`,
+            type: span.name,
+            name: span.name,
+            status: span.status === 'ok' ? 'success' : 'running',
+            duration: span.duration || 0,
+            depth: 0,
+            startTime: span.startTime,
+            endTime: span.endTime || Date.now(),
+            metadata: span.tags || {}
+          }]);
+        }
+      } catch (e) {
+        console.error('Trace SSE parse error:', e);
+      }
+    };
+
+    eventSource.onerror = () => {
+      console.warn('Trace SSE connection error, closing...');
+      eventSource.close();
+    };
+
+    return () => eventSource.close();
+  }, [activeTraceId]);
 
   // 计算进行中的任务数量
   const activeTaskCount = useMemo(() => {
@@ -481,6 +568,78 @@ const MissionControl = memo(function MissionControl({
             />
         </motionClass.div>
       </div>
+
+      {/* Mini 可视化 - 任务执行时自动显示 */}
+      {showMiniViz && activeTraceId && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          className="fixed bottom-4 right-4 w-96 h-72 bg-white rounded-xl shadow-2xl z-40 overflow-hidden border border-gray-200"
+        >
+          <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              <span className="text-sm font-medium">执行中...</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowFullViz(true)}
+                className="p-1 hover:bg-white/20 rounded transition-colors"
+                title="展开完整视图"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setShowMiniViz(false)}
+                className="p-1 hover:bg-white/20 rounded transition-colors"
+                title="关闭"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <div className="p-2 h-[calc(100%-44px)] overflow-y-auto">
+            <div className="text-xs text-gray-500 mb-2">Trace: {activeTraceId?.substring(0, 12)}...</div>
+
+            {/* 真实的 trace timeline 显示 */}
+            <div className="space-y-1 max-h-24 overflow-y-auto">
+              {traceSteps.slice(-5).map((step, i) => (
+                <div key={step.id} className="bg-indigo-50 rounded px-2 py-1 text-xs flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${step.status === 'success' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                  <span className="truncate">{step.type}</span>
+                  <span className="text-gray-400 ml-auto">{step.duration}ms</span>
+                </div>
+              ))}
+              {traceSteps.length === 0 && (
+                <div className="text-xs text-gray-400 text-center py-4">等待执行...</div>
+              )}
+            </div>
+
+            {/* 任务状态也显示 */}
+            <div className="mt-2 space-y-1">
+              {tasks.filter(t => t.status === 'in_progress').map(task => (
+                <div key={task.id} className="bg-indigo-50 rounded px-2 py-1 text-xs">
+                  执行: {task.title}
+                </div>
+              ))}
+              {tasks.filter(t => t.status === 'completed').slice(-3).map(task => (
+                <div key={task.id} className="bg-green-50 rounded px-2 py-1 text-xs flex items-center gap-1">
+                  <Check className="w-3 h-3 text-green-500" />
+                  {task.title}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* 完整可视化 Modal */}
+      <AgentVisualizer
+        isOpen={showFullViz}
+        onClose={() => setShowFullViz(false)}
+        traceId={activeTraceId || undefined}
+      />
     </motionClass.div>
   );
 });
