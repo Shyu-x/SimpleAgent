@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: simpleagent-backend
+    env: static
+    region: singapore
+    plan: starter
+    buildCommand: pnpm install
+    startCommand: node src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 30000
+      - key: MINIMAX_API_KEY
+        sync: false
+      - key: VECTOR_DB_TYPE
+        value: memory
