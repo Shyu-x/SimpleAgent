@@ -2,6 +2,10 @@
   "name": "@simpleagent/backend",
   "version": "2.5.0",
   "description": "SimpleAgent - 现代化AI对话平台后端服务",
+  "engines": {
+    "node": ">=18.0.0 <25.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

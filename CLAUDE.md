@@ -267,7 +267,82 @@ src/
 | ConfigCenter | `infra/config/ConfigCenter.js` | 配置中心热更新 |
 | QueueManager | `infra/queue/QueueManager.js` | 优先级队列管理 |
 
+## 环境管理 (2026-05-17)
+
+### 版本约束
+
+| 项目 | 版本 | 说明 |
+|------|------|------|
+| Node.js | ≥18.0.0, <25.0.0 | LTS 版本，推荐 v20.x |
+| pnpm | ≥8.0.0 | 项目默认包管理器 |
+
+### 环境配置
+
+**必须使用 nvm (Node Version Manager) 管理 Node 版本**
+
+```bash
+# 安装 nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+
+# 切换到正确版本
+nvm use  # 读取 .nvmrc
+
+# 安装 pnpm
+npm install -g pnpm
+```
+
+**版本锁定文件**:
+- `.nvmrc` - Node 版本锁定 (当前: 20)
+- `package.json engines` - 包管理器约束
+
+### 依赖安装
+
+```bash
+# 后端
+cd backend && pnpm install
+
+# 前端
+cd frontend && pnpm install
+
+# 使用 workspace (从根目录)
+pnpm install
+pnpm --filter @simpleagent/backend dev
+```
+
+### PM2 进程管理
+
+```bash
+# 启动
+pm2 start ecosystem.config.js
+
+# 查看状态
+pm2 list
+
+# 重启
+pm2 restart ai-chat-backend
+pm2 restart ai-chat-frontend
+
+# 查看日志
+pm2 logs ai-chat-backend
+```
+
+### 验证命令
+
+```bash
+# 验证环境
+node --version    # 期望: v20.x.x
+pnpm --version    # 期望: ≥10.x.x
+
+# 验证服务
+curl http://localhost:30000/api/health   # 后端
+curl http://localhost:3001               # 前端
+```
+
+详细文档: `docs/环境管理规范.md`
+
 ## 环境变量
+
+> **警告**: 禁止将包含真实密钥的 `.env` 文件提交到 Git。项目通过 `.gitignore` 规则排除敏感文件。
 
 ### 后端 (.env)
 ```bash
