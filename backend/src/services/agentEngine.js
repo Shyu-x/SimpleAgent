@@ -30,6 +30,7 @@ const { withRetry, withTimeout, sleep, TimeoutConfig } = require('../utils/retry
 const SessionNoteTool = require('./tools/SessionNoteTool');
 const AppError = require('../common/errors/AppError');
 const { createTokenManager } = require('./agent/TokenManager');
+const { agentVisualizer, StepType } = require('./agent/AgentVisualizer');
 
 // 指标采集器（延迟初始化）
 let _metricsCollector = null;
@@ -702,6 +703,14 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     const session = await this.persistence.createSession(task, context);
     this.sessionId = session.id;
 
+    // 创建 Agent 可视化轨迹
+    const trace = agentVisualizer.createTrace(session.id, task);
+    trace.metadata = {
+      maxIterations: this.maxIterations,
+      llmEnabled: this.llmEnabled,
+      humanConfirmationEnabled: this.humanConfirmationEnabled
+    };
+
     // 记录执行开始时间（用于指标统计）
     this._executionStartTime = Date.now();
 
@@ -761,6 +770,10 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       };
 
       // Agent循环
+      trace.startStep(StepType.MODEL_CALL, 'Agent Execution', {
+        iteration: 0,
+        maxIterations: this.maxIterations
+      });
       for (let i = 0; i < this.maxIterations; i++) {
         // 取消检查 (借鉴 MiniMax Mini-Agent)
         if (this._checkCancelled()) {
@@ -790,10 +803,21 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
         results.iterations = i + 1;
 
         // 步骤1: 思考 - 生成下一步行动
+        trace.startStep(StepType.MODEL_CALL, 'LLM Reasoning', {
+          iteration: this.state.iteration,
+          phase: 'reason'
+        });
         const thought = await this.think(currentContext);
+        trace.endStep({
+          thoughtType: thought.type,
+          tool: thought.tool,
+          reasoning: thought.reasoning
+        });
 
         // 步骤2: 决策 - 判断是结束还是继续
         if (thought.type === 'finish') {
+          trace.endStep({ result: thought.content });
+          trace.complete(thought.content);
           results.success = true;
           results.finalResult = thought.content;
           this.state.status = 'completed';
@@ -802,7 +826,23 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
 
         if (thought.type === 'action') {
           // 步骤3: 执行行动
+          trace.startStep(StepType.TOOL_SELECTION, `Select Tool: ${thought.tool}`, {
+            reasoning: thought.reasoning,
+            confidence: thought.confidence
+          });
+          trace.endStep({
+            tool: thought.tool,
+            input: thought.input
+          });
+          trace.startStep(StepType.TOOL_EXECUTION, `Execute: ${thought.tool}`, {
+            input: thought.input
+          });
           const actionResult = await this.act(thought.tool, thought.input);
+          trace.endStep({
+            tool: thought.tool,
+            input: thought.input,
+            success: actionResult.success !== false
+          });
           results.toolCalls.push({
             tool: thought.tool,
             input: thought.input,
@@ -820,7 +860,14 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
 
           // 步骤5: 反思 - 评估结果并决定下一步
           if (this.llmEnabled) {
+            trace.startStep(StepType.RESULT_AGGREGATION, 'Reflect on Result', {
+              tool: thought.tool
+            });
             const reflection = await this.reflect(thought.tool, thought.input, actionResult);
+            trace.endStep({
+              action: reflection.action,
+              reason: reflection.reason
+            });
 
             if (reflection.action === 'retry' && reflection.newTool) {
               // 重试新工具
@@ -883,6 +930,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       }
 
     } catch (error) {
+      trace?.failStep(error);
       results.error = error.message;
       this.state.status = 'error';
       this.logger.logError(error, { context: 'execution' });
@@ -896,6 +944,11 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
         error: error.message
       });
     } finally {
+      // 确保 trace 完成
+      if (trace && trace.status === 'running') {
+        trace.complete(results.finalResult);
+      }
+
       // 停止自动保存
       this.persistence.stopAutoSave();
 
