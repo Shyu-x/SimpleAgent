@@ -87,7 +87,7 @@ interface TraceResponse {
 // 从 Agent 轨迹 API 获取数据
 async function fetchAgentTraces(limit = 10): Promise<DebugFrame[]> {
   try {
-    const response = await fetchApi<TraceResponse>('/api/agent/traces');
+    const response = await fetchApi<TraceResponse>('/api/admin/traces');
     if (response.data?.traces) {
       // 将轨迹转换为调试帧
       const frames: DebugFrame[] = [];

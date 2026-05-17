@@ -123,7 +123,7 @@ class CrossEncoderRerankStrategy extends BaseRerankStrategy {
         { model: this.model, temperature: 0.3, max_tokens: 500 }
       );
 
-      const content = response.content?.[0]?.text || response.content || '';
+      const content = MiniMaxChatClient.extractContent(response.content);
       const relevanceScores = this._parseRelevanceScores(content);
 
       // 应用分数

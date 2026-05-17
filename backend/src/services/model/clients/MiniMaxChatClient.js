@@ -196,6 +196,31 @@ class MiniMaxChatClient extends ChatModelClient {
   }
 
   /**
+   * 安全提取响应内容
+   * MiniMax API 可能返回多种格式：
+   * - string
+   * - {type:"text", text:string}
+   * - {type:"text", text:string}[]
+   * @param {any} content - API 返回的 content 字段
+   * @returns {string} 提取的文本内容
+   */
+  static extractContent(content) {
+    if (typeof content === 'string') {
+      return content;
+    }
+    if (Array.isArray(content)) {
+      return content[0]?.text || content[0]?.content || '';
+    }
+    if (content?.text) {
+      return content.text;
+    }
+    if (content?.content) {
+      return content.content;
+    }
+    return '';
+  }
+
+  /**
    * 健康检查
    */
   async healthCheck() {

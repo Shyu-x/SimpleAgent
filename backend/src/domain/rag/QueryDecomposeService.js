@@ -82,6 +82,17 @@ class QueryDecomposeService {
     this.confidenceThreshold = options.confidenceThreshold || 0.5;
     this.enableLLMDetect = options.enableLLMDetect !== false;
 
+    // LLM detect 缓存（query hash -> result）
+    this._llmDetectCache = new Map();
+    this._llmDetectCacheTTL = 5 * 60 * 1000; // 5分钟缓存
+
+    // Rate limit：每秒最多一次
+    this._lastLLMDetectTime = 0;
+    this._llmDetectMinInterval = 1000; // 最小间隔 1 秒
+
+    // 降级日志抑制：只在第一次失败时打WARN
+    this._llmDetectFailedOnce = false;
+
     // 统计信息
     this.stats = {
       totalDecomposes: 0,
@@ -264,7 +275,7 @@ ${includeSourceAttribution ? '6. 在合适位置标注子问题来源（如"关�
         },
       });
 
-      const content = response.content?.[0]?.text || response.content || '';
+      const content = MiniMaxChatClient.extractContent(response.content);
       const parsed = this._parseJSONResponse(content);
 
       // 构建来源追溯
@@ -367,6 +378,20 @@ ${includeSourceAttribution ? '6. 在合适位置标注子问题来源（如"关�
    * @private
    */
   async _llmDetect(query) {
+    // 检查缓存
+    const cacheKey = query.substring(0, 100);
+    const cached = this._llmDetectCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this._llmDetectCacheTTL) {
+      return cached.result;
+    }
+
+    // Rate limit：每秒最多一次
+    const now = Date.now();
+    if (now - this._lastLLMDetectTime < this._llmDetectMinInterval) {
+      return this._quickDetect(query);
+    }
+    this._lastLLMDetectTime = now;
+
     const prompt = `你是一个复杂问题分析专家。请判断以下查询是否需要拆分为多个子问题。
 
 ## 查询
@@ -407,17 +432,36 @@ ${includeSourceAttribution ? '6. 在合适位置标注子问题来源（如"关�
         },
       });
 
-      const content = response.content?.[0]?.text || response.content || '';
+      const content = MiniMaxChatClient.extractContent(response.content);
       const parsed = this._parseJSONResponse(content);
 
-      return {
+      const result = {
         shouldDecompose: parsed.should_decompose || false,
         reasoning: parsed.reasoning || 'LLM判断',
         confidence: parsed.confidence || 0.5,
         type: parsed.decompose_type || null,
       };
+
+      // 缓存结果
+      this._llmDetectCache.set(cacheKey, { result, timestamp: Date.now() });
+
+      // 清理过期缓存（超过100条时）
+      if (this._llmDetectCache.size > 100) {
+        const oldest = [...this._llmDetectCache.entries()]
+          .sort((a, b) => a[1].timestamp - b[1].timestamp)
+          .slice(0, 50);
+        oldest.forEach(([k]) => this._llmDetectCache.delete(k));
+      }
+
+      return result;
     } catch (error) {
-      logger.warn('LLM detect failed, falling back to quick detect', { error: error.message });
+      // 只在第一次失败时打 WARN，后续失败打 DEBUG
+      if (!this._llmDetectFailedOnce) {
+        logger.warn('LLM detect failed, falling back to quick detect', { error: error.message });
+        this._llmDetectFailedOnce = true;
+      } else {
+        logger.debug('LLM detect failed (cached fallback)', { error: error.message });
+      }
       return this._quickDetect(query);
     }
   }
@@ -475,7 +519,7 @@ ${includeSourceAttribution ? '6. 在合适位置标注子问题来源（如"关�
       },
     });
 
-    const content = response.content?.[0]?.text || response.content || '';
+    const content = MiniMaxChatClient.extractContent(response.content);
     const parsed = this._parseJSONResponse(content);
 
     return {

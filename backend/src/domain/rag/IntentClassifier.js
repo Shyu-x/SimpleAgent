@@ -802,7 +802,7 @@ class TreeIntentClassifier extends EventEmitter {
       }
     );
 
-    const content = response.content?.[0]?.text || response.content || '';
+    const content = MiniMaxChatClient.extractContent(response.content);
     const parsed = this._parseJSONResponse(content);
 
     // 映射到领域类型

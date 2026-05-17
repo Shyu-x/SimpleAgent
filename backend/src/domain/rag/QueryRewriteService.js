@@ -217,7 +217,7 @@ class QueryRewriteService {
         },
       });
 
-      const content = response.content?.[0]?.text || response.content || '';
+      const content = MiniMaxChatClient.extractContent(response.content);
       const expansions = this._parseJSONArray(content);
 
       // 合并原始查询和扩展
@@ -294,7 +294,7 @@ ${contextSummary}
         },
       });
 
-      const content = response.content?.[0]?.text || response.content || '';
+      const content = MiniMaxChatClient.extractContent(response.content);
       const parsed = this._parseJSONResponse(content);
 
       return {

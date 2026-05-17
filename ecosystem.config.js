@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'ai-chat-backend',
       script: 'src/index.js',
-      cwd: 'C:/Users/Xu/Desktop/chat玩具/backend',
+      cwd: '/home/xu/Develop/longTermProject/SimpleAgent/backend',
       instances: 1,
       exec_mode: 'fork',
       watch: false,
@@ -29,8 +29,8 @@ module.exports = {
     {
       name: 'ai-chat-frontend',
       script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 3001',
-      cwd: 'C:/Users/Xu/Desktop/chat玩具/frontend',
+      args: 'dev -p 3001',
+      cwd: '/home/xu/Develop/longTermProject/SimpleAgent/frontend',
       instances: 1,
       exec_mode: 'fork',
       watch: false,

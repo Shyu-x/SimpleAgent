@@ -21,15 +21,15 @@ const WeatherTool = require('./weatherTool');
 const TranslationTool = require('./translationTool');
 const CodeReviewTool = require('./codeReviewTool');
 const ImageGenerationTool = require('./ImageGenerationTool');
-const QrCodeTool = require('./qrCodeTool');
+const QrCodeTool = require('./QrCodeTool');
 const CurrencyConverterTool = require('./CurrencyConverterTool');
-const UrlShortenerTool = require('./urlShortenerTool');
+const UrlShortenerTool = require('./UrlShortenerTool');
 const TimezoneConverterTool = require('./TimezoneConverterTool');
 const TextSummaryTool = require('./TextSummaryTool');
 const ErrorTrackingTool = require('./ErrorTrackingTool');
-const NoteTool = require('./noteTool');
-const PromptTemplateTool = require('./promptTemplateTool');
-const MeetingTool = require('./meetingTool');
+const NoteTool = require('./NoteTool');
+const PromptTemplateTool = require('./PromptTemplateTool');
+const MeetingTool = require('./MeetingTool');
 
 /**
  * 创建默认工具注册表
