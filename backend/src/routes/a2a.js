@@ -73,6 +73,9 @@ router.get('/collaboration/:taskId', (req, res) => { const s = coordinator.getCo
 router.get('/collaboration/:taskId/result', (req, res) => { const r = coordinator.getCollaborationResult(req.params.taskId); if (!r) return fail(res, 404, 'Collaboration task not found'); ok(res, r); });
 router.delete('/collaboration/:taskId', (req, res) => { const c = coordinator.cancelCollaboration(req.params.taskId); if (!c) return fail(res, 404, 'Collaboration task not found or already completed'); ok(res, { message: 'Collaboration cancelled', taskId: req.params.taskId }); });
 
+// 协作任务 SSE 订阅
+router.get('/collaboration/:taskId/subscribe', (req, res) => a2aService.subscribeCollaboration(req.params.taskId, req, res));
+
 // 任务定义
 router.post('/tasks/define', (req, res) => { const t = req.body; if (!t.task && !t.prompt && !t.description) return fail(res, 400, { type: 'validation_error', message: 'task/prompt/description is required' }); const def = coordinator.createTaskDefinition(t); created(res, { task: def.toJSON() }); });
 router.post('/tasks/define/batch', (req, res) => { const { tasks } = req.body; if (!tasks || !Array.isArray(tasks)) return fail(res, 400, { type: 'validation_error', message: 'tasks array is required' }); const defs = coordinator.createTaskDefinitions(tasks); created(res, { tasks: defs.map(d => d.toJSON()), count: defs.length }); });

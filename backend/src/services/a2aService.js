@@ -835,6 +835,62 @@ class A2AService extends EventEmitter {
   }
 
   /**
+   * SSE 订阅协作任务状态更新
+   */
+  subscribeCollaboration(taskId, req, res) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+
+    const heartbeatInterval = setInterval(() => {
+      res.write(': heartbeat\n\n');
+    }, 30 * 1000);
+
+    const onTaskProgress = (data) => {
+      if (data.taskId === taskId || data.collaborationId === taskId) {
+        res.write(`data: ${JSON.stringify({
+          event: 'task_update',
+          data: {
+            taskId: data.taskId,
+            status: data.status,
+            progress: data.progress,
+            message: data.message,
+            timestamp: Date.now()
+          }
+        })}\n\n`);
+      }
+    };
+
+    const onTaskCompleted = (task) => {
+      if (task.id === taskId || task.metadata?.collaborationId === taskId) {
+        res.write(`data: ${JSON.stringify({
+          event: 'task_complete',
+          data: {
+            taskId: task.id,
+            status: task.status,
+            result: task.result,
+            timestamp: Date.now()
+          }
+        })}\n\n`);
+      }
+    };
+
+    this.on('task:progress', onTaskProgress);
+    this.on('task:completed', onTaskCompleted);
+
+    if (req && req.on) {
+      req.on('close', () => {
+        clearInterval(heartbeatInterval);
+        this.removeListener('task:progress', onTaskProgress);
+        this.removeListener('task:completed', onTaskCompleted);
+      });
+    }
+
+    res.write(`data: ${JSON.stringify({ event: 'connected', taskId })}\n\n`);
+  }
+
+  /**
    * 销毁服务
    */
   destroy() {
