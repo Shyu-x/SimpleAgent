@@ -138,7 +138,7 @@ const RateLimitBanner = memo(function RateLimitBanner({
             <div className="mt-2 flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
                 {isRateLimited && autoHide && `${countdown}秒后可重试`}
-                {isQuotaExceeded && `将于 ${new Date(errorInfo.resetAt!).toLocaleTimeString()} 重置`}
+                {isQuotaExceeded && quota?.daily?.resetAt && `将于 ${new Date(quota.daily.resetAt).toLocaleTimeString()} 重置`}
               </span>
               {errorInfo.retryAfter > 60 && (
                 <span className="text-xs bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 rounded">

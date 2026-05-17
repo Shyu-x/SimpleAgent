@@ -25,6 +25,8 @@ import TaskBroadcast from './TaskBroadcast';
 import AgentStatusBar from './AgentStatusBar';
 import ActionBar from './ActionBar';
 
+import { demoAgents, demoTasks } from './useMissionControlAPI';
+
 import './styles.css';
 
 // Props 接口扩展（用于 initialAgents 和 initialTasks）
@@ -91,6 +93,13 @@ const MissionControl = memo(function MissionControl({
     syncAgents();
     syncEvents();
   }, [syncTasks, syncAgents, syncEvents]);
+
+  // 后端同步后如果没有agents，用demo数据
+  useEffect(() => {
+    if (agents.length === 0 && !isActive) {
+      initializeAgents(demoAgents);
+    }
+  }, [agents.length, isActive]);
 
   // 初始化 agents
   useEffect(() => {
