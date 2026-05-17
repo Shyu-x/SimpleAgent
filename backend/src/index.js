@@ -188,6 +188,7 @@ async function startServer() {
   const executionRoutes = require('./routes/execution');
   const modularRoutes = require('./routes/modular');
   const alertsRoutes = require('./routes/alerts');
+  const workflowRoutes = require('./routes/workflow');
 
   // 模块化架构初始化
   const moduleConfig = require('./config/module.config');
@@ -237,6 +238,7 @@ async function startServer() {
   app.use('/api/pool', poolRoutes);
   app.use('/api/minimax', minimaxMcpRoutes);
   app.use('/api/a2a', a2aRoutes);
+  app.use('/api/workflow', workflowRoutes);
   app.use('/api/agent', a2aRoutes); // 别名，与前端期望的路由兼容
   app.use('/api/agent', agentTraceRoutes); // Agent 轨迹 API
   app.use('/agent', agentTracePageRoutes); // Agent 可视化页面
