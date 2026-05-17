@@ -8,7 +8,7 @@
  */
 
 const EventEmitter = require('events');
-const { breakerFactory } = require('../../common/CircuitBreaker');
+const { createCircuitBreaker, getAllBreakersStatus, CB_STATES } = require('../../middleware/circuitBreaker');
 const { createSSEFirstChunkProbe, SSEProbeState } = require('../../infra/sse/ProbeBufferingCallback');
 const {
   MultiModelRouter,
@@ -422,6 +422,9 @@ class MiniMaxRouter extends EventEmitter {
 
   /**
    * 调用 MiniMax API
+   * @param {string} modelId - 模型ID
+   * @param {Object} request - 请求参数
+   * @returns {Promise<Object>}
    */
   async callAPI(modelId, request) {
     const apiKey = process.env.MINIMAX_API_KEY;
@@ -441,15 +444,27 @@ class MiniMaxRouter extends EventEmitter {
       // 指标采集器未初始化
     }
 
-    // 获取模型熔断器
-    const breaker = breakerFactory.get(`model_${modelId}`, {
-      failureThreshold: 5,
-      successThreshold: 3,
-      timeout: 30000
+    // Opossum 熔断器配置
+    const breakerName = `minimax_${modelId}`;
+    const breakerOptions = {
+      name: breakerName,
+      timeout: 10000,                    // 10秒超时
+      errorThresholdPercentage: 50,       // 50% 失败率
+      resetTimeout: 30000,                // 30秒后尝试恢复
+      minimumNumberOfCalls: 10,           // 至少10次调用
+      volumeThreshold: 5                   // 需要5次调用开始计算
+    };
+
+    // Fallback 函数：熔断打开时返回友好错误
+    const fallback = () => ({
+      error: 'MiniMax API 暂时不可用，请稍后重试',
+      fallback: true,
+      circuitBreaker: breakerName,
+      degraded: true
     });
 
-    // 执行请求，受熔断器保护
-    return await breaker.execute(async () => {
+    // 执行请求，受 Opossum 熔断器保护
+    return await createCircuitBreaker(async () => {
       const response = await fetch(`${baseUrl}/v1/messages`, {
         method: 'POST',
         headers: {
@@ -530,12 +545,20 @@ class MiniMaxRouter extends EventEmitter {
       }
 
       return result;
-    }, () => {
-      // 降级响应：熔断期间返回结构化错误
+    }, breakerOptions).then(result => {
+      // 如果返回 fallback 结果，添加熔断器信息
+      if (result && result.fallback && result.circuitBreaker) {
+        return result;
+      }
+      return result;
+    }).catch(error => {
+      // 捕获熔断器拒绝的错误
+      this.emit('circuit:rejected', { model: modelId, error: error.message });
       return {
-        degraded: true,
-        error: 'Service temporarily unavailable due to high error rate',
-        fallback: true
+        error: 'MiniMax API 暂时不可用，请稍后重试',
+        fallback: true,
+        circuitBreaker: breakerName,
+        degraded: true
       };
     });
   }
