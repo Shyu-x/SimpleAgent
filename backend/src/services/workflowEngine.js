@@ -110,7 +110,7 @@ class WorkflowEngine extends EventEmitter {
       throw AppError.internalError('Workflow already running');
     }
 
-    this.executionId = `wf_${Date.now()}_${Math.random()}`;
+    // 使用路由层传入的 executionId，不重复生成
     this.isRunning = true;
     this.results.clear();
     this.variables.clear();
@@ -139,6 +139,9 @@ class WorkflowEngine extends EventEmitter {
 
         const result = await this._executeNode(currentNode);
         this.results.set(currentNode.id, result);
+
+        // 让出事件循环，让 SSE 能建立连接
+        await new Promise(r => setImmediate(r));
 
         // 检查是否继续
         if (!result.continue) {

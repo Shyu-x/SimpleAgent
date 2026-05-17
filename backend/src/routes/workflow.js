@@ -83,6 +83,7 @@ router.post('/execute', async (req, res) => {
       nodes: backendNodes
     });
 
+    engine.executionId = executionId;
     activeEngines.set(executionId, engine);
 
     res.setHeader('Content-Type', 'text/event-stream');
@@ -97,12 +98,14 @@ router.post('/execute', async (req, res) => {
 
     engine.on('execution:complete', (d) => {
       sendEvent('execution:complete', d);
-      activeEngines.delete(executionId);
+      // 延迟删除，确保 SSE 完全结束
+      setTimeout(() => { activeEngines.delete(executionId); }, 5000);
       res.end();
     });
     engine.on('execution:failed', (d) => {
       sendEvent('execution:failed', d);
-      activeEngines.delete(executionId);
+      // 延迟删除，确保 SSE 完全结束
+      setTimeout(() => { activeEngines.delete(executionId); }, 5000);
       res.end();
     });
     engine.on('node:complete', (d) => sendEvent('node:complete', d));
