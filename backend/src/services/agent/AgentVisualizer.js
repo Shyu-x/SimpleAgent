@@ -391,7 +391,9 @@ class AgentVisualizer extends EventEmitter {
       status: t.status,
       totalDuration: t.totalDuration,
       startTime: t.startTime,
-      stats: t.getStats()
+      stats: t.getStats(),
+      stepCount: t.steps.length,
+      steps: t.steps.map(s => s.toJSON()).slice(0, 20)
     }));
   }
 
