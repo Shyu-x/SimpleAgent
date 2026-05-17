@@ -11,27 +11,28 @@
 const crypto = require('crypto');
 
 // 限流配置
+// 说明: 严格限制 AI 对话配额防烧干，但放宽普通请求限制让用户体验流畅
 const RATE_LIMIT_CONFIG = {
   // 体验用户限制 (未登录/游客)
   trial: {
-    perMinute: 20,       // 每分钟最大请求
-    perHour: 100,        // 每小时最大请求
-    perDay: 300,         // 每天最大请求 (防止 token 烧干)
-    dailyQuota: 50,     // 每日 AI 对话配额 (主要防护)
+    perMinute: 60,        // 每分钟最大请求 (放宽)
+    perHour: 300,         // 每小时最大请求 (放宽)
+    perDay: 1000,         // 每天最大请求 (放宽)
+    dailyQuota: 100,     // 每日 AI 对话配额 (核心防护，仍严格)
   },
   // 注册用户限制
   registered: {
-    perMinute: 60,
-    perHour: 500,
-    perDay: 2000,
-    dailyQuota: 500,
+    perMinute: 100,
+    perHour: 800,
+    perDay: 5000,
+    dailyQuota: 1000,
   },
   // 付费用户限制
   premium: {
-    perMinute: 200,
-    perHour: 2000,
-    perDay: 10000,
-    dailyQuota: 5000,
+    perMinute: 300,
+    perHour: 5000,
+    perDay: 50000,
+    dailyQuota: 10000,
   },
 };
 
@@ -272,8 +273,43 @@ function ipRateLimitMiddleware(req, res, next) {
   const userTier = getUserTier(req);
   const path = req.path;
   const startTime = Date.now();
-
-  // 检查配额
+  
+  // 判断是否为 AI 对话类请求 (需要严格配额限制)
+  const isAIRequest = path.startsWith('/api/chat') || 
+                      path.startsWith('/api/agent') ||
+                      path.startsWith('/api/completion');
+  
+  // 非 AI 请求不占用每日配额，只做速率限制
+  if (!isAIRequest) {
+    const rateCheck = checkRateLimit(ip, userTier);
+    if (!rateCheck.allowed) {
+      logRequest(ip, path, req.method, userTier, 0);
+      return res.status(429).json({
+        success: false,
+        error: {
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: `请求过于频繁，请稍后再试`,
+          limit: rateCheck.limit,
+          reason: rateCheck.reason,
+        },
+        retryAfter: 60,
+      });
+    }
+    
+    res.set({
+      'X-RateLimit-Minute': `${rateCheck.minuteRemaining}/${rateCheck.minuteLimit}`,
+      'X-RateLimit-Hour': `${rateCheck.hourRemaining}/${rateCheck.hourLimit}`,
+      'X-RateLimit-IP': ip,
+    });
+    
+    res.on('finish', () => {
+      logRequest(ip, path, req.method, userTier, Date.now() - startTime);
+    });
+    
+    return next();
+  }
+  
+  // AI 请求：先检查每日配额
   const quotaCheck = checkDailyQuota(ip, userTier);
   if (!quotaCheck.allowed) {
     logRequest(ip, path, req.method, userTier, 0);
@@ -281,16 +317,17 @@ function ipRateLimitMiddleware(req, res, next) {
       success: false,
       error: {
         code: 'DAILY_QUOTA_EXCEEDED',
-        message: `今日体验配额已用完，请明天再来或升级为注册用户`,
+        message: `今日 AI 对话配额已用完（${quotaCheck.used}/${quotaCheck.quota}次），请明天再来`,
         quota: quotaCheck.quota,
         used: quotaCheck.used,
-        resetAt: dailyResetTime,
+        remaining: 0,
+        resetAt: new Date(quotaCheck.resetAt).toISOString(),
       },
       retryAfter: Math.ceil((quotaCheck.resetAt - Date.now()) / 1000),
     });
   }
-
-  // 检查速率限制
+  
+  // 再检查速率限制
   const rateCheck = checkRateLimit(ip, userTier);
   if (!rateCheck.allowed) {
     logRequest(ip, path, req.method, userTier, 0);
@@ -305,13 +342,13 @@ function ipRateLimitMiddleware(req, res, next) {
       retryAfter: 60,
     });
   }
-
+  
   // 记录响应时间
   res.on('finish', () => {
     const responseTime = Date.now() - startTime;
     logRequest(ip, path, req.method, userTier, responseTime);
   });
-
+  
   // 添加限流头信息
   res.set({
     'X-RateLimit-Minute': `${rateCheck.minuteRemaining}/${rateCheck.minuteLimit}`,
@@ -319,7 +356,7 @@ function ipRateLimitMiddleware(req, res, next) {
     'X-RateLimit-Daily': `${quotaCheck.remaining}/${quotaCheck.quota}`,
     'X-RateLimit-IP': ip,
   });
-
+  
   next();
 }
 
