@@ -1,0 +1,5 @@
+[server]
+node_version = "20"
+
+[project]
+server_port = 30000

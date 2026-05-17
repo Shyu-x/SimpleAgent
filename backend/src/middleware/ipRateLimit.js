@@ -9,6 +9,7 @@
  */
 
 const crypto = require('crypto');
+const { getMetricsCollector } = require('../infra/metrics');
 
 // 限流配置
 // 说明: 严格限制 AI 对话配额防烧干，但放宽普通请求限制让用户体验流畅
@@ -279,11 +280,18 @@ function ipRateLimitMiddleware(req, res, next) {
                       path.startsWith('/api/agent') ||
                       path.startsWith('/api/completion');
   
-  // 非 AI 请求不占用每日配额，只做速率限制
+  // 非 AI 请求：先检查速率限制
   if (!isAIRequest) {
     const rateCheck = checkRateLimit(ip, userTier);
     if (!rateCheck.allowed) {
       logRequest(ip, path, req.method, userTier, 0);
+      // 记录限流指标
+      try {
+        const collector = getMetricsCollector();
+        collector.recordRateLimitExceeded(path, userTier);
+      } catch (e) {
+        // 忽略指标记录错误
+      }
       return res.status(429).json({
         success: false,
         error: {
@@ -313,6 +321,14 @@ function ipRateLimitMiddleware(req, res, next) {
   const quotaCheck = checkDailyQuota(ip, userTier);
   if (!quotaCheck.allowed) {
     logRequest(ip, path, req.method, userTier, 0);
+    // 记录限流指标
+    try {
+      const collector = getMetricsCollector();
+      collector.recordRateLimitExceeded(path, userTier);
+      collector.updateRateLimitQuota(userTier, quotaCheck.used, quotaCheck.quota);
+    } catch (e) {
+      // 忽略指标记录错误
+    }
     return res.status(429).json({
       success: false,
       error: {
@@ -326,11 +342,18 @@ function ipRateLimitMiddleware(req, res, next) {
       retryAfter: Math.ceil((quotaCheck.resetAt - Date.now()) / 1000),
     });
   }
-  
+
   // 再检查速率限制
   const rateCheck = checkRateLimit(ip, userTier);
   if (!rateCheck.allowed) {
     logRequest(ip, path, req.method, userTier, 0);
+    // 记录限流指标
+    try {
+      const collector = getMetricsCollector();
+      collector.recordRateLimitExceeded(path, userTier);
+    } catch (e) {
+      // 忽略指标记录错误
+    }
     return res.status(429).json({
       success: false,
       error: {

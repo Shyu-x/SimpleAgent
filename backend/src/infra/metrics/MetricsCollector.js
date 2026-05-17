@@ -87,8 +87,22 @@ class MetricsCollector {
     // 启动定时清理
     this._startCleanupTimer();
 
+    // 启动 Node.js 运行时指标更新
+    this._startNodejsMetricsTimer();
+
     // 注册默认指标
     this._registerDefaultMetrics();
+  }
+
+  /**
+   * 启动 Node.js 运行时指标定时更新
+   * @private
+   */
+  _startNodejsMetricsTimer() {
+    // 每 10 秒更新一次 Node.js 运行时指标
+    setInterval(() => {
+      this.updateNodejsMetrics();
+    }, 10000);
   }
 
   /**
@@ -100,6 +114,10 @@ class MetricsCollector {
     this.setGauge('process_cpu_seconds_total', 0);
     this.setGauge('process_memory_bytes', 0);
     this.setGauge('process_open_handles', 0);
+
+    // Node.js 运行时指标
+    this.setGauge('nodejs_active_handles', 0);
+    this.setGauge('nodejs_active_requests', 0);
 
     // 请求指标
     this.setGauge('http_requests_active', 0);
@@ -119,6 +137,11 @@ class MetricsCollector {
     // 队列指标
     this.setGauge('queue_length', 0);
     this.setGauge('queue_capacity', 0);
+
+    // 限流指标
+    this.setGauge('rate_limit_current_quota', 0, { user_level: 'trial' });
+    this.setGauge('rate_limit_current_quota', 0, { user_level: 'registered' });
+    this.setGauge('rate_limit_current_quota', 0, { user_level: 'premium' });
   }
 
   // ==================== Counter 操作 ====================
@@ -166,11 +189,14 @@ class MetricsCollector {
   setGauge(name, value, labels = {}) {
     const labelKey = this._labelsToKey(labels);
 
+    // 确保值为数字类型
+    const numValue = typeof value === 'number' ? value : 0;
+
     if (!this._gauges.has(name)) {
       this._gauges.set(name, new Map());
     }
 
-    this._gauges.get(name).set(labelKey, value);
+    this._gauges.get(name).set(labelKey, numValue);
   }
 
   /**
@@ -366,7 +392,8 @@ class MetricsCollector {
    * @returns {void}
    */
   startRequest(requestId, labels = {}) {
-    this._activeRequests++;
+    const currentActive = typeof this._activeRequests === 'number' ? this._activeRequests : parseInt(this._activeRequests, 10) || 0;
+    this._activeRequests = currentActive + 1;
     this._requestStartTimes.set(requestId, {
       startTime: Date.now(),
       labels,
@@ -387,7 +414,8 @@ class MetricsCollector {
     }
 
     const duration = (Date.now() - startData.startTime) / 1000; // 转换为秒
-    this._activeRequests = Math.max(0, this._activeRequests - 1);
+    const currentActive = typeof this._activeRequests === 'number' ? this._activeRequests : parseInt(this._activeRequests, 10) || 0;
+    this._activeRequests = Math.max(0, currentActive - 1);
     this._requestStartTimes.delete(requestId);
 
     // 更新指标
@@ -482,7 +510,22 @@ class MetricsCollector {
     for (const [name, data] of this._gauges) {
       result[name] = {};
       for (const [key, value] of data) {
-        result[name][key || '{}'] = value;
+        // 处理数组类型（转为长度）
+        if (Array.isArray(value)) {
+          result[name][key || '{}'] = value.length;
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          // 处理值为对象的情况（如 { current, total } 结构）
+          if ('current' in value) {
+            result[name][key || '{}'] = value.current;
+          } else if ('total' in value) {
+            result[name][key || '{}'] = value.total;
+          } else {
+            // 其他对象转为 JSON 字符串
+            result[name][key || '{}'] = JSON.stringify(value);
+          }
+        } else {
+          result[name][key || '{}'] = value;
+        }
       }
     }
     return result;
@@ -1106,6 +1149,33 @@ class MetricsCollector {
   }
 
   /**
+   * 更新 Node.js 运行时指标
+   * @returns {void}
+   */
+  updateNodejsMetrics() {
+    try {
+      // 获取活跃 handles 数量
+      let handleCount = 0;
+      if (typeof process._getActiveHandles === 'function') {
+        const handles = process._getActiveHandles();
+        handleCount = Array.isArray(handles) ? handles.length : (handles && typeof handles.length === 'number' ? handles.length : 0);
+      } else if (typeof process.resourceUsage === 'function') {
+        const usage = process.resourceUsage();
+        // resourceUsage returns { user: number, system: number, maxRSS: number, shared: number, ... }
+        handleCount = usage.maxRSS || 0;
+      }
+
+      // 获取活跃请求数量（确保是数字）
+      const requestCount = typeof this._activeRequests === 'number' ? this._activeRequests : parseInt(this._activeRequests, 10) || 0;
+
+      this.setGauge('nodejs_active_handles', handleCount);
+      this.setGauge('nodejs_active_requests', requestCount);
+    } catch (e) {
+      // 忽略错误，保持上次值
+    }
+  }
+
+  /**
    * 获取摘要格式的完整指标
    * @returns {Object}
    */
@@ -1194,6 +1264,67 @@ class MetricsCollector {
       },
       alerts: this.getActiveAlerts ? this.getActiveAlerts() : [],
     };
+  }
+
+  // ==================== 限流指标 ====================
+
+  /**
+   * 记录限流触发事件
+   * @param {string} endpoint - 端点路径
+   * @param {string} userLevel - 用户级别 (trial/registered/premium)
+   * @returns {void}
+   */
+  recordRateLimitExceeded(endpoint, userLevel) {
+    this.incrementCounter('rate_limit_exceeded_total', {
+      endpoint: this._normalizeMetricPath(endpoint),
+      user_level: userLevel,
+    });
+  }
+
+  /**
+   * 更新限流配额使用
+   * @param {string} userLevel - 用户级别
+   * @param {number} current - 当前使用量
+   * @param {number} max - 最大配额
+   * @returns {void}
+   */
+  updateRateLimitQuota(userLevel, current, max) {
+    this.setGauge('rate_limit_current_quota', current, { user_level: userLevel });
+    this.setGauge('rate_limit_max_quota', max, { user_level: userLevel });
+  }
+
+  /**
+   * 记录熔断器状态
+   * @param {string} circuitName - 熔断器名称
+   * @param {string} state - 状态 (closed/open/half_open)
+   * @param {string} result - 调用结果 (success/failure/timeout)
+   * @returns {void}
+   */
+  recordCircuitBreakerState(circuitName, state, result) {
+    // 状态值: 0=CLOSED, 1=OPEN, 2=HALF_OPEN
+    const stateValue = { closed: 0, open: 1, half_open: 2 }[state] ?? 0;
+    this.setGauge('circuit_breaker_state', stateValue, { name: circuitName });
+
+    // 调用计数
+    this.incrementCounter('circuit_breaker_calls_total', {
+      name: circuitName,
+      result: result,
+    });
+  }
+
+  /**
+   * 标准化指标路径
+   * @param {string} path - 请求路径
+   * @returns {string}
+   * @private
+   */
+  _normalizeMetricPath(path) {
+    if (!path) return 'unknown';
+    // 移除 UUID
+    let normalized = path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id');
+    // 移除数字 ID
+    normalized = normalized.replace(/\/\d+/g, '/:id');
+    return normalized;
   }
 
   // ==================== 生命周期 ====================

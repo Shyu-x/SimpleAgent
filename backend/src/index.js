@@ -190,6 +190,20 @@ async function startServer() {
   const alertsRoutes = require('./routes/alerts');
   const workflowRoutes = require('./routes/workflow');
 
+  const { aiRateLimitMiddleware, minuteRateLimitMiddleware } = require('./middleware/rateLimit');
+  const analyticsRoutes = require('./routes/analytics');
+
+  // 使用新的 Redis 限流中间件（非 AI 端点）
+  app.use(minuteRateLimitMiddleware);
+
+  // AI 对话端点使用更严格的限流
+  app.use('/api/chat', aiRateLimitMiddleware);
+  app.use('/api/agent', aiRateLimitMiddleware);
+  app.use('/api/completion', aiRateLimitMiddleware);
+
+  // 统计和分析 API
+  app.use('/api', analyticsRoutes);
+
   // 模块化架构初始化
   const moduleConfig = require('./config/module.config');
   const eventBus = require('./common/event-bus');
@@ -272,7 +286,9 @@ async function startServer() {
 
   // 保留简单健康检查（向后兼容）
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    const health = require('./middleware/loadProtection').healthCheck();
+    const status = health.status === 'ok' ? 200 : 503;
+    res.status(status).json(health);
   });
 
   // 网关降级状态查询

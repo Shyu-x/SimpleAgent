@@ -258,7 +258,7 @@ class PrometheusService {
     const moduleErrors = metrics.gauges?.module_errors_total || {};
     for (const [labels, value] of Object.entries(moduleErrors)) {
       const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`module_errors_total${labelStr} ${value}`);
+      lines.push(`module_errors_total${labelStr} ${typeof value === 'object' ? JSON.stringify(value) : value}`);
     }
     lines.push('');
 
@@ -273,10 +273,66 @@ class PrometheusService {
     }
     lines.push('');
 
+    // ==================== 熔断器调用计数 (Counter) ====================
+    lines.push('# HELP circuit_breaker_calls_total Total number of circuit breaker calls');
+    lines.push('# TYPE circuit_breaker_calls_total counter');
+
+    const circuitBreakerCalls = metrics.counters?.circuit_breaker_calls_total || {};
+    for (const [labels, value] of Object.entries(circuitBreakerCalls)) {
+      const labelStr = labels === '{}' ? '' : `{${labels}}`;
+      lines.push(`circuit_breaker_calls_total${labelStr} ${value}`);
+    }
+    lines.push('');
+
+    // ==================== 限流指标 (Counter) ====================
+    lines.push('# HELP rate_limit_exceeded_total Total number of rate limit exceeded');
+    lines.push('# TYPE rate_limit_exceeded_total counter');
+
+    const rateLimitExceeded = metrics.counters?.rate_limit_exceeded_total || {};
+    for (const [labels, value] of Object.entries(rateLimitExceeded)) {
+      const labelStr = labels === '{}' ? '' : `{${labels}}`;
+      lines.push(`rate_limit_exceeded_total${labelStr} ${value}`);
+    }
+    lines.push('');
+
+    // ==================== 限流配额 (Gauge) ====================
+    lines.push('# HELP rate_limit_current_quota Current rate limit quota usage');
+    lines.push('# TYPE rate_limit_current_quota gauge');
+
+    const rateLimitQuota = metrics.gauges?.rate_limit_current_quota || {};
+    for (const [labels, value] of Object.entries(rateLimitQuota)) {
+      const labelStr = labels === '{}' ? '' : `{${labels}}`;
+      lines.push(`rate_limit_current_quota${labelStr} ${value}`);
+    }
+    lines.push('');
+
+    // ==================== Node.js 运行时指标 ====================
+    lines.push('# HELP nodejs_active_handles Number of active handles');
+    lines.push('# TYPE nodejs_active_handles gauge');
+    const nodejsHandles = metrics.gauges?.nodejs_active_handles;
+    const handlesVal = typeof nodejsHandles === 'object' && nodejsHandles !== null
+      ? Object.values(nodejsHandles)[0] || 0
+      : (typeof nodejsHandles === 'number' ? nodejsHandles : 0);
+    lines.push(`nodejs_active_handles ${handlesVal}`);
+    lines.push('');
+
+    lines.push('# HELP nodejs_active_requests Number of active requests');
+    lines.push('# TYPE nodejs_active_requests gauge');
+    const nodejsRequests = metrics.gauges?.nodejs_active_requests;
+    const requestsVal = typeof nodejsRequests === 'object' && nodejsRequests !== null
+      ? Object.values(nodejsRequests)[0] || 0
+      : (typeof nodejsRequests === 'number' ? nodejsRequests : 0);
+    lines.push(`nodejs_active_requests ${requestsVal}`);
+    lines.push('');
+
     // ==================== 活跃请求数 (Gauge) ====================
     lines.push('# HELP http_requests_active Number of active HTTP requests');
     lines.push('# TYPE http_requests_active gauge');
-    lines.push(`http_requests_active ${metrics.gauges?.http_requests_active || 0}`);
+    const httpActive = metrics.gauges?.http_requests_active;
+    const httpActiveVal = typeof httpActive === 'object' && httpActive !== null
+      ? Object.values(httpActive)[0] || 0
+      : (typeof httpActive === 'number' ? httpActive : 0);
+    lines.push(`http_requests_active ${httpActiveVal}`);
     lines.push('');
 
     // ==================== 模型指标 ====================
@@ -292,12 +348,25 @@ class PrometheusService {
 
     lines.push('# HELP model_tokens_total Total number of tokens processed');
     lines.push('# TYPE model_tokens_total counter');
-    lines.push(`model_tokens_total ${metrics.gauges?.model_tokens_total || 0}`);
+    // 尝试从 counter 获取实际 token 总数
+    const modelTokensCounter = metrics.counters?.model_tokens_total;
+    let modelTokensValue = 0;
+    if (modelTokensCounter && typeof modelTokensCounter === 'object') {
+      const vals = Object.values(modelTokensCounter);
+      modelTokensValue = vals.reduce ? vals.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : (typeof vals[0] === 'number' ? vals[0] : 0);
+    } else if (typeof modelTokensCounter === 'number') {
+      modelTokensValue = modelTokensCounter;
+    }
+    lines.push(`model_tokens_total ${modelTokensValue}`);
     lines.push('');
 
     lines.push('# HELP model_errors_total Total number of model errors');
     lines.push('# TYPE model_errors_total gauge');
-    lines.push(`model_errors_total ${metrics.gauges?.model_errors_total || 0}`);
+    const modelErrors = metrics.gauges?.model_errors_total;
+    const modelErrorsVal = typeof modelErrors === 'object' && modelErrors !== null
+      ? Object.values(modelErrors)[0] || 0
+      : (typeof modelErrors === 'number' ? modelErrors : 0);
+    lines.push(`model_errors_total ${modelErrorsVal}`);
     lines.push('');
 
     // ==================== 工具指标 ====================
@@ -340,7 +409,11 @@ class PrometheusService {
     // ==================== 队列指标 ====================
     lines.push('# HELP queue_length Current queue length');
     lines.push('# TYPE queue_length gauge');
-    lines.push(`queue_length ${metrics.gauges?.queue_length || 0}`);
+    const queueLen = metrics.gauges?.queue_length;
+    const queueLenVal = typeof queueLen === 'object' && queueLen !== null
+      ? Object.values(queueLen)[0] || 0
+      : (typeof queueLen === 'number' ? queueLen : 0);
+    lines.push(`queue_length ${queueLenVal}`);
     lines.push('');
 
     return lines.join('\n');

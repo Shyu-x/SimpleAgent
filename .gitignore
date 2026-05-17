@@ -94,6 +94,9 @@ backend/tests/量化分析_runner.js
 # Docker files
 .dockerignore
 
+# Backups
+backups/
+
 # Temporary files
 tmp/
 temp/

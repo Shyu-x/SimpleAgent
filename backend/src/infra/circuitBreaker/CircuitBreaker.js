@@ -14,6 +14,7 @@
 
 const { CircuitState } = require('./CircuitState');
 const { CircuitEvent } = require('./CircuitEvent');
+const { getMetricsCollector } = require('../metrics/MetricsCollector');
 
 class CircuitBreaker {
   /**
@@ -259,6 +260,9 @@ class CircuitBreaker {
   _onSuccess(isProbe, probeId) {
     this._totalSuccesses++;
 
+    // 记录熔断器指标
+    this._recordMetrics('success');
+
     if (isProbe) {
       this._successCount++;
       this._emitEvent(CircuitEvent.PROBE_SUCCESS, { probeId });
@@ -281,6 +285,9 @@ class CircuitBreaker {
   _onFailure(error, isProbe, probeId) {
     this._totalFailures++;
     this._lastFailureTime = Date.now();
+
+    // 记录熔断器指标
+    this._recordMetrics('failure');
 
     if (isProbe) {
       this._emitEvent(CircuitEvent.PROBE_FAILURE, { probeId, error: error.message });
@@ -408,6 +415,19 @@ class CircuitBreaker {
     if (this._stateTransitionTimer) {
       clearTimeout(this._stateTransitionTimer);
       this._stateTransitionTimer = null;
+    }
+  }
+
+  /**
+   * 记录熔断器指标
+   * @private
+   */
+  _recordMetrics(result) {
+    try {
+      const collector = getMetricsCollector();
+      collector.recordCircuitBreakerState(this.name, this._state, result);
+    } catch (e) {
+      // 忽略指标记录错误
     }
   }
 

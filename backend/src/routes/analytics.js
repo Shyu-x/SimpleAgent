@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const { getGlobalStats, getIPStats, getAIUsageByIP, getClientIP } = require('../middleware/ipRateLimit');
+const { getSystemStats, healthCheck } = require('../middleware/loadProtection');
 
 // 全局统计
 router.get('/stats', (req, res) => {
@@ -37,6 +38,17 @@ router.get('/stats/me', (req, res) => {
       ip,
       ...stats,
       aiUsage,
+    },
+  });
+});
+
+// 系统负载统计
+router.get('/system', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      health: healthCheck(),
+      system: getSystemStats(),
     },
   });
 });
