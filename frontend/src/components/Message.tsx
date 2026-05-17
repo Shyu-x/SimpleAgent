@@ -18,9 +18,10 @@ interface MessageProps {
   onRegenerate?: () => void;
   onPreviewLink?: (url: string, title?: string) => void;
   onQuote?: (messageId: string) => void;
+  onEdit?: (content: string) => void;
 }
 
-const Message = memo(function Message({ message, isLast, status = 'complete', onDelete, onRegenerate, onPreviewLink, onQuote }: MessageProps) {
+const Message = memo(function Message({ message, isLast, status = 'complete', onDelete, onRegenerate, onPreviewLink, onQuote, onEdit }: MessageProps) {
   const isUser = message.role === 'user';
   const { showToast } = useToast();
   const [isCopied, setIsCopied] = useState(false);
@@ -158,7 +159,7 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
               />
               <div className="flex justify-end gap-2">
                 <button onClick={() => setIsEditing(false)} className="rounded-lg bg-background/10 px-3 py-1.5 text-xs hover:bg-background/20">取消</button>
-                <button className="rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-brand-600">保存</button>
+                <button onClick={() => { if (onEdit) { onEdit(editContent); setIsEditing(false); } }} className="rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-brand-600" disabled={!editContent.trim()}>保存</button>
               </div>
             </div>
           ) : (
