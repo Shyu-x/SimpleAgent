@@ -1,0 +1,32 @@
+name: Health Monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check backend health
+        run: |
+          response=$(curl -sf http://localhost:30000/api/health || echo "FAILED")
+          if [[ "$response" == "FAILED" ]]; then
+            echo "Backend health check failed"
+            exit 1
+          fi
+          echo "Backend: $response"
+          
+      - name: Check frontend
+        run: |
+          response=$(curl -sf -o /dev/null -w "%{http_code}" http://localhost:3001)
+          if [[ "$response" != "200" ]]; then
+            echo "Frontend health check failed: $response"
+            exit 1
+          fi
+          echo "Frontend: $response"
+          
+      - name: PM2 status
+        run: pm2 list

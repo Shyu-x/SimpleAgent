@@ -1,0 +1,36 @@
+# SimpleAgent Frontend Dockerfile
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+RUN npm install -g pnpm
+
+COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+
+RUN pnpm install --frozen-lockfile
+
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/next.config.js ./
+COPY frontend/tsconfig.json ./
+
+RUN pnpm build
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN npm install -g pnpm
+
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./
+
+RUN pnpm install --prod --frozen-lockfile
+
+EXPOSE 3001
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001 || exit 1
+
+CMD ["pnpm", "start"]

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: simpleagent-backend-dev
+    ports:
+      - "30000:30000"
+    environment:
+      - NODE_ENV=development
+      - PORT=30000
+      - LOG_LEVEL=debug
+      - VECTOR_DB_TYPE=memory
+    volumes:
+      - ../backend/src:/app/src
+    command: node --watch src/index.js
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: simpleagent-frontend-dev
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    volumes:
+      - ../frontend/src:/app/src
+      - ../frontend/public:/app/public
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: simpleagent-qdrant-dev
+    ports:
+      - "6333:6333"
+      - "6334:6334"

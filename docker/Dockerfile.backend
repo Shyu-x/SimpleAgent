@@ -1,0 +1,19 @@
+# SimpleAgent Backend Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN npm install -g pnpm
+
+COPY backend/package.json backend/pnpm-lock.yaml* ./
+
+RUN pnpm install --frozen-lockfile
+
+COPY backend/src ./src
+
+EXPOSE 30000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:30000/api/health || exit 1
+
+CMD ["node", "src/index.js"]
