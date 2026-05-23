@@ -1,0 +1,18 @@
+{
+  "preset": "ts-jest",
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+  "testEnvironment": "jsdom",
+  "transform": {
+    "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.(js|jsx)$": "babel-jest"
+  },
+  "moduleNameMapper": {
+    "^framer-motion$": "<rootDir>/__mocks__/framer-motion.js",
+    "^lucide-react$": "<rootDir>/__mocks__/lucide-react.js",
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+  },
+  "testMatch": ["**/__tests__/**/*.test.tsx", "**/__tests__/**/*.test.ts"],
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+  "collectCoverageFrom": ["src/**/*.{ts,tsx}", "!src/**/*.d.ts"]
+}

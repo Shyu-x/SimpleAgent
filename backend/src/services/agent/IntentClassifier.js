@@ -144,6 +144,9 @@ const SPECIAL_INTENT_PATTERNS = [
   { pattern: /^帮.*写/, intent: 'task', subIntent: TASK_SUB_TYPES.WRITING, weight: 15 },
   { pattern: /^帮.*分析/, intent: 'task', subIntent: TASK_SUB_TYPES.ANALYSIS, weight: 15 },
   { pattern: /^帮.*总结/, intent: 'task', subIntent: TASK_SUB_TYPES.SUMMARY, weight: 15 },
+  // 新增更多任务意图的特殊模式匹配
+  { pattern: /^分析/, intent: 'task', subIntent: TASK_SUB_TYPES.ANALYSIS, weight: 12 },
+  { pattern: /^总结/, intent: 'task', subIntent: TASK_SUB_TYPES.SUMMARY, weight: 12 },
   { pattern: /^什么是/, intent: 'knowledge', weight: 12 },
   { pattern: /^如何/, intent: 'knowledge', weight: 12 },
   { pattern: /^为什么/, intent: 'knowledge', weight: 12 },
@@ -211,9 +214,17 @@ class IntentClassifier extends EventEmitter {
 
       // 1. 优先尝试特殊模式匹配（快速路径）
       const specialMatch = this._matchSpecialPatterns(trimmedQuery);
-      if (specialMatch && specialMatch.confidence >= CONFIDENCE_THRESHOLDS.HIGH) {
-        this._updateLatency(startTime);
-        return specialMatch;
+      if (specialMatch) {
+        // 特殊模式权重 >= 12 的直接返回，不检查阈值
+        if (specialMatch.confidence >= CONFIDENCE_THRESHOLDS.HIGH) {
+          this._updateLatency(startTime);
+          return specialMatch;
+        }
+        // 权重 10-12 的特殊模式，只要不是闲聊就返回
+        if (specialMatch.source === 'special_pattern' && specialMatch.intent !== 'chat') {
+          this._updateLatency(startTime);
+          return specialMatch;
+        }
       }
 
       // 2. LLM 分类（如果启用）
@@ -373,7 +384,7 @@ class IntentClassifier extends EventEmitter {
     }
 
     // 计算置信度
-    const maxPossibleScore = 100; // 归一化基准
+    const maxPossibleScore = 20; // 归一化基准
     const confidence = bestScore > 0
       ? Math.min(0.3 + (bestScore / maxPossibleScore) * 0.6, 0.95)
       : 0.4;

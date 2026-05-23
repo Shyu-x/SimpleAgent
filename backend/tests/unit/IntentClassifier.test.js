@@ -16,7 +16,7 @@ const { IntentClassifier, INTENT_TYPES, CONFIDENCE_THRESHOLDS, TOOL_SUB_TYPES, T
 describe('IntentClassifier 构造函数', () => {
   test('默认配置应该正确', () => {
     const classifier = new IntentClassifier({ enableLLM: false });
-    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7-highspeed');
+    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7');
     assert.strictEqual(classifier.confidenceThreshold, CONFIDENCE_THRESHOLDS.MEDIUM);
     assert.strictEqual(classifier.enableLLM, false);
     assert.strictEqual(classifier.enableKeywordFallback, true);

@@ -555,7 +555,7 @@ class WorkflowEngine extends EventEmitter {
     }
 
     // 安全比较运算符模式
-    const comparisonPattern = /^([\w.]+)\s*(===|==|!==|!=|>=|<=|>|<)\s*([\w.'"]+)$/;
+    const comparisonPattern = /^([\w.'"]+)\s*(===|==|!==|!=|>=|<=|>|<)\s*([\w.'"]+)$/;
     const match = cleaned.match(comparisonPattern);
 
     if (match) {

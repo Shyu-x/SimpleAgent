@@ -43,7 +43,7 @@ describe('ConfigCenter 初始化', () => {
     assert.strictEqual(config.defaults.rag.chunkSize, 512);
     assert.strictEqual(config.defaults.rag.topK, 5);
     assert.strictEqual(config.defaults.rag.rerankEnabled, true);
-    assert.strictEqual(config.defaults.rag.embeddingModel, 'mxbai-embed-large');
+    assert.strictEqual(config.defaults.rag.embeddingModel, 'simple');
   });
 
   test('agent 默认配置应该正确', () => {

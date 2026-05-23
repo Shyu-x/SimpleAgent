@@ -198,6 +198,9 @@ export class ApiError extends Error {
   ) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    this.url = url;
   }
 
   static fromResponse(response: Response, data?: { error?: { message?: string; code?: string } }): ApiError {

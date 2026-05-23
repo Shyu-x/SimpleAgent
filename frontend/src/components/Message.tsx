@@ -79,12 +79,6 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
     setIsPressed(false);
   }, []);
 
-  // 计算气泡相对于时间戳的位置
-  const getStatusPosition = () => {
-    if (isUser) return 'left';
-    return 'right';
-  };
-
   return (
     <motion.div
       initial={animationsEnabled ? { opacity: 0, y: 10 } : false}

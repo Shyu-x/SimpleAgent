@@ -37,12 +37,10 @@ function transformRequest(req) {
   const { messages, model, temperature, max_tokens, stream, reasoning_split, thinking_budget } = req.body;
   return {
     model: model || PROVIDER.defaultModel,
-    messages: messages.map(m => {
-      if (Array.isArray(m.content)) {
-        return { role: m.role === 'assistant' ? 'assistant' : m.role, content: m.content };
-      }
-      return { role: m.role === 'assistant' ? 'assistant' : m.role, content: m.content };
-    }),
+    messages: messages.map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : m.role,
+      content: m.content
+    })),
     max_tokens: max_tokens || 8192,
     temperature: temperature !== undefined ? temperature : 0.7,
     stream: stream !== false,
@@ -71,9 +69,12 @@ router.post('/chat/completions', async (req, res) => {
   await minimaxBreaker.execute(async () => {
     const response = await fetch(targetUrl, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      timeout: 120000
+      headers: {
+        'X-Api-Key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -91,10 +92,10 @@ router.post('/chat/completions', async (req, res) => {
       const decoder = new TextDecoder();
       let buffer = '';
 
-      const readChunk = async () => {
-        try {
+      try {
+        while (true) {
           const { done, value } = await reader.read();
-          if (done) { res.end(); return; }
+          if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split('\n');
@@ -110,14 +111,19 @@ router.post('/chat/completions', async (req, res) => {
                   res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: data.delta.text } }] })}\n\n`);
                 } else if (data.type === 'content_block_delta' && data.delta?.type === 'thinking_delta') {
                   res.write(`data: ${JSON.stringify({ type: 'thinking_delta', content: data.delta.thinking })}\n\n`);
+                } else if (data.type === 'message_delta' && data.delta?.stop_reason) {
+                  // 发送消息结束信号，然后发送 [DONE]
+                  res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+                  res.write('data: [DONE]\n\n');
                 }
               } catch (e) { /* ignore */ }
             }
           }
-          readChunk();
-        } catch (err) { logger.error('Stream error', { error: err.message, stack: err.stack }); res.end(); }
-      };
-      readChunk();
+        }
+      } catch (err) {
+        logger.error('Stream error', { error: err.message, stack: err.stack });
+      }
+      res.end();
     } else {
       const data = await response.json();
       res.json(data);
@@ -144,9 +150,12 @@ router.post('/chat', async (req, res) => {
   await minimaxBreaker.execute(async () => {
     const response = await fetch(PROVIDER.baseUrl + PROVIDER.chatEndpoint, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      timeout: 120000
+      headers: {
+        'X-Api-Key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {

@@ -27,7 +27,7 @@ const {
 describe('TreeIntentClassifier 构造函数', () => {
   test('默认配置应该正确', () => {
     const classifier = new TreeIntentClassifier({ enableLLM: false });
-    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7-highspeed');
+    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7');
     assert.strictEqual(classifier.confidenceThreshold, 0.5);
     assert.strictEqual(classifier.enableLLM, false);
     assert.strictEqual(classifier.enableKeywordFallback, true);

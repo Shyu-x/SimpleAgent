@@ -1788,27 +1788,6 @@ ${contextText}
   }
 
   /**
-   * 查找替代工具
-   */
-  async _findAlternativeTool(failedTool, error) {
-    const availableTools = this.toolRegistry.listTools();
-
-    // 简单策略：返回另一个同类别的工具
-    const failedToolInfo = this.toolRegistry.get(failedTool);
-    const category = failedToolInfo?.category || 'general';
-
-    const alternatives = availableTools.filter(t =>
-      t.category === category && t.name !== failedTool
-    );
-
-    if (alternatives.length > 0) {
-      return alternatives[0].name;
-    }
-
-    return null;
-  }
-
-  /**
    * 规则匹配推理（回退方案）
    */
   _thinkWithRules(context) {
