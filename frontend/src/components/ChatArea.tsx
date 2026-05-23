@@ -73,6 +73,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     [conversations, activeConversationId]
   );
 
+
   // 检测用户滚动，优先用户控制
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
@@ -325,9 +326,16 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
         {
           signal: abortControllerRef.current.signal,
           onMessage: (chunk: string) => {
+            console.log('[ChatArea] onMessage:', {
+              chunkLength: chunk.length,
+              chunkPreview: chunk.substring(0, 50),
+            });
             const conv = useChatStore.getState().conversations.find((c) => c.id === activeConversationId);
             if (conv && conv.messages.length > 0) {
-              updateLastMessage(activeConversationId, conv.messages[conv.messages.length - 1].content + chunk);
+              const currentContent = conv.messages[conv.messages.length - 1].content;
+              console.log('[ChatArea] 更新前内容长度:', currentContent.length);
+              updateLastMessage(activeConversationId, currentContent + chunk);
+              console.log('[ChatArea] 更新后（期望）长度:', currentContent.length + chunk.length);
             }
           },
           onThinking: (thinkingChunk: string, isEnd: boolean) => {
@@ -435,6 +443,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
                   isLast={isLast}
                   status={getMessageStatus()}
                   onPreviewLink={triggerPreview}
+                  onEdit={(content) => activeConversationId && useChatStore.getState().updateMessageContent(activeConversationId, message.id, content)}
                 />
               );
             })}

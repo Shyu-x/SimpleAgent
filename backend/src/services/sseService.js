@@ -198,6 +198,22 @@ class SSEService {
         }
       });
 
+      // 首先检查是否是降级响应（熔断器触发）- 必须在 success 检查之前
+      if (result && result.fallback) {
+        logger.error('SSE Chat: Circuit breaker fallback', {
+          error: result.error,
+          circuitBreaker: result.circuitBreaker,
+          degraded: result.degraded
+        });
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          errorType: ErrorType.SERVER,
+          message: result.error || 'MiniMax API 暂时不可用，请稍后重试'
+        })}\n\n`);
+        res.end();
+        return;
+      }
+
       if (!result.success) {
         const errorInfo = classifyError(new Error(result.error));
         res.write(`data: ${JSON.stringify({
@@ -210,11 +226,54 @@ class SSEService {
         return;
       }
 
+      // Debug: 检查 result 结构
+      logger.debug('SSE Chat: result structure', {
+        resultKeys: result ? Object.keys(result) : [],
+        hasFallback: !!result?.fallback,
+        hasResult: !!result?.result,
+        resultType: typeof result?.result,
+        resultConstructor: result?.result?.constructor?.name,
+        success: result?.success
+      });
+
       // 获取流式响应
       const responseStream = result.result;
 
+      // 检查响应流是否有效
+      if (!responseStream || typeof responseStream !== 'object') {
+        // 详细日志
+        const resultType = result && typeof result;
+        const resultKeys = result && typeof result === 'object' ? Object.keys(result) : [];
+        logger.error('SSE Chat: Invalid response stream', {
+          resultSuccess: result?.success,
+          resultType: resultType,
+          resultKeys: resultKeys,
+          hasResult: !!result?.result,
+          resultResultType: typeof result?.result,
+          resultResultValue: result?.result,
+          hasError: !!result?.error,
+          error: result?.error
+        });
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          errorType: ErrorType.SERVER,
+          message: '服务内部错误：响应流无效'
+        })}\n\n`);
+        res.end();
+        return;
+      }
+
       // 检测流类型
       const streamType = detectStreamType(responseStream);
+      logger.debug('SSE Chat: stream detection', {
+        responseStreamType: typeof responseStream,
+        responseStreamConstructor: responseStream?.constructor?.name,
+        hasGetReader: typeof responseStream?.getReader === 'function',
+        hasPipe: typeof responseStream?.pipe === 'function',
+        hasOn: typeof responseStream?.on === 'function',
+        streamType: streamType,
+        keys: responseStream ? Object.keys(responseStream).slice(0, 10) : []
+      });
 
       if (!streamType) {
         res.write(`data: ${JSON.stringify({

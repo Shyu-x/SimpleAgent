@@ -11,21 +11,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 const { TraceService, Trace, Span, SpanStatus, EventTypes, FilePersister } = require('../../src/services/tracing/TraceService');
 
@@ -387,4 +373,3 @@ setTimeout(() => {
   } catch (e) {}
 }, 100);
 
-console.log('\n');

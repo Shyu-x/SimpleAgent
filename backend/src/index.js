@@ -239,9 +239,9 @@ async function startServer() {
   app.use('/api/hitl', hitlRoutes);
   app.use('/api/hitl', hitlSseRoutes);
   app.use('/api/enhanced-agent', enhancedAgentRoutes);
-  app.use('/api/memory', enhancedMemoryRoutes);
+  app.use('/api/memory', memoryRoutes); // 记忆系统 API (标准路由，优先匹配)
+  app.use('/api/memory', enhancedMemoryRoutes); // 增强记忆路由
   app.use('/api/router', routerRoutes);
-  app.use('/api/rag', ragRoutes);
   app.use('/api/tasks', taskQueueRoutes);
   app.use('/api/plugins', pluginRoutes);
   app.use('/api/skills', skillRoutes);

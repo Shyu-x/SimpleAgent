@@ -29,6 +29,9 @@ const { AgentLogger, formatConsole } = require('./AgentLogger');
 const { withRetry, withTimeout, sleep, TimeoutConfig } = require('../utils/retry');
 const SessionNoteTool = require('./tools/SessionNoteTool');
 const AppError = require('../common/errors/AppError');
+
+// 引入 EventEmitter 用于 trace 广播
+require('../common/EventEmitter');
 const { createTokenManager } = require('./agent/TokenManager');
 const { agentVisualizer, StepType } = require('./agent/AgentVisualizer');
 
@@ -185,6 +188,12 @@ class AgentEngine {
     this.cancelEvent = null;
     this._cancelCallback = null;
 
+    // Trace 功能
+    this.traceId = null;
+    this.spans = [];
+    this.startTime = null;
+    this.currentParentSpanId = null;
+
     this.state = {
       status: 'idle', // idle, running, paused, completed, error
       iteration: 0,
@@ -253,6 +262,115 @@ class AgentEngine {
       }
     }
     return messages.slice(0, lastCompleteIdx + 1);
+  }
+
+  // ==================== Trace 功能 ====================
+
+  /**
+   * 初始化 trace
+   */
+  initTrace() {
+    this.traceId = this._generateTraceId();
+    this.spans = [];
+    this.startTime = Date.now();
+    this.currentParentSpanId = null;
+    this.logger?.info('Trace initialized', { traceId: this.traceId });
+  }
+
+  /**
+   * 生成 trace ID
+   */
+  _generateTraceId() {
+    return `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 生成 span ID
+   */
+  _generateSpanId() {
+    return `span_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 记录 span
+   */
+  recordSpan(name, metadata = {}) {
+    if (!this.traceId) {
+      this.initTrace();
+    }
+
+    const span = {
+      spanId: this._generateSpanId(),
+      traceId: this.traceId,
+      parentSpanId: this.currentParentSpanId,
+      name,
+      startTime: Date.now(),
+      endTime: null,
+      duration: null,
+      status: 'running',
+      tags: metadata,
+      events: [],
+      childCount: 0
+    };
+
+    this.spans.push(span);
+    this.currentParentSpanId = span.spanId;
+    this.logger?.debug('Span recorded', { spanId: span.spanId, name });
+
+    // 广播到 SSE (通过 global event emitter)
+    if (global.traceEventEmitter) {
+      global.traceEventEmitter.emit('span_update', span);
+    }
+
+    return span;
+  }
+
+  /**
+   * 完成 span
+   */
+  completeSpan(spanId, status = 'ok', extraTags = {}) {
+    const span = this.spans.find(s => s.spanId === spanId);
+    if (span) {
+      span.endTime = Date.now();
+      span.duration = span.endTime - span.startTime;
+      span.status = status;
+      Object.assign(span.tags, extraTags);
+
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('span_update', span);
+      }
+    }
+  }
+
+  /**
+   * 完成 trace
+   */
+  finalizeTrace() {
+    if (!this.traceId) return null;
+
+    const trace = {
+      traceId: this.traceId,
+      operationName: this.prompt?.substring(0, 100) || 'agent_execution',
+      serviceName: 'agent-engine',
+      startTime: this.startTime,
+      endTime: Date.now(),
+      duration: Date.now() - this.startTime,
+      status: this.errorCount > 0 ? 'error' : 'ok',
+      totalSpans: this.spans.length,
+      spans: this.spans
+    };
+
+    if (global.traceEventEmitter) {
+      global.traceEventEmitter.emit('trace_complete', trace);
+    }
+
+    this.logger?.info('Trace finalized', {
+      traceId: trace.traceId,
+      totalSpans: trace.totalSpans,
+      duration: trace.duration
+    });
+
+    return trace;
   }
 
   // ==================== 错误分类与结构化错误恢复 ====================
@@ -703,6 +821,9 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     const session = await this.persistence.createSession(task, context);
     this.sessionId = session.id;
 
+    // 初始化 trace
+    this.initTrace();
+
     // 创建 Agent 可视化轨迹
     const trace = agentVisualizer.createTrace(session.id, task);
     trace.metadata = {
@@ -710,6 +831,63 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       llmEnabled: this.llmEnabled,
       humanConfirmationEnabled: this.humanConfirmationEnabled
     };
+
+    // 监听 agentVisualizer 事件并转发到 global.traceEventEmitter
+    const handleStepStart = (traceId, step) => {
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('span_update', {
+          spanId: step.id,
+          traceId: traceId,
+          parentSpanId: null,
+          name: step.name,
+          startTime: step.startTime,
+          endTime: null,
+          duration: null,
+          status: 'running',
+          tags: step.metadata || {},
+          events: [],
+          childCount: 0
+        });
+      }
+    };
+
+    const handleStepComplete = (traceId, step) => {
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('span_update', {
+          spanId: step.id,
+          traceId: traceId,
+          parentSpanId: null,
+          name: step.name,
+          startTime: step.startTime,
+          endTime: step.endTime,
+          duration: step.duration,
+          status: step.status === 'success' ? 'ok' : step.status,
+          tags: step.metadata || {},
+          events: [],
+          childCount: 0
+        });
+      }
+    };
+
+    const handleTraceComplete = (traceId, traceData) => {
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('trace_complete', {
+          traceId: traceId,
+          operationName: traceData.query?.substring(0, 100) || 'agent_execution',
+          serviceName: 'agent-engine',
+          startTime: traceData.startTime,
+          endTime: traceData.endTime,
+          duration: traceData.totalDuration,
+          status: traceData.status === 'success' ? 'ok' : traceData.status,
+          totalSpans: traceData.stats?.stepCount || 0,
+          spans: []
+        });
+      }
+    };
+
+    agentVisualizer.on('step_start', handleStepStart);
+    agentVisualizer.on('step_complete', handleStepComplete);
+    agentVisualizer.on('trace_complete', handleTraceComplete);
 
     // 记录执行开始时间（用于指标统计）
     this._executionStartTime = Date.now();
@@ -803,6 +981,8 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
         results.iterations = i + 1;
 
         // 步骤1: 思考 - 生成下一步行动
+        this.recordSpan('agent_thinking', { step: this.state.iteration });
+
         trace.startStep(StepType.MODEL_CALL, 'LLM Reasoning', {
           iteration: this.state.iteration,
           phase: 'reason'
@@ -826,6 +1006,8 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
 
         if (thought.type === 'action') {
           // 步骤3: 执行行动
+          this.recordSpan('tool_execution', { tool: thought.tool });
+
           trace.startStep(StepType.TOOL_SELECTION, `Select Tool: ${thought.tool}`, {
             reasoning: thought.reasoning,
             confidence: thought.confidence
@@ -949,6 +1131,11 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
         trace.complete(results.finalResult);
       }
 
+      // 清理 agentVisualizer 事件监听器
+      agentVisualizer.off('step_start', handleStepStart);
+      agentVisualizer.off('step_complete', handleStepComplete);
+      agentVisualizer.off('trace_complete', handleTraceComplete);
+
       // 停止自动保存
       this.persistence.stopAutoSave();
 
@@ -978,6 +1165,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     }
 
     this.state.history = [...results.toolCalls];
+    this.finalizeTrace();
     return results;
   }
 

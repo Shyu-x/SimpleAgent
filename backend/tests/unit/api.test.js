@@ -3,18 +3,7 @@
  */
 const assert = require('assert');
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-console.log('\nAPI Router Tests:');
 
 const modelAliases = {
   'gpt4': 'gpt-4o',
@@ -57,4 +46,3 @@ test('should retry on 502/503', () => {
   assert.strictEqual(shouldRetry(404), false);
 });
 
-console.log('\n');

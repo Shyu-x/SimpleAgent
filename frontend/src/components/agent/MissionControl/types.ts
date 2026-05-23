@@ -37,6 +37,7 @@ export interface MissionTask {
   progress?: number; // 0-100, for in_progress tasks
   result?: string;
   error?: string;
+  traceId?: string; // 用于 Mini 可视化的 trace ID
   subtasks?: MissionTask[];
 }
 

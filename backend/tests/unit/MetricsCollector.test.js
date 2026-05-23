@@ -14,21 +14,7 @@
 const assert = require('assert');
 
 // 简单的测试运行器
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 describe('MetricsCollector 初始化', () => {
   test('默认配置应该正确', () => {
@@ -255,4 +241,3 @@ describe('MetricsCollector 重置', () => {
   });
 });
 
-console.log('\n');

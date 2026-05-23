@@ -147,6 +147,48 @@ export function useMemorySystem() {
     }
   }, [hydrateGlobalMemories]);
 
+  /**
+   * 同步单个记忆到后端（创建）
+   */
+  const syncAddToBackend = useCallback(async (memory: GlobalMemory) => {
+    if (typeof window === 'undefined') return;
+    try {
+      await post(`${API_BASE}/api/memory/global`, {
+        content: memory.content,
+        type: memory.type,
+        importance: memory.importance,
+        tags: memory.tags,
+        userId: memory.userId,
+      });
+    } catch (error) {
+      console.error('[MemorySystem] Failed to sync add to backend:', error);
+    }
+  }, []);
+
+  /**
+   * 同步更新到后端
+   */
+  const syncUpdateToBackend = useCallback(async (memoryId: string, updates: Partial<Omit<GlobalMemory, 'id' | 'userId'>>) => {
+    if (typeof window === 'undefined') return;
+    try {
+      await put(`${API_BASE}/api/memory/global/${memoryId}`, updates);
+    } catch (error) {
+      console.error('[MemorySystem] Failed to sync update to backend:', error);
+    }
+  }, []);
+
+  /**
+   * 同步删除到后端
+   */
+  const syncDeleteToBackend = useCallback(async (memoryId: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      await del(`${API_BASE}/api/memory/global/${memoryId}`);
+    } catch (error) {
+      console.error('[MemorySystem] Failed to sync delete to backend:', error);
+    }
+  }, []);
+
   // 启动时从后端加载数据
   useEffect(() => {
     loadFromBackend();
@@ -198,26 +240,33 @@ export function useMemorySystem() {
     deleteNote(conversationId, noteId);
   }, [deleteNote]);
 
-  // 全局记忆：统一走 chatStore
+  // 全局记忆：统一走 chatStore + 后端同步
   const addGlobalMemory = useCallback((
     content: string,
     type: MemoryType = 'general',
     importance: MemoryImportance = 'medium',
     tags: string[] = []
   ) => {
-    return addGlobalMemoryToStore(content, type, importance, tags);
-  }, [addGlobalMemoryToStore]);
+    const memory = addGlobalMemoryToStore(content, type, importance, tags);
+    // 同步到后端
+    syncAddToBackend(memory);
+    return memory;
+  }, [addGlobalMemoryToStore, syncAddToBackend]);
 
   const updateGlobalMemory = useCallback((
     id: string,
     updates: Partial<Omit<GlobalMemory, 'id' | 'userId'>>
   ) => {
     updateGlobalMemoryToStore(id, updates);
-  }, [updateGlobalMemoryToStore]);
+    // 同步到后端
+    syncUpdateToBackend(id, updates);
+  }, [updateGlobalMemoryToStore, syncUpdateToBackend]);
 
   const deleteGlobalMemory = useCallback((id: string) => {
     deleteGlobalMemoryToStore(id);
-  }, [deleteGlobalMemoryToStore]);
+    // 同步到后端
+    syncDeleteToBackend(id);
+  }, [deleteGlobalMemoryToStore, syncDeleteToBackend]);
 
   // 语义搜索记忆
   const searchMemories = useCallback((query: string, limit = 5): GlobalMemory[] => {

@@ -2,6 +2,7 @@
  * Playwright 全局设置
  */
 import { chromium } from '@playwright/test';
+import '@testing-library/jest-dom/vitest';
 
 /**
  * 全局配置

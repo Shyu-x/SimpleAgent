@@ -10,6 +10,9 @@ import { motion } from 'framer-motion';
 import { useChatStore } from '@/store/chatStore';
 import { MessageStatusIndicator, formatMessageTime, type MessageStatus } from './MessageStatus';
 
+// MarkdownRenderer 高频重渲染优化：在流式更新期间避免每字符重新解析
+const MemoizedMarkdownRenderer = memo(MarkdownRenderer);
+
 interface MessageProps {
   message: MessageType;
   isLast: boolean;
@@ -183,7 +186,7 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
                   onPreviewLink={onPreviewLink}
                 />
               ) : (
-                <MarkdownRenderer content={message.content} onPreviewLink={onPreviewLink} />
+                <MemoizedMarkdownRenderer content={message.content} onPreviewLink={onPreviewLink} />
               )}
             </div>
           )}

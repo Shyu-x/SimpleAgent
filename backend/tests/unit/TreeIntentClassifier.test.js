@@ -11,21 +11,7 @@
 
 const assert = require('assert');
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 const {
   TreeIntentClassifier,
@@ -337,4 +323,3 @@ describe('TreeIntentClassifier 兼容性别名', () => {
   });
 });
 
-console.log('\n');

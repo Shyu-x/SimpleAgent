@@ -820,37 +820,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     setExecutionHistory([]);
   }, []);
 
-  // SSE 连接用于实时数据
-  useEffect(() => {
-    // 使用后端 /api/admin/stream SSE 端点
-    const eventSource = new EventSource(`${API_ENDPOINTS.base}/api/admin/stream`);
-
-    eventSource.onopen = () => {
-      console.log('[PerformanceMonitor] SSE connected');
-    };
-
-    eventSource.addEventListener('stats', (e) => {
-      try {
-        const message = JSON.parse(e.data);
-        // 后端发送格式: { type: 'stats', data: {...} }
-        const data = message.data;
-        refreshDataFromSSE(data);
-      } catch (error) {
-        console.error('[PerformanceMonitor] SSE parse error:', error);
-      }
-    });
-
-    eventSource.onerror = (error) => {
-      console.error('[PerformanceMonitor] SSE error:', error);
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, []);
-
-  // 从 SSE 数据刷新
+  // 从 SSE 数据刷新 - 必须在 SSE 连接 useEffect 之前定义
   const refreshDataFromSSE = useCallback((data: {
     totalRequests?: number;
     successRate?: number;
@@ -908,6 +878,36 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
       };
     });
   }, []);
+
+  // SSE 连接用于实时数据
+  useEffect(() => {
+    // 使用后端 /api/admin/stream SSE 端点
+    const eventSource = new EventSource(`${API_ENDPOINTS.base}/api/admin/stream`);
+
+    eventSource.onopen = () => {
+      console.log('[PerformanceMonitor] SSE connected');
+    };
+
+    eventSource.addEventListener('stats', (e) => {
+      try {
+        const message = JSON.parse(e.data);
+        // 后端发送格式: { type: 'stats', data: {...} }
+        const data = message.data;
+        refreshDataFromSSE(data);
+      } catch (error) {
+        console.error('[PerformanceMonitor] SSE parse error:', error);
+      }
+    });
+
+    eventSource.onerror = (error) => {
+      console.error('[PerformanceMonitor] SSE error:', error);
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []); // 移除 refreshDataFromSSE 依赖 - 函数体内通过闭包正确引用
 
   // 阈值检查 - 仅当有真实数据时执行
   useEffect(() => {

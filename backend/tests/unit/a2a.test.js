@@ -3,18 +3,7 @@
  */
 const assert = require('assert');
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-console.log('\nA2A Agent Registry Tests:');
 const registry = new Map();
 
 test('should register an agent with metadata', () => {
@@ -65,4 +54,3 @@ test('should mark task as completed with output', () => {
   assert.ok(task.completedAt);
 });
 
-console.log('\n');

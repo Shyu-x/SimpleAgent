@@ -13,21 +13,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs').promises;
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 const MemoryWindowManager = require('../../src/services/agent/MemoryWindowManager');
 const testStorageDir = path.join(__dirname, 'test-data', 'memory-windows');
@@ -291,4 +277,3 @@ setTimeout(async () => {
   } catch (e) {}
 }, 100);
 
-console.log('\n');

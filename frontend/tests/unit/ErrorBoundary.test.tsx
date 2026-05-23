@@ -14,7 +14,7 @@
 import React from 'react';
 import { describe, test, expect, vi } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import { ErrorBoundary, createErrorBoundary } from '../../src/components/ErrorBoundary';
+import { ErrorBoundary, createErrorBoundary } from '../../src/utils/ErrorBoundary';
 
 describe('ErrorBoundary 基础错误捕获测试', () => {
   test('子组件正常渲染时 ErrorBoundary 不显示错误状态', () => {

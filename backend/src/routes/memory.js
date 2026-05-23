@@ -47,10 +47,14 @@ router.delete('/sessions/:sessionId', (req, res) => {
 });
 
 // ========== 全局记忆 API ==========
-router.get('/global', (req, res) => {
+router.get('/global', async (req, res) => {
   const { type, limit, offset } = req.query;
-  const result = memoryStoreService.getGlobalMemories({ type, limit, offset });
-  ok(res, { data: result.data, total: result.total, offset: result.offset, limit: result.limit });
+  try {
+    const result = await memoryStoreService.getGlobalMemories({ type, limit, offset });
+    ok(res, { data: result.data, total: result.total, offset: result.offset, limit: result.limit });
+  } catch (error) {
+    fail(res, 500, error.message);
+  }
 });
 
 router.post('/global', (req, res) => {
@@ -79,12 +83,55 @@ router.post('/global/:memoryId/access', (req, res) => {
   ok(res, { data: result.memory });
 });
 
+// ========== 批量同步 API (前端 syncToBackend) ==========
+router.post('/global/sync', (req, res) => {
+  const { memories, timestamp } = req.body;
+  if (!memories || !Array.isArray(memories)) return fail(res, 400, '无效的记忆数据');
+
+  const existingIds = new Set(Array.from(memoryStoreService.globalMemories.keys()));
+  const synced = [];
+
+  for (const memory of memories) {
+    if (memory.id && existingIds.has(memory.id)) {
+      // 更新已存在的记忆
+      memoryStoreService.updateGlobalMemory(memory.id, {
+        content: memory.content,
+        type: memory.type,
+        importance: memory.importance,
+        tags: memory.tags,
+      });
+    } else if (memory.id) {
+      // 创建新记忆（使用前端ID保持一致性）
+      const newMemory = {
+        id: memory.id,
+        userId: memory.userId || 'default',
+        content: memory.content,
+        type: memory.type || 'general',
+        importance: memory.importance || 'medium',
+        tags: memory.tags || [],
+        createdAt: memory.createdAt || Date.now(),
+        updatedAt: Date.now(),
+        lastAccessedAt: memory.lastAccessedAt || Date.now(),
+        accessCount: memory.accessCount || 0,
+      };
+      memoryStoreService.globalMemories.set(memory.id, newMemory);
+    }
+    synced.push(memory.id);
+  }
+
+  ok(res, { synced: synced.length, timestamp: Date.now() });
+});
+
 // ========== 搜索 API ==========
-router.get('/search', (req, res) => {
+router.get('/search', async (req, res) => {
   const { q, limit = 10 } = req.query;
   if (!q || typeof q !== 'string') return fail(res, 400, '缺少搜索关键词');
-  const result = memoryStoreService.searchGlobalMemories(q, { limit: Number(limit) });
-  ok(res, { data: result.data, total: result.total, query: result.query });
+  try {
+    const result = await memoryStoreService.searchGlobalMemories(q, { limit: Number(limit) });
+    ok(res, { data: result.data, total: result.total, query: result.query });
+  } catch (error) {
+    fail(res, 500, error.message);
+  }
 });
 
 // ========== 记忆摘要 API ==========

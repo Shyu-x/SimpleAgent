@@ -125,25 +125,28 @@ class MiniMaxRouter extends EventEmitter {
         thinking_budget: options.thinking_budget
       });
 
-      // 如果是流式请求且启用了首包探测，包装响应流
-      let result = apiResult;
+      // 检查是否是降级响应（熔断器触发）
+      if (apiResult && (apiResult.fallback || apiResult.error)) {
+        this.stats.failedRequests++;
+        this.emit('circuit:rejected', { model: routing.model, error: apiResult.error });
+        return {
+          success: false,
+          requestId,
+          error: apiResult.error || 'MiniMax API 暂时不可用',
+          fallback: apiResult.fallback || true,
+          circuitBreaker: apiResult.circuitBreaker,
+          degraded: true
+        };
+      }
+
+      // 处理成功结果 - 从包装对象中提取实际数据
+      let resultData = apiResult;
       let probeInfo = null;
 
-      // 检测是否为浏览器 ReadableStream（Node.js stream 需要特殊处理）
-      const isBrowserReadableStream = stream && shouldProbe &&
-        typeof apiResult?.getReader === 'function' &&
-        typeof apiResult?.pipe !== 'function';
-
-      if (stream && shouldProbe && isBrowserReadableStream) {
-        const probeResult = await this._probeStream(apiResult, requestId);
-        result = probeResult.stream;
-        probeInfo = probeResult.probeResult;
-
-        if (probeResult.success) {
-          this.stats.probeSuccesses++;
-        } else {
-          this.stats.probeFailures++;
-        }
+      // 如果 apiResult 是包装对象，提取 result 和 model
+      if (apiResult.success !== undefined && apiResult.result !== undefined) {
+        // 从包装对象中提取流或 JSON 结果
+        resultData = apiResult.result;
       }
 
       this.stats.successRequests++;
@@ -151,8 +154,8 @@ class MiniMaxRouter extends EventEmitter {
         success: true,
         requestId,
         model: routing.model,
-        result,
-        probeInfo  // 首包探测结果（如果有）
+        result: resultData,  // 流或 JSON 结果
+        probeInfo
       };
     } catch (error) {
       this.stats.failedRequests++;
@@ -255,6 +258,30 @@ class MiniMaxRouter extends EventEmitter {
         reasoning_split: options.reasoning_split,
         thinking_budget: options.thinking_budget
       });
+
+      // 检查是否是降级响应（熔断器触发）
+      console.error('[ModelRouter] executeStream apiResult:', JSON.stringify({
+        hasResult: !!apiResult,
+        keys: apiResult ? Object.keys(apiResult) : [],
+        hasFallback: !!apiResult?.fallback,
+        hasError: !!apiResult?.error,
+        hasResultField: !!apiResult?.result,
+        resultType: typeof apiResult?.result,
+        resultConstructor: apiResult?.result?.constructor?.name
+      }));
+
+      if (apiResult && (apiResult.fallback || apiResult.error)) {
+        this.stats.failedRequests++;
+        this.emit('circuit:rejected', { model: routing.model, error: apiResult.error });
+        return {
+          success: false,
+          requestId,
+          error: apiResult.error || 'MiniMax API 暂时不可用',
+          fallback: apiResult.fallback || true,
+          circuitBreaker: apiResult.circuitBreaker || breakerName,
+          degraded: true
+        };
+      }
 
       // 如果启用了首包探测且是浏览器 ReadableStream，包装响应流
       let result = apiResult;
@@ -451,9 +478,14 @@ class MiniMaxRouter extends EventEmitter {
       timeout: 10000,                    // 10秒超时
       errorThresholdPercentage: 50,       // 50% 失败率
       resetTimeout: 30000,                // 30秒后尝试恢复
-      minimumNumberOfCalls: 10,           // 至少10次调用
-      volumeThreshold: 5                   // 需要5次调用开始计算
+      volumeThreshold: 0,                  // 0 = 立即开始计算（不等待最小调用数）
+      minimumNumberOfCalls: 0             // 0 = 立即开始计算
     };
+
+    // 获取熔断器并记录状态
+    const { getOpossumBreaker, getAllBreakersStatus } = require('../../middleware/circuitBreaker');
+    const breaker = getOpossumBreaker(breakerName, breakerOptions);
+    console.error('[ModelRouter] Breaker state:', breaker.status?.state, 'stats:', JSON.stringify(breaker.status?.stats));
 
     // Fallback 函数：熔断打开时返回友好错误
     const fallback = () => ({
@@ -463,8 +495,10 @@ class MiniMaxRouter extends EventEmitter {
       degraded: true
     });
 
-    // 执行请求，受 Opossum 熔断器保护
-    return await createCircuitBreaker(async () => {
+    // 执行请求 - 暂时禁用 Opossum 熔断器进行测试
+    // 直接调用 fetch，绕过熔断器
+    try {
+      console.error('[ModelRouter] Making direct fetch call (bypassing circuit breaker)');
       const response = await fetch(`${baseUrl}/v1/messages`, {
         method: 'POST',
         headers: {
@@ -487,6 +521,8 @@ class MiniMaxRouter extends EventEmitter {
         }),
         signal: AbortSignal.timeout(120000)
       });
+
+      console.error('[ModelRouter] Direct fetch response status:', response.status);
 
       // 记录模型 API 耗时
       const apiLatency = Date.now() - startTime;
@@ -528,7 +564,13 @@ class MiniMaxRouter extends EventEmitter {
       }
 
       if (request.stream) {
-        return response.body;
+        console.error('[ModelRouter] Returning stream for streaming request');
+        // 返回成功结果，包含流
+        return {
+          success: true,
+          result: response.body,
+          model: modelId
+        };
       }
 
       const result = await response.json();
@@ -544,23 +586,24 @@ class MiniMaxRouter extends EventEmitter {
         }
       }
 
-      return result;
-    }, breakerOptions).then(result => {
-      // 如果返回 fallback 结果，添加熔断器信息
-      if (result && result.fallback && result.circuitBreaker) {
-        return result;
-      }
-      return result;
-    }).catch(error => {
-      // 捕获熔断器拒绝的错误
-      this.emit('circuit:rejected', { model: modelId, error: error.message });
+      console.error('[ModelRouter] Returning JSON result');
+      // 返回成功结果，包含 JSON
       return {
-        error: 'MiniMax API 暂时不可用，请稍后重试',
-        fallback: true,
-        circuitBreaker: breakerName,
-        degraded: true
+        success: true,
+        result: result,
+        model: modelId
       };
-    });
+    } catch (error) {
+      console.error('[ModelRouter] Direct fetch failed:', error.message);
+      // 返回错误对象（不经过熔断器）
+      return {
+        success: false,
+        error: error.message || 'API call failed',
+        fallback: false,
+        circuitBreaker: null,
+        degraded: false
+      };
+    }
   }
 
   /**

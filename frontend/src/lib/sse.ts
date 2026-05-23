@@ -24,13 +24,7 @@ export async function sendSSEChatMessage(
 ): Promise<void> {
   const { onMessage, onThinking, onError, onComplete, signal } = options;
 
-  // 调试日志：检查发送的消息
-  console.log('[SSE] 发送请求:', {
-    model,
-    messageCount: messages.length,
-    lastMessage: messages[messages.length - 1]?.content?.substring(0, 50),
-    lastMessageBytes: messages[messages.length - 1]?.content ? new TextEncoder().encode(messages[messages.length - 1].content.substring(0, 10)).toString() : null
-  });
+  console.log('[SSE] 发送请求, model:', model, 'messages:', messages.length);
 
   try {
     // 通过后端代理发送请求，保护 API Key
@@ -57,6 +51,10 @@ export async function sendSSEChatMessage(
       signal,  // 传递取消信号
     });
 
+    console.log('[SSE] fetch response status:', response.status);
+    console.log('[SSE] response.ok:', response.ok);
+    console.log('[SSE] response.body exists:', !!response.body);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error?.message || `API请求失败: ${response.status}`);
@@ -69,15 +67,19 @@ export async function sendSSEChatMessage(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let chunkCount = 0;
+    let isComplete = false;  // 防止重复调用 onComplete
 
     while (true) {
       const { done, value } = await reader.read();
 
       if (done) {
-        onComplete?.();
+        console.log('[SSE] Stream complete, chunks:', chunkCount);
+        // 不在这里调用 onComplete，在循环外统一调用
         break;
       }
 
+      chunkCount++;
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
@@ -88,37 +90,73 @@ export async function sendSSEChatMessage(
 
         const data = trimmed.slice(5).trim();
         if (data === '[DONE]') {
-          onComplete?.();
-          return;
+          // 标记已完成但不调用 onComplete，在循环结束后统一调用
+          isComplete = true;
+          continue;
         }
 
         try {
           const json = JSON.parse(data);
+          console.log('[SSE] 解析 JSON:', JSON.stringify(json).substring(0, 200));
 
           // 处理后端自定义消息类型
           if (json.type === 'error') {
             throw new Error(json.message || '服务器错误');
           }
           if (json.type === 'done') {
-            onComplete?.();
-            return;
+            // 标记已完成但不调用 onComplete，在循环结束后统一调用
+            isComplete = true;
+            continue;
           }
 
-          // 处理思维链独立事件（来自 reasoning_split 的 thinking_delta）
+          // 处理思维链独立事件
           if (json.type === 'thinking_delta' && json.content) {
             onThinking?.(json.content, false);
-            return;
+            // 不要 return，继续处理同一批数据中可能存在的 choices
           }
 
-          // 处理思维链完成事件
+          // 处理思维链事件 (Anthropic 格式，无 _delta 后缀)
+          if (json.type === 'thinking' && json.content) {
+            onThinking?.(json.content, false);
+          }
+
+          // 处理思维链完成事件 - 不要 return，继续处理后续 chunk
           if (json.type === 'thinking_complete') {
             onThinking?.('', true);
-            return;
+            // 继续处理后续事件
+          }
+
+          // Anthropic 流式格式: { type: 'chunk', content: '...' }
+          if (json.type === 'chunk' && json.content) {
+            console.log('[SSE] Anthropic chunk:', {
+              contentLength: json.content.length,
+              contentPreview: json.content.substring(0, 80),
+            });
+            // 检测并处理思维链标签（Anthropic 格式）
+            if (json.content.includes('<think>') || json.content.includes('[/THINK]')) {
+              const thinkingContent = json.content
+                .replace(/<\/think>|$/g, '')
+                .replace(/\[\/THINK\]/g, '')
+                .replace(/<think>/g, '');
+              if (thinkingContent) {
+                onThinking?.(thinkingContent, json.content.includes('[/THINK]') || json.content.includes(''));
+              }
+              const cleanContent = json.content.replace(/<think>[\s\S]*?(\[\/THINK\]|<\/think>)/g, '');
+              if (cleanContent) {
+                onMessage(cleanContent);
+              }
+            } else {
+              onMessage(json.content);
+            }
           }
 
           // OpenAI 格式响应
           const content = json.choices?.[0]?.delta?.content;
           if (content) {
+            console.log('[SSE] 收到内容块:', {
+              contentLength: content.length,
+              contentPreview: content.substring(0, 80),
+            });
             // 检测并处理思维链标签
             if (content.includes('<think>') || content.includes('[/THINK]')) {
               // 提取并清理思维链内容
@@ -144,6 +182,41 @@ export async function sendSSEChatMessage(
         }
       }
     }
+
+    // 处理 buffer 中剩余的不完整数据（可能在 [DONE] 之后到达）
+    if (buffer.trim()) {
+      const lines = buffer.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith('data:')) continue;
+
+        const data = trimmed.slice(5).trim();
+        if (data === '[DONE]') continue;
+
+        try {
+          const json = JSON.parse(data);
+          // 处理思维链
+          if (json.type === 'thinking_delta' && json.content) {
+            onThinking?.(json.content, false);
+          }
+          // 处理内容块
+          const content = json.choices?.[0]?.delta?.content;
+          if (content) {
+            onMessage(content);
+          }
+          // 处理 chunk 类型
+          if (json.type === 'chunk' && json.content) {
+            onMessage(json.content);
+          }
+        } catch {
+          // Skip invalid JSON
+        }
+      }
+    }
+
+    // 调用完成回调 - 无论是否收到 done 信号都调用
+    onComplete?.();
+    isComplete = true;
   } catch (error) {
     // 忽略取消错误
     if (error instanceof Error && error.name === 'AbortError') {

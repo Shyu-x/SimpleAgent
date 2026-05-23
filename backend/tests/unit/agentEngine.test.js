@@ -101,21 +101,7 @@ class MockFileCheckpointManager {
 
 // ========== Test Helpers ==========
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n\x1b[1m' + name + ':\x1b[0m');
-  fn();
-}
 
 // ========== Tests ==========
 
@@ -634,6 +620,3 @@ describe('Agent 状态管理', () => {
 
 // ========== 运行报告 ==========
 
-console.log('\n========================================');
-console.log('\x1b[1mAgentEngine 单元测试完成\x1b[0m');
-console.log('========================================\n');
