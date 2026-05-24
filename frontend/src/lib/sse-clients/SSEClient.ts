@@ -125,11 +125,9 @@ export abstract class BaseSSEClient<TEvent extends BaseSSEEvent = BaseSSEEvent> 
     console.log(`[SSE] 正在重连... (${this.state.reconnectAttempts}/${this.options.maxReconnectAttempts})`);
 
     this.reconnectTimeout = setTimeout(() => {
-      if (!this.state.destroyed) {
-        // 重置 destroyed 状态以便重新连接
-        this.state.destroyed = false;
-        this.connect();
-      }
+      // destroyed check already done at start of this method
+      // do not reset destroyed flag - destroy() means permanent cleanup
+      this.connect();
     }, this.options.reconnectInterval);
   }
 
@@ -274,6 +272,7 @@ export class AdminSSEClient extends BaseSSEClient<AdminSSEEvent> {
   }
 
   protected getEndpoint(): string {
+    if (typeof window === 'undefined') return '';
     return `${BACKEND_URL}/api/admin/stream`;
   }
 
@@ -475,6 +474,7 @@ export class AgentSSEClient extends BaseSSEClient<AgentSSEEvent> {
   }
 
   protected getEndpoint(): string {
+    if (typeof window === 'undefined') return '';
     return `${BACKEND_URL}/api/multiagent/sse`;
   }
 
