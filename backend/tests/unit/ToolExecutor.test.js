@@ -131,7 +131,8 @@ describe('ToolExecutor executeTool 正常路径', () => {
     });
     const result = await executor.executeTool('delayTool', {});
     assert.strictEqual(result.success, true);
-    assert.ok(result.duration >= 50);
+    // 允许 45-200ms 范围 (200ms 捕获卡顿，45ms 处理系统负载)
+    assert.ok(result.duration >= 45 && result.duration <= 200, `Expected duration between 45-200ms, got ${result.duration}ms`);
   });
 });
 

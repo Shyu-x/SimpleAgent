@@ -109,17 +109,17 @@ export default function PromptTemplatePage() {
 
   const fetchTemplates = refreshTemplates;
 
+  // 将前端模板字段映射到后端格式
+  const toBackendTemplate = (template: Partial<PromptTemplate>) => {
+    const { content, ...rest } = template;
+    return { ...rest, template: content };
+  };
+
   const createTemplate = async (template: Partial<PromptTemplate>) => {
     try {
-      // 映射 content -> template 以匹配后端接口
-      const backendTemplate = {
-        ...template,
-        template: template.content,
-      };
-      delete backendTemplate.content;
       const { error } = await fetchApi('/api/admin/prompts', {
         method: 'POST',
-        body: JSON.stringify(backendTemplate),
+        body: JSON.stringify(toBackendTemplate(template)),
       });
       if (error) throw new Error(error.message);
       fetchTemplates();
@@ -131,15 +131,9 @@ export default function PromptTemplatePage() {
 
   const updateTemplate = async (id: string, template: Partial<PromptTemplate>) => {
     try {
-      // 映射 content -> template 以匹配后端接口
-      const backendTemplate = {
-        ...template,
-        template: template.content,
-      };
-      delete backendTemplate.content;
       const { error } = await fetchApi(`/api/admin/prompts/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(backendTemplate),
+        body: JSON.stringify(toBackendTemplate(template)),
       });
       if (error) throw new Error(error.message);
       fetchTemplates();
