@@ -220,7 +220,6 @@ class QdrantVectorStore {
             type: compression === 'compression32' ? 'quantile32' :
                  compression === 'compression64' ? 'quantile64' : 'quantile',
             quantile: quantile || this.quantizationConfig.quantile,
-            compression: compression || this.quantizationConfig.compression,
           },
         },
       };
