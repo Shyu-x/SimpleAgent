@@ -113,7 +113,6 @@ export abstract class BaseSSEClient<TEvent extends BaseSSEEvent = BaseSSEEvent> 
   protected scheduleReconnect(): void {
     if (this.state.destroyed) return;
     if (this.state.reconnectAttempts >= this.options.maxReconnectAttempts) {
-      console.log('[SSE] 达到最大重连次数');
       return;
     }
 
@@ -122,7 +121,6 @@ export abstract class BaseSSEClient<TEvent extends BaseSSEEvent = BaseSSEEvent> 
     }
 
     this.state.reconnectAttempts++;
-    console.log(`[SSE] 正在重连... (${this.state.reconnectAttempts}/${this.options.maxReconnectAttempts})`);
 
     this.reconnectTimeout = setTimeout(() => {
       // destroyed check already done at start of this method
@@ -145,7 +143,6 @@ export abstract class BaseSSEClient<TEvent extends BaseSSEEvent = BaseSSEEvent> 
       this.eventSource = new EventSource(endpoint);
 
       this.eventSource.onopen = () => {
-        console.log('[SSE] 连接已建立');
         this.state.connected = true;
         this.state.reconnectAttempts = 0;
         this.options.onConnected();
@@ -279,7 +276,6 @@ export class AdminSSEClient extends BaseSSEClient<AdminSSEEvent> {
   protected handleEvent(data: AdminSSEEvent): void {
     switch (data.type) {
       case 'connected':
-        console.log('[AdminSSE] 连接确认, clientId:', data.clientId);
         break;
 
       case 'stats':
@@ -380,30 +376,24 @@ export class HITLSSEClient extends BaseSSEClient<HITLSSEEvent> {
   protected handleEvent(data: HITLSSEEvent): void {
     switch (data.type) {
       case 'connected':
-        console.log('[HITL SSE] 连接确认, clientId:', data.clientId);
         break;
 
       case 'pending_checkpoints':
-        console.log('[HITL SSE] 待处理确认:', data.checkpoints?.length);
         break;
 
       case 'confirmation':
         if (data.checkpoint) {
           switch (data.subtype) {
             case 'created':
-              console.log('[HITL SSE] 请求确认:', data.checkpoint.title);
               this.hitlOptions.onConfirmation(data.checkpoint);
               break;
             case 'approved':
-              console.log('[HITL SSE] 确认通过:', data.checkpoint.id);
               this.hitlOptions.onApproved(data.checkpoint);
               break;
             case 'rejected':
-              console.log('[HITL SSE] 确认拒绝:', data.checkpoint.id);
               this.hitlOptions.onRejected(data.checkpoint);
               break;
             case 'timeout':
-              console.log('[HITL SSE] 确认超时:', data.checkpoint.id);
               this.hitlOptions.onTimeout(data.checkpoint);
               break;
           }
@@ -521,7 +511,6 @@ export class AgentSSEClient extends BaseSSEClient<AgentSSEEvent> {
       });
 
       this.eventSource.onopen = () => {
-        console.log('[AgentSSE] 连接已建立');
         this.state.connected = true;
         this.state.reconnectAttempts = 0;
         this.startHeartbeat();
