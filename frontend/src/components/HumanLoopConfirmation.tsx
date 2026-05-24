@@ -10,7 +10,7 @@ interface ConfirmationRequest {
   decision: {
     type: string;
     tool: string;
-    input: Record<string, any>;
+    input: Record<string, unknown>;
     reason: string;
   };
   status: 'pending' | 'responded';
@@ -21,7 +21,7 @@ interface HumanLoopConfirmationProps {
   confirmations: ConfirmationRequest[];
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
-  onModifyAndApprove: (id: string, modifiedInput: any) => void;
+  onModifyAndApprove: (id: string, modifiedInput: Record<string, unknown>) => void;
 }
 
 export function HumanLoopConfirmation({
@@ -32,6 +32,7 @@ export function HumanLoopConfirmation({
 }: HumanLoopConfirmationProps) {
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [modifiedInput, setModifiedInput] = React.useState<string>('');
+  const [parseError, setParseError] = React.useState<string | null>(null);
 
   if (confirmations.length === 0) {
     return null;
@@ -45,8 +46,9 @@ export function HumanLoopConfirmation({
       onModifyAndApprove(currentConfirmation.id, parsed);
       setEditingId(null);
       setModifiedInput('');
+      setParseError(null);
     } catch {
-      // Invalid JSON
+      setParseError('无效的 JSON 格式');
     }
   };
 
