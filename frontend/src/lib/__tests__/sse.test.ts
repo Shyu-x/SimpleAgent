@@ -17,7 +17,7 @@ type Step = {
 function createMockStream(steps: Step[]): ReadableStream {
   let index = 0;
   return {
-    getReader() {
+    getReader(): ReadableStreamDefaultReader<unknown> {
       return {
         read() {
           if (index >= steps.length) return Promise.resolve({ done: true, value: undefined });
@@ -27,9 +27,12 @@ function createMockStream(steps: Step[]): ReadableStream {
             value: new TextEncoder().encode(step.chunk),
           });
         },
+        releaseLock() {},
+        get closed() { return Promise.resolve(); },
+        cancel() { return Promise.resolve(); }
       };
     },
-  };
+  } as unknown as ReadableStream;
 }
 
 function createMockResponse(
@@ -69,6 +72,7 @@ describe('SSE 流式处理', () => {
     const { sendSSEChatMessage } = await import('../sse');
 
     const onMessage = vi.fn();
+    const onThinking = vi.fn();
     const onComplete = vi.fn();
 
     await sendSSEChatMessage(
@@ -76,7 +80,7 @@ describe('SSE 流式处理', () => {
       'https://api.minimaxi.com',
       'MiniMax-M2.7',
       [{ role: 'user', content: '你好' }],
-      { onMessage, onComplete }
+      { onMessage, onThinking, onComplete }
     );
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -102,6 +106,7 @@ describe('SSE 流式处理', () => {
 
     const { sendSSEChatMessage } = await import('../sse');
 
+    const onMessage = vi.fn();
     const onThinking = vi.fn();
     const onComplete = vi.fn();
 
@@ -110,7 +115,7 @@ describe('SSE 流式处理', () => {
       'url',
       'MiniMax-M2.7',
       [{ role: 'user', content: '问题' }],
-      { onThinking, onComplete }
+      { onMessage, onThinking, onComplete }
     );
 
     expect(onThinking).toHaveBeenCalledWith('我正在思考...', false);
@@ -177,13 +182,14 @@ describe('SSE 流式处理', () => {
 
     const { sendSSEChatMessage } = await import('../sse');
     const onError = vi.fn();
+    const onMessage = vi.fn();
 
     await sendSSEChatMessage(
       'key',
       'url',
       'MiniMax-M2.7',
       [{ role: 'user', content: '你好' }],
-      { onError }
+      { onMessage, onError }
     );
 
     expect(onError).toHaveBeenCalledWith(expect.any(Error));
@@ -199,13 +205,14 @@ describe('SSE 流式处理', () => {
 
     const { sendSSEChatMessage } = await import('../sse');
     const onError = vi.fn();
+    const onMessage = vi.fn();
 
     await sendSSEChatMessage(
       'key',
       'url',
       'MiniMax-M2.7',
       [{ role: 'user', content: '你好' }],
-      { onError }
+      { onMessage, onError }
     );
 
     expect(onError).toHaveBeenCalled();
@@ -225,13 +232,14 @@ describe('SSE 流式处理', () => {
     const { sendSSEChatMessage } = await import('../sse');
     const onThinking = vi.fn();
     const onComplete = vi.fn();
+    const onMessage = vi.fn();
 
     await sendSSEChatMessage(
       'key',
       'url',
       'MiniMax-M2.7',
       [{ role: 'user', content: '你好' }],
-      { onThinking, onComplete }
+      { onMessage, onThinking, onComplete }
     );
 
     expect(onThinking).toHaveBeenCalledWith('', true);
@@ -247,13 +255,14 @@ describe('SSE 流式处理', () => {
 
     const { sendSSEChatMessage } = await import('../sse');
     const onComplete = vi.fn();
+    const onMessage = vi.fn();
 
     await sendSSEChatMessage(
       'key',
       'url',
       'MiniMax-M2.7',
       [{ role: 'user', content: '你好' }],
-      { onComplete }
+      { onMessage, onComplete }
     );
 
     expect(onComplete).toHaveBeenCalled();
@@ -267,13 +276,15 @@ describe('SSE 流式处理', () => {
 
     const { sendSSEChatMessage } = await import('../sse');
     const onError = vi.fn();
+    const onComplete = vi.fn();
+    const onMessage = vi.fn();
 
     await sendSSEChatMessage(
       'key',
       'url',
       'MiniMax-M2.7',
       [{ role: 'user', content: '你好' }],
-      { onError, onComplete: vi.fn() }
+      { onMessage, onError, onComplete }
     );
 
     // 在 jsdom 环境中，DOMException 继承自 Error，

@@ -3,12 +3,31 @@ import '@testing-library/jest-dom';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
 
 // Mock EventSource - using class syntax for proper constructor
-class MockEventSource {
+interface MockEventSourceInstance {
+  url: string;
+  readyState: number;
+  onopen: ((event: Event) => void) | null;
+  onmessage: ((event: MessageEvent) => void) | null;
+  onerror: ((event: Event) => void) | null;
+  listeners: Record<string, ((event: Event) => void)[]>;
+  addEventListener(event: string, callback: (event: Event) => void): void;
+  dispatchEvent(event: { type: string }): void;
+  close(): void;
+}
+
+class MockEventSource implements MockEventSourceInstance {
   static CONNECTING = 0;
   static OPEN = 1;
   static CLOSED = 2;
 
-  constructor(url) {
+  url: string;
+  readyState: number;
+  onopen: ((event: Event) => void) | null;
+  onmessage: ((event: MessageEvent) => void) | null;
+  onerror: ((event: Event) => void) | null;
+  listeners: Record<string, ((event: Event) => void)[]>;
+
+  constructor(url: string) {
     this.url = url;
     this.readyState = MockEventSource.CONNECTING;
     this.onopen = null;
@@ -19,18 +38,18 @@ class MockEventSource {
     // Simulate async connection
     setTimeout(() => {
       this.readyState = MockEventSource.OPEN;
-      if (this.onopen) this.onopen();
+      if (this.onopen) this.onopen(new Event('open'));
     }, 0);
   }
 
-  addEventListener(event, callback) {
+  addEventListener(event: string, callback: (event: Event) => void) {
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(callback);
   }
 
-  dispatchEvent(event) {
+  dispatchEvent(event: { type: string }) {
     if (this.listeners[event.type]) {
-      this.listeners[event.type].forEach(cb => cb(event));
+      this.listeners[event.type].forEach(cb => cb(new Event(event.type)));
     }
   }
 
@@ -39,7 +58,7 @@ class MockEventSource {
   }
 }
 
-global.EventSource = MockEventSource;
+global.EventSource = MockEventSource as unknown as typeof EventSource;
 
 // Mock fetch - returns mock trace data
 const mockTraceData = {
@@ -209,10 +228,11 @@ describe('AgentVisualizer', () => {
         expect(btn).toBeTruthy();
       });
 
-      const closeButton = document.querySelector('button.w-full');
+      const closeButton = document.querySelector('button.w-full') as HTMLButtonElement | null;
+      expect(closeButton).toBeTruthy();
 
       act(() => {
-        closeButton.click();
+        closeButton!.click();
       });
 
       expect(onClose).toHaveBeenCalled();

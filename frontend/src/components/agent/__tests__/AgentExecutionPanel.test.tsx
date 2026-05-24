@@ -241,7 +241,7 @@ describe('AgentExecutionPanel', () => {
   describe('工具调用', () => {
     test('工具标签页可点击', async () => {
       const toolCalls = [
-        { id: 'tc-1', name: 'web_search', params: { query: 'test' }, result: { success: true, output: 'result', duration: 100 } }
+        { id: 'tc-1', name: 'web_search', type: 'function' as const, status: 'success' as const, params: { query: 'test' }, result: { success: true, output: 'result', duration: 100 } }
       ];
 
       render(

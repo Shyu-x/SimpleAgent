@@ -3,6 +3,7 @@
  * 测试日期: 2026-05-23
  */
 
+import { vi } from 'vitest';
 import {
   apiClient,
   fetchApi,

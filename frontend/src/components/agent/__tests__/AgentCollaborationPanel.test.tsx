@@ -263,7 +263,7 @@ describe('AgentCollaborationPanel', () => {
     test('有错误时显示错误标签', () => {
       const stateWithErrors: WorkflowExecutionState = {
         ...createMockExecutionState(),
-        errors: [{ id: 'e1', type: 'error', severity: 'high', message: '测试错误', timestamp: '2024-01-01' }]
+        errors: [{ id: 'e1', type: 'api_error', severity: 'high', recoverable: false, message: '测试错误', timestamp: '2024-01-01' }]
       };
       render(
         <AgentCollaborationPanel
@@ -369,8 +369,8 @@ describe('AgentCollaborationPanel', () => {
       const stateWithErrors: WorkflowExecutionState = {
         ...createMockExecutionState(),
         errors: [
-          { id: 'e1', type: 'error', severity: 'high', message: '错误1', timestamp: '2024-01-01' },
-          { id: 'e2', type: 'error', severity: 'high', message: '错误2', timestamp: '2024-01-01' }
+          { id: 'e1', type: 'api_error', severity: 'high', recoverable: false, message: '错误1', timestamp: '2024-01-01' },
+          { id: 'e2', type: 'api_error', severity: 'high', recoverable: false, message: '错误2', timestamp: '2024-01-01' }
         ]
       };
       render(

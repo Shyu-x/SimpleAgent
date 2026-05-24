@@ -158,7 +158,7 @@ describe('HumanConfirmationDialog', () => {
       // 不应该显示60倒计时（因为没有timeout）
       // 检查没有timeout时，60不应该出现
       const sixtyElement = screen.queryByText((content, element) => {
-        return element.tagName === 'SPAN' && content === '60';
+        return element?.tagName === 'SPAN' && content === '60';
       });
       expect(sixtyElement).not.toBeInTheDocument();
     });

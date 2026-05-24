@@ -546,7 +546,7 @@ describe('TaskExecutionPanel 组件测试', () => {
       const tasks = createTaskList(2);
       const { container } = render(<TaskExecutionPanel tasks={tasks} className="custom-class" />);
 
-      expect(container.firstChild?.className).toContain('custom-class');
+      expect((container.firstChild as HTMLElement)?.className).toContain('custom-class');
     });
 
     it('showSummary=false时不应该显示摘要', () => {

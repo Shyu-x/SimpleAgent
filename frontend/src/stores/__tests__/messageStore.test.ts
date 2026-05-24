@@ -5,6 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useMessageStore } from '../messageStore';
+import type { Note } from '@/types';
 
 // Helper: 构造基础 Conversation 数组
 function makeConversations(count: number, withMessages = true) {
@@ -17,7 +18,7 @@ function makeConversations(count: number, withMessages = true) {
           { id: `msg_${i}_1`, role: 'assistant' as const, content: 'AI 回复', thinking: '', createdAt: Date.now() },
         ]
       : [],
-    notes: [],
+    notes: [] as Note[],
     createdAt: Date.now(),
     updatedAt: Date.now(),
   }));
@@ -202,12 +203,12 @@ describe('MessageStore', () => {
     it('应该能传入元数据', () => {
       const conversations = makeConversations(1, false);
       const result = useMessageStore.getState().addNote('conv_0', conversations, '重要笔记', {
-        type: 'important',
+        type: 'knowledge',
         importance: 'high',
         tags: ['work'],
       });
 
-      expect(result[0].notes[0].type).toBe('important');
+      expect(result[0].notes[0].type).toBe('knowledge');
       expect(result[0].notes[0].importance).toBe('high');
       expect(result[0].notes[0].tags).toContain('work');
     });
@@ -235,7 +236,8 @@ describe('MessageStore', () => {
   describe('updateNote', () => {
     it('应该正确更新备注内容', () => {
       const conversations = makeConversations(1, false);
-      conversations[0].notes = [{ id: 'note_1', content: '原内容', createdAt: Date.now(), updatedAt: Date.now() }];
+      const note: Note = { id: 'note_1', content: '原内容', createdAt: Date.now(), updatedAt: Date.now() };
+      conversations[0].notes = [note];
 
       const result = useMessageStore.getState().updateNote('conv_0', conversations, 'note_1', '新内容');
 
@@ -244,22 +246,22 @@ describe('MessageStore', () => {
 
     it('应该支持部分更新', () => {
       const conversations = makeConversations(1, false);
-      conversations[0].notes = [{ id: 'note_1', content: '原内容', type: 'normal', createdAt: Date.now(), updatedAt: Date.now() }];
+      const note: Note = { id: 'note_1', content: '原内容', type: 'general', createdAt: Date.now(), updatedAt: Date.now() };
+      conversations[0].notes = [note];
 
-      const result = useMessageStore.getState().updateNote('conv_0', conversations, 'note_1', { type: 'important' });
+      const result = useMessageStore.getState().updateNote('conv_0', conversations, 'note_1', { type: 'knowledge' });
 
       expect(result[0].notes[0].content).toBe('原内容');
-      expect(result[0].notes[0].type).toBe('important');
+      expect(result[0].notes[0].type).toBe('knowledge');
     });
   });
 
   describe('deleteNote', () => {
     it('应该正确删除备注', () => {
       const conversations = makeConversations(1, false);
-      conversations[0].notes = [
-        { id: 'note_1', content: '备注1', createdAt: Date.now(), updatedAt: Date.now() },
-        { id: 'note_2', content: '备注2', createdAt: Date.now(), updatedAt: Date.now() },
-      ];
+      const note1: Note = { id: 'note_1', content: '备注1', createdAt: Date.now(), updatedAt: Date.now() };
+      const note2: Note = { id: 'note_2', content: '备注2', createdAt: Date.now(), updatedAt: Date.now() };
+      conversations[0].notes = [note1, note2];
 
       const result = useMessageStore.getState().deleteNote('conv_0', conversations, 'note_1');
 

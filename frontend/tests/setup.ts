@@ -4,6 +4,9 @@
 import { chromium } from '@playwright/test';
 import '@testing-library/jest-dom/vitest';
 
+// Mock environment variables
+process.env.NEXT_PUBLIC_BACKEND_URL = 'http://localhost:30000';
+
 /**
  * Mock localStorage for jsdom environment
  * jsdom 不支持 localStorage，需要手动 mock
