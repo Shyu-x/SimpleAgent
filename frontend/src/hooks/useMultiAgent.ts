@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 
 interface Agent {
@@ -32,15 +32,73 @@ interface CrewResult {
   agentCount: number;
 }
 
+export interface UseMultiAgentOptions {
+  /** 是否启用 hooks，默认 true */
+  enabled?: boolean;
+  /** 会话 ID，用于多会话隔离 */
+  sessionId?: string;
+  /** 自动获取初始数据 */
+  autoFetch?: boolean;
+}
+
+export interface UseMultiAgentReturn {
+  isLoading: boolean;
+  error: string | null;
+  agents: Agent[];
+  tasks: Task[];
+  crews: Crew[];
+  result: CrewResult | null;
+  fetchTemplates: () => Promise<unknown>;
+  createAgent: (config: Partial<Agent>) => Promise<unknown>;
+  createTask: (config: Partial<Task> & { agentId?: string }) => Promise<unknown>;
+  createCrew: (name: string, process?: 'sequential' | 'hierarchical') => Promise<unknown>;
+  executeCrew: (config: {
+    crewId?: string;
+    agents: Agent[];
+    tasks: Task[];
+    process?: 'sequential' | 'hierarchical' | 'parallel';
+    llmConfig?: {
+      model?: string;
+      temperature?: number;
+      maxTokens?: number;
+    };
+    sessionId?: string;
+  }) => Promise<unknown>;
+  fetchCrews: () => Promise<unknown>;
+  deleteCrew: (crewId: string) => Promise<unknown>;
+  clearAll: () => void;
+}
+
 const API_BASE = API_ENDPOINTS.multiagent;
 
-export function useMultiAgent() {
+export function useMultiAgent(options: UseMultiAgentOptions = {}): UseMultiAgentReturn {
+  const { enabled = true, sessionId, autoFetch = false } = options;
+  const enabledRef = useRef(enabled);
+  const sessionIdRef = useRef(sessionId);
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [crews, setCrews] = useState<Crew[]>([]);
   const [result, setResult] = useState<CrewResult | null>(null);
+
+  // 更新 ref
+  useEffect(() => {
+    enabledRef.current = enabled;
+  }, [enabled]);
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
+  // 自动获取初始数据
+  const [autoFetchTrigger, setAutoFetchTrigger] = useState(0);
+  useEffect(() => {
+    if (enabled && autoFetch) {
+      fetchCrews();
+    }
+  }, [enabled, autoFetch, autoFetchTrigger]);
 
   // 获取模板
   const fetchTemplates = useCallback(async () => {
@@ -144,14 +202,21 @@ export function useMultiAgent() {
       temperature?: number;
       maxTokens?: number;
     };
+    sessionId?: string;
   }) => {
+    if (!enabledRef.current) {
+      return { success: false, error: 'Hook is disabled' };
+    }
     setIsLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API_BASE}/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
+        body: JSON.stringify({
+          ...config,
+          sessionId: config.sessionId || sessionIdRef.current
+        })
       });
       const data = await response.json();
       if (data.success) {

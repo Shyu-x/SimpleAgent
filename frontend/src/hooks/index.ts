@@ -34,6 +34,7 @@ export { useEnhancedAgent } from './useEnhancedAgent';
 export { useEnhancedMemory } from './useEnhancedMemory';
 export { useMemorySystem } from './useMemorySystem';
 export { useMultiAgent } from './useMultiAgent';
+export type { UseMultiAgentOptions, UseMultiAgentReturn } from './useMultiAgent';
 export { useMCP } from './useMCP';
 export { useN8N } from './useN8N';
 
