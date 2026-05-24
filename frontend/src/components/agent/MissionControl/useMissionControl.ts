@@ -2,7 +2,7 @@
 import { useCallback, useMemo } from 'react';
 import { useMissionControlStore, initializeAgents, startMission } from './store';
 import type { MissionAgent, MissionTask, MissionEvent, TaskPriority } from './types';
-import { BACKEND_URL } from '@/lib/config';
+import { API_BASE } from '@/lib/apiConfig';
 
 // 后端 API 地址
 const API_BASE = BACKEND_URL;

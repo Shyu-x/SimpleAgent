@@ -15,9 +15,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
-import { BACKEND_URL } from '@/lib/config';
-
-const API_BASE = BACKEND_URL;
+import { API_BASE } from '@/lib/apiConfig';
 
 // ============ 类型定义 ============
 

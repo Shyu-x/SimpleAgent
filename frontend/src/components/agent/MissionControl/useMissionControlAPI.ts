@@ -5,15 +5,13 @@
 import { useCallback, useEffect } from 'react';
 import { useMissionControlStore } from './store';
 import type { MissionAgent, MissionTask, MissionEvent } from './types';
-import { BACKEND_URL } from '@/lib/config';
+import { API_BASE } from '@/lib/apiConfig';
 
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: { message: string; type: string };
 }
-
-const API_BASE = BACKEND_URL;
 
 interface TaskResponse {
   id: string;
