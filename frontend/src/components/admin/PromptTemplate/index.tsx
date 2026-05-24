@@ -390,7 +390,7 @@ function TemplateDetail({
       </div>
 
       {/* 模板变量 */}
-      {template.variables.length > 0 && (
+      {template.variables && template.variables.length > 0 && (
         <div>
           <h3 className="font-medium mb-2">模板变量</h3>
           <div className="flex flex-wrap gap-2">
@@ -425,7 +425,7 @@ function TemplateDetail({
         <h3 className="font-medium mb-2">模板测试</h3>
         <div className="space-y-4">
           {/* 变量输入 */}
-          {template.variables.length > 0 && (
+          {template.variables && template.variables.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {template.variables.map((v, idx) => (
                 <div key={`test-var-${v.name}-${idx}`}>
@@ -506,7 +506,7 @@ function TemplateEditor({
 }) {
   const [name, setName] = useState(template?.name || '');
   const [description, setDescription] = useState(template?.description || '');
-  const [category, setCategory] = useState(template?.category || 'general');
+  const [category, setCategory] = useState<string>(template?.category || 'general');
   const [content, setContent] = useState(template?.content || '');
   const [variables, setVariables] = useState<TemplateVariable[]>(
     template?.variables || []
@@ -528,7 +528,7 @@ function TemplateEditor({
     const templateData = {
       name,
       description,
-      category,
+      category: category as 'general' | 'coding' | 'writing' | 'analysis' | 'custom',
       content,
       variables,
       isActive: true,
@@ -815,10 +815,10 @@ function TemplateHighlighter({
   variables,
 }: {
   content: string;
-  variables: TemplateVariable[];
+  variables?: TemplateVariable[];
 }) {
   // 简单的变量高亮处理
-  const variableNames = new Set(variables.map((v) => v.name));
+  const variableNames = new Set((variables || []).map((v) => v.name));
 
   const parts = content.split(/(\{\{[^}]+\}\})/g);
 
