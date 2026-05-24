@@ -15,7 +15,7 @@
  */
 
 const { SearchChannel, SearchResult } = require('../SearchChannel');
-const AppError = require('../../common/errors/AppError');
+const AppError = require('../../../common/errors/AppError');
 const createLogger = require('../../../common/logger');
 const logger = createLogger('VectorSearchChannel');
 
