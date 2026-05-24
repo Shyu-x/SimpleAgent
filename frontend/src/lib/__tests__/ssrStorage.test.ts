@@ -107,7 +107,7 @@ describe('SSR Storage', () => {
 
       // 模拟服务端环境 (没有 window)
       const originalWindow = global.window;
-      // @ts-ignore
+      // @ts-expect-error - intentional delete for test
       delete global.window;
 
       const result = runOnClient(callback, fallback);
