@@ -46,6 +46,20 @@ class PrometheusService {
   }
 
   /**
+   * 提取 Gauge 值（兼容对象和数字格式）
+   * @param {*} gauge - Gauge 值
+   * @returns {number}
+   * @private
+   */
+  _extractGaugeValue(gauge) {
+    if (typeof gauge === 'object' && gauge !== null) {
+      const vals = Object.values(gauge);
+      return vals[0] || 0;
+    }
+    return typeof gauge === 'number' ? gauge : 0;
+  }
+
+  /**
    * 注册 HTTP 指标
    * @private
    */
@@ -305,29 +319,20 @@ class PrometheusService {
     lines.push('# HELP nodejs_active_handles Number of active handles');
     lines.push('# TYPE nodejs_active_handles gauge');
     const nodejsHandles = metrics.gauges?.nodejs_active_handles;
-    const handlesVal = typeof nodejsHandles === 'object' && nodejsHandles !== null
-      ? Object.values(nodejsHandles)[0] || 0
-      : (typeof nodejsHandles === 'number' ? nodejsHandles : 0);
-    lines.push(`nodejs_active_handles ${handlesVal}`);
+    lines.push(`nodejs_active_handles ${this._extractGaugeValue(nodejsHandles)}`);
     lines.push('');
 
     lines.push('# HELP nodejs_active_requests Number of active requests');
     lines.push('# TYPE nodejs_active_requests gauge');
     const nodejsRequests = metrics.gauges?.nodejs_active_requests;
-    const requestsVal = typeof nodejsRequests === 'object' && nodejsRequests !== null
-      ? Object.values(nodejsRequests)[0] || 0
-      : (typeof nodejsRequests === 'number' ? nodejsRequests : 0);
-    lines.push(`nodejs_active_requests ${requestsVal}`);
+    lines.push(`nodejs_active_requests ${this._extractGaugeValue(nodejsRequests)}`);
     lines.push('');
 
     // ==================== 活跃请求数 (Gauge) ====================
     lines.push('# HELP http_requests_active Number of active HTTP requests');
     lines.push('# TYPE http_requests_active gauge');
     const httpActive = metrics.gauges?.http_requests_active;
-    const httpActiveVal = typeof httpActive === 'object' && httpActive !== null
-      ? Object.values(httpActive)[0] || 0
-      : (typeof httpActive === 'number' ? httpActive : 0);
-    lines.push(`http_requests_active ${httpActiveVal}`);
+    lines.push(`http_requests_active ${this._extractGaugeValue(httpActive)}`);
     lines.push('');
 
     // ==================== 模型指标 ====================
@@ -358,10 +363,7 @@ class PrometheusService {
     lines.push('# HELP model_errors_total Total number of model errors');
     lines.push('# TYPE model_errors_total gauge');
     const modelErrors = metrics.gauges?.model_errors_total;
-    const modelErrorsVal = typeof modelErrors === 'object' && modelErrors !== null
-      ? Object.values(modelErrors)[0] || 0
-      : (typeof modelErrors === 'number' ? modelErrors : 0);
-    lines.push(`model_errors_total ${modelErrorsVal}`);
+    lines.push(`model_errors_total ${this._extractGaugeValue(modelErrors)}`);
     lines.push('');
 
     // ==================== 工具指标 ====================
@@ -405,10 +407,7 @@ class PrometheusService {
     lines.push('# HELP queue_length Current queue length');
     lines.push('# TYPE queue_length gauge');
     const queueLen = metrics.gauges?.queue_length;
-    const queueLenVal = typeof queueLen === 'object' && queueLen !== null
-      ? Object.values(queueLen)[0] || 0
-      : (typeof queueLen === 'number' ? queueLen : 0);
-    lines.push(`queue_length ${queueLenVal}`);
+    lines.push(`queue_length ${this._extractGaugeValue(queueLen)}`);
     lines.push('');
 
     return lines.join('\n');
