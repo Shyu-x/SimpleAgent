@@ -17,6 +17,8 @@ import { useAdminPolling } from '@/hooks/useAdminSSE';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
 import type { PromptTemplate as SharedPromptTemplate } from '@/types/prompts';
+import ConfirmDialog from '@/components/agent/MissionControl/ConfirmDialog';
+import AlertDialog from '@/components/agent/MissionControl/AlertDialog';
 
 // 扩展共享类型以支持后端返回的额外字段
 type PromptTemplate = SharedPromptTemplate & {
@@ -114,12 +116,23 @@ export default function PromptTemplatePage() {
     }
   };
 
+  // 删除确认对话框状态
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; templateId?: string }>({
+    isOpen: false,
+  });
+
   const deleteTemplate = async (id: string) => {
-    if (!confirm('确定要删除这个模板吗？')) return;
+    setDeleteDialog({ isOpen: true, templateId: id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { templateId } = deleteDialog;
+    if (!templateId) return;
+    setDeleteDialog({ isOpen: false });
     try {
-      const { error } = await fetchApi(`/api/admin/prompts/${id}`, { method: 'DELETE' });
+      const { error } = await fetchApi(`/api/admin/prompts/${templateId}`, { method: 'DELETE' });
       if (error) throw new Error(error.message);
-      if (selectedTemplate?.id === id) setSelectedTemplate(null);
+      if (selectedTemplate?.id === templateId) setSelectedTemplate(null);
       fetchTemplates();
     } catch (err) {
       console.error('Failed to delete template:', err);
@@ -147,6 +160,16 @@ export default function PromptTemplatePage() {
 
   return (
     <ErrorBoundary moduleName="PromptTemplatePage" fallback={<FallbackUI moduleName="Prompt模板" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <>
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        title="删除模板"
+        message="确定要删除这个模板吗？此操作不可恢复。"
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ isOpen: false })}
+      />
       <div className="p-6 space-y-6">
         {/* 页面标题 */}
         <div className="flex justify-between items-center">

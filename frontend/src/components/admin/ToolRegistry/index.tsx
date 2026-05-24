@@ -16,6 +16,8 @@ import { fetchApi, fetchStream } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
+import ConfirmDialog from '@/components/agent/MissionControl/ConfirmDialog';
+import AlertDialog from '@/components/agent/MissionControl/AlertDialog';
 
 // ============ 类型定义 ============
 
@@ -164,6 +166,11 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
   const [filterEnabled, setFilterEnabled] = useState<string>('all');
   const [selectedTool, setSelectedTool] = useState<ToolInfo | null>(null);
 
+  // 删除确认对话框状态
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; toolName?: string }>({
+    isOpen: false,
+  });
+
   useEffect(() => {
     fetchTools();
   }, [search, filterCategory, filterEnabled]);
@@ -187,14 +194,31 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
   };
 
   const deleteTool = async (name: string) => {
-    if (!confirm(`确定要删除工具 "${name}" 吗？`)) return;
-    await fetchApi(`/api/admin/tools/${name}`, { method: 'DELETE' });
+    setDeleteDialog({ isOpen: true, toolName: name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { toolName } = deleteDialog;
+    if (!toolName) return;
+    setDeleteDialog({ isOpen: false });
+    await fetchApi(`/api/admin/tools/${toolName}`, { method: 'DELETE' });
     fetchTools();
     onRefresh();
   };
 
   return (
-    <div className="space-y-4">
+    <>
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        title="删除工具"
+        message={deleteDialog.toolName ? `确定要删除工具 "${deleteDialog.toolName}" 吗？` : '确定要删除该工具吗？'}
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ isOpen: false })}
+      />
+      <div className="space-y-4">
       {/* 工具栏 */}
       <div className="flex gap-3 items-center">
         <div className="relative flex-1 max-w-md">
@@ -331,7 +355,8 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
       {selectedTool && (
         <ToolDetailPanel tool={selectedTool} onClose={() => setSelectedTool(null)} />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -446,6 +471,13 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  // 提示对话框状态
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+
   const addParameter = () => {
     setFormData(prev => ({
       ...prev,
@@ -469,7 +501,7 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
 
   const handleSubmit = async () => {
     if (!formData.name.trim() || !formData.description.trim()) {
-      alert('请填写名称和描述');
+      setAlertDialog({ isOpen: true, title: '输入验证', message: '请填写名称和描述' });
       return;
     }
     setSubmitting(true);
@@ -483,8 +515,16 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* 基本信息 */}
+    <>
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant="info"
+        onClose={() => setAlertDialog({ isOpen: false, title: '', message: '' })}
+      />
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* 基本信息 */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">基本信息</h3>
         <div className="space-y-4">
@@ -636,6 +676,7 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
         </button>
       </div>
     </div>
+    </>
   );
 }
 

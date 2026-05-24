@@ -16,6 +16,8 @@ import { fetchApi } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
+import ConfirmDialog from '@/components/agent/MissionControl/ConfirmDialog';
+import AlertDialog from '@/components/agent/MissionControl/AlertDialog';
 
 // ============ 类型定义 ============
 
@@ -155,6 +157,11 @@ function DocumentList({ onRefresh }: { onRefresh: () => void }) {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
+  // 删除确认对话框状态
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; docId?: string; kbId?: string }>({
+    isOpen: false,
+  });
+
   useEffect(() => {
     fetchDocuments();
   }, [search, filterStatus, page]);
@@ -180,12 +187,18 @@ function DocumentList({ onRefresh }: { onRefresh: () => void }) {
   };
 
   const deleteDocument = async (id: string, kbId?: string) => {
-    if (!confirm('确定要删除该文档吗？')) return;
     if (!kbId) {
       console.error('kbId is required for deletion');
       return;
     }
-    await fetchApi(`/api/admin/knowledge/docs/${id}?kbId=${encodeURIComponent(kbId)}`, { method: 'DELETE' });
+    setDeleteDialog({ isOpen: true, docId: id, kbId });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { docId, kbId } = deleteDialog;
+    if (!docId || !kbId) return;
+    setDeleteDialog({ isOpen: false });
+    await fetchApi(`/api/admin/knowledge/docs/${docId}?kbId=${encodeURIComponent(kbId)}`, { method: 'DELETE' });
     fetchDocuments();
     onRefresh();
   };
@@ -205,6 +218,16 @@ function DocumentList({ onRefresh }: { onRefresh: () => void }) {
 
   return (
     <div className="space-y-4">
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        title="删除文档"
+        message="确定要删除该文档吗？此操作不可恢复。"
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ isOpen: false })}
+      />
       {/* 工具栏 */}
       <div className="flex gap-3 items-center">
         <div className="relative flex-1 max-w-md">
@@ -509,15 +532,32 @@ function IndexManager({ stats, onRefresh }: { stats: IndexStats | null; onRefres
   const [rebuilding, setRebuilding] = useState(false);
   const [buildingProgress, setBuildingProgress] = useState(0);
 
+  // 对话框状态
+  const [rebuildDialog, setRebuildDialog] = useState(false);
+  const [clearDialog, setClearDialog] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string; variant?: 'info' | 'success' | 'error' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+
+  const handleRebuildClick = () => {
+    setRebuildDialog(true);
+  };
+
+  const handleClearClick = () => {
+    setClearDialog(true);
+  };
+
   const rebuildIndex = async () => {
-    if (!confirm('确定要重建所有索引吗？这可能需要几分钟。')) return;
+    setRebuildDialog(false);
     setRebuilding(true);
     setBuildingProgress(0);
 
     try {
       const { error } = await fetchApi('/api/admin/knowledge/reindex', { method: 'POST' });
       if (error) {
-        alert('重建索引失败: ' + error.message);
+        setAlertDialog({ isOpen: true, title: '操作失败', message: '重建索引失败: ' + error.message, variant: 'error' });
       }
     } finally {
       setRebuilding(false);
@@ -527,13 +567,40 @@ function IndexManager({ stats, onRefresh }: { stats: IndexStats | null; onRefres
   };
 
   const clearIndex = async () => {
-    if (!confirm('确定要清空所有索引吗？此操作不可恢复。')) return;
-    alert('清空索引功能暂不可用，请联系管理员。');
+    setClearDialog(false);
+    setAlertDialog({ isOpen: true, title: '功能暂不可用', message: '清空索引功能暂不可用，请联系管理员。', variant: 'info' });
     onRefresh();
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <>
+      {/* 对话框 */}
+      <ConfirmDialog
+        isOpen={rebuildDialog}
+        title="重建索引"
+        message="确定要重建所有索引吗？这可能需要几分钟。"
+        confirmLabel="重建"
+        variant="warning"
+        onConfirm={rebuildIndex}
+        onCancel={() => setRebuildDialog(false)}
+      />
+      <ConfirmDialog
+        isOpen={clearDialog}
+        title="清空索引"
+        message="确定要清空所有索引吗？此操作不可恢复。"
+        confirmLabel="清空"
+        variant="danger"
+        onConfirm={clearIndex}
+        onCancel={() => setClearDialog(false)}
+      />
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+        onClose={() => setAlertDialog({ isOpen: false, title: '', message: '' })}
+      />
+      <div className="space-y-6 max-w-2xl mx-auto">
       {/* 当前状态 */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">索引状态</h3>
@@ -575,14 +642,14 @@ function IndexManager({ stats, onRefresh }: { stats: IndexStats | null; onRefres
 
         <div className="flex gap-3">
           <button
-            onClick={rebuildIndex}
+            onClick={handleRebuildClick}
             disabled={rebuilding}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
           >
             重建索引
           </button>
           <button
-            onClick={clearIndex}
+            onClick={handleClearClick}
             disabled={rebuilding}
             className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50"
           >
@@ -631,6 +698,7 @@ function IndexManager({ stats, onRefresh }: { stats: IndexStats | null; onRefres
         </div>
       </div>
     </div>
+    </>
   );
 }
 
