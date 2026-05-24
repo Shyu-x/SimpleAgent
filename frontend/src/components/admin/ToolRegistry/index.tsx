@@ -318,14 +318,13 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
                 <span>平均 {tool.stats.avgLatency.toFixed(0)}ms</span>
                 <span
                   className={
-                    tool.stats.successCount / Math.max(tool.stats.callCount, 1) > 0.9
-                      ? 'text-green-600'
-                      : tool.stats.successCount / Math.max(tool.stats.callCount, 1) > 0.7
-                      ? 'text-yellow-600'
-                      : 'text-red-600'
+                    tool.stats.callCount === 0 ? 'text-gray-500'
+                    : tool.stats.successCount / tool.stats.callCount > 0.9 ? 'text-green-600'
+                    : tool.stats.successCount / tool.stats.callCount > 0.7 ? 'text-yellow-600'
+                    : 'text-red-600'
                   }
                 >
-                  成功率 {(tool.stats.successCount / Math.max(tool.stats.callCount, 1) * 100).toFixed(0)}%
+                  成功率 {tool.stats.callCount === 0 ? 0 : (tool.stats.successCount / tool.stats.callCount * 100).toFixed(0)}%
                 </span>
               </div>
               <div className="flex gap-2 mt-3">
