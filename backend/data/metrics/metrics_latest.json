@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-24T14:55:37.512Z",
+  "timestamp": "2026-05-24T14:58:18.462Z",
   "counters": {
     "reset_counter": {
       "{}": 1
@@ -66,4 +66,24 @@
   "histograms": {},
   "summaries": {},
   "activeRequests": 0
-}}
+}}00000000002,
+        "quantiles": {
+          "0.5": 0.2,
+          "0.9": 0.2,
+          "0.95": 0.2,
+          "0.99": 0.2
+        }
+      }
+    }
+  },
+  "activeRequests": 0
+}          "0.25": 2,
+          "0.5": 3,
+          "2.5": 3
+        }
+      }
+    }
+  },
+  "summaries": {},
+  "activeRequests": 0
+}

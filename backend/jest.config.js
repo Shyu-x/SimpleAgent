@@ -18,6 +18,14 @@ module.exports = {
     '/build/',
     '/tests/integration/',  // 集成测试需要服务器
     '/tests/tools/',  // 工具测试需要网络
+    '/tests/stress/',  // 压力测试需要独立运行
+    // 非 Jest 测试框架的自定义测试文件
+    '/tests/unit/modelRouter.test.js',
+    '/tests/unit/agentTrace.test.js',
+    '/tests/unit/probeBufferingCallback.test.js',
+    '/tests/unit/ingestionPipeline.test.js',
+    '/tests/unit/full-chain-tdd.test.js',
+    '/tests/unit/chatModelClient.test.js',
   ],
 
   // 收集覆盖率的文件
