@@ -56,12 +56,15 @@ class MetricsCollector {
     this._histogramBuckets = options.buckets || [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
     this._summaryQuantiles = options.quantiles || [0.5, 0.9, 0.95, 0.99];
 
-    // 活跃请求追踪
-    this._activeRequests = 0;
-    this._requestStartTimes = new Map();
+// 孤立请求超时清理（5分钟）
+const ORPHAN_REQUEST_TIMEOUT = 5 * 60 * 1000;
 
-    // 定时任务
-    this._persistTimer = null;
+// 活跃请求追踪
+this._activeRequests = 0;
+this._requestStartTimes = new Map();
+
+// 定时任务
+this._persistTimer = null;
     this._cleanupTimer = null;
     this._nodejsMetricsTimer = null;
 
@@ -453,6 +456,15 @@ class MetricsCollector {
 
     // 检查是否需要告警
     this._checkAlerts();
+
+    // 清理孤立请求（超过5分钟未结束的）
+    const now = Date.now();
+    for (const [id, data] of this._requestStartTimes) {
+      if (now - data.startTime > ORPHAN_REQUEST_TIMEOUT) {
+        this._requestStartTimes.delete(id);
+        this._activeRequests = Math.max(0, this._ensureNumeric(this._activeRequests) - 1);
+      }
+    }
 
     return {
       duration,
@@ -1351,6 +1363,25 @@ class MetricsCollector {
   }
 
   // ==================== 生命周期 ====================
+
+  /**
+   * 销毁采集器（清理所有定时器）
+   */
+  destroy() {
+    if (this._persistTimer) {
+      clearInterval(this._persistTimer);
+      this._persistTimer = null;
+    }
+    if (this._cleanupTimer) {
+      clearInterval(this._cleanupTimer);
+      this._cleanupTimer = null;
+    }
+    if (this._nodejsMetricsTimer) {
+      clearInterval(this._nodejsMetricsTimer);
+      this._nodejsMetricsTimer = null;
+    }
+    this._requestStartTimes.clear();
+  }
 
   /**
    * 重置所有指标
