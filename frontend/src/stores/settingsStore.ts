@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { APIConfig, ConfiguredModel } from '@/types';
 import { getBaseURLForModel as inferBaseURL } from '@/lib/modelConfig';
+import { sessionStorageAdapter } from './storage';
 
 // API Key 验证函数 (MiniMax 单一架构)
 export function validateApiKey(apiKey: string): { valid: boolean; error?: string } {
@@ -20,21 +21,6 @@ export function getProviderFromModel(model: string): string {
   if (model.startsWith('MiniMax-')) return 'MiniMax';
   return 'Custom';
 }
-
-const sessionStorageAdapter = {
-  getItem: (name: string): string | null => {
-    if (typeof window === 'undefined') return null;
-    return window.sessionStorage.getItem(name);
-  },
-  setItem: (name: string, value: string): void => {
-    if (typeof window === 'undefined') return;
-    window.sessionStorage.setItem(name, value);
-  },
-  removeItem: (name: string): void => {
-    if (typeof window === 'undefined') return;
-    window.sessionStorage.removeItem(name);
-  },
-};
 
 export interface Settings {
   theme: 'light' | 'dark' | 'system';
