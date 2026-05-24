@@ -19,11 +19,11 @@ interface TaskResponse {
   id: string;
   name: string;
   description?: string;
-  priority?: string;
+  priority?: 'critical' | 'high' | 'medium' | 'low';
   assignedAgent?: string;
   createdAt: number;
   updatedAt: number;
-  status: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   result?: string;
   error?: string;
 }
@@ -33,7 +33,7 @@ interface AgentResponse {
   name: string;
   role: string;
   avatar: string | null;
-  status: string;
+  status: 'idle' | 'busy' | 'offline';
   currentTask: string | null;
   progress: number;
   capabilities: string[];
