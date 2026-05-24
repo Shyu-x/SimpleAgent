@@ -25,7 +25,7 @@ interface Memory {
   type: string;
   source: string;
   embedding: number[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   importance: number;
   accessCount: number;
   createdAt: number;
@@ -44,7 +44,7 @@ interface SearchResult {
 interface SessionContext {
   sessionId: string;
   messageCount: number;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   createdAt: number;
   lastAccessedAt: number;
 }
