@@ -692,14 +692,11 @@ function ToolTester() {
   const outputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('[ToolRegistry] Fetching tools from /api/admin/tools');
     fetchApi<{ success: boolean; data: { tools: ToolInfo[] } }>('/api/admin/tools').then(({ data, error }) => {
-      console.log('[ToolRegistry] API response:', { data, error });
       if (error) {
         console.error('[ToolRegistry] API error:', error);
       }
       if (data?.data) {
-        console.log('[ToolRegistry] Setting tools, count:', data.data.tools.length);
         setTools(data.data.tools);
       }
     });

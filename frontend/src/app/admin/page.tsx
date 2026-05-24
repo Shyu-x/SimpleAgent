@@ -119,12 +119,9 @@ function AdminDashboardContent() {
     reconnectInterval: 3000,
     maxReconnectAttempts: 5,
     onConnected: () => {
-      console.log('[AdminDashboard] SSE Connected');
       setLoading(false);
     },
-    onDisconnected: () => {
-      console.log('[AdminDashboard] SSE Disconnected');
-    },
+    onDisconnected: () => {},
     onError: (err) => {
       console.error('[AdminDashboard] SSE Error:', err);
       setError(err.message);

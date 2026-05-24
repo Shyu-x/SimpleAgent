@@ -105,16 +105,16 @@ export default function Home() {
   const [promptSelectorOpen, setPromptSelectorOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
-  // 人机协作确认 Hook - 使用 useMemo 稳定 options 对象
+  // 人机协作确认 Hook
   const hitlOptions = useMemo(() => ({
     autoConnect: true,
     enabled: true,
-    onConnected: () => console.log('[Page] HITL SSE connected'),
+    onConnected: () => {},
     onError: (error) => console.error('[Page] HITL SSE error:', error),
-    onConfirmation: (checkpoint) => console.log('[Page] Confirmation requested:', checkpoint.title),
-    onApproved: (checkpoint) => console.log('[Page] Confirmation approved:', checkpoint.id),
-    onRejected: (checkpoint) => console.log('[Page] Confirmation rejected:', checkpoint.id),
-    onTimeout: (checkpoint) => console.log('[Page] Confirmation timeout:', checkpoint.id)
+    onConfirmation: () => {},
+    onApproved: () => {},
+    onRejected: () => {},
+    onTimeout: () => {}
   }), []);
 
   // 窗口快捷键
