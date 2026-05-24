@@ -28,8 +28,8 @@ class MetricsCollector {
     INFO: 'info',
   };
 
-  // 预编译的正则表达式
-  static LABEL_KEY_REGEX = /(\w+)="([^"]*)"/g;
+  // 预编译的正则表达式（无g标志，使用手动的exec循环）
+  static LABEL_KEY_REGEX = /(\w+)="([^"]*)"/;
 
   /**
    * 创建指标采集器实例
@@ -473,9 +473,9 @@ class MetricsCollector {
   _keyToLabels(key) {
     if (!key) return {};
     const labels = {};
-    const regex = new MetricsCollector.LABEL_KEY_REGEX;  // 创建独立实例避免 lastIndex 污染
-    const matches = key.matchAll(regex);
-    for (const match of matches) {
+    const regex = MetricsCollector.LABEL_KEY_REGEX;
+    let match;
+    while ((match = regex.exec(key)) !== null) {
       labels[match[1]] = match[2];
     }
     return labels;
