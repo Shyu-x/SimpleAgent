@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-24T17:31:23.347Z",
+  "timestamp": "2026-05-24T17:39:58.359Z",
   "counters": {
     "tool_calls_total": {
       "success=\"true\",tool=\"successTool\"": 1,
@@ -30,7 +30,7 @@
       "{}": 0
     },
     "nodejs_active_handles": {
-      "{}": 2
+      "{}": 0
     },
     "nodejs_active_requests": {
       "{}": 0
@@ -114,8 +114,8 @@
       },
       "tool=\"delayTool\"": {
         "count": 1,
-        "sum": 0.049,
-        "mean": 0.049,
+        "sum": 0.05,
+        "mean": 0.05,
         "buckets": {
           "1": 1,
           "5": 1,
@@ -204,8 +204,8 @@
       },
       "tool=\"slow1\"": {
         "count": 1,
-        "sum": 0.031,
-        "mean": 0.031,
+        "sum": 0.03,
+        "mean": 0.03,
         "buckets": {
           "1": 1,
           "5": 1,
@@ -222,8 +222,8 @@
       },
       "tool=\"slow2\"": {
         "count": 1,
-        "sum": 0.031,
-        "mean": 0.031,
+        "sum": 0.03,
+        "mean": 0.03,
         "buckets": {
           "1": 1,
           "5": 1,

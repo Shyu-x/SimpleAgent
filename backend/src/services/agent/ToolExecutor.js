@@ -147,7 +147,7 @@ class ToolExecutor extends EventEmitter {
 
         // 如果不是最后一次尝试，等待后重试
         if (attempt < retries) {
-          const delay = this.retryDelay * Math.pow(2, attempt);
+          const delay = calculateBackoffDelay(attempt);
           await sleep(delay); // 指数退避
         }
       }
