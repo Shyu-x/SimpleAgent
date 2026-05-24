@@ -170,21 +170,6 @@ const TaskDependencyGraph: React.FC<TaskDependencyGraphProps> = ({
     return { ...calculateLayout(tasks, layers), layers };
   }, [tasks, containerWidth, containerHeight]);
 
-  // 动态更新任务
-  const updateTask = useCallback((taskId: string, updates: Partial<TaskNode>) => {
-    // 外部通过更新 tasks prop 来触发更新
-  }, []);
-
-  // 添加任务
-  const addTask = useCallback((task: TaskNode) => {
-    // 外部通过更新 tasks prop 来触发更新
-  }, []);
-
-  // 删除任务
-  const removeTask = useCallback((taskId: string) => {
-    // 外部通过更新 tasks prop 来触发更新
-  }, []);
-
   // 鼠标事件处理
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
@@ -254,7 +239,6 @@ const TaskDependencyGraph: React.FC<TaskDependencyGraphProps> = ({
         const y2 = targetPos.y + NODE_HEIGHT / 2;
 
         // 贝塞尔曲线控制点
-        const midX = (x1 + x2) / 2;
         const controlOffset = Math.min(Math.abs(x2 - x1) / 2, 50);
 
         edges.push(
