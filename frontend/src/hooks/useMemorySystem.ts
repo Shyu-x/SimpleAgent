@@ -61,6 +61,29 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB) || 1);
 }
 
+// 语义哈希缓存，避免 O(n*m) 重复计算
+const hashCache = new Map<string, number[]>();
+const HASH_CACHE_MAX = 500;
+
+function getCachedSemanticHash(content: string): number[] {
+  // 使用内容长度的前64字符作为缓存键
+  const cacheKey = content.slice(0, 64);
+  if (hashCache.has(cacheKey)) {
+    return hashCache.get(cacheKey)!;
+  }
+
+  const hash = generateSemanticHash(content);
+
+  // 缓存清理：超过上限时清理一半最旧的条目
+  if (hashCache.size >= HASH_CACHE_MAX) {
+    const keysToDelete = Array.from(hashCache.keys()).slice(0, HASH_CACHE_MAX / 2);
+    keysToDelete.forEach(key => hashCache.delete(key));
+  }
+
+  hashCache.set(cacheKey, hash);
+  return hash;
+}
+
 type SessionMemoryMetadata = Partial<Pick<Note, 'type' | 'importance' | 'tags' | 'embedding'>>;
 
 // 防抖同步锁
@@ -68,6 +91,9 @@ let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 const SYNC_DEBOUNCE_MS = 500;
 
 export function useMemorySystem() {
+  // 使用 AbortController 支持清理
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const conversations = useChatStore((state) => state.conversations);
   const globalMemories = useChatStore((state) => state.globalMemories);
 
@@ -83,6 +109,17 @@ export function useMemorySystem() {
 
   const isLoading = false;
   const syncInProgress = useRef(false);
+
+  // 组件卸载时清理
+  useEffect(() => {
+    abortControllerRef.current = new AbortController();
+    return () => {
+      abortControllerRef.current?.abort();
+      if (syncDebounceTimer) {
+        clearTimeout(syncDebounceTimer);
+      }
+    };
+  }, []);
 
   // ========== 后端同步方法 ==========
 
@@ -272,10 +309,10 @@ export function useMemorySystem() {
 
   // 语义搜索记忆
   const searchMemories = useCallback((query: string, limit = 5): GlobalMemory[] => {
-    const queryHash = generateSemanticHash(query);
+    const queryHash = getCachedSemanticHash(query);
 
     const scored = globalMemories.map((memory) => {
-      const embedding = generateSemanticHash(memory.content);
+      const embedding = getCachedSemanticHash(memory.content);
       return {
         memory,
         score: cosineSimilarity(queryHash, embedding),

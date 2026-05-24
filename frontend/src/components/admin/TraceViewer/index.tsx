@@ -131,8 +131,14 @@ export default function TraceViewerPage() {
             setStats(data.stats);
             setStatsLoading(false);
           } else if (data.type === 'heartbeat' && data.stats) {
-            // 心跳包也更新统计
-            setStats(data.stats);
+            // 心跳包只在新数据时才更新，避免不必要的 re-render
+            setStats(prev => {
+              const newStats = data.stats;
+              if (prev && newStats && prev.totalTraces === newStats.totalTraces) {
+                return prev; // 数据相同，跳过更新
+              }
+              return newStats;
+            });
           }
         } catch (error) {
           console.error('[TraceViewer] Failed to parse SSE message:', error);
