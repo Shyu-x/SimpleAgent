@@ -91,7 +91,7 @@ export abstract class BaseSSEClient<TEvent extends BaseSSEEvent = BaseSSEEvent> 
   protected startHeartbeat(intervalMs: number = 30000): void {
     this.stopHeartbeat();
     this.heartbeatInterval = setInterval(() => {
-      fetch('/api/health', { method: 'HEAD' }).catch(() => {
+      fetch(`${BACKEND_URL}/api/health`, { method: 'HEAD' }).catch(() => {
         // 忽略心跳错误
       });
     }, intervalMs);
@@ -126,7 +126,8 @@ export abstract class BaseSSEClient<TEvent extends BaseSSEEvent = BaseSSEEvent> 
 
     this.reconnectTimeout = setTimeout(() => {
       if (!this.state.destroyed) {
-        this.destroy();
+        // 重置 destroyed 状态以便重新连接
+        this.state.destroyed = false;
         this.connect();
       }
     }, this.options.reconnectInterval);

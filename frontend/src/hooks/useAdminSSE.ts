@@ -85,7 +85,7 @@ export function useAdminSSE<T = unknown>(options: AdminSSEClientOptions & {
   useEffect(() => {
     optionsRef.current = options;
     if (options.autoConnect !== undefined) autoConnectRef.current = options.autoConnect;
-  });
+  }, [options]);
 
   const initClient = useCallback(() => {
     if (clientRef.current) {

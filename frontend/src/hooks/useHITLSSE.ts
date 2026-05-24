@@ -39,7 +39,7 @@ export function useHITLSSE(options: HITLSSEClientOptions = {}) {
     optionsRef.current = options;
     if (options.autoConnect !== undefined) autoConnectRef.current = options.autoConnect;
     if (options.enabled !== undefined) enabledRef.current = options.enabled;
-  });
+  }, [options]);
 
   // 初始化 SSE 客户端
   const initClient = useCallback(() => {
@@ -170,6 +170,7 @@ export function useHITLSSE(options: HITLSSEClientOptions = {}) {
       }
       return true;
     } catch {
+      // 忽略 localStorage 错误
       return false;
     }
   }, []);
@@ -186,7 +187,7 @@ export function useHITLSSE(options: HITLSSEClientOptions = {}) {
         localStorage.removeItem('hitl_skipped_operations');
       }
     } catch {
-      // Handle silently
+      // 忽略 localStorage 错误
     }
   }, []);
 
