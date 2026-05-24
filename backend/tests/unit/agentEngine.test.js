@@ -179,15 +179,16 @@ describe('AgentEngine 构造函数', () => {
     const classifyError = (error) => {
       const errorMsg = typeof error === 'string' ? error : error.message || '';
       if (errorMsg.includes('401') || errorMsg.includes('403') ||
-          errorMsg.includes('unauthorized') || errorMsg.includes('forbidden')) {
-        return 'auth';
+          errorMsg.includes('unauthorized') || errorMsg.includes('forbidden') ||
+          errorMsg.includes('api key')) {
+        return 'authentication';
       }
       return 'unknown';
     };
 
-    assert.strictEqual(classifyError('unauthorized'), 'auth');
-    assert.strictEqual(classifyError('403 forbidden'), 'auth');
-    assert.strictEqual(classifyError('API key invalid'), 'auth');
+    assert.strictEqual(classifyError('unauthorized'), 'authentication');
+    assert.strictEqual(classifyError('403 forbidden'), 'authentication');
+    assert.strictEqual(classifyError('API key invalid'), 'authentication');
     assert.strictEqual(classifyError('network error'), 'unknown');
   });
 
@@ -430,7 +431,7 @@ describe('人机确认检测', () => {
   });
 
   test('应正确识别高费用API调用', () => {
-    const _needsHumanConfirmation = (input, toolName, settings) => {
+    const needsConfirmation = (input, toolName, settings) => {
       const inputStr = typeof input === 'string' ? input : JSON.stringify(input);
       const toolNameLower = toolName.toLowerCase();
 
@@ -450,9 +451,9 @@ describe('人机确认检测', () => {
 
     const settings = { expensiveCalls: true };
 
-    assert.strictEqual(_needsHumanConfirmation('Use GPT-4 for analysis', 'llm_tool', settings).needsConfirmation, true);
-    assert.strictEqual(_needsHumanConfirmation('Generate image', 'image_gen', settings).needsConfirmation, true);
-    assert.strictEqual(_needsHumanConfirmation('Simple search', 'search', settings).needsConfirmation, false);
+    assert.strictEqual(needsConfirmation('Use GPT-4 for analysis', 'llm_tool', settings).needsConfirmation, true);
+    assert.strictEqual(needsConfirmation('Generate image', 'image_gen', settings).needsConfirmation, true);
+    assert.strictEqual(needsConfirmation('Simple search', 'search', settings).needsConfirmation, false);
   });
 });
 
