@@ -165,13 +165,13 @@ describe('MetricsCollector getMetrics', () => {
 });
 
 describe('MetricsCollector 重置', () => {
-  test('resetMetrics 应该重置所有指标', () => {
+  test('reset 应该重置所有指标', () => {
     const collector = new MetricsCollector({ enableHotReload: false });
 
     collector.setGauge('reset_gauge', 999);
     collector.incrementCounter('reset_counter');
 
-    collector.resetMetrics();
+    collector.reset();
 
     const metrics = collector.getMetrics();
     assert.ok(metrics);

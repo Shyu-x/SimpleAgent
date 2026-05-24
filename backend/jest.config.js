@@ -16,6 +16,8 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/build/',
+    '/tests/integration/',  // 集成测试需要服务器
+    '/tests/tools/',  // 工具测试需要网络
   ],
 
   // 收集覆盖率的文件

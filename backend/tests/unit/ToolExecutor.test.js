@@ -273,7 +273,8 @@ describe('ToolExecutor mergeResults', () => {
     ];
 
     const merged = executor.mergeResults(results);
-    assert.strictEqual(merged.mergedContent, 'string result\n\n{"content":"object result"}\n\n[1,2,3]');
+    // mergeResults 对有 content 属性的对象返回 content 字段的值
+    assert.strictEqual(merged.mergedContent, 'string result\n\nobject result\n\n[1,2,3]');
   });
 });
 

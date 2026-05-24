@@ -167,11 +167,11 @@ describe('FilePersister', () => {
 
   test('构造函数应该接受自定义配置', () => {
     const persister = new FilePersister({
-      baseDir: '/custom/path',
+      baseDir: '/tmp/test-trace-dir',
       maxFileSize: 1024,
       maxFiles: 10
     });
-    assert.strictEqual(persister.baseDir, '/custom/path');
+    assert.strictEqual(persister.baseDir, '/tmp/test-trace-dir');
     assert.strictEqual(persister.maxFileSize, 1024);
     assert.strictEqual(persister.maxFiles, 10);
   });
