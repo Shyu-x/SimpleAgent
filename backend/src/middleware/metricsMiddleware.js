@@ -11,6 +11,7 @@
  */
 
 const { getMetricsCollector } = require('../infra/metrics');
+const { normalizePath } = require('../utils/pathUtils');
 
 let prometheusService = null;
 let gatewayService = null;
@@ -129,20 +130,6 @@ function requestMetricsMiddleware() {
 
     next();
   };
-}
-
-/**
- * 标准化路径 - 去除动态参数
- * @param {string} path - 请求路径
- * @returns {string}
- */
-function normalizePath(path) {
-  let normalized = path;
-  // 移除 UUID
-  normalized = normalized.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id');
-  // 移除数字 ID
-  normalized = normalized.replace(/\/\d+/g, '/:id');
-  return normalized;
 }
 
 /**

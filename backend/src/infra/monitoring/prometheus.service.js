@@ -117,9 +117,8 @@ class PrometheusService {
         module: req.headers['x-module'] || 'unknown',
       });
 
-      // 拦截响应
-      const originalSend = res.send;
-      res.send = (body) => {
+      // 使用 response finish 事件记录请求完成
+      res.on('finish', () => {
         const duration = (Date.now() - startTime) / 1000;
 
         // 记录请求结束
@@ -131,9 +130,7 @@ class PrometheusService {
           path: this._normalizePath(req.path),
           status: res.statusCode.toString(),
         });
-
-        return originalSend.call(res, body);
-      };
+      });
 
       next();
     };

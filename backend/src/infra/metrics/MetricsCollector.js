@@ -301,12 +301,16 @@ class MetricsCollector {
     const data = histogram.get(labelKey);
     if (!data) return null;
 
+    const last100 = data.values.length > 0 ? data.values.slice(-100) : [];
+    const min = last100.length > 0 ? last100.reduce((a, b) => a < b ? a : b, last100[0]) : 0;
+    const max = last100.length > 0 ? last100.reduce((a, b) => a > b ? a : b, last100[0]) : 0;
+
     return {
       count: data.count,
       sum: data.sum,
       mean: data.count > 0 ? data.sum / data.count : 0,
-      min: data.values.length > 0 ? Math.min(...data.values.slice(-100)) : 0,
-      max: data.values.length > 0 ? Math.max(...data.values.slice(-100)) : 0,
+      min,
+      max,
       buckets: { ...data.buckets },
     };
   }
