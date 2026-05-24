@@ -2,6 +2,10 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import AgentCollaborationPanel from '../AgentCollaborationPanel';
+import type { ErrorInfo, ErrorType, ErrorSeverity } from '../ErrorRecoveryUI';
+import type { ToolCallInfo } from '../ToolCallDisplay';
+import type { ConfirmationRequest } from '../HumanConfirmationDialog';
+import type { WorkflowExecutionState } from '../AgentCollaborationPanel';
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
@@ -57,14 +61,15 @@ function createMockWorkflow() {
   };
 }
 
-function createMockExecutionState() {
+function createMockExecutionState(overrides: Partial<WorkflowExecutionState> = {}): WorkflowExecutionState {
   return {
-    status: 'idle' as const,
+    status: 'idle',
     currentTaskIndex: 0,
     progress: 0,
-    errors: [] as Array<{ id: string; type: 'error' | 'warning'; message: string; timestamp?: number; stack?: string; taskId?: string }>,
-    toolCalls: [],
-    pendingConfirmations: []
+    errors: [] as ErrorInfo[],
+    toolCalls: [] as ToolCallInfo[],
+    pendingConfirmations: [] as ConfirmationRequest[],
+    ...overrides
   };
 }
 
@@ -256,9 +261,9 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('有错误时显示错误标签', () => {
-      const stateWithErrors = {
+      const stateWithErrors: WorkflowExecutionState = {
         ...createMockExecutionState(),
-        errors: [{ id: 'e1', type: 'error', message: '测试错误' }]
+        errors: [{ id: 'e1', type: 'error', severity: 'high', message: '测试错误', timestamp: '2024-01-01' }]
       };
       render(
         <AgentCollaborationPanel
@@ -361,11 +366,11 @@ describe('AgentCollaborationPanel', () => {
 
   describe('错误恢复', () => {
     test('显示错误数量', () => {
-      const stateWithErrors = {
+      const stateWithErrors: WorkflowExecutionState = {
         ...createMockExecutionState(),
         errors: [
-          { id: 'e1', type: 'error', message: '错误1' },
-          { id: 'e2', type: 'error', message: '错误2' }
+          { id: 'e1', type: 'error', severity: 'high', message: '错误1', timestamp: '2024-01-01' },
+          { id: 'e2', type: 'error', severity: 'high', message: '错误2', timestamp: '2024-01-01' }
         ]
       };
       render(

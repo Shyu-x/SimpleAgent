@@ -4,6 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { validateApiKey, getProviderFromModel } from '../settingsStore';
+import type { Settings } from '../settingsStore';
 
 describe('Settings Store 工具函数', () => {
   describe('validateApiKey', () => {

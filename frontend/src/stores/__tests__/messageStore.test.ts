@@ -13,8 +13,8 @@ function makeConversations(count: number, withMessages = true) {
     title: `对话 ${i}`,
     messages: withMessages
       ? [
-          { id: `msg_${i}_0`, role: 'user' as const, content: '用户消息', timestamp: Date.now() },
-          { id: `msg_${i}_1`, role: 'assistant' as const, content: 'AI 回复', thinking: '', timestamp: Date.now() },
+          { id: `msg_${i}_0`, role: 'user' as const, content: '用户消息', createdAt: Date.now() },
+          { id: `msg_${i}_1`, role: 'assistant' as const, content: 'AI 回复', thinking: '', createdAt: Date.now() },
         ]
       : [],
     notes: [],
@@ -31,7 +31,7 @@ describe('MessageStore', () => {
   describe('addMessage', () => {
     it('应该正确添加消息到指定对话', () => {
       const conversations = makeConversations(2);
-      const newMessage = { id: 'msg_new', role: 'user' as const, content: '新消息', timestamp: Date.now() };
+      const newMessage = { id: 'msg_new', role: 'user' as const, content: '新消息', createdAt: Date.now() };
 
       const result = useMessageStore.getState().addMessage('conv_0', conversations, newMessage);
 
@@ -43,7 +43,7 @@ describe('MessageStore', () => {
       // 用 32 字符的纯英文内容确保超过 30 字符限制
       const longContent = 'abcdefghijklmnopqrstuvwxyz123456'; // 32 chars > 30
       const conversations = makeConversations(1, false);
-      const newMessage = { id: 'msg_new', role: 'user' as const, content: longContent, timestamp: Date.now() };
+      const newMessage = { id: 'msg_new', role: 'user' as const, content: longContent, createdAt: Date.now() };
 
       const result = useMessageStore.getState().addMessage('conv_0', conversations, newMessage);
 
@@ -53,7 +53,7 @@ describe('MessageStore', () => {
 
     it('应该不修改其他对话', () => {
       const conversations = makeConversations(3);
-      const newMessage = { id: 'msg_new', role: 'user' as const, content: '新消息', timestamp: Date.now() };
+      const newMessage = { id: 'msg_new', role: 'user' as const, content: '新消息', createdAt: Date.now() };
 
       const result = useMessageStore.getState().addMessage('conv_0', conversations, newMessage);
 
@@ -63,7 +63,7 @@ describe('MessageStore', () => {
 
     it('应该在消息为空时不添加', () => {
       const conversations = makeConversations(1, false);
-      const newMessage = { id: 'msg_new', role: 'user' as const, content: '', timestamp: Date.now() };
+      const newMessage = { id: 'msg_new', role: 'user' as const, content: '', createdAt: Date.now() };
 
       const result = useMessageStore.getState().addMessage('conv_0', conversations, newMessage);
 
@@ -119,7 +119,7 @@ describe('MessageStore', () => {
       const conversations = makeConversations(1);
       // 确保最后一条是用户消息
       conversations[0].messages = [
-        { id: 'msg_0', role: 'user' as const, content: '用户消息', timestamp: Date.now() },
+        { id: 'msg_0', role: 'user' as const, content: '用户消息', createdAt: Date.now() },
       ];
 
       const result = useMessageStore.getState().updateLastMessageThinking('conv_0', conversations, '思考内容');
@@ -272,7 +272,7 @@ describe('MessageStore', () => {
     it('addMessage 应该返回新数组，不修改原数组', () => {
       const conversations = makeConversations(2);
       const original = JSON.stringify(conversations);
-      const newMessage = { id: 'msg_new', role: 'user' as const, content: '新', timestamp: Date.now() };
+      const newMessage = { id: 'msg_new', role: 'user' as const, content: '新', createdAt: Date.now() };
 
       useMessageStore.getState().addMessage('conv_0', conversations, newMessage);
 

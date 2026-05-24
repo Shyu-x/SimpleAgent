@@ -48,7 +48,9 @@ describe('UI Store 状态管理', () => {
 
   it('应该正确设置面板内容', () => {
     // 测试面板内容设置
-    const setPanelContent = (current: string | null, newContent: string) => newContent;
+    const setPanelContent = (current: string | null, newContent: string | null): string | null => {
+      return newContent;
+    };
 
     expect(setPanelContent(null, 'knowledge')).toBe('knowledge');
     expect(setPanelContent('knowledge', null)).toBe(null);

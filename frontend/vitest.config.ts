@@ -14,9 +14,6 @@ export default defineConfig({
       'tests/integration/**',  // Standalone integration scripts (not vitest tests)
       'node_modules/**',  // Don't run tests in node_modules
     ],
-    fakeTimers: {
-      enabled: false,
-    },
   },
   resolve: {
     alias: {

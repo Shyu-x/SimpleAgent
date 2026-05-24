@@ -2,6 +2,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import Message from '../Message';
 import { ToastProvider } from '../Toast';
+import type { Message as MessageType } from '@/types';
 
 // Mock chat store
 vi.mock('@/store/chatStore', () => ({
@@ -12,14 +13,14 @@ vi.mock('@/store/chatStore', () => ({
 }));
 
 describe('Message', () => {
-  const baseMessage = {
+  const baseMessage: MessageType = {
     id: 'msg-1',
-    role: 'user' as const,
+    role: 'user',
     content: '测试消息',
     createdAt: 1716000000000,
   };
 
-  const renderMessage = (message: typeof baseMessage, isLast = false) => {
+  const renderMessage = (message: MessageType, isLast = false) => {
     return render(
       <ToastProvider>
         <Message message={message} isLast={isLast} />
@@ -33,10 +34,10 @@ describe('Message', () => {
   });
 
   test('助手消息显示内容', () => {
-    const assistantMessage = {
+    const assistantMessage: MessageType = {
       ...baseMessage,
       id: 'msg-2',
-      role: 'assistant' as const,
+      role: 'assistant',
       content: '助手回复',
     };
     renderMessage(assistantMessage);
@@ -50,9 +51,10 @@ describe('Message', () => {
   });
 
   test('Markdown 粗体渲染', () => {
-    const markdownMessage = {
+    const markdownMessage: MessageType = {
       ...baseMessage,
-      role: 'assistant' as const,
+      id: 'msg-md',
+      role: 'assistant',
       content: '这是**粗体**文字',
     };
     renderMessage(markdownMessage);
@@ -67,9 +69,9 @@ describe('Message', () => {
 
   test('编辑消息后保存', async () => {
     const handleEdit = vi.fn();
-    const mockMessage = {
+    const mockMessage: MessageType = {
       id: 'msg-edit',
-      role: 'user' as const,
+      role: 'user',
       content: '原始内容',
       createdAt: Date.now(),
     };
@@ -135,9 +137,9 @@ describe('Message', () => {
 
   test('取消编辑恢复原内容', async () => {
     const handleEdit = vi.fn();
-    const mockMessage = {
+    const mockMessage: MessageType = {
       id: 'msg-cancel',
-      role: 'user' as const,
+      role: 'user',
       content: '原始内容',
       createdAt: Date.now(),
     };
@@ -209,9 +211,9 @@ describe('Message', () => {
 
   test('onEdit 回调正确传递编辑内容', () => {
     const handleEdit = vi.fn();
-    const mockMessage = {
+    const mockMessage: MessageType = {
       id: 'msg-edit',
-      role: 'user' as const,
+      role: 'user',
       content: '原始内容',
       createdAt: Date.now(),
     };
@@ -231,16 +233,16 @@ describe('Message', () => {
   });
 
   test('编辑按钮仅在用户消息中显示', async () => {
-    const mockMessage = {
+    const mockMessage: MessageType = {
       id: 'msg-user',
-      role: 'user' as const,
+      role: 'user',
       content: '用户消息',
       createdAt: Date.now(),
     };
 
-    const assistantMessage = {
+    const assistantMessage: MessageType = {
       id: 'msg-assistant',
-      role: 'assistant' as const,
+      role: 'assistant',
       content: '助手消息',
       createdAt: Date.now(),
     };
