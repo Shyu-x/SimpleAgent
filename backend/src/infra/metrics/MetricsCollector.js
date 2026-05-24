@@ -1195,7 +1195,7 @@ class MetricsCollector {
       }
 
       // 获取活跃请求数量（确保是数字）
-      const requestCount = typeof this._activeRequests === 'number' ? this._activeRequests : parseInt(this._activeRequests, 10) || 0;
+      const requestCount = this._ensureNumeric(this._activeRequests);
 
       this.setGauge('nodejs_active_handles', handleCount);
       this.setGauge('nodejs_active_requests', requestCount);
