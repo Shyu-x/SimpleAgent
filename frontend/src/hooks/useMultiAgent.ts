@@ -136,10 +136,14 @@ export function useMultiAgent() {
   // 执行 Crew
   const executeCrew = useCallback(async (config: {
     crewId?: string;
-    agents: any[];
-    tasks: any[];
-    process?: string;
-    llmConfig?: any;
+    agents: Agent[];
+    tasks: Task[];
+    process?: 'sequential' | 'hierarchical' | 'parallel';
+    llmConfig?: {
+      model?: string;
+      temperature?: number;
+      maxTokens?: number;
+    };
   }) => {
     setIsLoading(true);
     setError(null);

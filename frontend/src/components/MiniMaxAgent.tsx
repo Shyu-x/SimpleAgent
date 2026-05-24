@@ -13,8 +13,8 @@ interface AgentMessage {
   timestamp: number;
   toolCalls?: Array<{
     name: string;
-    input: any;
-    result?: any;
+    input: Record<string, unknown>;
+    result?: { success: boolean; content?: string; error?: string };
   }>;
 }
 
@@ -95,7 +95,7 @@ export default function MiniMaxAgent() {
       } else {
         throw new Error(data.error);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('初始化会话失败:', error);
       setConfig(prev => ({ ...prev, status: 'error' }));
       return null;
@@ -277,14 +277,15 @@ export default function MiniMaxAgent() {
     }
 
     setIsLoading(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : '未知错误';
       console.error('执行任务失败:', error);
       setMessages(prev => [
         ...prev.filter(m => m.role !== 'thinking'),
         {
           id: `error_${Date.now()}`,
           role: 'assistant',
-          content: `错误: ${error.message}`,
+          content: `错误: ${message}`,
           timestamp: Date.now()
         }
       ]);
