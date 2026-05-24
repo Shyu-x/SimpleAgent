@@ -53,9 +53,8 @@ function requestMetricsMiddleware() {
       endpoint: req.path || req.url.split('?')[0],
     });
 
-    // 拦截响应完成
-    const originalEnd = res.end;
-    res.end = function(...args) {
+    // 拦截响应完成 - 使用 event listener 避免 monkey-patching
+    res.on('finish', () => {
       const duration = Date.now() - startTime;
       const statusCode = res.statusCode || 200;
       const normalizedPath = normalizePath(req.path || req.url.split('?')[0]);
@@ -87,10 +86,7 @@ function requestMetricsMiddleware() {
           type: 'server_error',
         });
       }
-
-      // 调用原始 end 方法
-      return originalEnd.apply(this, args);
-    };
+    });
 
     // 检查网关降级状态 - 如果是只读模式且请求为写操作
     if (gatewayService) {

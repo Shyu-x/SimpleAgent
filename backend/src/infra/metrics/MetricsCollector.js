@@ -306,8 +306,15 @@ class MetricsCollector {
     if (!data) return null;
 
     const last100 = data.values.length > 0 ? data.values.slice(-100) : [];
-    const min = last100.length > 0 ? last100.reduce((a, b) => a < b ? a : b, last100[0]) : 0;
-    const max = last100.length > 0 ? last100.reduce((a, b) => a > b ? a : b, last100[0]) : 0;
+    // Single pass for min/max calculation
+    let min = 0, max = 0;
+    if (last100.length > 0) {
+      min = max = last100[0];
+      for (const v of last100) {
+        if (v < min) min = v;
+        if (v > max) max = v;
+      }
+    }
 
     return {
       count: data.count,
@@ -399,14 +406,23 @@ class MetricsCollector {
   // ==================== 活跃请求追踪 ====================
 
   /**
+   * 确保值为数字类型
+   * @param {*} value - 任意值
+   * @returns {number}
+   * @private
+   */
+  _ensureNumeric(value) {
+    return typeof value === 'number' ? value : parseInt(value, 10) || 0;
+  }
+
+  /**
    * 记录请求开始
    * @param {string} requestId - 请求ID
    * @param {Object} [labels={}] - 标签
    * @returns {void}
    */
   startRequest(requestId, labels = {}) {
-    const currentActive = typeof this._activeRequests === 'number' ? this._activeRequests : parseInt(this._activeRequests, 10) || 0;
-    this._activeRequests = currentActive + 1;
+    this._activeRequests = this._ensureNumeric(this._activeRequests) + 1;
     this._requestStartTimes.set(requestId, {
       startTime: Date.now(),
       labels,
@@ -426,9 +442,8 @@ class MetricsCollector {
       return null;
     }
 
-    const duration = (Date.now() - startData.startTime) / 1000; // 转换为秒
-    const currentActive = typeof this._activeRequests === 'number' ? this._activeRequests : parseInt(this._activeRequests, 10) || 0;
-    this._activeRequests = Math.max(0, currentActive - 1);
+    const duration = (Date.now() - startData.startTime) / 1000;
+    this._activeRequests = Math.max(0, this._ensureNumeric(this._activeRequests) - 1);
     this._requestStartTimes.delete(requestId);
 
     // 更新指标
