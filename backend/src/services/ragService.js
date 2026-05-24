@@ -390,7 +390,7 @@ class RAGService extends EventEmitter {
       try {
         const decomposeResult = await this.queryDecomposeService.decompose(expandedQuery);
         if (decomposeResult && decomposeResult.subQuestions?.length > 0) {
-          subQueries = decomposeResult;
+          subQueries = decomposeResult.subQuestions;
         }
       } catch (err) {
         console.warn('[RAGService] Query decomposition failed:', err.message);
