@@ -7,12 +7,29 @@ const THINK_CLOSE_BRACKET_REGEX = /\[\/THINK\]/g;
 const THINK_OPEN_REGEX = /<think>/g;
 const THINK_BLOCK_REGEX = /<think>[\s\S]*?(\[\/THINK\]|<\/think>)/g;
 
+// SSE 事件类型定义
 interface SSEOptions {
   onMessage: (content: string) => void;
-  onThinking?: (content: string, isEnd: boolean) => void;
+  onThinking?: (content: string, isComplete: boolean) => void;
   onError?: (error: Error) => void;
   onComplete?: () => void;
   signal?: AbortSignal;
+}
+
+// SSE 消息事件类型
+type SSEMessage =
+  | { type: 'thinking_delta'; content: string }
+  | { type: 'thinking_complete' }
+  | { type: 'thinking'; content: string }
+  | { type: 'chunk'; content: string }
+  | { type: 'error'; message: string }
+  | { type: 'done' }
+  | { choices: [{ delta?: { content?: string } }] };
+
+// 回调接口
+interface SSECallbacks {
+  onMessage: (content: string) => void;
+  onThinking?: (content: string, isComplete: boolean) => void;
 }
 
 function extractThinkingContent(content: string): { thinking: string; clean: string } {
@@ -38,31 +55,36 @@ function parseSSEData(data: string): string | null {
   return content;
 }
 
-function processSSEChunk(
-  json: Record<string, unknown>,
-  callbacks: { onMessage: (content: string) => void; onThinking?: (content: string, isEnd: boolean) => void }
+function processSSEMessage(
+  json: SSEMessage,
+  callbacks: SSECallbacks
 ) {
+  // 处理错误事件
   if (json.type === 'error') {
-    throw new Error((json.message as string) || '服务器错误');
+    throw new Error(json.message || '服务器错误');
   }
+  // 处理完成事件
   if (json.type === 'done') return;
 
+  // 处理思维链事件
   if (json.type === 'thinking_delta' && json.content) {
-    callbacks.onThinking?.(json.content as string, false);
+    callbacks.onThinking?.(json.content, false);
   }
   if (json.type === 'thinking' && json.content) {
-    callbacks.onThinking?.(json.content as string, false);
+    callbacks.onThinking?.(json.content, false);
   }
   if (json.type === 'thinking_complete') {
     callbacks.onThinking?.('', true);
   }
 
+  // 处理 chunk 事件
   if (json.type === 'chunk' && json.content) {
-    const { thinking, clean } = extractThinkingContent(json.content as string);
-    if (thinking) callbacks.onThinking?.(thinking, (json.content as string).includes('[/THINK]'));
+    const { thinking, clean } = extractThinkingContent(json.content);
+    if (thinking) callbacks.onThinking?.(thinking, json.content.includes('[/THINK]'));
     if (clean) callbacks.onMessage(clean);
   }
 
+  // 处理 choices delta content (OpenAI 兼容格式)
   const content = (json as { choices?: [{ delta?: { content?: string } }] }).choices?.[0]?.delta?.content;
   if (content) {
     const { thinking, clean } = extractThinkingContent(content);
@@ -125,7 +147,7 @@ export async function sendSSEChatMessage(
 
         try {
           const json = JSON.parse(data) as Record<string, unknown>;
-          processSSEChunk(json, callbacks);
+          processSSEMessage(json, callbacks);
         } catch {
           // Skip invalid JSON
         }
