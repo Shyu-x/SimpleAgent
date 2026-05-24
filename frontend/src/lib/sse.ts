@@ -24,6 +24,47 @@ function extractThinkingContent(content: string): { thinking: string; clean: str
   return { thinking: thinkingContent, clean: cleanContent };
 }
 
+function parseSSEData(data: string): string | null {
+  const trimmed = data.trim();
+  if (!trimmed.startsWith('data:')) return null;
+  const content = trimmed.slice(5).trim();
+  if (content === '[DONE]') return null;
+  return content;
+}
+
+function processSSEChunk(
+  json: Record<string, unknown>,
+  callbacks: { onMessage: (content: string) => void; onThinking?: (content: string, isEnd: boolean) => void }
+) {
+  if (json.type === 'error') {
+    throw new Error((json.message as string) || '服务器错误');
+  }
+  if (json.type === 'done') return;
+
+  if (json.type === 'thinking_delta' && json.content) {
+    callbacks.onThinking?.(json.content as string, false);
+  }
+  if (json.type === 'thinking' && json.content) {
+    callbacks.onThinking?.(json.content as string, false);
+  }
+  if (json.type === 'thinking_complete') {
+    callbacks.onThinking?.('', true);
+  }
+
+  if (json.type === 'chunk' && json.content) {
+    const { thinking, clean } = extractThinkingContent(json.content as string);
+    if (thinking) callbacks.onThinking?.(thinking, (json.content as string).includes('[/THINK]'));
+    if (clean) callbacks.onMessage(clean);
+  }
+
+  const content = (json as { choices?: [{ delta?: { content?: string } }] }).choices?.[0]?.delta?.content;
+  if (content) {
+    const { thinking, clean } = extractThinkingContent(content);
+    if (thinking) callbacks.onThinking?.(thinking, content.includes('[/THINK]'));
+    if (clean) callbacks.onMessage(clean);
+  }
+}
+
 export async function sendSSEChatMessage(
   apiKey: string,
   baseURL: string,
@@ -62,6 +103,7 @@ export async function sendSSEChatMessage(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    const callbacks = { onMessage, onThinking };
 
     while (true) {
       const { done, value } = await reader.read();
@@ -72,42 +114,12 @@ export async function sendSSEChatMessage(
       buffer = lines.pop() || '';
 
       for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith('data:')) continue;
-
-        const data = trimmed.slice(5).trim();
-        if (data === '[DONE]') continue;
+        const data = parseSSEData(line);
+        if (!data) continue;
 
         try {
-          const json = JSON.parse(data);
-
-          if (json.type === 'error') {
-            throw new Error(json.message || '服务器错误');
-          }
-          if (json.type === 'done') continue;
-
-          if (json.type === 'thinking_delta' && json.content) {
-            onThinking?.(json.content, false);
-          }
-          if (json.type === 'thinking' && json.content) {
-            onThinking?.(json.content, false);
-          }
-          if (json.type === 'thinking_complete') {
-            onThinking?.('', true);
-          }
-
-          if (json.type === 'chunk' && json.content) {
-            const { thinking, clean } = extractThinkingContent(json.content);
-            if (thinking) onThinking?.(thinking, json.content.includes('[/THINK]'));
-            if (clean) onMessage(clean);
-          }
-
-          const content = json.choices?.[0]?.delta?.content;
-          if (content) {
-            const { thinking, clean } = extractThinkingContent(content);
-            if (thinking) onThinking?.(thinking, content.includes('[/THINK]'));
-            if (clean) onMessage(clean);
-          }
+          const json = JSON.parse(data) as Record<string, unknown>;
+          processSSEChunk(json, callbacks);
         } catch {
           // Skip invalid JSON
         }
@@ -117,21 +129,18 @@ export async function sendSSEChatMessage(
     if (buffer.trim()) {
       const lines = buffer.split('\n');
       for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith('data:')) continue;
-
-        const data = trimmed.slice(5).trim();
-        if (data === '[DONE]') continue;
+        const data = parseSSEData(line);
+        if (!data) continue;
 
         try {
-          const json = JSON.parse(data);
+          const json = JSON.parse(data) as Record<string, unknown>;
           if (json.type === 'thinking_delta' && json.content) {
-            onThinking?.(json.content, false);
+            onThinking?.(json.content as string, false);
           }
-          const content = json.choices?.[0]?.delta?.content;
+          const content = (json as { choices?: [{ delta?: { content?: string } }] }).choices?.[0]?.delta?.content;
           if (content) onMessage(content);
           if (json.type === 'chunk' && json.content) {
-            onMessage(json.content);
+            onMessage(json.content as string);
           }
         } catch {
           // Skip invalid JSON
