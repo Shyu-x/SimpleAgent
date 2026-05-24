@@ -308,13 +308,6 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     }
 
     try {
-      // 调试日志：检查发送的消息内容
-      console.log('[ChatArea] 发送消息:', {
-        contentLength: content.length,
-        contentPreview: content.substring(0, 50),
-        contentBytes: new TextEncoder().encode(content.slice(0, 10)).toString()
-      });
-
       const assistantMessageId = assistantMessage.id;
 
       await sendSSEChatMessage(
@@ -325,16 +318,10 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
         {
           signal: abortControllerRef.current.signal,
           onMessage: (chunk: string) => {
-            console.log('[ChatArea] onMessage:', {
-              chunkLength: chunk.length,
-              chunkPreview: chunk.substring(0, 50),
-            });
             const conv = useChatStore.getState().conversations.find((c) => c.id === activeConversationId);
             if (conv && conv.messages.length > 0) {
               const currentContent = conv.messages[conv.messages.length - 1].content;
-              console.log('[ChatArea] 更新前内容长度:', currentContent.length);
               updateLastMessage(activeConversationId, currentContent + chunk);
-              console.log('[ChatArea] 更新后（期望）长度:', currentContent.length + chunk.length);
             }
           },
           onThinking: (thinkingChunk: string, isEnd: boolean) => {
