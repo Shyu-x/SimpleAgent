@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { isClient } from '@/lib/ssrStorage';
+import { BACKEND_URL } from '@/lib/config';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
 
 // ==================== 类型定义 ====================
@@ -93,7 +94,7 @@ class HITLSSEClient {
   private _getBaseUrl(): string {
     if (typeof window === 'undefined') return '';
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-    const host = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+    const host = BACKEND_URL;
     return `${host}/api/hitl/sse`;
   }
 
@@ -291,7 +292,7 @@ export function useHITLSSE(options: UseHITLSSEOptions = {}) {
         ? `/api/hitl/checkpoint/${checkpointId}/approve`
         : `/api/hitl/checkpoint/${checkpointId}/reject`;
 
-      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+      const baseUrl = BACKEND_URL;
       const response = await fetch(`${baseUrl}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

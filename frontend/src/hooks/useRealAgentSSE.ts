@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { agentWorkflowAPI } from '@/lib/agentWorkflowAPI';
 import { retryService } from '@/lib/workflowPersistence';
+import { BACKEND_URL } from '@/lib/config';
 
 // ==================== 类型定义 ====================
 
@@ -278,7 +279,7 @@ export function useRealAgentSSE(
       return;
     }
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+    const backendUrl = BACKEND_URL;
     const sseUrl = `${backendUrl}/api/multiagent/sse`;
 
     const client = new SSEClient({
@@ -421,7 +422,7 @@ export function useMultiChannelSSE() {
       // 创建新通道
       const client = new SSEClient({
         ...handlers,
-        url: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000'}/api/multiagent/sse`,
+        url: `${BACKEND_URL}/api/multiagent/sse`,
         credentials: { sessionId },
       });
 

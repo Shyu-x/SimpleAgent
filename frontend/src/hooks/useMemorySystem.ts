@@ -7,7 +7,7 @@ import { Note, MemoryType, MemoryImportance, GlobalMemory } from '@/types';
 // 导入 API 客户端
 import { fetchApi, post, del, put } from '@/lib/apiClient';
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { BACKEND_URL } from '@/lib/config';
 
 // 记忆类型配置
 export const MEMORY_TYPE_CONFIG: Record<MemoryType, { label: string; color: string; icon: string }> = {

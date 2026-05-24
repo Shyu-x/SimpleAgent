@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useChatStore } from '@/store/chatStore';
 import { Sparkles, Bot, Send, Square, Trash2, ChevronDown, ChevronUp, Loader2, Terminal } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
+import { BACKEND_URL } from '@/lib/config';
 
 interface AgentMessage {
   id: string;
@@ -52,7 +53,6 @@ export default function MiniMaxAgent() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -67,7 +67,7 @@ export default function MiniMaxAgent() {
     try {
       const apiConfig = useChatStore.getState().apiConfig;
 
-      const response = await fetch(`${backendUrl}/api/minimax-agent/session`, {
+      const response = await fetch(`${BACKEND_URL}/api/minimax-agent/session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -124,7 +124,7 @@ export default function MiniMaxAgent() {
     setConfig(prev => ({ ...prev, status: 'running' }));
 
     try {
-      const response = await fetch(`${backendUrl}/api/minimax-agent/execute`, {
+      const response = await fetch(`${BACKEND_URL}/api/minimax-agent/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -303,7 +303,7 @@ export default function MiniMaxAgent() {
   // 清除会话
   const clearSession = async () => {
     if (config.sessionId) {
-      await fetch(`${backendUrl}/api/minimax-agent/session/${config.sessionId}`, {
+      await fetch(`${BACKEND_URL}/api/minimax-agent/session/${config.sessionId}`, {
         method: 'DELETE'
       });
     }

@@ -6,6 +6,7 @@ import { AVAILABLE_MODELS, Model } from '@/types';
 import { Settings as SettingsIcon, X, Check, Sun, Moon, Type, Keyboard, ChevronDown, Layout, Sparkles, Volume2, VolumeX, Zap, RefreshCw, Brain, Wifi, WifiOff, Loader2, AlertCircle, Plug, PlugZap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getBaseURLForModel, syncBaseURLForPresetModel } from '@/lib/modelConfig';
+import { BACKEND_URL } from '@/lib/config';
 
 // 模态框动画变体
 const modalVariants = {
@@ -214,8 +215,7 @@ export default function Settings({ autoOpen = false, hideTrigger = false }: Sett
   // MCP 状态获取
   const fetchMcpStatus = useCallback(async () => {
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-      const res = await fetch(`${backendUrl}/api/minimax/status`);
+      const res = await fetch(`${BACKEND_URL}/api/minimax/status`);
       const data = await res.json();
       if (data.success) {
         setMcpStatus(data.mcp_server?.connected ? 'connected' : 'disconnected');
@@ -234,8 +234,7 @@ export default function Settings({ autoOpen = false, hideTrigger = false }: Sett
     setMcpStatus('connecting');
     setMcpError(null);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-      const res = await fetch(`${backendUrl}/api/minimax/connect`, { method: 'POST' });
+      const res = await fetch(`${BACKEND_URL}/api/minimax/connect`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         setMcpStatus('connected');
@@ -258,8 +257,7 @@ export default function Settings({ autoOpen = false, hideTrigger = false }: Sett
     setMcpToolsCount(0);
     setMcpError(null);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-      await fetch(`${backendUrl}/api/minimax/disconnect`, { method: 'POST' });
+      await fetch(`${BACKEND_URL}/api/minimax/disconnect`, { method: 'POST' });
     } catch {
       // ignore
     }

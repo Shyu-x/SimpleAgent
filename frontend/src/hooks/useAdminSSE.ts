@@ -1,8 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { BACKEND_URL } from '@/lib/config';
 
 /**
  * 系统统计数据
@@ -95,7 +94,7 @@ class AdminSSEClient<T = unknown> {
   }
 
   private getBaseUrl(): string {
-    return `${API_BASE}/api/admin/stream`;
+    return `${BACKEND_URL}/api/admin/stream`;
   }
 
   connect(): void {
@@ -248,7 +247,7 @@ export function useAdminSSE<T = unknown>(options: UseAdminSSEOptions = {}): {
     if (!options.endpoint) return;
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}${options.endpoint}`);
+      const response = await fetch(`${BACKEND_URL}${options.endpoint}`);
       if (response.ok) {
         const result = await response.json();
         const parsedData = options.parser ? options.parser(result) : (result as T);
@@ -419,7 +418,7 @@ export function useAdminPolling<T>(options: UseAdminPollingOptions<T>): UseAdmin
     if (!enabled) return;
 
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
         headers: { 'Content-Type': 'application/json' },
       });
       const json = await response.json();

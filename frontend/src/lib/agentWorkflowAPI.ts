@@ -3,7 +3,7 @@
  * 负责与后端多Agent系统通信
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { BACKEND_URL } from './config';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -65,7 +65,7 @@ export interface WorkflowExecutionResult {
 class AgentWorkflowAPI {
   private baseUrl: string;
 
-  constructor(baseUrl: string = API_BASE) {
+  constructor(baseUrl: string = BACKEND_URL) {
     this.baseUrl = baseUrl;
   }
 

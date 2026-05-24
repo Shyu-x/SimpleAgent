@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Attachment } from '@/types';
+import { BACKEND_URL } from '@/lib/config';
 
 // 简单的 ID 生成函数
 function generateId(): string {
@@ -164,8 +165,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
       addMessage(activeConversationId, assistantMessage);
 
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-        const response = await fetch(`${backendUrl}/api/minimax/image`, {
+        const response = await fetch(`${BACKEND_URL}/api/minimax/image`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -272,8 +272,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
       try {
         updateLastMessage(activeConversationId, '🔍 正在联网搜索相关信息...');
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-        const searchResponse = await fetch(`${backendUrl}/api/search/enhanced`, {
+        const searchResponse = await fetch(`${BACKEND_URL}/api/search/enhanced`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
