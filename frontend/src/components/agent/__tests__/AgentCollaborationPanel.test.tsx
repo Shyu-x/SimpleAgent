@@ -412,6 +412,7 @@ describe('AgentCollaborationPanel', () => {
           { id: 'task-2', name: '任务二', agentId: 'agent-2', status: 'pending' as const, order: 2 }
         ]
       };
+      const runningState = { ...createMockExecutionState(), status: 'running' as const };
 
       render(
         <AgentCollaborationPanel
