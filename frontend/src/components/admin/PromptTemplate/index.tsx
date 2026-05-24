@@ -267,6 +267,7 @@ export default function PromptTemplatePage() {
           </div>
         </div>
       </div>
+      </>
     </ErrorBoundary>
   );
 }
@@ -512,9 +513,16 @@ function TemplateEditor({
   );
   const [newVarName, setNewVarName] = useState('');
 
+  // 提示对话框状态
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+
   const handleSave = () => {
     if (!name.trim() || !content.trim()) {
-      alert('请填写名称和内容');
+      setAlertDialog({ isOpen: true, title: '输入验证', message: '请填写名称和内容' });
       return;
     }
     const templateData = {
@@ -537,7 +545,7 @@ function TemplateEditor({
   const addVariable = () => {
     if (!newVarName.trim()) return;
     if (variables.some((v) => v.name === newVarName)) {
-      alert('变量已存在');
+      setAlertDialog({ isOpen: true, title: '变量已存在', message: '变量名不能重复' });
       return;
     }
     setVariables([...variables, { name: newVarName, type: 'string', required: false }]);
@@ -549,26 +557,34 @@ function TemplateEditor({
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">{template ? '编辑模板' : '新建模板'}</h2>
-        <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
-          ✕
-        </button>
-      </div>
+    <>
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant="info"
+        onClose={() => setAlertDialog({ isOpen: false, title: '', message: '' })}
+      />
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">{template ? '编辑模板' : '新建模板'}</h2>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
+            ✕
+          </button>
+        </div>
 
-      <div className="space-y-4">
-        {/* 基本信息 */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">名称 *</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="输入模板名称"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        <div className="space-y-4">
+          {/* 基本信息 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">名称 *</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="输入模板名称"
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">分类</label>
@@ -662,6 +678,7 @@ function TemplateEditor({
         </button>
       </div>
     </div>
+    </>
   );
 }
 
@@ -676,6 +693,16 @@ function VersionHistoryPanel({
 }) {
   const [versions, setVersions] = useState<TemplateVersion[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // 对话框状态
+  const [rollbackDialog, setRollbackDialog] = useState<{ isOpen: boolean; version?: number }>({
+    isOpen: false,
+  });
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string; variant?: 'info' | 'success' | 'error' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
 
   useEffect(() => {
     const fetchVersions = async () => {
@@ -697,15 +724,21 @@ function VersionHistoryPanel({
     fetchVersions();
   }, [templateId]);
 
-  const rollbackToVersion = async (version: number) => {
-    if (!confirm(`确定要回滚到 v${version} 吗？`)) return;
+  const handleRollbackClick = (version: number) => {
+    setRollbackDialog({ isOpen: true, version });
+  };
+
+  const rollbackToVersion = async () => {
+    const { version } = rollbackDialog;
+    if (version === undefined) return;
+    setRollbackDialog({ isOpen: false });
     try {
       const { error } = await fetchApi(`/api/admin/prompts/${templateId}/rollback`, {
         method: 'POST',
         body: JSON.stringify({ version }),
       });
       if (error) throw new Error(error.message);
-      alert('回滚成功');
+      setAlertDialog({ isOpen: true, title: '回滚成功', message: `已回滚到 v${version}`, variant: 'success' });
       onBack();
     } catch (err) {
       console.error('Failed to rollback:', err);
@@ -713,8 +746,25 @@ function VersionHistoryPanel({
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
+    <>
+      <ConfirmDialog
+        isOpen={rollbackDialog.isOpen}
+        title="回滚模板"
+        message={rollbackDialog.version !== undefined ? `确定要回滚到 v${rollbackDialog.version} 吗？` : '确定要回滚吗？'}
+        confirmLabel="回滚"
+        variant="warning"
+        onConfirm={rollbackToVersion}
+        onCancel={() => setRollbackDialog({ isOpen: false })}
+      />
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+        onClose={() => setAlertDialog({ isOpen: false, title: '', message: '' })}
+      />
+      <div className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">版本历史</h2>
         <button onClick={onBack} className="text-gray-400 hover:text-gray-600">
           ✕
@@ -738,7 +788,7 @@ function VersionHistoryPanel({
                   </span>
                 </div>
                 <button
-                  onClick={() => rollbackToVersion(v.version)}
+                  onClick={() => handleRollbackClick(v.version)}
                   className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                 >
                   回滚到此版本
@@ -754,6 +804,7 @@ function VersionHistoryPanel({
         </div>
       )}
     </div>
+    </>
   );
 }
 
