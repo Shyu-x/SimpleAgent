@@ -14,6 +14,7 @@
 
 const express = require('express');
 const MetricsCollector = require('../metrics/MetricsCollector');
+const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
 
 /**
  * Prometheus 指标服务
@@ -130,13 +131,7 @@ class PrometheusService {
    * @returns {string} 标准化后的路径
    */
   _normalizePath(path) {
-    // 移除 UUID
-    let normalized = path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id');
-
-    // 移除数字 ID
-    normalized = normalized.replace(/\/\d+/g, '/:id');
-
-    return normalized;
+    return utilsNormalizePath(path);
   }
 
   /**

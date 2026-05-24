@@ -15,6 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
 
 class MetricsCollector {
   /**
@@ -58,6 +59,7 @@ class MetricsCollector {
     // 定时任务
     this._persistTimer = null;
     this._cleanupTimer = null;
+    this._nodejsMetricsTimer = null;
 
     // 告警规则
     this._alertRules = new Map();
@@ -99,8 +101,11 @@ class MetricsCollector {
    * @private
    */
   _startNodejsMetricsTimer() {
+    if (this._nodejsMetricsTimer) {
+      clearInterval(this._nodejsMetricsTimer);
+    }
     // 每 10 秒更新一次 Node.js 运行时指标
-    setInterval(() => {
+    this._nodejsMetricsTimer = setInterval(() => {
       this.updateNodejsMetrics();
     }, 10000);
   }
@@ -1319,12 +1324,7 @@ class MetricsCollector {
    * @private
    */
   _normalizeMetricPath(path) {
-    if (!path) return 'unknown';
-    // 移除 UUID
-    let normalized = path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id');
-    // 移除数字 ID
-    normalized = normalized.replace(/\/\d+/g, '/:id');
-    return normalized;
+    return utilsNormalizePath(path);
   }
 
   // ==================== 生命周期 ====================
@@ -1354,6 +1354,11 @@ class MetricsCollector {
     if (this._cleanupTimer) {
       clearInterval(this._cleanupTimer);
       this._cleanupTimer = null;
+    }
+
+    if (this._nodejsMetricsTimer) {
+      clearInterval(this._nodejsMetricsTimer);
+      this._nodejsMetricsTimer = null;
     }
 
     // 最后一次持久化
