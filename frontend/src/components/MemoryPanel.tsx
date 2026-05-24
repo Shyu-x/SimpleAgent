@@ -155,7 +155,7 @@ export function MemoryPanel({ conversationId, isOpen, onClose, layout = 'drawer'
             transition={isModal ? { type: 'spring', damping: 30, stiffness: 320 } : { type: 'spring', damping: 25, stiffness: 300 }}
             className={
               isModal
-                ? 'fixed left-4 right-4 top-4 bottom-4 z-[100] flex flex-col overflow-hidden rounded-3xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/98 shadow-2xl backdrop-blur-xl mx-auto my-auto'
+                ? 'fixed left-4 right-4 top-4 bottom-4 z-[100] flex flex-col overflow-hidden rounded-3xl border border-border bg-muted/98 shadow-2xl backdrop-blur-xl mx-auto my-auto'
                 : 'fixed right-0 top-0 z-[100] flex h-full w-full flex-col border-l border-border bg-background shadow-xl sm:w-96'
             }
           >
@@ -180,27 +180,27 @@ export function MemoryPanel({ conversationId, isOpen, onClose, layout = 'drawer'
               </button>
             </div>
 
-            <div className="grid gap-2 border-b border-border bg-[hsl(var(--bg-elevated))]/72 px-4 py-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-[hsl(var(--bg-surface))]/92 px-3 py-2">
+            <div className="grid gap-2 border-b border-border bg-muted/72 px-4 py-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-muted/92 px-3 py-2">
                 <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">会话记忆</div>
                 <div className="mt-1 text-lg font-semibold text-foreground" data-testid="session-memory-count">
                   {sessionNotes.length}
                 </div>
               </div>
-              <div className="rounded-2xl bg-[hsl(var(--bg-surface))]/92 px-3 py-2">
+              <div className="rounded-2xl bg-muted/92 px-3 py-2">
                 <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">全局记忆</div>
                 <div className="mt-1 text-lg font-semibold text-foreground" data-testid="global-memory-count">
                   {globalMemories.length}
                 </div>
               </div>
-              <div className="rounded-2xl bg-[hsl(var(--bg-surface))]/92 px-3 py-2">
+              <div className="rounded-2xl bg-muted/92 px-3 py-2">
                 <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">回归状态</div>
                 <div
-                  className="mt-1 flex min-h-7 items-center gap-2 text-sm text-[hsl(var(--text-main))]"
+                  className="mt-1 flex min-h-7 items-center gap-2 text-sm text-foreground"
                   aria-live="polite"
                   data-testid="memory-status"
                 >
-                  <Sparkles className="h-4 w-4 text-[hsl(var(--brand-500))]" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <span>{statusMessage || '等待操作'}</span>
                 </div>
               </div>
@@ -229,7 +229,7 @@ export function MemoryPanel({ conversationId, isOpen, onClose, layout = 'drawer'
             <div className="flex-1 overflow-y-auto">
               {activeTab === 'session' && (
                 <div className="space-y-4 p-4">
-                  <div className="space-y-2 rounded-2xl border border-border bg-[hsl(var(--bg-elevated))]/72 p-3">
+                  <div className="space-y-2 rounded-2xl border border-border bg-muted/72 p-3">
                     <textarea
                       value={sessionDraft}
                       onChange={(e) => setSessionDraft(e.target.value)}
@@ -394,7 +394,7 @@ export function MemoryPanel({ conversationId, isOpen, onClose, layout = 'drawer'
               )}
             </div>
 
-            <div className="border-t border-border bg-[hsl(var(--bg-elevated))]/72 p-4">
+            <div className="border-t border-border bg-muted/72 p-4">
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>会话笔记: {sessionNotes.length}</span>
                 <span>全局记忆: {globalMemories.length}</span>
@@ -449,7 +449,7 @@ function NoteCard({
             <button onClick={onSaveEdit} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">
               保存
             </button>
-            <button onClick={onCancelEdit} className="rounded bg-[hsl(var(--text-muted))/0.18] px-2 py-1 text-xs text-muted-foreground">
+            <button onClick={onCancelEdit} className="rounded bg-muted/0.18 px-2 py-1 text-xs text-muted-foreground">
               取消
             </button>
           </div>
@@ -527,7 +527,7 @@ function GlobalMemoryCard({
             <button onClick={onSaveEdit} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">
               保存
             </button>
-            <button onClick={onCancelEdit} className="rounded bg-[hsl(var(--text-muted))/0.18] px-2 py-1 text-xs text-muted-foreground">
+            <button onClick={onCancelEdit} className="rounded bg-muted/0.18 px-2 py-1 text-xs text-muted-foreground">
               取消
             </button>
           </div>
