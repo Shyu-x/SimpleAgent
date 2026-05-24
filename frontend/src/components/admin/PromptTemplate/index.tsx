@@ -16,22 +16,15 @@ import { fetchApi } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
+import type { PromptTemplate as SharedPromptTemplate } from '@/types/prompts';
 
-// ============ 类型定义 ============
-
-interface PromptTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  version: number;
-  variables: TemplateVariable[];
-  content: string; // 后端返回 template，前端映射为 content
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  isActive: boolean;
-}
+// 扩展共享类型以支持后端返回的额外字段
+type PromptTemplate = SharedPromptTemplate & {
+  version?: number;
+  variables?: TemplateVariable[];
+  createdBy?: string;
+  isActive?: boolean;
+};
 
 interface TemplateVariable {
   name: string;
