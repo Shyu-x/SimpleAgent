@@ -469,6 +469,9 @@ export function useCheckpointManager() {
 /**
  * 双记忆系统 Hook
  */
+const MAX_SHORT_TERM = 100;
+const MAX_LONG_TERM = 500;
+
 export function useDualMemory() {
   const [shortTermMemory, setShortTermMemory] = useState<MemoryItem[]>([]);
   const [longTermMemory, setLongTermMemory] = useState<MemoryItem[]>([]);
@@ -482,7 +485,10 @@ export function useDualMemory() {
       id: `stm_${Date.now()}`,
       timestamp: Date.now()
     };
-    setShortTermMemory(prev => [...prev, memoryItem]);
+    setShortTermMemory(prev => {
+      const updated = [...prev, memoryItem];
+      return updated.length > MAX_SHORT_TERM ? updated.slice(-MAX_SHORT_TERM) : updated;
+    });
     return memoryItem;
   }, []);
 
@@ -496,7 +502,10 @@ export function useDualMemory() {
       timestamp: Date.now(),
       accessCount: 0
     };
-    setLongTermMemory(prev => [...prev, memoryItem]);
+    setLongTermMemory(prev => {
+      const updated = [...prev, memoryItem];
+      return updated.length > MAX_LONG_TERM ? updated.slice(-MAX_LONG_TERM) : updated;
+    });
     return memoryItem;
   }, []);
 

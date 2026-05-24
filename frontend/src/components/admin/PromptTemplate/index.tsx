@@ -278,24 +278,22 @@ export default function PromptTemplatePage() {
                   if (!selectedTemplate) setSelectedTemplate(null);
                 }}
               />
-            ) : selectedTemplate ? (
-              showVersionHistory ? (
-                <VersionHistoryPanel
-                  templateId={selectedTemplate.id}
-                  onBack={() => setShowVersionHistory(false)}
-                />
-              ) : (
-                <TemplateDetail
-                  template={selectedTemplate}
-                  onEdit={() => setIsEditing(true)}
-                  onDelete={() => deleteTemplate(selectedTemplate.id)}
-                  onShowHistory={() => setShowVersionHistory(true)}
-                />
-              )
-            ) : (
+            ) : !selectedTemplate ? (
               <div className="flex items-center justify-center h-96 text-gray-400">
                 选择一个模板查看详情
               </div>
+            ) : showVersionHistory ? (
+              <VersionHistoryPanel
+                templateId={selectedTemplate.id}
+                onBack={() => setShowVersionHistory(false)}
+              />
+            ) : (
+              <TemplateDetail
+                template={selectedTemplate}
+                onEdit={() => setIsEditing(true)}
+                onDelete={() => deleteTemplate(selectedTemplate.id)}
+                onShowHistory={() => setShowVersionHistory(true)}
+              />
             )}
           </div>
         </div>
