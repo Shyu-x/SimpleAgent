@@ -3,12 +3,13 @@
 
 import { BACKEND_URL } from './config';
 
-const API_BASE = BACKEND_URL;
+// Re-export API_BASE for convenience (same as BACKEND_URL)
+export const API_BASE = BACKEND_URL;
 
 // Export individual endpoints for different services
 export const API_ENDPOINTS = {
   // Main API
-  base: BACKEND_URL,
+  base: API_BASE,
 
   // Chat
   chat: `${API_BASE}/api/chat`,
