@@ -6,6 +6,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const { execSync } = require('child_process');
+const { sleep } = require('../utils/retry');
 
 class ContinuousLearning {
   constructor(options = {}) {
@@ -147,7 +148,7 @@ class ContinuousLearning {
       };
 
       // 避免API限制
-      await this.sleep(1000);
+      await sleep(1000);
     }
 
     // 保存结果
@@ -244,13 +245,6 @@ ${Object.entries(p.techStack).filter(([k, v]) => v).map(([k]) => `- ${k}`).join(
       'typescript_best': 'TypeScript最佳实践'
     };
     return names[name] || name;
-  }
-
-  /**
-   * 睡眠
-   */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**

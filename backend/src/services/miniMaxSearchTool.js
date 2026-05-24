@@ -3,7 +3,7 @@
  * 直接使用 MiniMax API 实现联网搜索功能
  */
 
-const { withRetry, withTimeout } = require('../utils/retry');
+const { withRetry, withTimeout, sleep } = require('../utils/retry');
 const AppError = require('../common/errors/AppError');
 
 class MiniMaxSearchTool {
@@ -133,7 +133,7 @@ class MiniMaxSearchTool {
 
         // 添加延迟避免限流
         if (i < limitedQueries.length - 1) {
-          await this.sleep(500);
+          await sleep(500);
         }
       } catch (error) {
         errors.push({ query: q, error: error.message });
@@ -406,13 +406,6 @@ class MiniMaxSearchTool {
       resultCount: r.results?.length || 0,
       topResult: r.results?.[0] || null
     }));
-  }
-
-  /**
-   * 睡眠
-   */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**

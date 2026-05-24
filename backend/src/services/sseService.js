@@ -5,6 +5,7 @@
 
 const { AgentLogger, createLogger } = require('../infra/logger/AgentLogger');
 const { MiniMaxRouter } = require('./router/modelRouter');
+const { classifyRetryableError } = require('../common/errors/errorClassifier');
 
 // 创建日志记录器
 const logger = new AgentLogger('sse');
@@ -27,6 +28,27 @@ const ErrorType = {
   UNKNOWN: 'unknown_error'
 };
 
+// 错误类型到 ErrorType 的映射
+const ERROR_TYPE_MAP = {
+  auth: ErrorType.AUTH,
+  parameter: ErrorType.VALIDATION,
+  rate_limit: ErrorType.RATE_LIMIT,
+  transient: ErrorType.SERVER,
+  resource: ErrorType.SERVER,
+  unknown: ErrorType.UNKNOWN
+};
+
+// 用户友好的错误消息
+const ERROR_MESSAGES = {
+  [ErrorType.AUTH]: 'API Key无效或未配置，请检查设置',
+  [ErrorType.RATE_LIMIT]: '请求过于频繁，请稍后再试',
+  [ErrorType.TIMEOUT]: '请求超时，请检查网络或稍后重试',
+  [ErrorType.SERVER]: 'MiniMax服务暂时不可用，请稍后重试',
+  [ErrorType.VALIDATION]: '请求参数无效，请检查输入内容',
+  [ErrorType.API]: '服务异常，请稍后重试',
+  [ErrorType.UNKNOWN]: '服务异常，请稍后重试'
+};
+
 /**
  * 分类错误类型
  */
@@ -35,23 +57,23 @@ function classifyError(error, response = null) {
 
   // API 密钥问题
   if (message.includes('API Key') || message.includes('apiKey') || message.includes('401')) {
-    return { type: ErrorType.AUTH, message: 'API Key无效或未配置，请检查设置' };
+    return { type: ErrorType.AUTH, message: ERROR_MESSAGES[ErrorType.AUTH] };
   }
 
   // 速率限制
   if (message.includes('429') || message.includes('rate limit') || message.includes('请求过于频繁')) {
-    return { type: ErrorType.RATE_LIMIT, message: '请求过于频繁，请稍后再试' };
+    return { type: ErrorType.RATE_LIMIT, message: ERROR_MESSAGES[ErrorType.RATE_LIMIT] };
   }
 
   // 超时错误
   if (message.includes('timeout') || message.includes('Timeout') || message.includes('504')) {
-    return { type: ErrorType.TIMEOUT, message: '请求超时，请检查网络或稍后重试' };
+    return { type: ErrorType.TIMEOUT, message: ERROR_MESSAGES[ErrorType.TIMEOUT] };
   }
 
   // API 错误（带状态码）
   if (response?.status) {
     if (response.status >= 500) {
-      return { type: ErrorType.SERVER, message: 'MiniMax服务暂时不可用，请稍后重试' };
+      return { type: ErrorType.SERVER, message: ERROR_MESSAGES[ErrorType.SERVER] };
     }
     if (response.status >= 400) {
       return { type: ErrorType.API, message: `请求参数错误: ${message}` };
@@ -61,16 +83,20 @@ function classifyError(error, response = null) {
   // MiniMax API 特定错误
   if (message.includes('MiniMax API Error')) {
     if (message.includes('400')) {
-      return { type: ErrorType.VALIDATION, message: '请求参数无效，请检查输入内容' };
+      return { type: ErrorType.VALIDATION, message: ERROR_MESSAGES[ErrorType.VALIDATION] };
     }
     if (message.includes('401') || message.includes('403')) {
-      return { type: ErrorType.AUTH, message: 'API Key无效或权限不足' };
+      return { type: ErrorType.AUTH, message: ERROR_MESSAGES[ErrorType.AUTH] };
     }
     return { type: ErrorType.API, message: `MiniMax API错误: ${message}` };
   }
 
+  // 使用共享工具进行分类，映射到 ErrorType
+  const errorType = classifyRetryableError(error);
+  const mappedType = ERROR_TYPE_MAP[errorType] || ErrorType.UNKNOWN;
+
   // 通用错误
-  return { type: ErrorType.UNKNOWN, message: `服务异常: ${message}` };
+  return { type: mappedType, message: ERROR_MESSAGES[mappedType] };
 }
 
 /**

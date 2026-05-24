@@ -13,6 +13,7 @@
 
 const EventEmitter = require('events');
 const AppError = require('../../common/errors/AppError');
+const { sleep, calculateBackoffDelay } = require('../../utils/retry');
 
 // 指标采集器（延迟初始化）
 let _metricsCollector = null;
@@ -146,7 +147,8 @@ class ToolExecutor extends EventEmitter {
 
         // 如果不是最后一次尝试，等待后重试
         if (attempt < retries) {
-          await this._sleep(this.retryDelay * Math.pow(2, attempt)); // 指数退避
+          const delay = this.retryDelay * Math.pow(2, attempt);
+          await sleep(delay); // 指数退避
         }
       }
     }
@@ -282,7 +284,7 @@ class ToolExecutor extends EventEmitter {
       if (depResult && depResult.success) {
         return;
       }
-      await this._sleep(100);
+      await sleep(100);
     }
 
     throw AppError.internalError(`Dependency ${dependency} did not complete successfully`);
@@ -293,7 +295,7 @@ class ToolExecutor extends EventEmitter {
    */
   async _waitForSlot() {
     while (this.runningCount >= this.maxConcurrent) {
-      await this._sleep(100);
+      await sleep(100);
     }
     this.runningCount++;
   }
@@ -317,13 +319,6 @@ class ToolExecutor extends EventEmitter {
           reject(error);
         });
     });
-  }
-
-  /**
-   * 睡眠
-   */
-  _sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**

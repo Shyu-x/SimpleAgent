@@ -7,6 +7,7 @@ const { createLogger } = require('../infra/logger/AgentLogger');
 
 const logger = createLogger('DuckDuckGoSearchTool');
 const AppError = require('../common/errors/AppError');
+const { sleep, calculateBackoffDelay } = require('../utils/retry');
 
 class DuckDuckGoSearchTool {
   constructor(options = {}) {
@@ -126,7 +127,7 @@ class DuckDuckGoSearchTool {
 
       // 避免请求过快
       if (i < limitedQueries.length - 1) {
-        await this.sleep(300);
+        await sleep(300);
       }
     }
 
@@ -204,7 +205,7 @@ class DuckDuckGoSearchTool {
 
         if (attempt < maxRetries) {
           // 指数退避: 1s, 2s, 4s
-          await this.sleep(Math.pow(2, attempt - 1) * 1000);
+          await sleep(calculateBackoffDelay(attempt - 1));
         }
       }
     }
@@ -334,13 +335,6 @@ class DuckDuckGoSearchTool {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
       .replace(/&nbsp;/g, ' ');
-  }
-
-  /**
-   * 睡眠
-   */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

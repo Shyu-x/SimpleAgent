@@ -29,6 +29,7 @@ const { AgentLogger, formatConsole } = require('./AgentLogger');
 const { withRetry, withTimeout, sleep, TimeoutConfig } = require('../utils/retry');
 const SessionNoteTool = require('./tools/SessionNoteTool');
 const AppError = require('../common/errors/AppError');
+const { ERROR_CLASSIFICATION, RETRY_STRATEGY, classifyRetryableError, getRetryConfig, calculateBackoffDelay } = require('../common/errors/errorClassifier');
 
 // 引入 EventEmitter 用于 trace 广播
 require('../common/EventEmitter');
@@ -61,16 +62,6 @@ const REACT_PHASES = {
   CONTINUE: 'continue'
 };
 
-// 错误分类 - 用于结构化错误恢复
-const ERROR_CLASSIFICATION = {
-  TRANSIENT: 'transient',       // 临时错误（网络超时等），可重试
-  RESOURCE: 'resource',         // 资源错误（内存不足等），可重试但需降级
-  PARAMETER: 'parameter',        // 参数错误，不应重试
-  AUTHENTICATION: 'auth',        // 认证错误，不应重试
-  RATE_LIMIT: 'rate_limit',     // 限流错误，可重试但需退避
-  UNKNOWN: 'unknown'            // 未知错误，根据情况判断
-};
-
 // 工具执行结果质量等级
 const RESULT_QUALITY = {
   EXCELLENT: 'excellent',       // 结果完美，无需处理
@@ -78,20 +69,6 @@ const RESULT_QUALITY = {
   INCOMPLETE: 'incomplete',    // 结果不完整，可能需要补充
   ERROR: 'error',              // 执行出错，需要处理
   EMPTY: 'empty'               // 结果为空，需要处理
-};
-
-// 重试策略配置
-const RETRY_STRATEGY = {
-  maxRetries: 3,
-  initialDelayMs: 1000,
-  maxDelayMs: 30000,
-  exponentialBase: 2,
-  // 不同错误类型的重试配置
-  errorTypes: {
-    [ERROR_CLASSIFICATION.TRANSIENT]: { maxRetries: 3, backoffMultiplier: 1 },
-    [ERROR_CLASSIFICATION.RESOURCE]: { maxRetries: 2, backoffMultiplier: 1.5 },
-    [ERROR_CLASSIFICATION.RATE_LIMIT]: { maxRetries: 5, backoffMultiplier: 2 }
-  }
 };
 
 // 最大反思次数
@@ -376,100 +353,6 @@ class AgentEngine {
   // ==================== 错误分类与结构化错误恢复 ====================
 
   /**
-   * 分类错误类型 - 用于决定重试策略
-   * @param {Error|string} error - 错误对象或错误消息
-   * @returns {string} 错误分类
-   */
-  _classifyError(error) {
-    if (!error) return ERROR_CLASSIFICATION.UNKNOWN;
-
-    const errorMsg = typeof error === 'string' ? error : error.message || '';
-    const errorCode = typeof error === 'object' ? (error.code || error.errno || '') : '';
-    const statusCode = typeof error === 'object' ? (error.status || error.statusCode || '') : '';
-
-    // 认证相关错误 - 不应重试
-    if (errorMsg.includes('401') || errorMsg.includes('403') ||
-        errorMsg.includes('unauthorized') || errorMsg.includes('forbidden') ||
-        errorMsg.includes('authentication') || errorMsg.includes('api key')) {
-      return ERROR_CLASSIFICATION.AUTHENTICATION;
-    }
-
-    // 参数错误 - 不应重试
-    if (errorMsg.includes('invalid') || errorMsg.includes('parameter') ||
-        errorMsg.includes('argument') || errorMsg.includes('schema') ||
-        errorMsg.includes('validation')) {
-      return ERROR_CLASSIFICATION.PARAMETER;
-    }
-
-    // 限流错误 - 可重试但需要更长退避
-    if (statusCode === 429 || errorMsg.includes('rate limit') ||
-        errorMsg.includes('too many requests') || errorMsg.includes('quota')) {
-      return ERROR_CLASSIFICATION.RATE_LIMIT;
-    }
-
-    // 网络临时错误 - 可重试
-    if (errorCode === 'ECONNRESET' || errorCode === 'ETIMEDOUT' ||
-        errorCode === 'ENOTFOUND' || errorCode === 'ECONNREFUSED' ||
-        errorMsg.includes('timeout') || errorMsg.includes('network') ||
-        errorMsg.includes('ECONNREFUSED')) {
-      return ERROR_CLASSIFICATION.TRANSIENT;
-    }
-
-    // 资源错误 - 可重试但可能需要降级
-    if (errorMsg.includes('memory') || errorMsg.includes('disk') ||
-        errorMsg.includes('storage') || errorMsg.includes('resource')) {
-      return ERROR_CLASSIFICATION.RESOURCE;
-    }
-
-    // 500/502/503/504 服务器错误 - 临时错误
-    if (statusCode >= 500 && statusCode < 600) {
-      return ERROR_CLASSIFICATION.TRANSIENT;
-    }
-
-    return ERROR_CLASSIFICATION.UNKNOWN;
-  }
-
-  /**
-   * 根据错误类型获取重试配置
-   * @param {string} errorType - 错误分类
-   * @returns {Object} 重试配置
-   */
-  _getRetryConfigForError(errorType) {
-    const defaultConfig = {
-      maxRetries: RETRY_STRATEGY.maxRetries,
-      delayMs: RETRY_STRATEGY.initialDelayMs,
-      backoffMultiplier: 1
-    };
-
-    const errorConfig = RETRY_STRATEGY.errorTypes[errorType];
-    if (!errorConfig) {
-      // UNKNOWN 或 PARAMETER/AUTH 类型使用默认配置
-      if (errorType === ERROR_CLASSIFICATION.UNKNOWN) {
-        return { maxRetries: 1, delayMs: 1000, backoffMultiplier: 1 };
-      }
-      return defaultConfig;
-    }
-
-    return {
-      maxRetries: errorConfig.maxRetries,
-      delayMs: RETRY_STRATEGY.initialDelayMs,
-      backoffMultiplier: errorConfig.backoffMultiplier
-    };
-  }
-
-  /**
-   * 计算退避延迟
-   * @param {number} attempt - 当前重试次数
-   * @param {number} baseDelay - 基础延迟
-   * @param {number} multiplier - 退避倍数
-   * @returns {number} 延迟毫秒数
-   */
-  _calculateBackoffDelay(attempt, baseDelay, multiplier) {
-    const delay = baseDelay * Math.pow(multiplier, attempt);
-    return Math.min(delay, RETRY_STRATEGY.maxDelayMs);
-  }
-
-  /**
    * 评估工具执行结果质量
    * @param {Object} output - 工具执行结果
    * @returns {Object} { quality: string, reason: string, suggestion: string }
@@ -485,7 +368,7 @@ class AgentEngine {
 
     // 检查成功标记
     if (output.success === false) {
-      const errorType = this._classifyError(output.error);
+      const errorType = classifyRetryableError(output.error);
       if (errorType === ERROR_CLASSIFICATION.AUTHENTICATION) {
         return { quality: RESULT_QUALITY.ERROR, reason: '认证错误', suggestion: '检查 API 密钥配置' };
       }
@@ -556,7 +439,7 @@ class AgentEngine {
 
         // 如果结果质量为 ERROR，检查是否可重试
         if (quality.quality === RESULT_QUALITY.ERROR) {
-          const errorType = this._classifyError(result.error);
+          const errorType = classifyRetryableError(result.error);
 
           // 认证和参数错误不重试
           if (errorType === ERROR_CLASSIFICATION.AUTHENTICATION ||
@@ -582,7 +465,7 @@ class AgentEngine {
         lastError = error;
 
         // 检查错误是否可重试
-        const errorType = this._classifyError(error);
+        const errorType = classifyRetryableError(error);
 
         // 认证和参数错误不重试
         if (errorType === ERROR_CLASSIFICATION.AUTHENTICATION ||
@@ -597,7 +480,7 @@ class AgentEngine {
       }
 
       // 计算下一次延迟
-      const delay = this._calculateBackoffDelay(attempt, delayMs, backoffMultiplier);
+      const delay = calculateBackoffDelay(attempt, delayMs, backoffMultiplier);
       // Operational log - using formatConsole for colored output
 
       // 等待后重试
@@ -615,7 +498,7 @@ class AgentEngine {
    */
   async _findAlternativeTool(failedTool, error) {
     const availableTools = this.toolRegistry.listTools();
-    const errorType = this._classifyError(error);
+    const errorType = classifyRetryableError(error);
 
     // 根据错误类型选择替代策略
     if (errorType === ERROR_CLASSIFICATION.RATE_LIMIT) {
@@ -1672,7 +1555,7 @@ ${contextText}
 
     // 使用增强的结果质量评估
     const quality = this._evaluateResultQuality(output);
-    const errorType = this._classifyError(output.error);
+    const errorType = classifyRetryableError(output.error);
 
     // 检查是否成功
     if (output.success === false) {
@@ -1683,7 +1566,7 @@ ${contextText}
 
       if (shouldRetry) {
         // 根据错误类型调整重试策略
-        const retryConfig = this._getRetryConfigForError(errorType);
+        const retryConfig = getRetryConfig(errorType);
         // Tool execution failed - operational warning
 
         return {

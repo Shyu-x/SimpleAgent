@@ -12,6 +12,7 @@
 const { createLogger } = require('../../infra/logger/AgentLogger');
 const logger = createLogger('QdrantVectorStore');
 const AppError = require('../../common/errors/AppError');
+const { sleep, calculateBackoffDelay } = require('../../utils/retry');
 
 class QdrantVectorStore {
   constructor(options = {}) {
@@ -727,8 +728,8 @@ class QdrantVectorStore {
 
         if (attempt < maxAttempts) {
           // 指数退避
-          const delay = retryDelay * Math.pow(2, attempt - 1);
-          await this._sleep(delay);
+          const delay = retryDelay * Math.pow(2, attempt);
+          await sleep(delay);
         }
       }
     }
@@ -763,13 +764,6 @@ class QdrantVectorStore {
       currentConnections: this.connectionPool.length,
       enabled: this.poolConfig.maxConnections > 0,
     };
-  }
-
-  /**
-   * 辅助方法：睡眠
-   */
-  _sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

@@ -5,6 +5,7 @@
 
 const EventEmitter = require('events');
 const AppError = require('../common/errors/AppError');
+const { sleep, calculateBackoffDelay } = require('../utils/retry');
 
 /**
  * 工具执行优先级
@@ -144,8 +145,8 @@ class ToolScheduler extends EventEmitter {
         lastError = error;
 
         if (attempt < task.retries) {
-          const delay = Math.pow(2, attempt) * 1000;
-          await this.sleep(delay);
+          const delay = calculateBackoffDelay(attempt);
+          await sleep(delay);
         }
       }
     }
@@ -240,13 +241,6 @@ class ToolScheduler extends EventEmitter {
     }
     this.queue = [];
     this.emit('cleared');
-  }
-
-  /**
-   * 睡眠
-   */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

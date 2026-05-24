@@ -3,6 +3,8 @@
  * 提供结构化错误类型、错误恢复和重试机制
  */
 
+const { sleep, calculateBackoffDelay } = require('../utils/retry');
+
 /**
  * 错误代码枚举
  */
@@ -117,7 +119,7 @@ class RetryStrategy {
 
     switch (this.strategy) {
       case 'exponential':
-        delay = this.baseDelay * Math.pow(2, attempt - 1);
+        delay = this.baseDelay * Math.pow(2, attempt);
         break;
       case 'linear':
         delay = this.baseDelay * attempt;
@@ -165,20 +167,13 @@ class RetryStrategy {
         if (attempt < this.maxAttempts) {
           const delay = this.calculateDelay(attempt);
           console.log(`[RetryStrategy] Attempt ${attempt} failed, retrying in ${delay}ms...`);
-          await this.sleep(delay);
+          await sleep(delay);
         }
       }
     }
 
     // 所有尝试都失败
     throw lastError;
-  }
-
-  /**
-   * 睡眠函数
-   */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

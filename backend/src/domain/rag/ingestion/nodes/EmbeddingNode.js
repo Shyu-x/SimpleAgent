@@ -15,7 +15,8 @@
  */
 
 const { IngestionNode } = require('../IngestionNode');
-const AppError = require('../../common/errors/AppError');
+const AppError = require('../../../../common/errors/AppError');
+const { sleep, calculateBackoffDelay } = require('../../../../utils/retry');
 
 class EmbeddingNode extends IngestionNode {
   constructor(options = {}) {
@@ -64,7 +65,7 @@ class EmbeddingNode extends IngestionNode {
 
       // 批次间延迟，避免限流
       if (i < batches.length - 1) {
-        await this._sleep(100);
+        await sleep(100);
       }
     }
 
@@ -180,7 +181,7 @@ class EmbeddingNode extends IngestionNode {
         });
 
         if (attempt < this.options.maxRetries - 1) {
-          await this._sleep(1000 * Math.pow(2, attempt));
+          await sleep(calculateBackoffDelay(attempt));
         }
       }
     }
@@ -263,14 +264,6 @@ class EmbeddingNode extends IngestionNode {
       }
       return chunk;
     });
-  }
-
-  /**
-   * 延迟
-   * @param {number} ms
-   */
-  _sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**

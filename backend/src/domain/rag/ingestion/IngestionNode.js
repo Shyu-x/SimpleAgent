@@ -12,6 +12,8 @@ class IngestionNode {
   constructor(name, options = {}) {
     this.name = name;
     this.AppError = require('../../common/errors/AppError');
+    const { sleep, calculateBackoffDelay } = require('../../../utils/retry');
+    this.sleep = sleep;
     this.options = {
       retryCount: 3,
       retryDelay: 1000,
@@ -131,7 +133,7 @@ class IngestionNode {
             error: error.message,
             nextRetryIn: delay,
           });
-          await this._sleep(delay);
+          await this.sleep(delay);
         }
       }
     }
@@ -161,14 +163,6 @@ class IngestionNode {
     } catch {
       return 0;
     }
-  }
-
-  /**
-   * 工具方法：延迟
-   * @param {number} ms
-   */
-  _sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

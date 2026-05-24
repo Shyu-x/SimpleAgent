@@ -12,6 +12,7 @@
 const QdrantVectorStore = require('./QdrantVectorStore');
 const { createLogger } = require('../../infra/logger/AgentLogger');
 const logger = createLogger('QdrantRouter');
+const { sleep } = require('../../utils/retry');
 
 /**
  * 简易向量化函数（128维）
@@ -336,13 +337,6 @@ class QdrantRouter {
     }
 
     return chunks;
-  }
-
-  /**
-   * 延迟
-   */
-  sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
