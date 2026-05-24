@@ -15,6 +15,7 @@
 const express = require('express');
 const MetricsCollector = require('../metrics/MetricsCollector');
 const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
+const { getStateValue } = require('../../utils/circuitStateUtils');
 
 /**
  * Prometheus 指标服务
@@ -199,11 +200,7 @@ class PrometheusService {
   updateCircuitBreakerState(circuitName, state) {
     if (!this._initialized) return;
 
-    const stateValue = {
-      closed: 0,
-      open: 1,
-      half_open: 2,
-    }[state] ?? 0;
+    const stateValue = getStateValue(state);
 
     this._metricsCollector.setGauge('circuit_breaker_state', stateValue, {
       circuit: circuitName,

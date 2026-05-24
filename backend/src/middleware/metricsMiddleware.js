@@ -155,7 +155,9 @@ function extractFeature(path) {
     '/api/memories': 'memory',
   };
 
-  for (const [prefix, feature] of Object.entries(featureMap)) {
+  // 优化：按长度降序排列，前缀长的优先匹配
+  const sortedEntries = Object.entries(featureMap).sort((a, b) => b[0].length - a[0].length);
+  for (const [prefix, feature] of sortedEntries) {
     if (path.startsWith(prefix)) {
       return feature;
     }

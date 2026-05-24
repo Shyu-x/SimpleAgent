@@ -16,6 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
+const { getStateValue } = require('../../utils/circuitStateUtils');
 
 class MetricsCollector {
   /**
@@ -26,6 +27,9 @@ class MetricsCollector {
     WARNING: 'warning',
     INFO: 'info',
   };
+
+  // 预编译的正则表达式
+  static LABEL_KEY_REGEX = /(\w+)="([^"]*)"/g;
 
   /**
    * 创建指标采集器实例
@@ -469,7 +473,8 @@ class MetricsCollector {
   _keyToLabels(key) {
     if (!key) return {};
     const labels = {};
-    const matches = key.matchAll(/(\w+)="([^"]*)"/g);
+    const regex = new MetricsCollector.LABEL_KEY_REGEX;  // 创建独立实例避免 lastIndex 污染
+    const matches = key.matchAll(regex);
     for (const match of matches) {
       labels[match[1]] = match[2];
     }
@@ -1310,8 +1315,7 @@ class MetricsCollector {
    * @returns {void}
    */
   recordCircuitBreakerState(circuitName, state, result) {
-    // 状态值: 0=CLOSED, 1=OPEN, 2=HALF_OPEN
-    const stateValue = { closed: 0, open: 1, half_open: 2 }[state] ?? 0;
+    const stateValue = getStateValue(state);
     this.setGauge('circuit_breaker_state', stateValue, { name: circuitName });
 
     // 调用计数
