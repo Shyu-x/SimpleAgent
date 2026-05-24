@@ -4,9 +4,6 @@ import { useMissionControlStore, initializeAgents, startMission } from './store'
 import type { MissionAgent, MissionTask, MissionEvent, TaskPriority } from './types';
 import { API_BASE } from '@/lib/apiConfig';
 
-// 后端 API 地址
-const API_BASE = BACKEND_URL;
-
 /**
  * 发起 API 请求
  */
