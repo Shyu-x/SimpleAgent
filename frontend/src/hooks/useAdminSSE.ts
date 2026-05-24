@@ -27,7 +27,7 @@ export type { SystemStats, QdrantStatus, CollectionInfo, AdminSSEEvent } from '@
  */
 export function useAdminSSE<T = unknown>(options: AdminSSEClientOptions & {
   endpoint?: string;
-  parser?: (response: any) => T;
+  parser?: (response: unknown) => T;
   interval?: number;
 } = {}): {
   connected: boolean;
@@ -167,7 +167,7 @@ interface UseAdminPollingOptions<T> {
   /** API 端点 */
   endpoint: string;
   /** 数据解析函数 */
-  parser: (response: any) => T;
+  parser: (response: unknown) => T;
   /** 轮询间隔（毫秒），默认 30s */
   interval?: number;
   /** 是否启用，默认 true */

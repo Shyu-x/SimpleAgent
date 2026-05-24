@@ -32,8 +32,8 @@ const COMMON_LANGS = [
 
 // Katex 懒加载模块
 let katexModules: {
-  remarkMath: any;
-  rehypeKatex: any;
+  remarkMath: unknown;
+  rehypeKatex: unknown;
 } | null = null;
 
 async function loadKatexModules() {

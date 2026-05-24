@@ -60,7 +60,7 @@ export default function KnowledgeBasePage() {
   // SSE 订阅 stats 数据
   const { data: statsData, loading, refresh } = useAdminPolling<IndexStats | null>({
     endpoint: '/api/admin/knowledge/stats',
-    parser: (res) => res?.data?.data || null,
+    parser: (res: unknown) => (res as { data?: IndexStats | null })?.data || null,
     interval: 30000,
   });
 

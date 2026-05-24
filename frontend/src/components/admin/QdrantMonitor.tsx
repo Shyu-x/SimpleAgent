@@ -54,14 +54,14 @@ export default function QdrantMonitor() {
   // 使用通用 Admin SSE Hook 获取 Qdrant 状态和集合
   const { data: qdrantStatus, loading, error, refresh: refreshStatus } = useAdminPolling<QdrantStatus>({
     endpoint: '/api/qdrant/status',
-    parser: (res) => res || { success: false, healthy: false, status: 'unknown', collection: 'chat_documents' },
+    parser: (res: unknown) => (res as QdrantStatus) || { success: false, healthy: false, status: 'unknown', collection: 'chat_documents' },
     interval: 15000,
   });
 
   // 单独获取集合列表
   const { data: collectionsData, refresh: refreshCollections } = useAdminPolling<{ collections: string[] }>({
     endpoint: '/api/qdrant/collections',
-    parser: (res) => res || { collections: [] },
+    parser: (res: unknown) => (res as { collections: string[] }) || { collections: [] },
     interval: 30000,
   });
 

@@ -82,7 +82,7 @@ export default function ToolRegistryPage() {
   // SSE 订阅 categories 数据
   const { data: categoriesData, loading, refresh } = useAdminPolling<ToolCategory[]>({
     endpoint: '/api/admin/tools/categories',
-    parser: (res) => res?.data?.data?.categories || [],
+    parser: (res: unknown) => (res as { data?: { data?: { categories: ToolCategory[] } } })?.data?.data?.categories || [],
     interval: 30000,
   });
 

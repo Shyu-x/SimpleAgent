@@ -42,7 +42,7 @@ export default function KnowledgeBaseManagement() {
   // 使用通用 Admin Polling Hook 获取知识库列表
   const { data: kbsData, loading, error, refresh } = useAdminPolling<KbStatsResponse>({
     endpoint: '/api/admin/knowledge/stats',
-    parser: (res) => res?.data?.data || { knowledgeBases: [] },
+    parser: (res: unknown) => ((res as { data?: KbStatsResponse })?.data) || { knowledgeBases: [] },
     interval: 30000,
   });
 

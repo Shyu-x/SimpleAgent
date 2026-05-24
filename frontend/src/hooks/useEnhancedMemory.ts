@@ -262,7 +262,7 @@ export function useEnhancedMemory() {
     }
   }, []);
 
-  const setSessionVariable = useCallback(async (sessionId: string, key: string, value: any) => {
+  const setSessionVariable = useCallback(async (sessionId: string, key: string, value: unknown) => {
     setIsLoading(true);
     setError(null);
     try {

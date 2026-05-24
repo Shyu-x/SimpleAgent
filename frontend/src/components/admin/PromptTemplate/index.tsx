@@ -44,6 +44,29 @@ interface TemplateVersion {
   changeNote: string;
 }
 
+// 后端返回的原始模板结构 (template 字段)
+interface RawTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  template: string;  // 后端使用 template 而非 content
+  version?: number;
+  variables?: TemplateVariable[];
+  createdBy?: string;
+  isActive?: boolean;
+  createdAt?: number | string;
+  updatedAt?: number | string;
+}
+
+// 后端返回的原始版本结构
+interface RawTemplateVersion {
+  id: string;
+  version: number;
+  createdAt: number;
+  changes?: string;
+}
+
 interface TemplateTestResult {
   rendered: string;
   tokenCount: number;
@@ -62,11 +85,21 @@ export default function PromptTemplatePage() {
   // SSE 订阅 templates 数据
   const { data: templatesData, loading, refresh: refreshTemplates } = useAdminPolling<PromptTemplate[]>({
     endpoint: '/api/admin/prompts',
-    parser: (res) => {
-      const rawTemplates = res?.data?.data?.templates || res?.data?.templates || [];
-      return rawTemplates.map((t: any) => ({
-        ...t,
+    parser: (res: unknown) => {
+      const response = res as { data: { data: { templates: RawTemplate[] } } };
+      const rTemplates = response?.data?.data?.templates || [];
+      return rTemplates.map((t: RawTemplate): PromptTemplate => ({
+        id: t.id,
+        name: t.name,
+        description: t.description || '',
         content: t.template,
+        category: (t.category || 'general') as PromptTemplate['category'],
+        version: t.version,
+        variables: t.variables,
+        createdBy: t.createdBy,
+        isActive: t.isActive,
+        createdAt: typeof t.createdAt === 'number' ? t.createdAt : Date.now(),
+        updatedAt: typeof t.updatedAt === 'number' ? t.updatedAt : Date.now(),
       }));
     },
     interval: 30000,
@@ -707,12 +740,15 @@ function VersionHistoryPanel({
   useEffect(() => {
     const fetchVersions = async () => {
       try {
-        const { data, error } = await fetchApi<{ data?: { versions: any[] } }>(`/api/admin/prompts/${templateId}/versions`);
+        const { data, error } = await fetchApi<{ data?: { versions: RawTemplateVersion[] } }>(`/api/admin/prompts/${templateId}/versions`);
         if (error) throw new Error(error.message);
         // 映射 createdAt -> changedAt 以匹配前端接口
         const mappedVersions: TemplateVersion[] = (data?.data?.versions || []).map((v) => ({
-          ...v,
-          changedAt: v.createdAt,
+          version: v.version,
+          content: '', // 后端版本历史可能不返回完整内容
+          changedAt: new Date(v.createdAt).toISOString(),
+          changedBy: 'system',
+          changeNote: v.changes || '',
         }));
         setVersions(mappedVersions);
       } catch (err) {

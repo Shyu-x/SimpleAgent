@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   // 使用通用 Admin SSE Hook 获取 stats 数据
   const { data: statsData, loading, error, refresh } = useAdminPolling<SystemStats>({
     endpoint: '/api/admin/stats',
-    parser: (res) => res?.data?.data || defaultStats,
+    parser: (res: unknown) => (res as { data?: SystemStats })?.data || defaultStats,
     interval: 30000,
   });
 
