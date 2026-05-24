@@ -2,10 +2,7 @@
 
 import { useEffect, useState, useRef, memo } from 'react';
 import { useChatStore } from '@/store/chatStore';
-import MarkdownRenderer from './MarkdownRenderer';
-
-// 避免 MarkdownRenderer 在流式更新期间每字符重渲染
-const MemoizedMarkdownRenderer = memo(MarkdownRenderer);
+import { MemoizedMarkdownRenderer } from '@/lib/markdown';
 
 interface TypewriterProps {
   text: string;

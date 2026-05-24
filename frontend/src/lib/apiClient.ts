@@ -246,8 +246,8 @@ export class ApiError extends Error {
 
   /** 获取错误类型分类 */
   getErrorType(): ApiErrorCode {
-    if (this.isNetworkError()) return 'NETWORK';
     if (this.isTimeout()) return 'TIMEOUT';
+    if (this.isNetworkError()) return 'NETWORK';
     if (this.isUnauthorized()) return 'UNAUTHORIZED';
     if (this.isForbidden()) return 'FORBIDDEN';
     if (this.isNotFound()) return 'NOT_FOUND';

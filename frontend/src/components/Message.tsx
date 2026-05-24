@@ -3,15 +3,12 @@
 import { useState, useCallback, memo, useRef } from 'react';
 import { Message as MessageType } from '@/types';
 import Typewriter from './Typewriter';
-import MarkdownRenderer from './MarkdownRenderer';
-import { Bot, User, Copy, Check, Trash2, RefreshCw, Edit2, Quote, Brain, ChevronDown, ChevronUp } from 'lucide-react';
+import { MemoizedMarkdownRenderer } from '@/lib/markdown';
+import { Bot, User, Copy, Check, Trash2, RefreshCw, Edit2, Quote, Brain } from 'lucide-react';
 import { useToast } from './Toast';
 import { motion } from 'framer-motion';
 import { useChatStore } from '@/store/chatStore';
 import { MessageStatusIndicator, formatMessageTime, type MessageStatus } from './MessageStatus';
-
-// MarkdownRenderer 高频重渲染优化：在流式更新期间避免每字符重新解析
-const MemoizedMarkdownRenderer = memo(MarkdownRenderer);
 
 interface MessageProps {
   message: MessageType;
@@ -71,13 +68,8 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
     setIsPressed(true);
   }, [isUser]);
 
-  const handlePointerUp = useCallback(() => {
-    setIsPressed(false);
-  }, []);
-
-  const handlePointerLeave = useCallback(() => {
-    setIsPressed(false);
-  }, []);
+  const handlePointerUp = () => setIsPressed(false);
+  const handlePointerLeave = () => setIsPressed(false);
 
   return (
     <motion.div
