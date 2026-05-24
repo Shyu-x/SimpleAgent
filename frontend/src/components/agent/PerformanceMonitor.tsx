@@ -885,7 +885,7 @@ export const PerformanceMonitor = memo(function PerformanceMonitor({
     const eventSource = new EventSource(`${API_ENDPOINTS.base}/api/admin/stream`);
 
     eventSource.onopen = () => {
-      console.log('[PerformanceMonitor] SSE connected');
+      // SSE 已连接，静默处理
     };
 
     eventSource.addEventListener('stats', (e) => {

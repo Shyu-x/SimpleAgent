@@ -692,9 +692,6 @@ function ToolTester() {
 
   useEffect(() => {
     fetchApi<{ success: boolean; data: { tools: ToolInfo[] } }>('/api/admin/tools').then(({ data, error }) => {
-      if (error) {
-        console.error('[ToolRegistry] API error:', error);
-      }
       if (data?.data) {
         setTools(data.data.tools);
       }

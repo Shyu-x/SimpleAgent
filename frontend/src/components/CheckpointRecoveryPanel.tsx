@@ -142,7 +142,6 @@ export function CheckpointRecoveryPanel() {
 
       if (res.ok) {
         const data = await res.json();
-        console.log('Restore result:', data);
         await fetchSessions();
       } else {
         const errData = await res.json();

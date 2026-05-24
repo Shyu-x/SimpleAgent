@@ -153,7 +153,7 @@ export function useMissionControlAPI() {
   const syncEvents = useCallback(async () => {
     const response = await apiRequest<{ events: EventResponse[] }>('/api/mission/events?limit=50');
     if (response.success && response.data) {
-      console.log('[MissionControlAPI] Synced events from backend:', response.data.events.length);
+      // 静默同步后端事件
     }
   }, []);
 
