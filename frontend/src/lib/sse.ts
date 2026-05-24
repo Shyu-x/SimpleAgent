@@ -1,6 +1,12 @@
 import { resolveProvider } from './modelConfig';
 import { BACKEND_URL } from './config';
 
+// 预编译正则表达式，避免高频调用时重复创建
+const THINK_CLOSE_REGEX = /<\/think>/g;
+const THINK_CLOSE_BRACKET_REGEX = /\[\/THINK\]/g;
+const THINK_OPEN_REGEX = /<think>/g;
+const THINK_BLOCK_REGEX = /<think>[\s\S]*?(\[\/THINK\]|<\/think>)/g;
+
 interface SSEOptions {
   onMessage: (content: string) => void;
   onThinking?: (content: string, isEnd: boolean) => void;
@@ -16,10 +22,10 @@ function extractThinkingContent(content: string): { thinking: string; clean: str
   }
 
   const thinkingContent = content
-    .replace(/<\/think>/g, '')
-    .replace(/\[\/THINK\]/g, '')
-    .replace(/<think>/g, '');
-  const cleanContent = content.replace(/<think>[\s\S]*?(\[\/THINK\]|<\/think>)/g, '');
+    .replace(THINK_CLOSE_REGEX, '')
+    .replace(THINK_CLOSE_BRACKET_REGEX, '')
+    .replace(THINK_OPEN_REGEX, '');
+  const cleanContent = content.replace(THINK_BLOCK_REGEX, '');
 
   return { thinking: thinkingContent, clean: cleanContent };
 }
