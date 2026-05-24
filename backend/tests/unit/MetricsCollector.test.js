@@ -115,12 +115,12 @@ describe('MetricsCollector Gauge 指标', () => {
 });
 
 describe('MetricsCollector Histogram 指标', () => {
-  test('observeHistogram 应该记录值', () => {
+  test('recordHistogram 应该记录值', () => {
     const collector = new MetricsCollector({ enableHotReload: false });
 
-    collector.observeHistogram('test_histogram', 0.1);
-    collector.observeHistogram('test_histogram', 0.2);
-    collector.observeHistogram('test_histogram', 0.3);
+    collector.recordHistogram('test_histogram', 0.1);
+    collector.recordHistogram('test_histogram', 0.2);
+    collector.recordHistogram('test_histogram', 0.3);
 
     const histogram = collector._histograms.get('test_histogram');
     assert.ok(histogram instanceof Map);
@@ -128,11 +128,11 @@ describe('MetricsCollector Histogram 指标', () => {
 });
 
 describe('MetricsCollector Summary 指标', () => {
-  test('observeSummary 应该记录值', () => {
+  test('recordSummary 应该记录值', () => {
     const collector = new MetricsCollector({ enableHotReload: false });
 
-    collector.observeSummary('test_summary', 0.1);
-    collector.observeSummary('test_summary', 0.2);
+    collector.recordSummary('test_summary', 0.1);
+    collector.recordSummary('test_summary', 0.2);
 
     const summary = collector._summaries.get('test_summary');
     assert.ok(summary instanceof Map);

@@ -57,8 +57,14 @@ class QueryDecomposeService {
    * 分析查询复杂度
    */
   analyzeComplexity(query) {
+    // 统计问号数量（包括中英文）
     const questionCount = (query.match(/[？?]/g) || []).length;
-    const hasComparison = /对比|比较|差异|不同/i.test(query);
+    // 检查是否包含疑问词（用于识别隐式问题，如"什么是机器学习"）
+    const hasQuestionWords = /^(什么|如何|怎么|为什么|请问|能否|能不能|是否)/.test(query.trim());
+    // 如果没有问号但有疑问词，则视为一个问题
+    const effectiveQuestionCount = questionCount > 0 ? questionCount : (hasQuestionWords ? 1 : 0);
+    // 检查比较类关键词
+    const hasComparison = /对比|比较|差异|不同|区别/i.test(query);
     const hasMultipleSteps = /首先|然后|接着|最后/i.test(query);
     const hasParallelParts = /和|与|以及|并且|同时|或者/.test(query);
     const hasConditional = /如果|当|条件|假设/i.test(query);
@@ -66,8 +72,9 @@ class QueryDecomposeService {
 
     // 计算复杂度得分
     let score = 0;
-    if (questionCount > 1) score += 2;
-    if (hasComparison) score += 2;
+    if (effectiveQuestionCount > 1) score += 2;
+    if (effectiveQuestionCount === 1) score += 1; // 单问题给1分
+    if (hasComparison) score += 3; // 比较类问题权重更高
     if (hasMultipleSteps) score += 2;
     if (hasParallelParts) score += 1;
     if (hasConditional) score += 1;
@@ -81,7 +88,7 @@ class QueryDecomposeService {
     return {
       score,
       level,
-      questionCount,
+      questionCount: effectiveQuestionCount,
       hasComparison,
       hasMultipleSteps,
       hasParallelParts,
@@ -209,12 +216,13 @@ class QueryDecomposeService {
     const serialSeparators = this.serialKeywords.filter(kw => query.includes(kw));
     const parallelSeparators = this.parallelKeywords.filter(kw => query.includes(kw));
 
-    // 优先按串行词拆分
+    // 优先按串行词拆分（使用所有找到的串行关键词进行拆分）
     if (serialSeparators.length > 0) {
-      const sep = serialSeparators[0];
-      const parts = query.split(sep).filter(p => p.trim());
+      // 按所有串行关键词拆分
+      const serialPattern = serialSeparators.join('|');
+      const parts = query.split(new RegExp(`(${serialPattern})`)).filter(p => p.trim());
       if (parts.length > 1) {
-        return this.rebuildWithSerial(parts, sep);
+        return this.rebuildWithSerial(parts, serialSeparators);
       }
     }
 
@@ -334,26 +342,43 @@ class QueryDecomposeService {
    * 检查是否有依赖指示词
    */
   hasDepIndicator(currentQuery, previousQuery) {
-    // 当前查询是否包含依赖关键词
+    const prevNouns = this.extractNouns(previousQuery);
+
+    // 方法1: 检查依赖关键词 + 名词匹配
     for (const kw of this.depIndicatorKeywords) {
       if (currentQuery.includes(kw)) {
-        // 检查是否涉及前面的内容
-        const prevNouns = this.extractNouns(previousQuery);
+        // 检查是否涉及前面的内容（精确匹配或部分匹配）
         for (const noun of prevNouns) {
           if (currentQuery.includes(noun) && noun.length >= 2) {
             return true;
+          }
+          // 也检查部分匹配：提取名词中的关键概念
+          for (const prevNoun of prevNouns) {
+            // 检查前一个词的核心概念是否出现在当前查询中
+            const coreWords = prevNoun.split(/(?:分析|处理|总结|比较|查询)/).filter(w => w.length >= 2);
+            for (const word of coreWords) {
+              if (currentQuery.includes(word) && word.length >= 2) {
+                return true;
+              }
+            }
           }
         }
       }
     }
 
-    // 检查"用...结果"模式
+    // 方法2: 检查"用...结果"模式（独立检查，不依赖depIndicatorKeywords）
     const resultPattern = /结果|答案|内容|信息|数据/i;
     if (resultPattern.test(currentQuery)) {
-      const prevNouns = this.extractNouns(previousQuery);
       for (const noun of prevNouns) {
         if (currentQuery.includes(noun) && noun.length >= 2) {
           return true;
+        }
+        // 额外检查：数据、分析等核心词
+        const keywords = ['分析', '处理', '数据', '结果', '比较'];
+        for (const kw of keywords) {
+          if (currentQuery.includes(kw) && previousQuery.includes(kw)) {
+            return true;
+          }
         }
       }
     }
@@ -365,17 +390,24 @@ class QueryDecomposeService {
    * 提取名词（简单实现）
    */
   extractNouns(text) {
-    // 排除常见动词和形容词
+    // 排除常见动词和形容词（作为完整词）
     const stopWords = [
       '什么', '如何', '怎么', '为什么', '查询', '搜索', '获取',
       '比较', '对比', '总结', '分析', '知道', '了解', '查看'
     ];
 
+    // 按标点和空格分割，同时保留复合词
     const words = text.split(/[，、。！？""''（）()\s]/);
-    return words.filter(w =>
-      w.length >= 2 &&
-      !stopWords.some(sw => w.includes(sw))
-    );
+    return words.filter(w => {
+      if (w.length < 2) return false;
+      // 排除完整匹配停用词的词
+      if (stopWords.includes(w)) return false;
+      // 复合词（4+字符）通常是有意义的名词短语，保留
+      if (w.length >= 4) return true;
+      // 短词（2-3字符）如果以停用词开头则过滤
+      if (stopWords.some(sw => w.startsWith(sw))) return false;
+      return true;
+    });
   }
 
   /**

@@ -389,11 +389,27 @@ class QueryRewriteService {
         }
 
         // 提取明确命名的实体（简单的启发式规则）
-        // 匹配 "X 是 Y" 模式
+        // 匹配 "X 是一个 Y" 模式
         const isPatterns = content.match(/([^，,。\n]+)是一个?([^，,。\n]+)/g);
         if (isPatterns) {
           for (const pattern of isPatterns) {
             const match = pattern.match(/([^，,。\n]+)是一个?([^，,。\n]+)/);
+            if (match && match[1]) {
+              entities.push({
+                text: match[1].trim(),
+                type: 'definition',
+                timestamp: Date.now()
+              });
+            }
+          }
+        }
+
+        // 提取 "X 是 Y 的 Z" 模式（如 "机器学习是人工智能的一个分支"）
+        const isOfPatterns = content.match(/([^，,。\n]+)是的?([^，]*的[^，,。\n]+)/g);
+        if (isOfPatterns) {
+          for (const pattern of isOfPatterns) {
+            // 提取主语：匹配 "X 是" 模式，取 X 部分
+            const match = pattern.match(/^([^，,。\n]+)是的?/);
             if (match && match[1]) {
               entities.push({
                 text: match[1].trim(),
