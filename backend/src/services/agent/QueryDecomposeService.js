@@ -22,6 +22,23 @@ class QueryDecomposeService {
     this.depIndicatorKeywords = options.depIndicatorKeywords || [
       '用', '根据', '基于', '依赖', '通过', '借助', '因为', '由于'
     ];
+
+    // 预编译正则表达式，避免每次调用重建
+    this._compiledPatterns = {
+      question: /[？?]/g,
+      questionWords: /^(什么|如何|怎么|为什么|请问|能否|能不能|是否)/,
+      comparison: /对比|比较|差异|不同|区别/i,
+      multipleSteps: /首先|然后|接着|最后/i,
+      parallelParts: /和|与|以及|并且|同时|或者/,
+      conditional: /如果|当|条件|假设/i,
+      coreConceptSplit: /(?:分析|处理|总结|比较|查询)/
+    };
+
+    // 预定义停用词 Set，O(1) 查找
+    this._stopWordsSet = new Set([
+      '什么', '如何', '怎么', '为什么', '查询', '搜索', '获取',
+      '比较', '对比', '总结', '分析', '知道', '了解', '查看'
+    ]);
   }
 
   /**
@@ -57,17 +74,14 @@ class QueryDecomposeService {
    * 分析查询复杂度
    */
   analyzeComplexity(query) {
-    // 统计问号数量（包括中英文）
-    const questionCount = (query.match(/[？?]/g) || []).length;
-    // 检查是否包含疑问词（用于识别隐式问题，如"什么是机器学习"）
-    const hasQuestionWords = /^(什么|如何|怎么|为什么|请问|能否|能不能|是否)/.test(query.trim());
-    // 如果没有问号但有疑问词，则视为一个问题
+    // 使用预编译的正则表达式
+    const questionCount = (query.match(this._compiledPatterns.question) || []).length;
+    const hasQuestionWords = this._compiledPatterns.questionWords.test(query.trim());
     const effectiveQuestionCount = questionCount > 0 ? questionCount : (hasQuestionWords ? 1 : 0);
-    // 检查比较类关键词
-    const hasComparison = /对比|比较|差异|不同|区别/i.test(query);
-    const hasMultipleSteps = /首先|然后|接着|最后/i.test(query);
-    const hasParallelParts = /和|与|以及|并且|同时|或者/.test(query);
-    const hasConditional = /如果|当|条件|假设/i.test(query);
+    const hasComparison = this._compiledPatterns.comparison.test(query);
+    const hasMultipleSteps = this._compiledPatterns.multipleSteps.test(query);
+    const hasParallelParts = this._compiledPatterns.parallelParts.test(query);
+    const hasConditional = this._compiledPatterns.conditional.test(query);
     const length = query.length;
 
     // 计算复杂度得分
@@ -343,6 +357,7 @@ class QueryDecomposeService {
    */
   hasDepIndicator(currentQuery, previousQuery) {
     const prevNouns = this.extractNouns(previousQuery);
+    const currentLower = currentQuery.toLowerCase();
 
     // 方法1: 检查依赖关键词 + 名词匹配
     for (const kw of this.depIndicatorKeywords) {
@@ -352,14 +367,11 @@ class QueryDecomposeService {
           if (currentQuery.includes(noun) && noun.length >= 2) {
             return true;
           }
-          // 也检查部分匹配：提取名词中的关键概念
-          for (const prevNoun of prevNouns) {
-            // 检查前一个词的核心概念是否出现在当前查询中
-            const coreWords = prevNoun.split(/(?:分析|处理|总结|比较|查询)/).filter(w => w.length >= 2);
-            for (const word of coreWords) {
-              if (currentQuery.includes(word) && word.length >= 2) {
-                return true;
-              }
+          // 检查前一个词的核心概念是否出现在当前查询中
+          const coreWords = noun.split(this._compiledPatterns.coreConceptSplit).filter(w => w.length >= 2);
+          for (const word of coreWords) {
+            if (currentQuery.includes(word) && word.length >= 2) {
+              return true;
             }
           }
         }
@@ -373,12 +385,12 @@ class QueryDecomposeService {
         if (currentQuery.includes(noun) && noun.length >= 2) {
           return true;
         }
-        // 额外检查：数据、分析等核心词
-        const keywords = ['分析', '处理', '数据', '结果', '比较'];
-        for (const kw of keywords) {
-          if (currentQuery.includes(kw) && previousQuery.includes(kw)) {
-            return true;
-          }
+      }
+      // 额外检查：数据、分析等核心词
+      const coreKeywords = ['分析', '处理', '数据', '结果', '比较'];
+      for (const kw of coreKeywords) {
+        if (currentQuery.includes(kw) && previousQuery.includes(kw)) {
+          return true;
         }
       }
     }
@@ -390,22 +402,16 @@ class QueryDecomposeService {
    * 提取名词（简单实现）
    */
   extractNouns(text) {
-    // 排除常见动词和形容词（作为完整词）
-    const stopWords = [
-      '什么', '如何', '怎么', '为什么', '查询', '搜索', '获取',
-      '比较', '对比', '总结', '分析', '知道', '了解', '查看'
-    ];
-
     // 按标点和空格分割，同时保留复合词
     const words = text.split(/[，、。！？""''（）()\s]/);
     return words.filter(w => {
       if (w.length < 2) return false;
-      // 排除完整匹配停用词的词
-      if (stopWords.includes(w)) return false;
+      // 使用 Set 的 O(1) 查找
+      if (this._stopWordsSet.has(w)) return false;
       // 复合词（4+字符）通常是有意义的名词短语，保留
       if (w.length >= 4) return true;
-      // 短词（2-3字符）如果以停用词开头则过滤
-      if (stopWords.some(sw => w.startsWith(sw))) return false;
+      // 短词如果以停用词开头则过滤（原逻辑）
+      if ([...this._stopWordsSet].some(sw => w.startsWith(sw))) return false;
       return true;
     });
   }

@@ -19,6 +19,11 @@ const { AgentLogger } = require('../../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('admin-trace');
 
+// 时间常量（毫秒）
+const ONE_HOUR_MS = 60 * 60 * 1000;  // 1小时
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;  // 1天
+const SSE_PUSH_INTERVAL_MS = 5000;  // SSE推送间隔
+
 // 内存追踪存储 - 实际项目应使用分布式追踪系统（如 Jaeger/Zipkin）
 const traceStore = new Map();
 const MAX_TRACES = 1000;
@@ -272,8 +277,8 @@ router.get('/stats', (req, res) => {
   try {
     const traces = Array.from(traceStore.values());
     const now = Date.now();
-    const oneHourAgo = now - 3600000;
-    const oneDayAgo = now - 86400000;
+    const oneHourAgo = now - ONE_HOUR_MS;
+    const oneDayAgo = now - ONE_DAY_MS;
 
     // 时间范围过滤
     const recentTraces = traces.filter(t => t.startTime > oneHourAgo);
@@ -359,7 +364,7 @@ router.get('/subscribe', (req, res) => {
   // 发送连接成功消息
   res.write(`data: ${JSON.stringify({ type: 'connected', clientId })}\n\n`);
 
-  const PUSH_INTERVAL = 5000;
+  const PUSH_INTERVAL = SSE_PUSH_INTERVAL_MS;
   let lastTracesHash = '';
 
   const getTracesSummary = () => {
@@ -550,9 +555,10 @@ router.post('/', (req, res) => {
 router.delete('/', (req, res) => {
   try {
     const { password } = req.query;
+    const adminPassword = process.env.TRACE_ADMIN_PASSWORD || 'admin';
 
-    // 简单验证
-    if (password !== 'admin') {
+    // 验证
+    if (password !== adminPassword) {
       return res.status(403).json({
         success: false,
         error: '需要管理员密码'

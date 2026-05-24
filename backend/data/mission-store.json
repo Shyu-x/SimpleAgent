@@ -271,10 +271,1778 @@
         "result": null,
         "error": null
       }
+    ],
+    [
+      "1779628293235-acrph7l",
+      {
+        "id": "1779628293235-acrph7l",
+        "name": "test-task-1779628293211",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779628293235,
+        "updatedAt": 1779628293235,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779628293265-s0xfvdb",
+      {
+        "id": "1779628293265-s0xfvdb",
+        "name": "detail-test-1779628293264",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779628293265,
+        "updatedAt": 1779628293265,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779628293277-osrdgs8",
+      {
+        "id": "1779628293277-osrdgs8",
+        "name": "update-test-1779628293275",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779628293277,
+        "updatedAt": 1779628293277,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779628293283-gei4d3a",
+      {
+        "id": "1779628293283-gei4d3a",
+        "name": "delete-test-1779628293281",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779628293283,
+        "updatedAt": 1779628293283,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629633926-kt7lqfk",
+      {
+        "id": "1779629633926-kt7lqfk",
+        "name": "test-task-1779629633902",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779629633926,
+        "updatedAt": 1779629633926,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629633957-2sgpjsz",
+      {
+        "id": "1779629633957-2sgpjsz",
+        "name": "detail-test-1779629633955",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629633957,
+        "updatedAt": 1779629633957,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629633969-nffijn0",
+      {
+        "id": "1779629633969-nffijn0",
+        "name": "update-test-1779629633967",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629633969,
+        "updatedAt": 1779629633969,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629633976-iyil5n6",
+      {
+        "id": "1779629633976-iyil5n6",
+        "name": "delete-test-1779629633975",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629633976,
+        "updatedAt": 1779629633976,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629685608-w8tu0uu",
+      {
+        "id": "1779629685608-w8tu0uu",
+        "name": "test-task-1779629685582",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779629685608,
+        "updatedAt": 1779629685608,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629685649-a2n4xnq",
+      {
+        "id": "1779629685649-a2n4xnq",
+        "name": "detail-test-1779629685647",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629685649,
+        "updatedAt": 1779629685649,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629685664-m9e9zsu",
+      {
+        "id": "1779629685664-m9e9zsu",
+        "name": "update-test-1779629685662",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629685664,
+        "updatedAt": 1779629685664,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629685673-kxlnzjc",
+      {
+        "id": "1779629685673-kxlnzjc",
+        "name": "delete-test-1779629685671",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629685673,
+        "updatedAt": 1779629685673,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629748503-kmaoltt",
+      {
+        "id": "1779629748503-kmaoltt",
+        "name": "test-task-1779629748479",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779629748503,
+        "updatedAt": 1779629748503,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629748535-4dfixt8",
+      {
+        "id": "1779629748535-4dfixt8",
+        "name": "detail-test-1779629748532",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629748535,
+        "updatedAt": 1779629748535,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629748549-8mbhjom",
+      {
+        "id": "1779629748549-8mbhjom",
+        "name": "update-test-1779629748547",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629748549,
+        "updatedAt": 1779629748549,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779629748560-bo8lc0a",
+      {
+        "id": "1779629748560-bo8lc0a",
+        "name": "delete-test-1779629748558",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779629748560,
+        "updatedAt": 1779629748560,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630200553-j8nn74g",
+      {
+        "id": "1779630200553-j8nn74g",
+        "name": "test-task-1779630200527",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779630200553,
+        "updatedAt": 1779630200553,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630200580-coh2lvx",
+      {
+        "id": "1779630200580-coh2lvx",
+        "name": "detail-test-1779630200578",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630200580,
+        "updatedAt": 1779630200580,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630200591-cayawzq",
+      {
+        "id": "1779630200591-cayawzq",
+        "name": "update-test-1779630200589",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630200591,
+        "updatedAt": 1779630200591,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630200605-c9oghqe",
+      {
+        "id": "1779630200605-c9oghqe",
+        "name": "delete-test-1779630200603",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630200605,
+        "updatedAt": 1779630200605,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630252734-1gf2jkp",
+      {
+        "id": "1779630252734-1gf2jkp",
+        "name": "test-task-1779630252710",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779630252734,
+        "updatedAt": 1779630252734,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630252757-wdforlv",
+      {
+        "id": "1779630252757-wdforlv",
+        "name": "detail-test-1779630252756",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630252757,
+        "updatedAt": 1779630252757,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630252774-ktcel0t",
+      {
+        "id": "1779630252774-ktcel0t",
+        "name": "update-test-1779630252772",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630252774,
+        "updatedAt": 1779630252774,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630252781-gtcxvf1",
+      {
+        "id": "1779630252781-gtcxvf1",
+        "name": "delete-test-1779630252780",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630252781,
+        "updatedAt": 1779630252781,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630625414-inzas44",
+      {
+        "id": "1779630625414-inzas44",
+        "name": "test-task-1779630625385",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779630625414,
+        "updatedAt": 1779630625414,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630625452-i6oqmfy",
+      {
+        "id": "1779630625452-i6oqmfy",
+        "name": "detail-test-1779630625449",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630625452,
+        "updatedAt": 1779630625452,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630625464-cyz6vfu",
+      {
+        "id": "1779630625464-cyz6vfu",
+        "name": "update-test-1779630625462",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630625464,
+        "updatedAt": 1779630625464,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630625475-rp6aa5k",
+      {
+        "id": "1779630625475-rp6aa5k",
+        "name": "delete-test-1779630625473",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630625475,
+        "updatedAt": 1779630625475,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630684228-7imad65",
+      {
+        "id": "1779630684228-7imad65",
+        "name": "test-task-1779630684202",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779630684228,
+        "updatedAt": 1779630684228,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630684257-8un4tot",
+      {
+        "id": "1779630684257-8un4tot",
+        "name": "detail-test-1779630684255",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630684257,
+        "updatedAt": 1779630684257,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630684267-bt6qesn",
+      {
+        "id": "1779630684267-bt6qesn",
+        "name": "update-test-1779630684265",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630684267,
+        "updatedAt": 1779630684267,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630684274-fgq2xwr",
+      {
+        "id": "1779630684274-fgq2xwr",
+        "name": "delete-test-1779630684272",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630684274,
+        "updatedAt": 1779630684274,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630751477-d4zm5wb",
+      {
+        "id": "1779630751477-d4zm5wb",
+        "name": "test-task-1779630751471",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779630751477,
+        "updatedAt": 1779630751477,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630751486-b0izw2v",
+      {
+        "id": "1779630751486-b0izw2v",
+        "name": "detail-test-1779630751486",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630751486,
+        "updatedAt": 1779630751486,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630751490-yn3bcqu",
+      {
+        "id": "1779630751490-yn3bcqu",
+        "name": "update-test-1779630751490",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630751490,
+        "updatedAt": 1779630751490,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630751494-djypkip",
+      {
+        "id": "1779630751494-djypkip",
+        "name": "delete-test-1779630751493",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630751494,
+        "updatedAt": 1779630751494,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630761308-wl3wsfp",
+      {
+        "id": "1779630761308-wl3wsfp",
+        "name": "test-task-1779630761283",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779630761308,
+        "updatedAt": 1779630761308,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630761345-uhzixeg",
+      {
+        "id": "1779630761345-uhzixeg",
+        "name": "detail-test-1779630761343",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630761345,
+        "updatedAt": 1779630761345,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630761356-y8dkz2h",
+      {
+        "id": "1779630761356-y8dkz2h",
+        "name": "update-test-1779630761355",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630761356,
+        "updatedAt": 1779630761356,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630761364-b3dvpnw",
+      {
+        "id": "1779630761364-b3dvpnw",
+        "name": "delete-test-1779630761362",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630761364,
+        "updatedAt": 1779630761364,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630886022-71vrvkf",
+      {
+        "id": "1779630886022-71vrvkf",
+        "name": "test-task-1779630885996",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779630886022,
+        "updatedAt": 1779630886022,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630886050-oxt1bdo",
+      {
+        "id": "1779630886050-oxt1bdo",
+        "name": "detail-test-1779630886049",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630886050,
+        "updatedAt": 1779630886050,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630886061-6olnk1z",
+      {
+        "id": "1779630886061-6olnk1z",
+        "name": "update-test-1779630886059",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630886061,
+        "updatedAt": 1779630886061,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779630886073-15z6fqa",
+      {
+        "id": "1779630886073-15z6fqa",
+        "name": "delete-test-1779630886071",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779630886073,
+        "updatedAt": 1779630886073,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631057632-1rjap7m",
+      {
+        "id": "1779631057632-1rjap7m",
+        "name": "test-task-1779631057605",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779631057632,
+        "updatedAt": 1779631057632,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631057668-wgjugkk",
+      {
+        "id": "1779631057668-wgjugkk",
+        "name": "detail-test-1779631057665",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779631057668,
+        "updatedAt": 1779631057668,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631057683-9hlo7dv",
+      {
+        "id": "1779631057683-9hlo7dv",
+        "name": "update-test-1779631057682",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779631057683,
+        "updatedAt": 1779631057683,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631057693-zcl4lst",
+      {
+        "id": "1779631057693-zcl4lst",
+        "name": "delete-test-1779631057691",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779631057693,
+        "updatedAt": 1779631057693,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631247216-n2bhera",
+      {
+        "id": "1779631247216-n2bhera",
+        "name": "test-task-1779631247188",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779631247216,
+        "updatedAt": 1779631247216,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631247248-buhuqzp",
+      {
+        "id": "1779631247248-buhuqzp",
+        "name": "detail-test-1779631247246",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779631247248,
+        "updatedAt": 1779631247248,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631247263-t42hq9x",
+      {
+        "id": "1779631247263-t42hq9x",
+        "name": "update-test-1779631247261",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779631247263,
+        "updatedAt": 1779631247263,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779631247271-wi3kec7",
+      {
+        "id": "1779631247271-wi3kec7",
+        "name": "delete-test-1779631247269",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779631247271,
+        "updatedAt": 1779631247271,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632189576-7jac6np",
+      {
+        "id": "1779632189576-7jac6np",
+        "name": "test-task-1779632189548",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779632189576,
+        "updatedAt": 1779632189576,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632189611-hr6mmu6",
+      {
+        "id": "1779632189611-hr6mmu6",
+        "name": "detail-test-1779632189609",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779632189611,
+        "updatedAt": 1779632189611,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632189629-7l1nesy",
+      {
+        "id": "1779632189629-7l1nesy",
+        "name": "update-test-1779632189627",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779632189629,
+        "updatedAt": 1779632189629,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632189646-dyrhgon",
+      {
+        "id": "1779632189646-dyrhgon",
+        "name": "delete-test-1779632189643",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779632189646,
+        "updatedAt": 1779632189646,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632416993-i8uvjg7",
+      {
+        "id": "1779632416993-i8uvjg7",
+        "name": "test-task-1779632416954",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779632416993,
+        "updatedAt": 1779632416993,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632417035-ejhhj7e",
+      {
+        "id": "1779632417035-ejhhj7e",
+        "name": "detail-test-1779632417033",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779632417035,
+        "updatedAt": 1779632417035,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632417053-64np2es",
+      {
+        "id": "1779632417053-64np2es",
+        "name": "update-test-1779632417051",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779632417053,
+        "updatedAt": 1779632417053,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779632417064-zvuha4c",
+      {
+        "id": "1779632417064-zvuha4c",
+        "name": "delete-test-1779632417061",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779632417064,
+        "updatedAt": 1779632417064,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633283529-cyk3u3i",
+      {
+        "id": "1779633283529-cyk3u3i",
+        "name": "test-task-1779633283500",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779633283529,
+        "updatedAt": 1779633283529,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633283566-wgm4n5f",
+      {
+        "id": "1779633283566-wgm4n5f",
+        "name": "detail-test-1779633283563",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779633283566,
+        "updatedAt": 1779633283566,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633283583-ncjizeo",
+      {
+        "id": "1779633283583-ncjizeo",
+        "name": "update-test-1779633283581",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779633283583,
+        "updatedAt": 1779633283583,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633283597-rmim04w",
+      {
+        "id": "1779633283597-rmim04w",
+        "name": "delete-test-1779633283593",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779633283597,
+        "updatedAt": 1779633283597,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633533874-4pc6jy0",
+      {
+        "id": "1779633533874-4pc6jy0",
+        "name": "test-task-1779633533839",
+        "description": "Test task description",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": "test-agent",
+        "createdAt": 1779633533874,
+        "updatedAt": 1779633533874,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633533924-z3gtj5n",
+      {
+        "id": "1779633533924-z3gtj5n",
+        "name": "detail-test-1779633533922",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779633533924,
+        "updatedAt": 1779633533924,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633533944-s4ypqdf",
+      {
+        "id": "1779633533944-s4ypqdf",
+        "name": "update-test-1779633533942",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779633533944,
+        "updatedAt": 1779633533944,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
+    ],
+    [
+      "1779633533959-mv9vlcc",
+      {
+        "id": "1779633533959-mv9vlcc",
+        "name": "delete-test-1779633533956",
+        "description": "Test",
+        "priority": "medium",
+        "status": "pending",
+        "assignedAgent": null,
+        "createdAt": 1779633533959,
+        "updatedAt": 1779633533959,
+        "startedAt": null,
+        "completedAt": null,
+        "result": null,
+        "error": null
+      }
     ]
   ],
   "agents": [],
   "events": [
+    {
+      "id": "1779633533959-o0rk8cn",
+      "type": "task_created",
+      "timestamp": 1779633533959,
+      "taskId": "1779633533959-mv9vlcc",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779633533956",
+      "data": null
+    },
+    {
+      "id": "1779633533944-byd7yjg",
+      "type": "task_created",
+      "timestamp": 1779633533944,
+      "taskId": "1779633533944-s4ypqdf",
+      "agentId": null,
+      "message": "新建任务: update-test-1779633533942",
+      "data": null
+    },
+    {
+      "id": "1779633533924-v1dxlf8",
+      "type": "task_created",
+      "timestamp": 1779633533924,
+      "taskId": "1779633533924-z3gtj5n",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779633533922",
+      "data": null
+    },
+    {
+      "id": "1779633533874-ns4s6gx",
+      "type": "task_created",
+      "timestamp": 1779633533874,
+      "taskId": "1779633533874-4pc6jy0",
+      "agentId": null,
+      "message": "新建任务: test-task-1779633533839",
+      "data": null
+    },
+    {
+      "id": "1779633283597-6er8ide",
+      "type": "task_created",
+      "timestamp": 1779633283597,
+      "taskId": "1779633283597-rmim04w",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779633283593",
+      "data": null
+    },
+    {
+      "id": "1779633283584-m99627n",
+      "type": "task_created",
+      "timestamp": 1779633283584,
+      "taskId": "1779633283583-ncjizeo",
+      "agentId": null,
+      "message": "新建任务: update-test-1779633283581",
+      "data": null
+    },
+    {
+      "id": "1779633283566-q8fq2v8",
+      "type": "task_created",
+      "timestamp": 1779633283566,
+      "taskId": "1779633283566-wgm4n5f",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779633283563",
+      "data": null
+    },
+    {
+      "id": "1779633283529-hwqdnqa",
+      "type": "task_created",
+      "timestamp": 1779633283529,
+      "taskId": "1779633283529-cyk3u3i",
+      "agentId": null,
+      "message": "新建任务: test-task-1779633283500",
+      "data": null
+    },
+    {
+      "id": "1779632417064-hhde3jv",
+      "type": "task_created",
+      "timestamp": 1779632417064,
+      "taskId": "1779632417064-zvuha4c",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779632417061",
+      "data": null
+    },
+    {
+      "id": "1779632417053-wjo3oww",
+      "type": "task_created",
+      "timestamp": 1779632417053,
+      "taskId": "1779632417053-64np2es",
+      "agentId": null,
+      "message": "新建任务: update-test-1779632417051",
+      "data": null
+    },
+    {
+      "id": "1779632417035-g38jl7v",
+      "type": "task_created",
+      "timestamp": 1779632417035,
+      "taskId": "1779632417035-ejhhj7e",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779632417033",
+      "data": null
+    },
+    {
+      "id": "1779632416993-g7zjbca",
+      "type": "task_created",
+      "timestamp": 1779632416993,
+      "taskId": "1779632416993-i8uvjg7",
+      "agentId": null,
+      "message": "新建任务: test-task-1779632416954",
+      "data": null
+    },
+    {
+      "id": "1779632189646-vafyuey",
+      "type": "task_created",
+      "timestamp": 1779632189646,
+      "taskId": "1779632189646-dyrhgon",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779632189643",
+      "data": null
+    },
+    {
+      "id": "1779632189629-s7wcw48",
+      "type": "task_created",
+      "timestamp": 1779632189629,
+      "taskId": "1779632189629-7l1nesy",
+      "agentId": null,
+      "message": "新建任务: update-test-1779632189627",
+      "data": null
+    },
+    {
+      "id": "1779632189611-ayjizlt",
+      "type": "task_created",
+      "timestamp": 1779632189611,
+      "taskId": "1779632189611-hr6mmu6",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779632189609",
+      "data": null
+    },
+    {
+      "id": "1779632189576-tbum8fb",
+      "type": "task_created",
+      "timestamp": 1779632189576,
+      "taskId": "1779632189576-7jac6np",
+      "agentId": null,
+      "message": "新建任务: test-task-1779632189548",
+      "data": null
+    },
+    {
+      "id": "1779631247271-k0zpkv1",
+      "type": "task_created",
+      "timestamp": 1779631247271,
+      "taskId": "1779631247271-wi3kec7",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779631247269",
+      "data": null
+    },
+    {
+      "id": "1779631247263-v8lzz6s",
+      "type": "task_created",
+      "timestamp": 1779631247263,
+      "taskId": "1779631247263-t42hq9x",
+      "agentId": null,
+      "message": "新建任务: update-test-1779631247261",
+      "data": null
+    },
+    {
+      "id": "1779631247248-g6h4wnu",
+      "type": "task_created",
+      "timestamp": 1779631247248,
+      "taskId": "1779631247248-buhuqzp",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779631247246",
+      "data": null
+    },
+    {
+      "id": "1779631247216-kmjrbhm",
+      "type": "task_created",
+      "timestamp": 1779631247216,
+      "taskId": "1779631247216-n2bhera",
+      "agentId": null,
+      "message": "新建任务: test-task-1779631247188",
+      "data": null
+    },
+    {
+      "id": "1779631057693-wax9dqq",
+      "type": "task_created",
+      "timestamp": 1779631057693,
+      "taskId": "1779631057693-zcl4lst",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779631057691",
+      "data": null
+    },
+    {
+      "id": "1779631057683-mofn68q",
+      "type": "task_created",
+      "timestamp": 1779631057683,
+      "taskId": "1779631057683-9hlo7dv",
+      "agentId": null,
+      "message": "新建任务: update-test-1779631057682",
+      "data": null
+    },
+    {
+      "id": "1779631057668-abbz9em",
+      "type": "task_created",
+      "timestamp": 1779631057668,
+      "taskId": "1779631057668-wgjugkk",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779631057665",
+      "data": null
+    },
+    {
+      "id": "1779631057632-8eewgrt",
+      "type": "task_created",
+      "timestamp": 1779631057632,
+      "taskId": "1779631057632-1rjap7m",
+      "agentId": null,
+      "message": "新建任务: test-task-1779631057605",
+      "data": null
+    },
+    {
+      "id": "1779630886073-dbtp8m4",
+      "type": "task_created",
+      "timestamp": 1779630886073,
+      "taskId": "1779630886073-15z6fqa",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779630886071",
+      "data": null
+    },
+    {
+      "id": "1779630886062-bxm57pn",
+      "type": "task_created",
+      "timestamp": 1779630886062,
+      "taskId": "1779630886061-6olnk1z",
+      "agentId": null,
+      "message": "新建任务: update-test-1779630886059",
+      "data": null
+    },
+    {
+      "id": "1779630886050-279ipnq",
+      "type": "task_created",
+      "timestamp": 1779630886050,
+      "taskId": "1779630886050-oxt1bdo",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779630886049",
+      "data": null
+    },
+    {
+      "id": "1779630886022-248nprz",
+      "type": "task_created",
+      "timestamp": 1779630886022,
+      "taskId": "1779630886022-71vrvkf",
+      "agentId": null,
+      "message": "新建任务: test-task-1779630885996",
+      "data": null
+    },
+    {
+      "id": "1779630761364-753n7nf",
+      "type": "task_created",
+      "timestamp": 1779630761364,
+      "taskId": "1779630761364-b3dvpnw",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779630761362",
+      "data": null
+    },
+    {
+      "id": "1779630761356-3ur2ty8",
+      "type": "task_created",
+      "timestamp": 1779630761356,
+      "taskId": "1779630761356-y8dkz2h",
+      "agentId": null,
+      "message": "新建任务: update-test-1779630761355",
+      "data": null
+    },
+    {
+      "id": "1779630761345-oho6beg",
+      "type": "task_created",
+      "timestamp": 1779630761345,
+      "taskId": "1779630761345-uhzixeg",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779630761343",
+      "data": null
+    },
+    {
+      "id": "1779630761308-wkpm2z2",
+      "type": "task_created",
+      "timestamp": 1779630761308,
+      "taskId": "1779630761308-wl3wsfp",
+      "agentId": null,
+      "message": "新建任务: test-task-1779630761283",
+      "data": null
+    },
+    {
+      "id": "1779630751494-3gv9npm",
+      "type": "task_created",
+      "timestamp": 1779630751494,
+      "taskId": "1779630751494-djypkip",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779630751493",
+      "data": null
+    },
+    {
+      "id": "1779630751490-uy2mzzq",
+      "type": "task_created",
+      "timestamp": 1779630751490,
+      "taskId": "1779630751490-yn3bcqu",
+      "agentId": null,
+      "message": "新建任务: update-test-1779630751490",
+      "data": null
+    },
+    {
+      "id": "1779630751486-hlq9fvp",
+      "type": "task_created",
+      "timestamp": 1779630751486,
+      "taskId": "1779630751486-b0izw2v",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779630751486",
+      "data": null
+    },
+    {
+      "id": "1779630751477-9kydirf",
+      "type": "task_created",
+      "timestamp": 1779630751477,
+      "taskId": "1779630751477-d4zm5wb",
+      "agentId": null,
+      "message": "新建任务: test-task-1779630751471",
+      "data": null
+    },
+    {
+      "id": "1779630684274-surp29q",
+      "type": "task_created",
+      "timestamp": 1779630684274,
+      "taskId": "1779630684274-fgq2xwr",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779630684272",
+      "data": null
+    },
+    {
+      "id": "1779630684267-g2fdlc9",
+      "type": "task_created",
+      "timestamp": 1779630684267,
+      "taskId": "1779630684267-bt6qesn",
+      "agentId": null,
+      "message": "新建任务: update-test-1779630684265",
+      "data": null
+    },
+    {
+      "id": "1779630684257-10v69tn",
+      "type": "task_created",
+      "timestamp": 1779630684257,
+      "taskId": "1779630684257-8un4tot",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779630684255",
+      "data": null
+    },
+    {
+      "id": "1779630684228-al1a0er",
+      "type": "task_created",
+      "timestamp": 1779630684228,
+      "taskId": "1779630684228-7imad65",
+      "agentId": null,
+      "message": "新建任务: test-task-1779630684202",
+      "data": null
+    },
+    {
+      "id": "1779630625475-dlyjfax",
+      "type": "task_created",
+      "timestamp": 1779630625475,
+      "taskId": "1779630625475-rp6aa5k",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779630625473",
+      "data": null
+    },
+    {
+      "id": "1779630625464-pc076qy",
+      "type": "task_created",
+      "timestamp": 1779630625464,
+      "taskId": "1779630625464-cyz6vfu",
+      "agentId": null,
+      "message": "新建任务: update-test-1779630625462",
+      "data": null
+    },
+    {
+      "id": "1779630625452-7msndw6",
+      "type": "task_created",
+      "timestamp": 1779630625452,
+      "taskId": "1779630625452-i6oqmfy",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779630625449",
+      "data": null
+    },
+    {
+      "id": "1779630625414-qybth82",
+      "type": "task_created",
+      "timestamp": 1779630625414,
+      "taskId": "1779630625414-inzas44",
+      "agentId": null,
+      "message": "新建任务: test-task-1779630625385",
+      "data": null
+    },
+    {
+      "id": "1779630252781-pl1quqr",
+      "type": "task_created",
+      "timestamp": 1779630252781,
+      "taskId": "1779630252781-gtcxvf1",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779630252780",
+      "data": null
+    },
+    {
+      "id": "1779630252774-1cp9fe7",
+      "type": "task_created",
+      "timestamp": 1779630252774,
+      "taskId": "1779630252774-ktcel0t",
+      "agentId": null,
+      "message": "新建任务: update-test-1779630252772",
+      "data": null
+    },
+    {
+      "id": "1779630252757-7z9hhtr",
+      "type": "task_created",
+      "timestamp": 1779630252757,
+      "taskId": "1779630252757-wdforlv",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779630252756",
+      "data": null
+    },
+    {
+      "id": "1779630252734-0sq3brg",
+      "type": "task_created",
+      "timestamp": 1779630252734,
+      "taskId": "1779630252734-1gf2jkp",
+      "agentId": null,
+      "message": "新建任务: test-task-1779630252710",
+      "data": null
+    },
+    {
+      "id": "1779630200605-9qh6wau",
+      "type": "task_created",
+      "timestamp": 1779630200605,
+      "taskId": "1779630200605-c9oghqe",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779630200603",
+      "data": null
+    },
+    {
+      "id": "1779630200591-1nvq7uf",
+      "type": "task_created",
+      "timestamp": 1779630200591,
+      "taskId": "1779630200591-cayawzq",
+      "agentId": null,
+      "message": "新建任务: update-test-1779630200589",
+      "data": null
+    },
+    {
+      "id": "1779630200580-hi2yf03",
+      "type": "task_created",
+      "timestamp": 1779630200580,
+      "taskId": "1779630200580-coh2lvx",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779630200578",
+      "data": null
+    },
+    {
+      "id": "1779630200553-wl81m6t",
+      "type": "task_created",
+      "timestamp": 1779630200553,
+      "taskId": "1779630200553-j8nn74g",
+      "agentId": null,
+      "message": "新建任务: test-task-1779630200527",
+      "data": null
+    },
+    {
+      "id": "1779629748560-c63cclq",
+      "type": "task_created",
+      "timestamp": 1779629748560,
+      "taskId": "1779629748560-bo8lc0a",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779629748558",
+      "data": null
+    },
+    {
+      "id": "1779629748549-uv7s1nf",
+      "type": "task_created",
+      "timestamp": 1779629748549,
+      "taskId": "1779629748549-8mbhjom",
+      "agentId": null,
+      "message": "新建任务: update-test-1779629748547",
+      "data": null
+    },
+    {
+      "id": "1779629748535-4p3px3d",
+      "type": "task_created",
+      "timestamp": 1779629748535,
+      "taskId": "1779629748535-4dfixt8",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779629748532",
+      "data": null
+    },
+    {
+      "id": "1779629748503-alw2t3u",
+      "type": "task_created",
+      "timestamp": 1779629748503,
+      "taskId": "1779629748503-kmaoltt",
+      "agentId": null,
+      "message": "新建任务: test-task-1779629748479",
+      "data": null
+    },
+    {
+      "id": "1779629685673-2g3ca2g",
+      "type": "task_created",
+      "timestamp": 1779629685673,
+      "taskId": "1779629685673-kxlnzjc",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779629685671",
+      "data": null
+    },
+    {
+      "id": "1779629685664-2ucys7t",
+      "type": "task_created",
+      "timestamp": 1779629685664,
+      "taskId": "1779629685664-m9e9zsu",
+      "agentId": null,
+      "message": "新建任务: update-test-1779629685662",
+      "data": null
+    },
+    {
+      "id": "1779629685649-qzo6bt9",
+      "type": "task_created",
+      "timestamp": 1779629685649,
+      "taskId": "1779629685649-a2n4xnq",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779629685647",
+      "data": null
+    },
+    {
+      "id": "1779629685608-xd1n9mz",
+      "type": "task_created",
+      "timestamp": 1779629685608,
+      "taskId": "1779629685608-w8tu0uu",
+      "agentId": null,
+      "message": "新建任务: test-task-1779629685582",
+      "data": null
+    },
+    {
+      "id": "1779629633976-kqtaifo",
+      "type": "task_created",
+      "timestamp": 1779629633976,
+      "taskId": "1779629633976-iyil5n6",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779629633975",
+      "data": null
+    },
+    {
+      "id": "1779629633969-kf4jqjt",
+      "type": "task_created",
+      "timestamp": 1779629633969,
+      "taskId": "1779629633969-nffijn0",
+      "agentId": null,
+      "message": "新建任务: update-test-1779629633967",
+      "data": null
+    },
+    {
+      "id": "1779629633957-dcq9eiz",
+      "type": "task_created",
+      "timestamp": 1779629633957,
+      "taskId": "1779629633957-2sgpjsz",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779629633955",
+      "data": null
+    },
+    {
+      "id": "1779629633926-y5qvdmm",
+      "type": "task_created",
+      "timestamp": 1779629633926,
+      "taskId": "1779629633926-kt7lqfk",
+      "agentId": null,
+      "message": "新建任务: test-task-1779629633902",
+      "data": null
+    },
+    {
+      "id": "1779628293283-c3ojqfz",
+      "type": "task_created",
+      "timestamp": 1779628293283,
+      "taskId": "1779628293283-gei4d3a",
+      "agentId": null,
+      "message": "新建任务: delete-test-1779628293281",
+      "data": null
+    },
+    {
+      "id": "1779628293277-2c58c0y",
+      "type": "task_created",
+      "timestamp": 1779628293277,
+      "taskId": "1779628293277-osrdgs8",
+      "agentId": null,
+      "message": "新建任务: update-test-1779628293275",
+      "data": null
+    },
+    {
+      "id": "1779628293265-tb2vpo3",
+      "type": "task_created",
+      "timestamp": 1779628293265,
+      "taskId": "1779628293265-s0xfvdb",
+      "agentId": null,
+      "message": "新建任务: detail-test-1779628293264",
+      "data": null
+    },
+    {
+      "id": "1779628293235-lnbuqa5",
+      "type": "task_created",
+      "timestamp": 1779628293235,
+      "taskId": "1779628293235-acrph7l",
+      "agentId": null,
+      "message": "新建任务: test-task-1779628293211",
+      "data": null
+    },
     {
       "id": "1779620150203-618bhjn",
       "type": "task_created",
