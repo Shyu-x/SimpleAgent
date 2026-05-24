@@ -3,207 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { isClient } from '@/lib/ssrStorage';
 import { BACKEND_URL } from '@/lib/config';
-import { API_ENDPOINTS } from '@/lib/apiConfig';
+import {
+  HITLSSEClient,
+  type HITLSSEEvent,
+  type HITLCheckpoint,
+  type HITLSSEClientOptions,
+} from '@/lib/sse-clients';
 
-// ==================== 类型定义 ====================
+// Re-export types for backward compatibility
+export type { HITLCheckpoint } from '@/lib/sse-clients';
 
-export type RiskLevel = 'high' | 'medium' | 'low';
-
-export interface OperationImpact {
-  scope?: string;
-  affectedFiles?: string[];
-  affectedSystems?: string[];
-  dataChanges?: string;
-  sideEffects?: string[];
-}
-
-export interface HITLCheckpoint {
-  id: string;
-  type: string;
-  title: string;
-  description?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'timeout' | 'cancelled';
-  createdAt: number;
-  respondedAt?: number;
-  response?: {
-    option?: string;
-    comment?: string;
-    reason?: string;
-  };
-  context?: Record<string, unknown>;
-  // 新增字段
-  riskLevel?: RiskLevel;
-  estimatedTime?: string;
-  impact?: OperationImpact;
-  command?: string;
-  warnings?: string[];
-  similarOperationKey?: string;
-}
-
-export interface HITLSSEEvent {
-  type: 'connected' | 'pending_checkpoints' | 'confirmation' | 'error';
-  clientId?: string;
-  checkpoints?: HITLCheckpoint[];
-  subtype?: 'created' | 'approved' | 'rejected' | 'timeout';
-  checkpoint?: HITLCheckpoint;
-  message?: string;
-}
-
-interface UseHITLSSEOptions {
-  enabled?: boolean;
-  autoConnect?: boolean;
-  reconnect?: boolean;
-  reconnectInterval?: number;
-  maxReconnectAttempts?: number;
-  onConfirmation?: (checkpoint: HITLCheckpoint) => void;
-  onApproved?: (checkpoint: HITLCheckpoint) => void;
-  onRejected?: (checkpoint: HITLCheckpoint) => void;
-  onTimeout?: (checkpoint: HITLCheckpoint) => void;
-  onConnected?: () => void;
-  onDisconnected?: () => void;
-  onError?: (error: Error) => void;
-}
-
-interface ConnectionState {
+export interface ConnectionState {
   status: 'disconnected' | 'connecting' | 'connected' | 'error';
   clientId?: string;
   reconnectAttempts: number;
 }
 
-// ==================== SSE 客户端类 ====================
-
-class HITLSSEClient {
-  private eventSource: EventSource | null = null;
-  private options: UseHITLSSEOptions;
-  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
-  private destroyed = false;
-  private baseUrl: string;
-
-  constructor(options: UseHITLSSEOptions) {
-    this.options = {
-      enabled: true,
-      autoConnect: true,
-      reconnect: true,
-      reconnectInterval: 3000,
-      maxReconnectAttempts: 5,
-      ...options
-    };
-    this.baseUrl = this._getBaseUrl();
-  }
-
-  private _getBaseUrl(): string {
-    if (typeof window === 'undefined') return '';
-    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-    const host = BACKEND_URL;
-    return `${host}/api/hitl/sse`;
-  }
-
-  connect(): void {
-    if (this.destroyed || !this.options.enabled) return;
-    if (this.eventSource) {
-      this.eventSource.close();
-    }
-
-    try {
-      this.eventSource = new EventSource(this.baseUrl);
-
-      this.eventSource.onopen = () => {
-        console.log('[HITL SSE] Connected');
-      };
-
-      this.eventSource.onmessage = (event) => {
-        try {
-          const data: HITLSSEEvent = JSON.parse(event.data);
-          this._handleEvent(data);
-        } catch (error) {
-          console.error('[HITL SSE] Failed to parse message:', error);
-        }
-      };
-
-      this.eventSource.onerror = (error) => {
-        console.error('[HITL SSE] Error:', error);
-        this.options.onError?.(new Error('SSE connection error'));
-
-        // 尝试重连
-        if (!this.destroyed && this.options.autoConnect) {
-          this._scheduleReconnect();
-        }
-      };
-    } catch (error) {
-      console.error('[HITL SSE] Failed to connect:', error);
-      this.options.onError?.(error as Error);
-    }
-  }
-
-  private _scheduleReconnect(): void {
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-    }
-    this.reconnectTimeout = setTimeout(() => {
-      if (!this.destroyed) {
-        console.log('[HITL SSE] Reconnecting...');
-        this.connect();
-      }
-    }, this.options.reconnectInterval || 3000);
-  }
-
-  private _handleEvent(data: HITLSSEEvent): void {
-    switch (data.type) {
-      case 'connected':
-        console.log('[HITL SSE] Connection confirmed, clientId:', data.clientId);
-        this.options.onConnected?.();
-        break;
-
-      case 'pending_checkpoints':
-        console.log('[HITL SSE] Pending checkpoints:', data.checkpoints?.length);
-        break;
-
-      case 'confirmation':
-        if (data.checkpoint) {
-          switch (data.subtype) {
-            case 'created':
-              console.log('[HITL SSE] Confirmation requested:', data.checkpoint.title);
-              this.options.onConfirmation?.(data.checkpoint);
-              break;
-            case 'approved':
-              console.log('[HITL SSE] Confirmation approved:', data.checkpoint.id);
-              this.options.onApproved?.(data.checkpoint);
-              break;
-            case 'rejected':
-              console.log('[HITL SSE] Confirmation rejected:', data.checkpoint.id);
-              this.options.onRejected?.(data.checkpoint);
-              break;
-            case 'timeout':
-              console.log('[HITL SSE] Confirmation timeout:', data.checkpoint.id);
-              this.options.onTimeout?.(data.checkpoint);
-              break;
-          }
-        }
-        break;
-    }
-  }
-
-  disconnect(): void {
-    this.destroyed = true;
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
-    }
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
-    }
-    this.options.onDisconnected?.();
-  }
-
-  isConnected(): boolean {
-    return this.eventSource !== null && !this.destroyed;
-  }
-}
-
 // ==================== Hook ====================
 
-export function useHITLSSE(options: UseHITLSSEOptions = {}) {
+export function useHITLSSE(options: HITLSSEClientOptions = {}) {
   const [connectionState, setConnectionState] = useState<ConnectionState>({
     status: 'disconnected',
     reconnectAttempts: 0
@@ -230,7 +48,10 @@ export function useHITLSSE(options: UseHITLSSEOptions = {}) {
     }
 
     clientRef.current = new HITLSSEClient({
-      ...options,
+      autoConnect: options.autoConnect,
+      reconnect: options.reconnect,
+      reconnectInterval: options.reconnectInterval,
+      maxReconnectAttempts: options.maxReconnectAttempts,
       onConnected: () => {
         setConnectionState(prev => ({ ...prev, status: 'connected' }));
         options.onConnected?.();

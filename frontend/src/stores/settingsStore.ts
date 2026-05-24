@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { APIConfig, ConfiguredModel } from '@/types';
+import type { Settings } from '@/types/common';
 import { getBaseURLForModel as inferBaseURL } from '@/lib/modelConfig';
 import { sessionStorageAdapter } from './storage';
 
@@ -20,17 +21,6 @@ export function validateApiKey(apiKey: string): { valid: boolean; error?: string
 export function getProviderFromModel(model: string): string {
   if (model.startsWith('MiniMax-')) return 'MiniMax';
   return 'Custom';
-}
-
-export interface Settings {
-  theme: 'light' | 'dark' | 'system';
-  desktopPalette: 'aurora' | 'mint' | 'sunset';
-  typingSpeed: number;
-  fontSize: number;
-  windowLayout: 'single' | 'horizontal' | 'vertical' | 'grid';
-  animationsEnabled: boolean;
-  soundEnabled: boolean;
-  autoTitle: boolean;
 }
 
 interface SettingsState {

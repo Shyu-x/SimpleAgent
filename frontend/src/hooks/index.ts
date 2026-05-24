@@ -39,7 +39,7 @@ export { useN8N } from './useN8N';
 
 // ============ Admin SSE Hook ============
 export { useAdminSSE } from './useAdminSSE';
-export type { SystemStats, QdrantStatus, CollectionInfo, AdminSSEEvent } from './useAdminSSE';
+export type { SystemStats, QdrantStatus, CollectionInfo, AdminSSEEvent } from '@/lib/sse-clients';
 
 // ============ 浏览器自动化 Hook ============
 export { useBrowser } from './useBrowser';
