@@ -62,7 +62,7 @@ class ConfigCenter extends EventEmitter {
 
     // 启动热更新监听
     if (this.enableHotReload) {
-      this._startWatching();
+      await this._startWatching();
     }
   }
 
