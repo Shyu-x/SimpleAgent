@@ -172,9 +172,16 @@ export async function sendSSEChatMessage(
           }
           const choices = json.choices as Array<{ delta?: { content?: string } }> | undefined;
           const contentDelta = choices?.[0]?.delta?.content;
-          if (contentDelta) onMessage(contentDelta);
+          if (contentDelta) {
+            const { thinking, clean } = extractThinkingContent(contentDelta);
+            if (thinking) onThinking?.(thinking, contentDelta.includes('[/THINK]'));
+            if (clean) onMessage(clean);
+          }
           if (type === 'chunk' && json.content) {
-            onMessage(String(json.content));
+            const content = String(json.content);
+            const { thinking, clean } = extractThinkingContent(content);
+            if (thinking) onThinking?.(thinking, content.includes('[/THINK]'));
+            if (clean) onMessage(clean);
           }
         } catch {
           // Skip invalid JSON
