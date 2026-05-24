@@ -8,7 +8,6 @@
  * - 体验用户分级
  */
 
-const crypto = require('crypto');
 const { getMetricsCollector } = require('../infra/metrics');
 
 // 限流配置
