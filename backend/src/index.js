@@ -263,6 +263,7 @@ async function startServer() {
   app.use('/api/mission', missionControlRoutes); // MissionControl API
   app.use('/api/execution', executionRoutes); // 执行历史 API
   app.use('/api/alerts', alertsRoutes); // Alerts API
+  app.use('/api/rag', ragRoutes); // RAG 知识库 API
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
