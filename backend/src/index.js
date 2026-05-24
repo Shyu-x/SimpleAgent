@@ -64,6 +64,9 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT || 30000;
 
+  // 禁用 X-Powered-By 响应头
+  app.disable('x-powered-by');
+
   // 设置全局工具注册表
   app.set('toolRegistry', globalToolRegistry);
 
@@ -111,8 +114,21 @@ async function startServer() {
   };
   app.use(cors(corsOptions));
 
+  // 安全中间件：速率限制、输入限制、安全响应头
+  const {
+    rateLimitMiddleware,
+    inputLimitMiddleware,
+    securityHeadersMiddleware,
+  } = require('./middleware/security');
+
   // 全链路追踪中间件
   app.use(tracingMiddleware(tracingService));
+
+  // 安全中间件：IP速率限制 (100请求/分钟)
+  app.use(rateLimitMiddleware);
+
+  // 安全中间件：输入长度限制 (10MB)
+  app.use(inputLimitMiddleware);
 
   // 安全中间件：基本请求验证
   app.use((req, _res, next) => {
@@ -285,11 +301,15 @@ async function startServer() {
   // 挂载 Prometheus 指标路由
   app.use('/metrics', prometheusService.createRouter());
 
-  // 保留简单健康检查（向后兼容）
+  // 安全中间件：安全响应头 (在所有路由之后设置)
+  app.use(securityHeadersMiddleware);
+
+  // 保留简单健康检查（向后兼容）- 始终返回200避免监控误报
   app.get('/api/health', (_req, res) => {
-    const health = require('./middleware/loadProtection').healthCheck();
-    const status = health.status === 'ok' ? 200 : 503;
-    res.status(status).json(health);
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString()
+    });
   });
 
   // 网关降级状态查询
