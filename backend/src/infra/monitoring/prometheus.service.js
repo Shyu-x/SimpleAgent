@@ -154,11 +154,12 @@ class PrometheusService {
     if (!this._initialized) return;
 
     const { method, path, status, duration, module } = info;
+    const normalizedPath = this._normalizePath(path);
 
     // 增加请求计数器
     this._metricsCollector.incrementCounter('http_requests_total', {
       method,
-      path: this._normalizePath(path),
+      path: normalizedPath,
       status: status.toString(),
       module: module || 'unknown',
     });
@@ -166,7 +167,7 @@ class PrometheusService {
     // 记录延迟
     this._metricsCollector.recordHistogram('http_request_duration_seconds', duration / 1000, {
       method,
-      path: this._normalizePath(path),
+      path: normalizedPath,
     });
 
     // 记录错误

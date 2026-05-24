@@ -96,29 +96,13 @@ function requestMetricsMiddleware() {
     if (gatewayService) {
       const isWriteOperation = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method);
       if (gatewayService.isReadOnlyMode() && isWriteOperation) {
-        return res.status(503).json({
-          success: false,
-          error: {
-            code: 'DEGRADED-001',
-            message: '服务降级中，仅支持读取操作',
-          },
-          degradation: gatewayService.getStatus(),
-          timestamp: new Date().toISOString(),
-        });
+        return sendDegradedResponse(res, 'DEGRADED-001', '服务降级中，仅支持读取操作', gatewayService);
       }
 
       // 检查特定功能是否被降级禁用
       const feature = extractFeature(req.path);
       if (feature && !gatewayService.isFeatureEnabled(feature)) {
-        return res.status(503).json({
-          success: false,
-          error: {
-            code: 'DEGRADED-002',
-            message: `功能 "${feature}" 因服务降级暂时不可用`,
-          },
-          degradation: gatewayService.getStatus(),
-          timestamp: new Date().toISOString(),
-        });
+        return sendDegradedResponse(res, 'DEGRADED-002', `功能 "${feature}" 因服务降级暂时不可用`, gatewayService);
       }
 
       // 应用超时倍数
@@ -132,37 +116,51 @@ function requestMetricsMiddleware() {
   };
 }
 
+// 按路径长度降序排序，前缀长的优先匹配
+const FEATURE_MAP_SORTED = Object.entries({
+  '/api/multiagent': 'multi_agent',
+  '/api/agents': 'multi_agent',
+  '/api/minimax/tts': 'voice_synthesis',
+  '/api/minimax/image': 'image_generation',
+  '/api/browser': 'browser_automation',
+  '/api/qdrant': 'advanced_rag',
+  '/api/chat': 'chat',
+  '/api/search': 'search',
+  '/api/rag': 'advanced_rag',
+  '/api/mcp': 'mcp_tools',
+  '/api/a2a': 'multi_agent',
+  '/api/memory': 'memory',
+  '/api/memories': 'memory',
+}).sort((a, b) => b[0].length - a[0].length);
+
 /**
  * 从请求路径提取功能标识
  * @param {string} path - 请求路径
  * @returns {string|null}
  */
 function extractFeature(path) {
-  const featureMap = {
-    '/api/chat': 'chat',
-    '/api/search': 'search',
-    '/api/rag': 'advanced_rag',
-    '/api/qdrant': 'advanced_rag',
-    '/api/browser': 'browser_automation',
-    '/api/mcp': 'mcp_tools',
-    '/api/a2a': 'multi_agent',
-    '/api/multiagent': 'multi_agent',
-    '/api/agents': 'multi_agent',
-    '/api/minimax/image': 'image_generation',
-    '/api/minimax/tts': 'voice_synthesis',
-    '/api/minimax': 'minimax_api',
-    '/api/memory': 'memory',
-    '/api/memories': 'memory',
-  };
-
-  // 优化：按长度降序排列，前缀长的优先匹配
-  const sortedEntries = Object.entries(featureMap).sort((a, b) => b[0].length - a[0].length);
-  for (const [prefix, feature] of sortedEntries) {
+  for (const [prefix, feature] of FEATURE_MAP_SORTED) {
     if (path.startsWith(prefix)) {
       return feature;
     }
   }
   return null;
+}
+
+/**
+ * 生成降级响应
+ * @param {Object} res - Express response
+ * @param {string} code - 错误码
+ * @param {string} message - 错误消息
+ * @param {Object} gatewayService - 网关服务
+ */
+function sendDegradedResponse(res, code, message, gatewayService) {
+  return res.status(503).json({
+    success: false,
+    error: { code, message },
+    degradation: gatewayService.getStatus(),
+    timestamp: new Date().toISOString(),
+  });
 }
 
 module.exports = {

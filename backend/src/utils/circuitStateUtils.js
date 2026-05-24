@@ -9,6 +9,13 @@ const CIRCUIT_STATE_MAP = {
   half_open: 2,
 };
 
+// 反向映射用于 O(1) 查找
+const STATE_VALUE_MAP = {
+  0: 'closed',
+  1: 'open',
+  2: 'half_open',
+};
+
 /**
  * 获取熔断器状态的数值
  * @param {string} state - 状态字符串 (closed/open/half_open)
@@ -24,11 +31,7 @@ function getStateValue(state) {
  * @returns {string} 状态名
  */
 function getStateName(value) {
-  const entries = Object.entries(CIRCUIT_STATE_MAP);
-  for (const [name, val] of entries) {
-    if (val === value) return name;
-  }
-  return 'closed';
+  return STATE_VALUE_MAP[value] ?? 'closed';
 }
 
 module.exports = {
