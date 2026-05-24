@@ -9,6 +9,8 @@ import { fetchApi, post, del, put } from '@/lib/apiClient';
 
 import { BACKEND_URL } from '@/lib/config';
 
+const API_BASE = BACKEND_URL;
+
 // 记忆类型配置
 export const MEMORY_TYPE_CONFIG: Record<MemoryType, { label: string; color: string; icon: string }> = {
   user_pref: { label: '用户偏好', color: 'blue', icon: 'user' },

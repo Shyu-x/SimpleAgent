@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Clock, AlertCircle, CheckCircle2, XCircle, Minus, ArrowRight } from 'lucide-react';
+import { BACKEND_URL } from '@/lib/config';
 
 /**
  * 任务状态枚举
@@ -402,8 +403,7 @@ function useTaskExecutionSubscription(
       return;
     }
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-    const eventSource = new EventSource(`${backendUrl}/api/a2a/subscribe/${sessionId}`);
+    const eventSource = new EventSource(`${BACKEND_URL}/api/a2a/subscribe/${sessionId}`);
 
     eventSource.onopen = () => {
       setConnected(true);

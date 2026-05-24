@@ -4,6 +4,7 @@ import { memo, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isClient } from '@/lib/ssrStorage';
 import { fetchApi } from '@/lib/apiClient';
+import { BACKEND_URL } from '@/lib/config';
 import {
   Package,
   Search,
@@ -682,8 +683,7 @@ const ToolMarketplace = memo(function ToolMarketplace({
   // MCP 状态获取
   const fetchMcpStatus = useCallback(async () => {
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-      const res = await fetch(`${backendUrl}/api/minimax/status`);
+      const res = await fetch(`${BACKEND_URL}/api/minimax/status`);
       const data = await res.json();
       if (data.success) {
         setMcpStatus(data.mcp_server?.connected ? 'connected' : 'disconnected');
@@ -702,8 +702,7 @@ const ToolMarketplace = memo(function ToolMarketplace({
     setMcpStatus('connecting');
     setMcpError(null);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-      const res = await fetch(`${backendUrl}/api/minimax/connect`, { method: 'POST' });
+      const res = await fetch(`${BACKEND_URL}/api/minimax/connect`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
         setMcpStatus('connected');
@@ -726,8 +725,7 @@ const ToolMarketplace = memo(function ToolMarketplace({
     setMcpToolsCount(0);
     setMcpError(null);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-      await fetch(`${backendUrl}/api/minimax/disconnect`, { method: 'POST' });
+      await fetch(`${BACKEND_URL}/api/minimax/disconnect`, { method: 'POST' });
     } catch {
       // ignore
     }
@@ -737,8 +735,7 @@ const ToolMarketplace = memo(function ToolMarketplace({
   useEffect(() => {
     async function fetchTools() {
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-        const res = await fetch(`${backendUrl}/api/admin/tools`);
+        const res = await fetch(`${BACKEND_URL}/api/admin/tools`);
         const data = await res.json();
         if (data.success && data.tools) {
           const mappedTools = data.tools.map(mapApiToToolInfo);

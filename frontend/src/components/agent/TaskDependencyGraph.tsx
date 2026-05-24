@@ -234,7 +234,7 @@ const TaskDependencyGraph: React.FC<TaskDependencyGraphProps> = ({
 
   // 渲染依赖连线
   const renderEdges = useMemo(() => {
-    const edges: JSX.Element[] = [];
+    const edges: React.ReactNode[] = [];
 
     tasks.forEach(task => {
       const targetPos = positions.get(task.id);

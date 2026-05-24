@@ -2,9 +2,10 @@
 import { useCallback, useMemo } from 'react';
 import { useMissionControlStore, initializeAgents, startMission } from './store';
 import type { MissionAgent, MissionTask, MissionEvent, TaskPriority } from './types';
+import { BACKEND_URL } from '@/lib/config';
 
 // 后端 API 地址
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+const API_BASE = BACKEND_URL;
 
 /**
  * 发起 API 请求

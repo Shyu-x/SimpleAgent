@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BACKEND_URL } from '@/lib/config';
 import { motion as motionClass } from 'framer-motion';
 import {
   Users,
@@ -186,9 +187,8 @@ const MissionControl = memo(function MissionControl({
   useEffect(() => {
     if (!activeTraceId) return;
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
     const eventSource = new EventSource(
-      `${backendUrl}/api/admin/traces/subscribe/live?traceId=${activeTraceId}`
+      `${BACKEND_URL}/api/admin/traces/subscribe/live?traceId=${activeTraceId}`
     );
 
     eventSource.onmessage = (event) => {

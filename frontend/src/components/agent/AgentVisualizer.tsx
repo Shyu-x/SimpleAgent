@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import ResponsiveModal from '@/components/ui/ResponsiveModal';
+import { BACKEND_URL } from '@/lib/config';
 
 /**
  * API返回的Span结构
@@ -239,8 +240,7 @@ function useTraceSubscription(traceId?: string) {
     setSteps([]);
 
     // 使用后端代理地址（与 MissionControl 保持一致）
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-    const eventSource = new EventSource(`${backendUrl}/api/admin/traces/subscribe/live?traceId=${traceId}`);
+    const eventSource = new EventSource(`${BACKEND_URL}/api/admin/traces/subscribe/live?traceId=${traceId}`);
 
     eventSource.onopen = () => {
       setLoading(false);
@@ -464,8 +464,7 @@ const AgentVisualizer: React.FC<AgentVisualizerProps> = ({
     if (!traceId) return;
 
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-      const response = await fetch(`${backendUrl}/api/admin/traces/${traceId}`);
+      const response = await fetch(`${BACKEND_URL}/api/admin/traces/${traceId}`);
       if (!response.ok) throw new Error('获取轨迹失败');
 
       const json = await response.json();

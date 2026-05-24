@@ -15,8 +15,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
+import { BACKEND_URL } from '@/lib/config';
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+const API_BASE = BACKEND_URL;
 
 // ============ 类型定义 ============
 

@@ -47,8 +47,8 @@ function createMockWorkflow() {
     description: '测试工作流描述',
     process: 'sequential' as const,
     agents: [
-      { id: 'agent-1', name: 'Agent-1', status: 'idle', type: 'worker' },
-      { id: 'agent-2', name: 'Agent-2', status: 'idle', type: 'worker' }
+      { id: 'agent-1', name: 'Agent-1', status: 'idle' as const, type: 'worker' as const, role: 'executor' as const },
+      { id: 'agent-2', name: 'Agent-2', status: 'idle' as const, type: 'worker' as const, role: 'executor' as const }
     ],
     tasks: [
       { id: 'task-1', name: '任务一', agentId: 'agent-1', status: 'pending' as const, order: 1 },
@@ -62,7 +62,7 @@ function createMockExecutionState() {
     status: 'idle' as const,
     currentTaskIndex: 0,
     progress: 0,
-    errors: [],
+    errors: [] as Array<{ id: string; type: 'error' | 'warning'; message: string; timestamp?: number; stack?: string; taskId?: string }>,
     toolCalls: [],
     pendingConfirmations: []
   };
@@ -298,8 +298,13 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('已完成任务显示正确状态', async () => {
-      const workflow = createMockWorkflow();
-      workflow.tasks[0].status = 'completed';
+      const workflow = {
+        ...createMockWorkflow(),
+        tasks: [
+          { id: 'task-1', name: '任务一', agentId: 'agent-1', status: 'completed' as const, order: 1 },
+          { id: 'task-2', name: '任务二', agentId: 'agent-2', status: 'pending' as const, order: 2 }
+        ]
+      };
 
       render(
         <AgentCollaborationPanel
@@ -400,9 +405,13 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('有运行中任务时显示执行中文字', () => {
-      const runningState = createMockExecutionState();
-      const workflow = createMockWorkflow();
-      workflow.tasks[0].status = 'running';
+      const workflow = {
+        ...createMockWorkflow(),
+        tasks: [
+          { id: 'task-1', name: '任务一', agentId: 'agent-1', status: 'running' as const, order: 1 },
+          { id: 'task-2', name: '任务二', agentId: 'agent-2', status: 'pending' as const, order: 2 }
+        ]
+      };
 
       render(
         <AgentCollaborationPanel

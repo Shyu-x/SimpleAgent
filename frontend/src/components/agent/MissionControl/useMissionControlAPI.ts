@@ -5,8 +5,7 @@
 import { useCallback, useEffect } from 'react';
 import { useMissionControlStore } from './store';
 import type { MissionAgent, MissionTask, MissionEvent } from './types';
-
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { BACKEND_URL } from '@/lib/config';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -14,19 +13,19 @@ interface ApiResponse<T> {
   error?: { message: string; type: string };
 }
 
+const API_BASE = BACKEND_URL;
+
 interface TaskResponse {
   id: string;
   name: string;
-  description: string;
-  priority: string;
-  status: string;
-  assignedAgent: string | null;
+  description?: string;
+  priority?: string;
+  assignedAgent?: string;
   createdAt: number;
   updatedAt: number;
-  startedAt: number | null;
-  completedAt: number | null;
-  result: string | null;
-  error: string | null;
+  status: string;
+  result?: string;
+  error?: string;
 }
 
 interface AgentResponse {
@@ -100,7 +99,7 @@ function convertTask(task: TaskResponse): Omit<MissionTask, 'id' | 'createdAt' |
   return {
     id: task.id,
     title: task.name,
-    description: task.description,
+    description: task.description || '',
     priority: task.priority as MissionTask['priority'],
     status: task.status as MissionTask['status'],
     assignedAgent: task.assignedAgent || undefined,
