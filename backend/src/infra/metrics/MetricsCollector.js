@@ -17,6 +17,9 @@ const path = require('path');
 const os = require('os');
 const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
 const { getStateValue } = require('../../utils/circuitStateUtils');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('metricsCollector');
 
 class MetricsCollector {
   /**
@@ -707,7 +710,7 @@ class MetricsCollector {
       const latestPath = path.join(this.persistPath, 'metrics_latest.json');
       await fs.promises.writeFile(latestPath, JSON.stringify(metrics, null, 2));
     } catch (error) {
-      console.error('[MetricsCollector] 持久化失败:', error);
+      logger.error('持久化失败', { error: error.message });
     }
   }
 
@@ -765,7 +768,7 @@ class MetricsCollector {
         }
       }
     } catch (error) {
-      console.error('[MetricsCollector] 清理失败:', error);
+      logger.error('清理失败', { error: error.message });
     }
   }
 
@@ -1065,7 +1068,7 @@ class MetricsCollector {
     } catch (error) {
       // 使用上次缓存值而非随机值
       const lastValue = this._lastCpuUsage || 50;
-      console.warn('[MetricsCollector] CPU usage fallback to cached value:', lastValue);
+      logger.warn('CPU usage fallback to cached value', { value: lastValue });
       return lastValue;
     }
   }
@@ -1084,7 +1087,7 @@ class MetricsCollector {
     } catch (error) {
       // 使用上次缓存值而非随机值
       const lastValue = this._lastMemoryUsage || 50;
-      console.warn('[MetricsCollector] Memory usage fallback to cached value:', lastValue);
+      logger.warn('Memory usage fallback to cached value', { value: lastValue });
       return lastValue;
     }
   }
