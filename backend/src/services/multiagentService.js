@@ -6,6 +6,9 @@
 const { Agent, Task, Crew, AGENT_TEMPLATES, TASK_TEMPLATES } = require('../multiagent');
 const MiniMaxChatClient = require('./model/clients/MiniMaxChatClient');
 const AppError = require('../common/errors/AppError');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('multiagentService');
 
 // ============================================
 // 状态存储 (内存中)
@@ -120,7 +123,7 @@ function createRealLLMClient() {
         });
         return response.content || '[无内容返回]';
       } catch (error) {
-        console.error('[MultiagentService] LLM 调用失败:', error.message);
+        logger.error('LLM 调用失败', { error: error.message });
         return `[${agent?.role || 'Agent'}] 执行出错: ${error.message}`;
       }
     }

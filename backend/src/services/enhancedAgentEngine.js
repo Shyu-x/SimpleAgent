@@ -12,6 +12,9 @@ const ToolRegistry = require('./tools/toolRegistry');
 const FileSystemTool = require('./tools/fileSystemTool');
 const ShellTool = require('./tools/shellTool');
 const WebSearchTool = require('./tools/webSearchTool');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('enhancedAgentEngine');
 
 /**
  * 检查点管理器
@@ -579,7 +582,7 @@ class EnhancedAgentEngine extends EventEmitter {
       results.error = error.message;
       this.state.status = 'error';
       this.emit('error', error);
-      console.error('Agent execution error:', error);
+      logger.error('Agent execution error', { error: error.message });
 
       // 保存错误状态检查点
       if (this.config.enableCheckpoints) {
