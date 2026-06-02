@@ -8,6 +8,9 @@
  */
 
 const EventEmitter = require('events');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+
+const logger = createLogger('modelRouter');
 const { createCircuitBreaker, getAllBreakersStatus, CB_STATES } = require('../../middleware/circuitBreaker');
 const { createSSEFirstChunkProbe, SSEProbeState } = require('../../infra/sse/ProbeBufferingCallback');
 const {
@@ -260,7 +263,7 @@ class MiniMaxRouter extends EventEmitter {
       });
 
       // 检查是否是降级响应（熔断器触发）
-      console.error('[ModelRouter] executeStream apiResult:', JSON.stringify({
+      logger.error('executeStream apiResult', {
         hasResult: !!apiResult,
         keys: apiResult ? Object.keys(apiResult) : [],
         hasFallback: !!apiResult?.fallback,
@@ -268,7 +271,7 @@ class MiniMaxRouter extends EventEmitter {
         hasResultField: !!apiResult?.result,
         resultType: typeof apiResult?.result,
         resultConstructor: apiResult?.result?.constructor?.name
-      }));
+      });
 
       if (apiResult && (apiResult.fallback || apiResult.error)) {
         this.stats.failedRequests++;
@@ -485,7 +488,7 @@ class MiniMaxRouter extends EventEmitter {
     // 获取熔断器并记录状态
     const { getOpossumBreaker, getAllBreakersStatus } = require('../../middleware/circuitBreaker');
     const breaker = getOpossumBreaker(breakerName, breakerOptions);
-    console.error('[ModelRouter] Breaker state:', breaker.status?.state, 'stats:', JSON.stringify(breaker.status?.stats));
+    logger.error('Breaker state', { state: breaker.status?.state, stats: JSON.stringify(breaker.status?.stats) });
 
     // Fallback 函数：熔断打开时返回友好错误
     const fallback = () => ({
@@ -498,7 +501,7 @@ class MiniMaxRouter extends EventEmitter {
     // 执行请求 - 暂时禁用 Opossum 熔断器进行测试
     // 直接调用 fetch，绕过熔断器
     try {
-      console.error('[ModelRouter] Making direct fetch call (bypassing circuit breaker)');
+      logger.error('Making direct fetch call (bypassing circuit breaker)');
       const response = await fetch(`${baseUrl}/v1/messages`, {
         method: 'POST',
         headers: {
@@ -522,7 +525,7 @@ class MiniMaxRouter extends EventEmitter {
         signal: AbortSignal.timeout(120000)
       });
 
-      console.error('[ModelRouter] Direct fetch response status:', response.status);
+      logger.error('Direct fetch response status', { status: response.status });
 
       // 记录模型 API 耗时
       const apiLatency = Date.now() - startTime;
@@ -564,7 +567,7 @@ class MiniMaxRouter extends EventEmitter {
       }
 
       if (request.stream) {
-        console.error('[ModelRouter] Returning stream for streaming request');
+        logger.error('Returning stream for streaming request');
         // 返回成功结果，包含流
         return {
           success: true,
@@ -586,7 +589,7 @@ class MiniMaxRouter extends EventEmitter {
         }
       }
 
-      console.error('[ModelRouter] Returning JSON result');
+      logger.error('Returning JSON result');
       // 返回成功结果，包含 JSON
       return {
         success: true,
@@ -594,7 +597,7 @@ class MiniMaxRouter extends EventEmitter {
         model: modelId
       };
     } catch (error) {
-      console.error('[ModelRouter] Direct fetch failed:', error.message);
+      logger.error('Direct fetch failed', { error: error.message });
       // 返回错误对象（不经过熔断器）
       return {
         success: false,
