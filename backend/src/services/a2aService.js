@@ -5,6 +5,9 @@
  */
 
 const EventEmitter = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('a2aService');
 
 // A2A 消息类型
 const A2A_MESSAGE_TYPES = {
@@ -162,7 +165,7 @@ class A2AAgentRegistry extends EventEmitter {
     this.agents.set(agentInfo.id, agent);
     this.heartbeats.set(agentInfo.id, Date.now());
     this.emit('agent:registered', agent);
-    console.log(`[A2A] Agent registered: ${agent.id} (${agent.name})`);
+    logger.info('Agent registered', { agentId: agent.id, name: agent.name });
 
     return agent;
   }
@@ -176,7 +179,7 @@ class A2AAgentRegistry extends EventEmitter {
       this.agents.delete(agentId);
       this.heartbeats.delete(agentId);
       this.emit('agent:unregistered', { agentId, agent });
-      console.log(`[A2A] Agent unregistered: ${agentId}`);
+      logger.info('Agent unregistered', { agentId });
     }
   }
 
@@ -282,7 +285,7 @@ class A2AMessageBroker extends EventEmitter {
 
     // 去重检查
     if (this.processedMessages.has(message.id)) {
-      console.log(`[A2A] Duplicate message ignored: ${message.id}`);
+      logger.info('Duplicate message ignored', { messageId: message.id });
       return { success: false, error: 'Duplicate message' };
     }
 
@@ -294,7 +297,7 @@ class A2AMessageBroker extends EventEmitter {
     this.inbox.get(message.to).push(message);
     this.processedMessages.add(message.id);
 
-    console.log(`[A2A] Message sent: ${message.id} from ${message.from} to ${message.to} (${message.type})`);
+    logger.info('Message sent', { messageId: message.id, from: message.from, to: message.to, type: message.type });
 
     this.emit('message:sent', message);
     this.emit(`message:${message.to}`, message);
@@ -489,7 +492,7 @@ class A2AService extends EventEmitter {
       task.status = A2A_TASK_STATUS.PENDING;
     }
 
-    console.log(`[A2A] Task delegated: ${task.id} from ${from} to ${to}`);
+    logger.info('Task delegated', { taskId: task.id, from, to });
 
     this.emit('task:delegated', task);
 
@@ -502,7 +505,7 @@ class A2AService extends EventEmitter {
   returnResult(taskId, result, status = A2A_TASK_STATUS.COMPLETED, metadata = {}) {
     const task = this._pendingTasks.get(taskId);
     if (!task) {
-      console.warn(`[A2A] Task not found for result return: ${taskId}`);
+      logger.warn('Task not found for result return', { taskId });
       return { success: false, error: 'Task not found' };
     }
 
@@ -535,7 +538,7 @@ class A2AService extends EventEmitter {
       this._pendingTasks.delete(taskId);
     }
 
-    console.log(`[A2A] Result returned for task: ${taskId}, status: ${status}`);
+    logger.info('Result returned for task', { taskId, status });
 
     this.emit('task:completed', task);
 
@@ -697,7 +700,7 @@ class A2AService extends EventEmitter {
         try {
           cb(message);
         } catch (err) {
-          console.error(`[A2A] Task callback error: ${err.message}`);
+          logger.error('Task callback error', { error: err.message });
         }
       });
       this._taskCallbacks.delete(taskId);

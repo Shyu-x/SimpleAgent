@@ -598,7 +598,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
           content: `[对话摘要] ${parsed.summary || '之前的对话已压缩'}`
         });
       } catch (e) {
-        console.warn('[Token] 摘要生成失败，使用默认摘要');
+        this.logger?.warn('摘要生成失败，使用默认摘要');
         summarizedMessages.push({
           role: 'assistant',
           content: `[对话摘要] 已完成 ${messagesToSummarize.length} 轮对话`
@@ -641,7 +641,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       try {
         this.toolRegistry.register(new CodeExecutionTool(toolOptions.codeExecution || {}));
       } catch (e) {
-        console.warn('CodeExecutionTool not loaded:', e.message);
+        this.logger?.warn('CodeExecutionTool not loaded', { error: e.message });
       }
     }
 
@@ -1026,7 +1026,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       try {
         await this._storeSemanticMemory(task, results.finalResult, results.success);
       } catch (err) {
-        console.warn('[AgentEngine] 语义记忆存储失败:', err.message);
+        this.logger?.warn('语义记忆存储失败', { error: err.message });
       }
 
       // 记录 Agent 执行指标
@@ -1082,7 +1082,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       };
       await this.fileCheckpoint.save(this.sessionId, state);
     } catch (error) {
-      console.warn('[AgentEngine] 文件检查点保存失败:', error.message);
+      this.logger?.warn('文件检查点保存失败', { error: error.message });
     }
   }
 
@@ -1961,7 +1961,7 @@ ${context.customPrompt || ''}
         source: r.source
       }));
     } catch (err) {
-      console.warn('[AgentEngine] 语义记忆检索失败:', err.message);
+      this.logger?.warn('语义记忆检索失败', { error: err.message });
       return [];
     }
   }
