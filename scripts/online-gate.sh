@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # online-gate.sh - 商业级上线门禁检查
 # 用法: bash scripts/online-gate.sh
+# ⚠️ 必须单实例运行！多次并发会触发后端资源争用导致抖动。
 # 退出码: 0 = GO, 1 = NO-GO
 
 set -u
