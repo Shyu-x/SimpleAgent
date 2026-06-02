@@ -7,7 +7,14 @@ const crypto = require('crypto');
 
 // IP 速率限制 (简单的内存实现)
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1分钟
-const MAX_REQUESTS_PER_WINDOW = 100;
+const MAX_REQUESTS_PER_WINDOW = parseInt(
+  process.env.RATE_LIMIT_MAX || '100',
+  10
+);
+// 完全禁用速率限制（仅在性能测试 / 内网部署时使用）
+const RATE_LIMIT_DISABLED =
+  process.env.DISABLE_RATE_LIMIT === 'true' ||
+  process.env.DISABLE_RATE_LIMIT === '1';
 
 // CSRF Token 配置
 const CSRF_SECRET = process.env.CSRF_SECRET || crypto.randomBytes(32).toString('hex');
@@ -51,6 +58,7 @@ const CSRF_EXEMPT_PATHS = [
 const rateLimit = new Map();
 
 function rateLimitMiddleware(req, res, next) {
+  if (RATE_LIMIT_DISABLED) return next();
   const ip = req.ip || req.connection.remoteAddress || 'unknown';
   const now = Date.now();
 
