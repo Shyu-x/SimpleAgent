@@ -6,6 +6,9 @@ const express = require('express');
 const MetricsCollector = require('../metrics/MetricsCollector');
 const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
 const { getStateValue } = require('../../utils/circuitStateUtils');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('prometheusService');
 
 /**
  * Prometheus 指标服务
@@ -33,7 +36,7 @@ class PrometheusService {
     // 注册业务相关指标
     this._registerBusinessMetrics();
 
-    console.log('[PrometheusService] 初始化完成');
+    logger.info('初始化完成');
   }
 
   /**
@@ -141,7 +144,7 @@ class PrometheusService {
     // 活跃请求数 - Gauge
     // 标签: module
 
-    console.log('[PrometheusService] HTTP 指标已注册');
+    logger.info('HTTP 指标已注册');
   }
 
   /**
@@ -160,7 +163,7 @@ class PrometheusService {
     // 熔断器状态 - Gauge
     this._metricsCollector.setGauge('circuit_breaker_state', 0, { circuit: 'default' });
 
-    console.log('[PrometheusService] 业务指标已注册');
+    logger.info('业务指标已注册');
   }
 
   /**
@@ -432,7 +435,7 @@ class PrometheusService {
 
     // 每分钟输出一次指标到日志
     setInterval(() => {
-      console.log('[PrometheusService] 指标采集:', {
+      logger.info('指标采集', {
         timestamp: new Date().toISOString(),
         requests: this._metricsCollector?.getCounterSum('http_requests_total') || 0,
         errors: this._metricsCollector?.getGaugeValue('module_errors_total') || 0,

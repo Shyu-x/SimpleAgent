@@ -13,6 +13,9 @@
  * @date 2026-05-13
  */
 
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('qdrantMonitor');
 const MetricsCollector = require('../metrics/MetricsCollector');
 
 /**
@@ -133,7 +136,7 @@ class QdrantMonitor {
    */
   initialize(metricsCollector) {
     if (this._isInitialized) {
-      console.warn('[QdrantMonitor] 已初始化，跳过');
+      logger.warn('已初始化，跳过');
       return;
     }
 
@@ -146,7 +149,7 @@ class QdrantMonitor {
     this._startHealthCheck();
 
     this._isInitialized = true;
-    console.log('[QdrantMonitor] 初始化完成');
+    logger.info('初始化完成');
   }
 
   /**
@@ -325,7 +328,7 @@ class QdrantMonitor {
         break;
     }
 
-    console.error(`[QdrantMonitor] 错误: type=${type}, operation=${operation}, collection=${collection}, message=${message}`);
+    logger.error('Qdrant 错误', { type, operation, collection, message });
   }
 
   /**
@@ -352,7 +355,7 @@ class QdrantMonitor {
     this.metricsCollector.incrementCounter(METRICS.DEGRADED_TO_MEMORY, { reason, instance: this.serviceName });
     this._updateHealthStatus(HEALTH_STATUS.DEGRADED);
 
-    console.warn(`[QdrantMonitor] 降级到内存存储: reason=${reason}`);
+    logger.warn('降级到内存存储', { reason });
   }
 
   /**
@@ -633,7 +636,7 @@ class QdrantMonitor {
       this._healthCheckTimer = null;
     }
 
-    console.log('[QdrantMonitor] 已关闭');
+    logger.info('已关闭');
   }
 }
 

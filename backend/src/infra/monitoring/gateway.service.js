@@ -14,6 +14,9 @@
  */
 
 const EventEmitter = require('events');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('gatewayService');
 
 /**
  * 降级级别枚举
@@ -206,7 +209,7 @@ class GatewayService extends EventEmitter {
         currentLevel: this._currentLevel,
       });
     } catch (error) {
-      console.error('[GatewayService] 检查失败:', error.message);
+      logger.error('检查失败', { error: error.message });
     }
   }
 
@@ -331,10 +334,7 @@ class GatewayService extends EventEmitter {
       reason,
     });
 
-    console.log(`[GatewayService] 降级状态变更: ${previousLevel} -> ${level}`, {
-      reason,
-      strategy,
-    });
+    logger.info('降级状态变更', { previousLevel, level, reason, strategy });
   }
 
   /**
@@ -364,7 +364,7 @@ class GatewayService extends EventEmitter {
     this._clearRecoveryTimer();
 
     this._recoveryTimer = setTimeout(() => {
-      console.log('[GatewayService] 恢复定时器触发，开始健康检查...');
+      logger.info('恢复定时器触发，开始健康检查...');
 
       // 执行一次检查
       this._performCheck().then(() => {
