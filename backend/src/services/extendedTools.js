@@ -7,6 +7,9 @@ const https = require('https');
 const http = require('http');
 const { URL } = require('url');
 const AppError = require('../common/errors/AppError');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('extendedTools');
 
 /**
  * Arxiv论文搜索工具
@@ -178,7 +181,7 @@ class WebCrawlTool {
         }
       }
     } catch (error) {
-      console.error(`Failed to crawl ${url}:`, error.message);
+      logger.error('Failed to crawl', { url, error: error.message });
     }
   }
 

@@ -4,6 +4,9 @@
  */
 
 const { sleep, calculateBackoffDelay } = require('../utils/retry');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('errorHandler');
 
 /**
  * 错误代码枚举
@@ -166,7 +169,7 @@ class RetryStrategy {
         // 如果不是最后一次尝试，等待后重试
         if (attempt < this.maxAttempts) {
           const delay = this.calculateDelay(attempt);
-          console.log(`[RetryStrategy] Attempt ${attempt} failed, retrying in ${delay}ms...`);
+          logger.info('Retry attempt failed, retrying', { attempt, delay });
           await sleep(delay);
         }
       }
@@ -192,20 +195,20 @@ class RecoveryManager {
   registerDefaultHandlers() {
     // 工具执行失败恢复
     this.registerRecoveryHandler(ErrorCodes.TOOL_EXECUTION_FAILED, async (error, context) => {
-      console.log(`[Recovery] Attempting recovery for tool execution failure`);
+      logger.info('Recovery: tool execution failure');
       // 可以尝试替代工具或简化操作
       return { action: 'retry', modifications: { simplified: true } };
     });
 
     // 超时恢复
     this.registerRecoveryHandler(ErrorCodes.EXECUTION_TIMEOUT, async (error, context) => {
-      console.log(`[Recovery] Attempting recovery for timeout`);
+      logger.info('Recovery: timeout');
       return { action: 'checkpoint_and_retry', timeout: context.timeout * 1.5 };
     });
 
     // LLM 速率限制恢复
     this.registerRecoveryHandler(ErrorCodes.LLM_RATE_LIMIT, async (error, context) => {
-      console.log(`[Recovery] Attempting recovery for rate limit`);
+      logger.info('Recovery: rate limit');
       return { action: 'wait_and_retry', delay: 60000 }; // 等待60秒
     });
   }
@@ -231,7 +234,7 @@ class RecoveryManager {
       const result = await handler(error, context);
       return result;
     } catch (recoveryError) {
-      console.error(`[Recovery] Recovery handler failed:`, recoveryError);
+      logger.error('Recovery handler failed', { error: recoveryError.message });
       return { action: 'fail', reason: recoveryError.message };
     }
   }
