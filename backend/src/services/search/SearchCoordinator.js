@@ -16,6 +16,9 @@
 
 const { SearchChannel, SearchResult } = require('./SearchChannel');
 const AppError = require('../../common/errors/AppError');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+
+const logger = createLogger('searchCoordinator');
 
 class SearchCoordinator {
   constructor(options = {}) {
@@ -124,7 +127,7 @@ class SearchCoordinator {
           results
         };
       } catch (error) {
-        console.error(`[SearchCoordinator] Channel ${channel.name} failed:`, error.message);
+        logger.error('Channel failed', { channel: channel.name, error: error.message });
         return {
           channel: channel.name,
           weight: channel.weight,
@@ -155,7 +158,7 @@ class SearchCoordinator {
           results: channelResults
         });
       } catch (error) {
-        console.error(`[SearchCoordinator] Channel ${channel.name} failed:`, error.message);
+        logger.error('Channel failed', { channel: channel.name, error: error.message });
         results.push({
           channel: channel.name,
           weight: channel.weight,

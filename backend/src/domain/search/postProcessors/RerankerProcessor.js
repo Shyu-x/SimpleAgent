@@ -128,7 +128,7 @@ ${content.slice(0, 500)}
       const score = match ? parseInt(match[0], 10) : 5;
       return Math.min(10, Math.max(0, score));
     } catch (err) {
-      console.warn(`[RerankerProcessor] 评估失败，使用默认分 5:`, err.message);
+      logger.warn('评估失败，使用默认分 5', { error: err.message });
       return 5;
     }
   }

@@ -10,6 +10,9 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('enhancedMemoryService');
 
 // 查询超时配置
 const ENHANCED_QUERY_TIMEOUT_MS = 5000;
@@ -173,9 +176,9 @@ class EnhancedMemoryService {
       await fs.mkdir(this.storagePath, { recursive: true });
       await this.loadFromStorage();
       this.initialized = true;
-      console.log('[EnhancedMemoryService] Initialized');
+      logger.info('Initialized');
     } catch (error) {
-      console.error('[EnhancedMemoryService] Initialization failed:', error);
+      logger.error('Initialization failed', { error: error.message });
       throw error;
     }
   }
@@ -472,7 +475,7 @@ class EnhancedMemoryService {
       const filePath = path.join(this.storagePath, 'memory.json');
       await fs.writeFile(filePath, JSON.stringify(data, null, 2));
     } catch (error) {
-      console.error('[EnhancedMemoryService] Save failed:', error);
+      logger.error('Save failed', { error: error.message });
     }
   }
 
@@ -508,7 +511,7 @@ class EnhancedMemoryService {
     } catch (error) {
       // 文件不存在时忽略
       if (error.code !== 'ENOENT') {
-        console.error('[EnhancedMemoryService] Load failed:', error);
+        logger.error('Load failed', { error: error.message });
       }
     }
   }

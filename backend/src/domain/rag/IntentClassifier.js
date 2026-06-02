@@ -23,6 +23,9 @@
 
 const EventEmitter = require('events');
 const AppError = require('../../common/errors/AppError');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+
+const logger = createLogger('intentClassifier');
 
 // ==================== 常量定义 ====================
 
@@ -577,7 +580,7 @@ class TreeIntentClassifier extends EventEmitter {
           }
         } catch (error) {
           this.stats.llmFailures++;
-          console.warn('[TreeIntentClassifier] LLM分类失败，降级到关键词匹配:', error.message);
+          logger.warn('LLM分类失败，降级到关键词匹配', { error: error.message });
         }
       }
 
@@ -608,7 +611,7 @@ class TreeIntentClassifier extends EventEmitter {
       return this._addClarification(defaultResult, trimmedQuery);
 
     } catch (error) {
-      console.error('[TreeIntentClassifier] 分类异常:', error);
+      logger.error('分类异常', { error: error.message });
       this._updateLatency(startTime);
       return this._buildResult(
         DOMAIN_TYPES.DAILY_COMMUNICATION,
