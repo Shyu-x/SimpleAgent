@@ -128,7 +128,7 @@ class MiniMaxSearchTool {
     // 串行执行避免 API 限流
     for (let i = 0; i < limitedQueries.length; i++) {
       const q = limitedQueries[i];
-      console.log(`[MiniMaxSearch] [${i + 1}/${limitedQueries.length}] 搜索: ${q}`);
+      logger.info('搜索进度', { index: i + 1, total: limitedQueries.length, query: q });
 
       try {
         const result = await this.search(q, { ...options, maxResults });
