@@ -11,6 +11,9 @@
 
 const { RateLimiterRedis } = require('rate-limiter-flexible');
 const Redis = require('ioredis');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('rateLimit');
 
 // Redis 连接配置
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
@@ -30,14 +33,14 @@ try {
   redisClient.on('error', (err) => {
     // Only log once per connection cycle to avoid spam
     if (!redisConnectionLogged) {
-      console.warn('[RateLimit] Redis error, will retry silently:', err.message.split('\n')[0]);
+      logger.warn('Redis error, will retry silently', { error: err.message.split('\n')[0] });
       redisConnectionLogged = true;
     }
   });
-  
+
   redisClient.on('ready', () => {
     if (!redisConnectionLogged) {
-      console.log('[RateLimit] Redis connected successfully');
+      logger.info('Redis connected successfully');
       redisConnectionLogged = true;
     }
   });
@@ -47,7 +50,7 @@ try {
     // 连接失败是正常的（Redis可能未启动），静默处理
   });
 } catch (err) {
-  console.warn('[RateLimit] Redis initialization skipped');
+  logger.warn('Redis initialization skipped', { error: err.message });
 }
 
 // 配置规格（三层用户）
@@ -355,7 +358,7 @@ function createRateLimitMiddleware(options = {}) {
 
     } catch (error) {
       // 限流器错误时降级为允许请求
-      console.error('[RateLimit] Limiter error:', error.message);
+      logger.error('Limiter error', { error: error.message });
       res.set('X-RateLimit-Status', 'error');
       next();
     }
@@ -415,7 +418,7 @@ async function getRateLimitStats(ip, tier) {
       },
     };
   } catch (error) {
-    console.error('[RateLimit] Stats error:', error.message);
+    logger.error('Stats error', { error: error.message });
     return null;
   }
 }

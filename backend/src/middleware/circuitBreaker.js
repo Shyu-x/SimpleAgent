@@ -17,6 +17,9 @@
 
 const CircuitBreaker = require('opossum');
 const { getMetricsCollector } = require('../infra/metrics');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('circuitBreaker');
 
 // 熔断器状态常量
 const CB_STATES = {
@@ -64,27 +67,27 @@ function getOpossumBreaker(name, options = {}) {
 
   // 配置事件
   breaker.on('open', (data) => {
-    console.log(`[CircuitBreaker] ${name} OPENED - ${JSON.stringify(data)}`);
+    logger.info('熔断器 OPENED', { name, data });
     emitCircuitMetric(name, 'open');
   });
 
   breaker.on('halfOpen', (data) => {
-    console.log(`[CircuitBreaker] ${name} HALF_OPEN - ${JSON.stringify(data)}`);
+    logger.info('熔断器 HALF_OPEN', { name, data });
     emitCircuitMetric(name, 'halfOpen');
   });
 
   breaker.on('close', (data) => {
-    console.log(`[CircuitBreaker] ${name} CLOSED - ${JSON.stringify(data)}`);
+    logger.info('熔断器 CLOSED', { name, data });
     emitCircuitMetric(name, 'close');
   });
 
   breaker.on('fallback', (data) => {
-    console.log(`[CircuitBreaker] ${name} FALLBACK triggered`);
+    logger.info('熔断器 FALLBACK triggered', { name });
     emitCircuitMetric(name, 'fallback');
   });
 
   breaker.on('timeout', (data) => {
-    console.log(`[CircuitBreaker] ${name} TIMEOUT - ${JSON.stringify(data)}`);
+    logger.info('熔断器 TIMEOUT', { name, data });
     emitCircuitMetric(name, 'timeout');
   });
 
