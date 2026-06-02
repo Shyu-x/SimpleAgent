@@ -3,6 +3,10 @@
  * 借鉴 MiniMax Mini-Agent 的优雅重试设计
  */
 
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('retry');
+
 /**
  * 重试配置
  */
@@ -93,7 +97,7 @@ async function withRetry(fn, options = {}) {
       const delay = Math.min(initialDelay * Math.pow(2, attempt), maxDelay);
 
       // 记录重试
-      console.warn(`[Retry] Attempt ${attempt + 1} failed: ${error.message}. Retrying in ${delay}ms...`);
+      logger.warn('Attempt failed, retrying', { attempt: attempt + 1, error: error.message, delay });
 
       if (onRetry) {
         onRetry(error, attempt + 1);
