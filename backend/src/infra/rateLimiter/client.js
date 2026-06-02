@@ -4,6 +4,9 @@
  */
 
 const Redis = require('ioredis');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('redisClient');
 
 let defaultClient = null;
 
@@ -18,7 +21,7 @@ function createRedisClient(url = null) {
   const client = new Redis(redisUrl, {
     retryStrategy: (retries) => {
       if (retries > 10) {
-        console.error('[Redis] 连接重试次数过多, 停止重连');
+        logger.error('连接重试次数过多, 停止重连');
         return false;
       }
       return Math.min(retries * 100, 3000);
@@ -27,19 +30,19 @@ function createRedisClient(url = null) {
   });
 
   client.on('error', (err) => {
-    console.error('[Redis] 客户端错误:', err.message);
+    logger.error('客户端错误', { error: err.message });
   });
 
   client.on('connect', () => {
-    console.log('[Redis] 已连接');
+    logger.info('已连接');
   });
 
   client.on('ready', () => {
-    console.log('[Redis] 就绪');
+    logger.info('就绪');
   });
 
   client.on('reconnecting', () => {
-    console.warn('[Redis] 正在重连...');
+    logger.warn('正在重连...');
   });
 
   return client;
@@ -54,7 +57,7 @@ function getDefaultClient() {
     try {
       defaultClient = createRedisClient();
     } catch (error) {
-      console.warn('[Redis] 创建默认客户端失败:', error.message);
+      logger.warn('创建默认客户端失败', { error: error.message });
       return null;
     }
   }

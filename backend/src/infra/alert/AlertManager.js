@@ -14,6 +14,9 @@
 const https = require('https');
 const http = require('http');
 const url = require('url');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('alertManager');
 
 class AlertManager {
   /**
@@ -113,17 +116,17 @@ class AlertManager {
    */
   registerRule(rule) {
     if (!rule.id || !rule.name || !rule.level || !rule.source) {
-      console.error('[AlertManager] 规则注册失败：缺少必需字段', rule);
+      logger.error('规则注册失败：缺少必需字段', { rule });
       return false;
     }
 
     if (!AlertManager.LEVELS[rule.level.toUpperCase()]) {
-      console.error('[AlertManager] 规则注册失败：无效的告警级别', rule.level);
+      logger.error('规则注册失败：无效的告警级别', { level: rule.level });
       return false;
     }
 
     if (this._rules.has(rule.id)) {
-      console.warn('[AlertManager] 规则已存在，将被覆盖:', rule.id);
+      logger.warn('规则已存在，将被覆盖', { ruleId: rule.id });
     }
 
     // 合并默认配置
@@ -478,7 +481,7 @@ class AlertManager {
       try {
         await this._sendWebhook(webhookUrl, alert);
       } catch (error) {
-        console.error(`[AlertManager] Webhook 发送失败: ${webhookUrl}`, error);
+        logger.error('Webhook 发送失败', { url: webhookUrl, error: error.message });
       }
     }
   }

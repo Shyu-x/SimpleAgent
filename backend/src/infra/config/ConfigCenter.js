@@ -12,6 +12,9 @@ const { EventEmitter } = require('events');
 const fs = require('fs').promises;
 const path = require('path');
 const AppError = require('../../common/errors/AppError');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('configCenter');
 
 class ConfigCenter extends EventEmitter {
   constructor(options = {}) {
@@ -365,7 +368,7 @@ class ConfigCenter extends EventEmitter {
 
       this._watcher = watcher;
     } catch (error) {
-      console.warn('配置热更新监听启动失败:', error.message);
+      logger.warn('配置热更新监听启动失败', { error: error.message });
     }
   }
 
