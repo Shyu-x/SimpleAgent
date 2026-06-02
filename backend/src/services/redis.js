@@ -3,6 +3,9 @@
  * 提供分布式缓存层
  */
 const Redis = require('ioredis');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('redis');
 
 // 配置
 const redisConfig = {
@@ -29,11 +32,11 @@ function getRedisClient() {
     redisClient = new Redis(redisConfig);
 
     redisClient.on('connect', () => {
-      console.log('✅ Redis 客户端已连接');
+      logger.info('Redis 客户端已连接');
     });
 
     redisClient.on('error', (err) => {
-      console.error('❌ Redis 错误:', err.message);
+      logger.error('Redis 错误', { error: err.message });
     });
   }
   return redisClient;
@@ -66,10 +69,10 @@ async function initializeRedis() {
   try {
     const client = getRedisClient();
     await client.connect();
-    console.log('✅ Redis 连接成功');
+    logger.info('Redis 连接成功');
     return true;
   } catch (error) {
-    console.error('❌ Redis 连接失败:', error.message);
+    logger.error('Redis 连接失败', { error: error.message });
     return false;
   }
 }
@@ -90,7 +93,7 @@ async function closeRedis() {
     await redisSubClient.quit();
     redisSubClient = null;
   }
-  console.log('✅ Redis 连接已关闭');
+  logger.info('Redis 连接已关闭');
 }
 
 /**

@@ -6,6 +6,9 @@
  */
 
 const NodeCache = require('node-cache');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('cacheService');
 
 class CacheService {
   constructor(options = {}) {
@@ -90,7 +93,7 @@ class CacheService {
       // 如果单个值超过限制，拒绝写入
       if (valueSize > maxSize) {
         this.stats.errors++;
-        console.warn(`Cache: Value too large for key ${key} (${valueSize} bytes > ${maxSize} bytes)`);
+        logger.warn('Value too large', { key, valueSize, maxSize });
         return false;
       }
 
@@ -114,7 +117,7 @@ class CacheService {
       return result;
     } catch (error) {
       this.stats.errors++;
-      console.error('Cache set error:', error);
+      logger.error('Cache set error', { error: error.message });
       return false;
     }
   }
@@ -136,7 +139,7 @@ class CacheService {
       }
     } catch (error) {
       this.stats.errors++;
-      console.error('Cache get error:', error);
+      logger.error('Cache get error', { error: error.message });
       return null;
     }
   }
@@ -385,7 +388,7 @@ class CacheService {
     }
 
     if (evicted.length > 0) {
-      console.log(`Cache: Evicted ${evicted.length} keys to free space: ${evicted.slice(0, 5).join(', ')}${evicted.length > 5 ? '...' : ''}`);
+      logger.info('Evicted keys to free space', { count: evicted.length, sample: evicted.slice(0, 5) });
     }
 
     return evicted;

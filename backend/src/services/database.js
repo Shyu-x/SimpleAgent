@@ -3,6 +3,9 @@
  * 使用原生 pg 库，支持 PostgreSQL 和 pgvector
  */
 const { Pool } = require('pg');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('database');
 
 // 创建连接池
 const pool = new Pool({
@@ -37,7 +40,7 @@ async function checkColumnExists(tableName, columnName) {
 
     return exists;
   } catch (error) {
-    console.warn(`检查列存在性失败: ${tableName}.${columnName}`, error.message);
+    logger.warn('检查列存在性失败', { table: tableName, column: columnName, error: error.message });
     return false;
   }
 }
@@ -48,11 +51,11 @@ async function initializeDatabase() {
     const client = await pool.connect();
     await client.query('SELECT 1');
     client.release();
-    console.log('✅ PostgreSQL 数据库连接成功');
+    logger.info('PostgreSQL 数据库连接成功');
     return true;
   } catch (error) {
-    console.log('⚠️ 数据库连接失败:', error.message);
-    console.log('   服务将继续运行但数据将存储在内存中');
+    logger.warn('数据库连接失败', { error: error.message });
+    logger.info('服务将继续运行但数据将存储在内存中');
     return false;
   }
 }
@@ -60,7 +63,7 @@ async function initializeDatabase() {
 // 关闭连接池
 async function closeDatabase() {
   await pool.end();
-  console.log('✅ 数据库连接池已关闭');
+  logger.info('数据库连接池已关闭');
 }
 
 // 导出查询方法
@@ -68,7 +71,7 @@ const query = async (text, params) => {
   try {
     return await pool.query(text, params);
   } catch (error) {
-    console.error('❌ 查询失败:', error.message);
+    logger.error('查询失败', { error: error.message });
     throw error;
   }
 };
