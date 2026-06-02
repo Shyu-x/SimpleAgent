@@ -6,6 +6,9 @@
  * 以避免单例模式导致的 collection 冲突问题
  */
 const { QdrantRouter } = require('./vector/QdrantRouter');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('qdrantService');
 
 class QdrantService {
   // 缓存不同 collection 的 router 实例
@@ -61,7 +64,7 @@ class QdrantService {
     // 异步初始化
     setImmediate(() => {
       router.initialize().catch((err) => {
-        console.warn(`QdrantService: Router initialization failed for ${collectionName}: ${err.message}`);
+        logger.warn('Router initialization failed', { collection: collectionName, error: err.message });
       });
     });
 

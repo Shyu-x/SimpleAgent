@@ -306,7 +306,7 @@ class RAGService extends EventEmitter {
           return data.data[0].embedding;
         }
       } catch (error) {
-        console.warn('OpenAI embedding failed, using simple embedding');
+        logger.warn('OpenAI embedding failed, using simple embedding');
       }
     }
 
@@ -369,7 +369,7 @@ class RAGService extends EventEmitter {
           changes: rewriteResult.changes || []
         };
       } catch (err) {
-        console.warn('[RAGService] Query rewrite failed, using original query:', err.message);
+        logger.warn('Query rewrite failed, using original query', { error: err.message });
       }
     }
 
@@ -380,7 +380,7 @@ class RAGService extends EventEmitter {
         const expandResult = await this.queryRewriteService.expand(rewrittenQuery);
         expandedQuery = expandResult.query;
       } catch (err) {
-        console.warn('[RAGService] Query expansion failed:', err.message);
+        logger.warn('Query expansion failed', { error: err.message });
       }
     }
 
@@ -393,7 +393,7 @@ class RAGService extends EventEmitter {
           subQueries = decomposeResult.subQuestions;
         }
       } catch (err) {
-        console.warn('[RAGService] Query decomposition failed:', err.message);
+        logger.warn('Query decomposition failed', { error: err.message });
       }
     }
 
