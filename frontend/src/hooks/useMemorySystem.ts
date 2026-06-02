@@ -142,7 +142,7 @@ export function useMemorySystem() {
           timestamp: Date.now(),
         });
         if (!res.error) {
-          console.debug('[MemorySystem] Synced to backend:', currentMemories.length, 'memories');
+          // Removed: console.debug for production
         }
       } catch (error) {
         console.error('[MemorySystem] Failed to sync to backend:', error);
@@ -177,7 +177,7 @@ export function useMemorySystem() {
         ];
 
         hydrateGlobalMemories(merged);
-        console.debug('[MemorySystem] Loaded from backend:', backendMemories.length, 'memories');
+        // Removed: console.debug for production
       }
     } catch (error) {
       console.error('[MemorySystem] Failed to load from backend:', error);
