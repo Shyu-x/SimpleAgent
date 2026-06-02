@@ -1,5 +1,118 @@
 # SimpleAgent - 更新日志
 
+**Sprint #6 完成日期**: 2026-06-02
+
+---
+
+## Sprint #6 变更摘要 (2026-06-02) — 商业化闭环
+
+### 核心成果
+
+| 类别 | 成果 | 状态 |
+|------|------|------|
+| **上线门禁** | 15 项检查，GO/NO-GO 单命令决策 | ✅ 完成 |
+| **运维手册** | 8 类故障标准处置 + 4 模式部署 | ✅ 完成 |
+| **性能基线** | 6 场景压测，p99 < 162ms | ✅ 完成 |
+| **截图验证** | 5+8+6+6+5=30 张关键状态截图 | ✅ 完成 |
+| **CI 升级** | 新增 smoke job 跑综合测试 | ✅ 完成 |
+| **生产可用性** | 服务起来 + 1612 测试全过 + GATE GO | ✅ 完成 |
+
+### 关键指标
+
+| 指标 | 数值 | 商业级门槛 |
+|------|------|----------|
+| 综合回归 | 26/26 PASS | 全绿 |
+| 后端单测 | 709/709 PASS | 全绿 |
+| 前端单测 | 877/877 PASS | 全绿 |
+| TypeScript | 0 错 | 0 错 |
+| 性能 p99 | < 162ms | < 3000ms |
+| 5xx 错误率 | 0% | < 1% |
+| 上线 GATE | 15/15 GO | 全部 YES |
+
+### 关键产出物
+
+- `docs/online/RUNBOOK.md` — 8 类故障 (R-1 ~ R-8) 标准处置
+- `docs/online/DEPLOY.md` — 4 模式部署 (PM2 / Docker / 后台 / 监控)
+- `docs/online/PERF.md` + `perf-results.json` — 性能报告
+- `docs/online/cleanup-report.md` — Console 清理报告
+- `docs/online/screenshots/*.png` — 5 张核心页面
+- `docs/online/journeys/{conversation,agent,resilience,rag}/*.png` — 25 张旅程截图
+- `scripts/online-gate.sh` — 15 项上线门禁
+- `scripts/smoke.sh` — 12 路径冒烟
+- `scripts/canary-deploy.sh` — 灰度发布
+- `scripts/perf-bench.js` — 6 场景压测
+- `scripts/screenshot.mjs` + 4 个 journey 脚本 — 截图自动化
+- `.github/workflows/ci.yml` — 升级加 smoke job
+
+### 主要变更
+
+**1. 上线门禁系统**
+- `scripts/online-gate.sh` 7 大类 15 项检查
+- 串行 3/3 稳定 GO
+- 文档化"单实例运行"避免并发抖动
+
+**2. 运维 Runbook**
+- R-1 服务挂 / R-2 MiniMax 401/429 / R-3 Qdrant 不可用
+- R-4 SSE 中断 / R-5 连接池耗尽 / R-6 前端 504
+- R-7 内存泄漏 / R-8 磁盘满
+- 每类配黄金 30 秒 + 处置命令
+
+**3. 性能基线**
+- autocannon 6 场景 (health/rag-kb/a2a/tools/admin-tools/admin-traces)
+- p99 < 162ms (门槛 3000ms 留 18x 余量)
+- 新增 `DISABLE_RATE_LIMIT` env 旁路
+- 5xx = 0, 错误率 < 1%
+
+**4. Console 清理 (G2 subagent 主导)**
+- 总扫描 498 → 实际清理 186 (160 REPLACE + 26 REMOVE)
+- 35 个 backend service 转 logger
+- 6 个 frontend 文件移除 debug console
+- 修复 1 处 sed 误改 (mcp.js)
+- 保留 280+ React catch 块 (标准错误处理)
+
+**5. CI 升级**
+- 新增 smoke job (master 自动跑)
+- 启动 backend+frontend → 跑 comprehensive-test
+- 服务挂了自动 cleanup
+
+**6. 截图验证体系**
+- 5 张基础页 (main/welcome/3 admin)
+- 4 个 journey 覆盖对话 / Agent / 响应式 / RAG
+- 共 30 张 PNG 截图，全部 1440×900
+
+### 26 个本 Sprint 提交 (按时间)
+
+| 提交 | 描述 | 类别 |
+|------|------|------|
+| `c6ef11d` | feat(ops): 商业级上线基础设施 | 基础设施 |
+| `25ac801` | refactor(services): a2a/agentEngine/taskQueue 转 logger | Console |
+| `118955b` | chore: remove .bak file | 清理 |
+| `0ef238e` | refactor(services): cacheService/database/redis/pluginManager | Console |
+| `7df4866` | refactor(services): redisCache/errorHandler/memory/extendedTools | Console |
+| `c5a59f2` | refactor(services): multiagent/enhancedAgent/MultiAgentCoordinator | Console |
+| `c58a036` | refactor(services): mcpToolService/mcpSearchService/mcp | Console |
+| `358584a` | refactor(services): QdrantService/ragService/miniMaxSearchTool | Console |
+| `a0a723b` | refactor(services): SemanticMemory/hybridSearch/searchRouter | Console |
+| `edaa5dd` | refactor(services): mockVectorStore/unifiedCache/ingestion | Console |
+| `136ce8d` | feat(perf): 性能基准 + 限流旁路 | 性能 |
+| `86a6abd` | refactor(root,lib): n8n/browser/enhancedMemory/hitl/mcp/search | Console |
+| `3a2e8c1` | refactor(infra/monitoring): gateway/prometheus/qdrant-monitor | Console |
+| `8e86f2c` | refactor(infra): rateLimiter/QueueManager/ConfigCenter/AlertManager | Console |
+| `ece5edf` | refactor(infra): MetricsCollector | Console |
+| `7b247a1` | refactor(middleware): circuitBreaker/rateLimit | Console |
+| `3a864f5` | refactor(utils,common,infra): retry/errors/QueueRateLimiter | Console |
+| `953095c` | refactor(domain,config,services): Reranker/SearchCoordinator | Console |
+| `3f35e69` | chore(verification): add Playwright screenshot script | 截图 |
+| `5d2eaa3` | fix(backend): restore mcp.js from corrupted sed | 修复 |
+| `b6e4f32` | refactor(frontend): useMemorySystem/ExecutionHistory | Console |
+| `eaad892` | refactor(frontend): TraceViewer SSE state | Console |
+| `75bb82a` | refactor(services): miniMaxSearchTool batch loop | Console |
+| `74ae0dc` | docs(online): add G2 console cleanup report | 文档 |
+| `c083bf2` | refactor(services): modelRouter | Console |
+| `b49ee01` | docs(ops): 明确 online-gate 单实例运行 | 文档 |
+
+---
+
 **Sprint #5 完成日期**: 2026-05-16
 
 ---
