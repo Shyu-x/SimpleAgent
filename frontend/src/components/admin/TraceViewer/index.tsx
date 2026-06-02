@@ -109,7 +109,6 @@ export default function TraceViewerPage() {
       eventSource = new EventSource(`${API_BASE}/api/admin/traces/subscribe`);
 
       eventSource.onopen = () => {
-        console.log('[TraceViewer] SSE connected');
         setConnected(true);
         setTracesLoading(false);
         setStatsLoading(false);
@@ -119,7 +118,7 @@ export default function TraceViewerPage() {
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'connected') {
-            console.log('[TraceViewer] SSE ready, clientId:', data.clientId);
+            // SSE 已就绪
           } else if (data.type === 'traces_update' || data.type === 'traces') {
             setTraces(data.data || []);
             if (data.stats) setStats(data.stats);
