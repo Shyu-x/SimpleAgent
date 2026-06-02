@@ -6,6 +6,9 @@
 const fs = require('fs');
 const path = require('path');
 const AppError = require('../../common/errors/AppError');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+
+const logger = createLogger('ingestionPipeline');
 
 class DocumentPipeline {
   constructor(options = {}) {
@@ -77,7 +80,7 @@ class DocumentPipeline {
       const data = await pdfParse(dataBuffer);
       return data.text;
     } catch (error) {
-      console.error('PDF解析失败:', error.message);
+      logger.error('PDF解析失败', { error: error.message });
       throw AppError.internalError(`PDF解析失败: ${error.message}`);
     }
   }
