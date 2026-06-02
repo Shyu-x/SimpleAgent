@@ -4,6 +4,9 @@
  */
 
 const EventEmitter = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('performanceMonitor');
 
 /**
  * 性能指标类型
@@ -191,7 +194,7 @@ class PerformanceMonitor extends EventEmitter {
       };
 
       this.emit('alert', alert);
-      console.warn(`[PerformanceMonitor] Alert: ${type} = ${value}, threshold = ${threshold}`);
+      logger.warn('Alert', { type, value, threshold });
     }
   }
 

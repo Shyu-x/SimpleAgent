@@ -323,7 +323,7 @@ class SemanticMemory {
     }
 
     await this.persist();
-    console.log(`[SemanticMemory] 清理了 ${toRemove.length} 条记忆`);
+    logger.info('清理了过期记忆', { count: toRemove.length });
   }
 
   /**
@@ -438,7 +438,7 @@ class SemanticMemory {
         embeddings: Array.from(this.longTerm.embeddings.entries())
       }, null, 2));
     } catch (error) {
-      console.error('[SemanticMemory] 持久化失败:', error);
+      logger.error('持久化失败', { error: error.message });
     }
   }
 

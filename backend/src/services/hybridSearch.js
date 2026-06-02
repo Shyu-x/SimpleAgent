@@ -4,6 +4,10 @@
  * 参考 ragent 的 Agentic RAG 设计
  */
 
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('hybridSearch');
+
 class HybridSearch {
   constructor(options = {}) {
     this.vectorSearch = options.vectorSearch || null;
@@ -82,7 +86,7 @@ class HybridSearch {
           count: result?.length || 0
         };
       } catch (error) {
-        console.error(`Channel ${channel} error:`, error);
+        logger.error('Channel error', { channel, error: error.message });
         results[channel] = {
           success: false,
           error: error.message,
@@ -119,7 +123,7 @@ class HybridSearch {
           : this.mockIntentSearch(query, knowledgeBaseId, intent);
 
       default:
-        console.warn(`Unknown channel: ${channel}`);
+        logger.warn('Unknown channel', { channel });
         return [];
     }
   }

@@ -3,6 +3,10 @@
  * 支持多个模型自动切换、故障转移、健康检查
  */
 
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('modelPool');
+
 class ModelPool {
   constructor(options = {}) {
     this.models = new Map();           // 模型配置
@@ -438,7 +442,7 @@ class ModelPool {
       try {
         callback(data);
       } catch (error) {
-        console.error(`Error in event listener for ${event}:`, error);
+        logger.error('Error in event listener', { event, error: error.message });
       }
     }
     return this;
