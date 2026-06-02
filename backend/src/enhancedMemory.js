@@ -5,6 +5,9 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { createLogger } = require('./infra/logger/AgentLogger');
+
+const logger = createLogger('enhancedMemory');
 
 // 记忆类型
 const MemoryType = {
@@ -224,7 +227,7 @@ class EnhancedMemorySystem {
     try {
       await fs.mkdir(this.config.storagePath, { recursive: true });
     } catch (error) {
-      console.error('[Memory] Failed to create storage directory:', error);
+      logger.error('Failed to create storage directory', { error: error.message });
     }
 
     // 加载持久化的记忆
@@ -234,7 +237,7 @@ class EnhancedMemorySystem {
     this.startCleanupTimer();
 
     this.initialized = true;
-    console.log('[Memory] System initialized');
+    logger.info('System initialized');
   }
 
   /**
@@ -422,7 +425,7 @@ class EnhancedMemorySystem {
    * 清理过期记忆
    */
   async cleanupExpired() {
-    console.log('[Memory] Running cleanup...');
+    logger.info('Running cleanup...');
 
     let cleaned = 0;
 
@@ -450,7 +453,7 @@ class EnhancedMemorySystem {
       }
     });
 
-    console.log(`[Memory] Cleaned ${cleaned} expired memories`);
+    logger.info('Cleaned expired memories', { count: cleaned });
     return cleaned;
   }
 
@@ -484,7 +487,7 @@ class EnhancedMemorySystem {
       const filepath = path.join(this.config.storagePath, filename);
       await fs.writeFile(filepath, JSON.stringify(memory.toJSON(), null, 2));
     } catch (error) {
-      console.error('[Memory] Failed to persist memory:', error);
+      logger.error('Failed to persist memory', { error: error.message });
     }
   }
 
@@ -532,13 +535,13 @@ class EnhancedMemorySystem {
 
           loaded++;
         } catch (e) {
-          console.error(`[Memory] Failed to load ${file}:`, e);
+          logger.error('Failed to load memory file', { file, error: e.message });
         }
       }
 
-      console.log(`[Memory] Loaded ${loaded} memories from storage`);
+      logger.info('Loaded memories from storage', { count: loaded });
     } catch (error) {
-      console.error('[Memory] Failed to load memories:', error);
+      logger.error('Failed to load memories', { error: error.message });
     }
   }
 
@@ -570,7 +573,7 @@ class EnhancedMemorySystem {
       await this.persistMemory(memory);
     }
 
-    console.log('[Memory] System shutdown complete');
+    logger.info('System shutdown complete');
   }
 }
 
