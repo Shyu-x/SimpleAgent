@@ -9,6 +9,9 @@
  */
 
 const EventEmitter = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('mcp');
 
 /**
  * JSON-RPC 2.0 错误码
@@ -71,7 +74,7 @@ class MCPService extends EventEmitter {
    */
   async initialize(options = {}) {
     if (process.env.NODE_ENV !== 'production') {
-      console.log('Initializing MCP Service...');
+      logger.info('Initializing MCP Service...');
     }
 
     // 注册内置工具
@@ -436,7 +439,7 @@ class MCPService extends EventEmitter {
     this.emit('toolExecuted', logEntry);
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`[MCP Tool] ${toolName} ${success ? 'SUCCESS' : 'FAILED'} (${executionTime}ms)`);
+      logger.info('MCP Tool execution', { toolName, success, executionTime });
     }
   }
 
@@ -636,7 +639,7 @@ class MCPService extends EventEmitter {
     const { protocolVersion, capabilities, clientInfo } = params;
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`MCP Client connected: ${clientInfo?.name || 'Unknown'}`);
+      logger.info('MCP Client connected', { name: clientInfo?.name || 'Unknown' });
     }
 
     return {
