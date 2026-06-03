@@ -100,6 +100,9 @@
 - 35+ backend service 改用结构化 logger
 - 修复 1 处 sed 误改 (mcp.js 5d2eaa3)
 - 删除 .bak 文件污染 (118955b)
+- **修复 React 19 兼容性** (mobile/index.tsx): `<style jsx global>` → `<style>` (styled-jsx 5.x 与 React 19 冲突)
+  - 验证: 0 warning / 0 error / Next.js dev "Issues" 浮标消失
+  - 证据: `docs/online/journeys/conversation/09-react19-no-warning.png`
 
 ### 可观测性
 - 全部请求带 traceId (X-Trace-Id 头)
@@ -150,7 +153,7 @@
 - 运维手册: `docs/online/RUNBOOK.md`
 - 部署手册: `docs/online/DEPLOY.md`
 - 上线门禁: `scripts/online-gate.sh` (15/15 GO)
-- 截图证据: `docs/online/screenshots/` + `docs/online/journeys/`
+- 截图证据: `docs/online/screenshots/` (5) + `docs/online/journeys/` (26) = **31 张**
 - CHANGELOG: `CHANGELOG.md` Sprint #6
 
 ---
