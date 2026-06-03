@@ -711,4 +711,24 @@ class RAGService extends EventEmitter {
   }
 }
 
+// 共享单例 - 避免多实例导致 KB 数据不同步
+let _singletonInstance = null;
+function getSharedRagService() {
+  if (!_singletonInstance) {
+    const RAGService = module.exports;
+    _singletonInstance = new RAGService({
+      storagePath: process.env.RAG_STORAGE_PATH || './data/rag',
+      chunkSize: 500,
+      overlap: 50,
+      topK: 5
+    });
+    // 首次访问时从磁盘异步加载（不阻塞）
+    _singletonInstance.loadAllKnowledgeBases().catch(err => {
+      // 加载失败不影响基本服务
+    });
+  }
+  return _singletonInstance;
+}
+
 module.exports = RAGService;
+module.exports.getSharedRagService = getSharedRagService;

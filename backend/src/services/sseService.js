@@ -7,6 +7,40 @@ const { AgentLogger, createLogger } = require('../infra/logger/AgentLogger');
 const { MiniMaxRouter } = require('./router/modelRouter');
 const { classifyRetryableError } = require('../common/errors/errorClassifier');
 
+// 工具声明注入（B4 TOOL-1）- 让 LLM 知道可用工具
+// MiniMax M2.7 工具调用协议: 输出 <<<TOOL:tool_name:args>>> 触发调用
+const TOOL_SYSPROMPT = `\n\n[可用工具]
+- get_current_time(): 返回当前 ISO 时间
+- web_search(query): 联网搜索
+- calculator(expression): 数学计算
+- knowledge_base_search(query): 查询知识库
+需要时在回复末尾输出 <<<TOOL:tool_name:args>>> 格式。`;
+
+// RAG 注入（B5 RAG-1）- 懒加载
+let _intentClassifier = null;
+let _ragService = null;
+
+function getIntentClassifier() {
+  if (!_intentClassifier) {
+    // 使用 services/agent/IntentClassifier：含 knowledge/tool_use/chat/task 语义
+    // 相比 domain/rag/TreeIntentClassifier 的细粒度 domain，更适合路由决策
+    const { IntentClassifier } = require('./agent/IntentClassifier');
+    _intentClassifier = new IntentClassifier({
+      enableLLM: false,
+      enableKeywordFallback: true
+    });
+  }
+  return _intentClassifier;
+}
+
+function getRagService() {
+  if (!_ragService) {
+    const RAGService = require('./ragService');
+    _ragService = RAGService.getSharedRagService();
+  }
+  return _ragService;
+}
+
 // 创建日志记录器
 const logger = new AgentLogger('sse');
 
@@ -176,6 +210,71 @@ function detectStreamType(stream) {
   return null;
 }
 
+/**
+ * B4 TOOL-1: 注入工具声明到 system prompt
+ * @param {Array} messages - 原始消息列表
+ * @returns {Array} augmentedMessages - 注入工具声明后的消息列表（不可变）
+ */
+function injectToolDeclarations(messages) {
+  const result = messages.map(m => ({ ...m }));
+  if (result.length > 0 && result[0].role === 'system') {
+    result[0] = { ...result[0], content: result[0].content + TOOL_SYSPROMPT };
+  } else {
+    result.unshift({ role: 'system', content: TOOL_SYSPROMPT });
+  }
+  return result;
+}
+
+/**
+ * B5 RAG-1: 注入知识库上下文
+ * @param {Array} messages - 已注入工具声明的消息列表
+ * @param {string} userQuery - 用户问题
+ * @param {Object} deps - 依赖注入
+ * @param {Object} deps.intentClassifier - IntentClassifier 实例
+ * @param {Object} deps.ragService - RAGService 实例
+ * @returns {Promise<Array>} 注入 KB 上下文后的消息列表（不可变）
+ */
+async function injectRagContext(messages, userQuery, { intentClassifier, ragService }) {
+  if (!userQuery || typeof userQuery !== 'string') return messages;
+  let intent;
+  try {
+    intent = await intentClassifier.classify(userQuery);
+  } catch {
+    // 分类器故障降级：不做 RAG 注入
+    return messages;
+  }
+  // agent IntentClassifier 返回 intent 字段 (knowledge/tool_use/chat/task)
+  // 当为 knowledge 或低置信度 chat 时也尝试注入（chat 也可能需要知识支撑）
+  const isKnowledge = intent.intent === 'knowledge'
+    || (intent.intent === 'chat' && intent.confidence < 0.5);
+  if (!isKnowledge) return messages;
+  let kbs;
+  try {
+    kbs = ragService.listKnowledgeBases();
+  } catch {
+    return messages;
+  }
+  for (const kb of kbs) {
+    try {
+      const ctx = await Promise.race([
+        ragService.getContextForConversation(kb.id, userQuery, { topK: 3 }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('KB timeout')), 2000))
+      ]);
+      if (ctx && ctx.context) {
+        const newMessages = messages.slice();
+        newMessages.splice(1, 0, {
+          role: 'system',
+          content: `[知识库: ${kb.name}]\n${ctx.context}`
+        });
+        return newMessages;
+      }
+    } catch (kbErr) {
+      // 跳过该 KB
+    }
+  }
+  return messages;
+}
+
 // SSE流式输出服务
 class SSEService {
   /**
@@ -212,10 +311,30 @@ class SSEService {
     // 发送连接成功消息
     res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
 
+    // B4 TOOL-1: 注入工具声明到 system prompt
+    let augmentedMessages = injectToolDeclarations(messages);
+
+    // B5 RAG-1: 意图检测 + 知识库检索
+    const lastUserMsg = messages.filter(m => m.role === 'user').pop();
+    if (lastUserMsg && typeof lastUserMsg.content === 'string') {
+      try {
+        augmentedMessages = await injectRagContext(
+          augmentedMessages,
+          lastUserMsg.content,
+          {
+            intentClassifier: getIntentClassifier(),
+            ragService: getRagService()
+          }
+        );
+      } catch (e) {
+        logger.warn('RAG injection skipped', { err: e.message });
+      }
+    }
+
     try {
       // 调用 MiniMax API
       const result = await miniMaxRouter.execute({
-        messages,
+        messages: augmentedMessages,
         model,
         stream: true,
         options: {
@@ -465,3 +584,6 @@ class SSEService {
 }
 
 module.exports = SSEService;
+module.exports.injectToolDeclarations = injectToolDeclarations;
+module.exports.injectRagContext = injectRagContext;
+module.exports.TOOL_SYSPROMPT = TOOL_SYSPROMPT;
