@@ -447,7 +447,7 @@ export default function Home() {
 
           </LayoutGroup>
 
-          {sidePanelContent === 'settings' && <Settings hideTrigger />}
+          {sidePanelContent === 'settings' && <Settings hideTrigger autoOpen />}
           {sidePanelContent === 'memory' && activeConversationId && (
             <MemoryPanel
               conversationId={activeConversationId}
