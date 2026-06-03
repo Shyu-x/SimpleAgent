@@ -1,0 +1,282 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "datasource", "uid": "grafana" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "SimpleAgent 后端核心指标 - 流量 / 资源 / 业务 / 依赖",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "title": "面板 1: 流量 — RPM / 错误率 / P99 延迟",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false,
+      "panels": [
+        {
+          "id": 11,
+          "title": "RPM (按 endpoint)",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+          "targets": [
+            {
+              "expr": "sum by (endpoint) (rate(http_requests_total[1m])) * 60",
+              "legendFormat": "{{endpoint}}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqpm",
+              "custom": { "drawStyle": "line", "lineWidth": 2 }
+            }
+          },
+          "options": { "legend": { "displayMode": "table", "placement": "right" } }
+        },
+        {
+          "id": 12,
+          "title": "错误率 (5xx / total)",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+          "targets": [
+            {
+              "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 1)",
+              "legendFormat": "5xx 错误率",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(http_requests_total{status=~\"4..\"}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 1)",
+              "legendFormat": "4xx 错误率",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "max": 0.1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.01 },
+                  { "color": "red", "value": 0.05 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 13,
+          "title": "P50 / P95 / P99 延迟",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.5, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))",
+              "legendFormat": "P50",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))",
+              "legendFormat": "P95",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))",
+              "legendFormat": "P99",
+              "refId": "C"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 1 },
+                  { "color": "red", "value": 3 }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "面板 2: 资源 — Heap / 活动句柄 / Event Loop",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 17 },
+      "collapsed": false,
+      "panels": [
+        {
+          "id": 21,
+          "title": "Node Heap (used / total)",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 18 },
+          "targets": [
+            {
+              "expr": "nodejs_heap_size_used_bytes",
+              "legendFormat": "Heap Used",
+              "refId": "A"
+            },
+            {
+              "expr": "nodejs_heap_size_total_bytes",
+              "legendFormat": "Heap Total",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 524288000 },
+                  { "color": "red", "value": 786432000 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 22,
+          "title": "Active Handles / Requests",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 18 },
+          "targets": [
+            { "expr": "nodejs_active_handles_total", "legendFormat": "Handles", "refId": "A" },
+            { "expr": "nodejs_active_requests_total", "legendFormat": "Requests", "refId": "B" },
+            { "expr": "http_requests_active", "legendFormat": "HTTP Active", "refId": "C" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "面板 3: 业务 — 模型 / 工具 / Agent",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
+      "collapsed": false,
+      "panels": [
+        {
+          "id": 31,
+          "title": "模型调用 (RPM + 错误)",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 27 },
+          "targets": [
+            { "expr": "sum(rate(model_requests_total[5m])) * 60", "legendFormat": "Model RPM", "refId": "A" },
+            { "expr": "sum(rate(model_errors_total[5m])) * 60", "legendFormat": "Model Errors", "refId": "B" }
+          ]
+        },
+        {
+          "id": 32,
+          "title": "Token 吞吐 / 分钟",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 27 },
+          "targets": [
+            { "expr": "sum(rate(model_tokens_total[5m])) * 60", "legendFormat": "Tokens/min", "refId": "A" }
+          ],
+          "fieldConfig": { "defaults": { "unit": "short" } }
+        },
+        {
+          "id": 33,
+          "title": "工具 / Agent 调用",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 35 },
+          "targets": [
+            { "expr": "sum(rate(tool_calls_total[5m])) * 60", "legendFormat": "Tool Calls/min", "refId": "A" },
+            { "expr": "sum(rate(tool_errors_total[5m])) * 60", "legendFormat": "Tool Errors/min", "refId": "B" },
+            { "expr": "sum(rate(agent_executions_total[5m])) * 60", "legendFormat": "Agent/min", "refId": "C" },
+            { "expr": "sum(rate(agent_iterations_total[5m])) * 60", "legendFormat": "Agent Iter/min", "refId": "D" }
+          ]
+        },
+        {
+          "id": 34,
+          "title": "Circuit Breaker 状态",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 35 },
+          "targets": [
+            { "expr": "circuit_breaker_state", "legendFormat": "{{name}}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "0": { "text": "CLOSED", "color": "green" } } },
+                { "type": "value", "options": { "1": { "text": "OPEN", "color": "red" } } },
+                { "type": "value", "options": { "2": { "text": "HALF", "color": "yellow" } } }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "面板 4: 限流 / 队列",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 43 },
+      "collapsed": false,
+      "panels": [
+        {
+          "id": 41,
+          "title": "限流触发次数 (按 tier)",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 },
+          "targets": [
+            { "expr": "sum by (tier) (rate(rate_limit_exceeded_total[5m])) * 60", "legendFormat": "{{tier}}", "refId": "A" }
+          ]
+        },
+        {
+          "id": 42,
+          "title": "队列长度 / 模块错误",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 44 },
+          "targets": [
+            { "expr": "queue_length", "legendFormat": "Queue {{name}}", "refId": "A" },
+            { "expr": "sum by (module) (rate(module_errors_total[5m])) * 60", "legendFormat": "Err {{module}}", "refId": "B" }
+          ]
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["simpleagent", "production", "sprint6"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SimpleAgent Overview",
+  "uid": "simpleagent-overview",
+  "version": 1,
+  "weekStart": ""
+}
