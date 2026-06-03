@@ -525,7 +525,7 @@ function MobileSettingsView() {
             }`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white dark:bg-zinc-200 shadow-sm transition-transform ${
                 settings.animationsEnabled ? 'translate-x-4' : 'translate-x-0.5'
               }`}
             />
