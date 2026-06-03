@@ -14,6 +14,21 @@ interface SSEOptions {
   onError?: (error: Error) => void;
   onComplete?: () => void;
   signal?: AbortSignal;
+  // 指数退避重连回调: attempt 从 1 开始, delayMs 是该次重连前等待的毫秒数
+  onReconnectAttempt?: (attempt: number, delayMs: number) => void;
+}
+
+// SSE 指数退避重连配置
+const MAX_RETRIES = 5;
+const MAX_RETRY_DELAY_MS = 30000;
+const BASE_RETRY_DELAY_MS = 1000;
+
+/**
+ * 计算指数退避延迟, 上限 30s
+ * attempt 1 -> 1s, 2 -> 2s, 3 -> 4s, 4 -> 8s, 5 -> 16s, 6+ -> 30s
+ */
+function calculateBackoffDelay(retryCount: number): number {
+  return Math.min(BASE_RETRY_DELAY_MS * 2 ** retryCount, MAX_RETRY_DELAY_MS);
 }
 
 // SSE 消息事件类型
@@ -104,7 +119,25 @@ export async function sendSSEChatMessage(
   messages: { role: string; content: string }[],
   options: SSEOptions
 ): Promise<void> {
-  const { onMessage, onThinking, onError, onComplete, signal } = options;
+  return _sendSSEChatMessageWithRetry(
+    apiKey,
+    baseURL,
+    model,
+    messages,
+    options,
+    0
+  );
+}
+
+async function _sendSSEChatMessageWithRetry(
+  apiKey: string,
+  baseURL: string,
+  model: string,
+  messages: { role: string; content: string }[],
+  options: SSEOptions,
+  retryCount: number
+): Promise<void> {
+  const { onMessage, onThinking, onError, onComplete, signal, onReconnectAttempt } = options;
 
   try {
     const requestBody = {
@@ -191,9 +224,36 @@ export async function sendSSEChatMessage(
 
     onComplete?.();
   } catch (error) {
+    // 用户主动中止: 不重试, 静默返回
     if (error instanceof Error && error.name === 'AbortError') {
       return;
     }
+
+    // 指数退避重连: 最多 MAX_RETRIES 次, 间隔 1/2/4/8/16s (上限 30s)
+    if (retryCount < MAX_RETRIES) {
+      const delay = calculateBackoffDelay(retryCount);
+
+      // 通知上层 UI: 第 N 次重连, 延迟 N ms
+      onReconnectAttempt?.(retryCount + 1, delay);
+
+      await new Promise<void>((resolve) => setTimeout(resolve, delay));
+
+      // 中途被中止则停止重试
+      if (signal?.aborted) {
+        return;
+      }
+
+      return _sendSSEChatMessageWithRetry(
+        apiKey,
+        baseURL,
+        model,
+        messages,
+        options,
+        retryCount + 1
+      );
+    }
+
+    // 达到最大重试次数, 上报错误
     onError?.(error instanceof Error ? error : new Error('未知错误'));
   }
 }
