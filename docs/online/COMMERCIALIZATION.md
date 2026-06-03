@@ -40,16 +40,35 @@
 
 ## 3. 性能基线
 
+### 3.1 HTTP REST 端点 (autocannon, p99 < 3000ms)
+
 | 场景 | 连接 | RPS | p99 | 门槛 | 状态 |
 |------|------|-----|-----|------|------|
-| health-check | 1 | 7,422 | 162ms | 3000ms | ✓ 18x 余量 |
+| health-check | 1 | 7,422 | 162ms | 3000ms | ✓ 18x |
 | rag-kb-list | 5 | 914 | 13ms | 3000ms | ✓ |
 | a2a-agents | 5 | 8,623 | 1ms | 3000ms | ✓ |
 | tools-list | 5 | 4,490 | 2ms | 3000ms | ✓ |
 | admin-tools | 3 | 4,425 | 1ms | 3000ms | ✓ |
 | admin-traces | 3 | 8,927 | 0ms | 3000ms | ✓ |
 
-**5xx = 0, 错误率 < 1%**
+### 3.2 SSE 流式 (node:http, 5 trials, TTFB P95 < 800ms)
+
+| 场景 | TTFB P50 | TTFB P95 | 总时长 P95 | Token rate |
+|------|----------|----------|------------|------------|
+| 短消息 | 3ms | 3ms | 1,705ms | 7.4 tok/s |
+| 长消息 | 2ms | 3ms | 14,594ms | 1.6 tok/s |
+
+### 3.3 100 并发 60s 稳定性 (autocannon)
+
+| 指标 | 数值 | 门槛 | 状态 |
+|------|------|------|------|
+| 总请求 | 238,387 | - | - |
+| 平均 RPS | 3,973 | - | - |
+| 错误率 | 0% | < 1% | ✓ |
+| P50/P90/P99 | 24/28/47ms | < 3000ms | ✓ |
+| 内存增长 | +8.1MB/60s | < 100MB | ✓ |
+
+**全部 3 类 perf 报告**: PERF.md / PERF-SSE.md / PERF-STRESS-100.md
 
 ## 4. 截图证据 (30 张)
 
@@ -106,9 +125,11 @@
 
 ### 可观测性
 - 全部请求带 traceId (X-Trace-Id 头)
-- Prometheus /metrics 端点 (9 类业务指标)
+- Prometheus /metrics 端点 (18 类业务指标)
 - 结构化 JSON 日志 (logger)
 - 故障时 X-RateLimit-* 头暴露限流状态
+- **Grafana Dashboard** (4 行 11 子面板) — `docs/online/grafana-dashboard.json`
+- **Prometheus Alert Rules** (2 组 8 规则) — `docs/online/grafana-alerts.yaml`
 
 ### 可运维性
 - 上线门禁 15 项 (online-gate.sh)
@@ -119,8 +140,10 @@
 
 ### 性能
 - 限流旁路 env (DISABLE_RATE_LIMIT / RATE_LIMIT_MAX)
-- 性能基线 (perf-bench.js)
-- 6 场景压测报告 (PERF.md)
+- 性能基线 (perf-bench.js) — 6 场景 HTTP REST
+- **SSE 专项** (perf-sse.mjs) — TTFB / Token rate
+- **100 并发稳定性** (perf-stress-100.mjs) — 60s / 238k 请求 / 0 错
+- 3 份 perf 报告: PERF.md / PERF-SSE.md / PERF-STRESS-100.md
 
 ### CI/CD
 - 完整 lint + test + build pipeline
