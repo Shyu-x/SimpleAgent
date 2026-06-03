@@ -99,6 +99,8 @@ export default function Home() {
 
   // 响应式断点 - 使用 Tailwind 默认断点 640px
   const isMobile = useMediaQuery('(max-width: 640px)');
+  const isTablet = useMediaQuery('(min-width: 641px) and (max-width: 1024px)');
+  const isTabletEnabled = process.env.NEXT_PUBLIC_TABLET_LAYOUT === 'true';
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidePanelContent, setSidePanelContent] = useState<SidePanelContent>('none');
 
@@ -252,6 +254,12 @@ export default function Home() {
         </MobileExperienceProvider>
       </ToastProvider>
     );
+  }
+
+  // ===== 平板端专用布局 (iPad 768-1024px, feature flag 控制) =====
+  if (isTablet && isTabletEnabled) {
+    const TabletLayout = require('@/components/TabletLayout').default;
+    return <TabletLayout />;
   }
 
   // ===== 桌面端布局 =====
