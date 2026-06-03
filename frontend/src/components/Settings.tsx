@@ -562,7 +562,10 @@ export default function Settings({ autoOpen = false, hideTrigger = false }: Sett
                           {(['light', 'dark', 'system'] as const).map((theme) => (
                             <motion.button
                               key={theme}
-                              onClick={() => setLocalSettings({ ...localSettings, theme })}
+                              onClick={() => {
+                                setLocalSettings({ ...localSettings, theme });
+                                setSettings({ theme });
+                              }}
                               className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 sm:py-2 rounded-md border text-xs sm:text-sm transition-colors ${
                                 localSettings.theme === theme
                                   ? 'border-primary bg-primary/10 text-primary'
