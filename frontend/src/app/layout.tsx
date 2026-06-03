@@ -27,7 +27,16 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var settings = JSON.parse(localStorage.getItem('chat-settings') || '{}');
+                  // 兼容多个 store key（uiStore 用 ai-chat-ui, settingsStore 用 ai-chat-settings）
+                  // 实际数据存储在 sessionStorage 而非 localStorage
+                  var uiRaw = sessionStorage.getItem('ai-chat-ui');
+                  var stRaw = sessionStorage.getItem('ai-chat-settings');
+                  var ui = uiRaw ? JSON.parse(uiRaw) : {};
+                  var st = stRaw ? JSON.parse(stRaw) : {};
+                  // Zustand persist 格式: { state: { settings: {...} }, version: 0 }
+                  var uiSettings = (ui && ui.state && ui.state.settings) || (ui && ui.settings) || {};
+                  var stSettings = (st && st.state && st.state.settings) || (st && st.settings) || {};
+                  var settings = Object.assign({}, uiSettings, stSettings);
                   var theme = settings.theme || 'system';
                   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   var resolved = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
