@@ -154,12 +154,24 @@
 
 | 项 | 修复状态 | 引用 |
 |----|---------|------|
-| 前端 153 处 console.error (catch 块) | ✅ 已修 | Sprint #7 (标准化错误处理保留) |
-| 后端 152 处 console (logger 自身) | ✅ 已修 | Sprint #7 (按职责合理保留) |
-| 100 并发长时压测未做 | ✅ 已修 | `scripts/perf-stress-5min.mjs` |
+| 前端 153 处 console.error (catch 块) | ✅ 保留 | 按惯例，标准错误处理 |
+| 后端 152 处 console (logger 自身) | ✅ 保留 | 按职责合理 |
+| 100 并发长时压测未做 | ⚠️ 60s 已验, 5min 测被 subagent stall 阻塞 | `docs/online/PERF-STRESS-100.md` |
 | 流式 SSE 首包 P95 单独测 | ✅ 已修 | `docs/online/PERF-SSE.md` (b48d9ca) |
-| Docker daemon 不可用 (本机) | ✅ 已修 | 切主机已复测，部署成功 |
-| Grafana 大盘未建 | ✅ 已修 | `docs/online/grafana-dashboard.json` + `grafana-alerts.yaml` |
+| Docker daemon 不可用 (本机) | ❌ 仍阻塞 | 需切 Docker 主机 |
+| Grafana 大盘未建 | ⚠️ 配置完成, 部署待运维 | `docs/online/grafana-dashboard.json` + `grafana-alerts.yaml` |
+
+### 6.1 Sprint #7 7 个 P1/P2 BUG 修复 (新)
+
+| BUG | 状态 | commit |
+|-----|------|--------|
+| THEME-3 layout.tsx FOUC | ✅ | 8aa7d0f |
+| THEME-2 桌面主题不实时 | ✅ | 901cf3f |
+| SSE-1 无重连 | ✅ (单测 5/5) | b48d9ca |
+| TOOL-1 工具调用 1/4 | ⚠️ 代码注入, LLM 真实调用待 E2E | 586101a |
+| RAG-1 聊天不调 KB | ⚠️ 代码注入, KB 路径长 | 8822e7d |
+| LAYOUT-1 iPad 768 | ✅ (feature flag 默认 false) | 647a051 |
+| THEME-4 移动深色 | ✅ (1 行修复) | eb756ff |
 
 ## 7. 下一步行动
 
