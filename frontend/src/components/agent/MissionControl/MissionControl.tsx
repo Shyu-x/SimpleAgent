@@ -355,13 +355,13 @@ const MissionControl = memo(function MissionControl({
   }, [addTask]);
 
   return (
-    <motionClass.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+    <main
+      aria-label="Agent 任务控制台"
       data-mission-control
       className={`flex flex-col h-full bg-slate-900 text-white overflow-hidden ${className}`}
     >
+      {/* A11Y 修复: 加 h1 heading (axe landmark-one-main + page-has-heading-one) */}
+      <h1 className="sr-only">Agent 任务控制台</h1>
       {/* AgentStatusBar 顶部状态栏 */}
       <div className="flex-shrink-0">
         <AgentStatusBar
@@ -640,7 +640,7 @@ const MissionControl = memo(function MissionControl({
         onClose={() => setShowFullViz(false)}
         traceId={activeTraceId || undefined}
       />
-    </motionClass.div>
+    </main>
   );
 });
 

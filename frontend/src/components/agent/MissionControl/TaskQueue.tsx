@@ -283,7 +283,10 @@ const SortableTaskItem = memo(function SortableTaskItem({
         </div>
 
         {/* 更多按钮 */}
-        <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded">
+        <button
+          aria-label="任务更多操作"
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded"
+        >
           <MoreVertical size={14} className="text-slate-400" />
         </button>
       </div>
