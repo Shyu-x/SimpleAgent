@@ -5,6 +5,12 @@
  * 1. 第一条是 system 时，追加 TOOL_SYSPROMPT
  * 2. 第一条不是 system 时，插入 system
  * 3. 不修改原 messages（不可变）
+ *
+ * TOOL_SYSPROMPT 当前声明 4 个工具 (Sprint #7 + A2 改):
+ *   - calculator (数学计算)
+ *   - datetime (时间)
+ *   - web_search (联网)
+ *   - file_read (本地文件)
  */
 const assert = require('assert');
 const SSEService = require('../../src/services/sseService');
@@ -19,7 +25,6 @@ describe('B4 TOOL-1: injectToolDeclarations 工具声明注入', () => {
     const result = injectToolDeclarations(messages);
     assert.strictEqual(result.length, 2, '应多出一条 system');
     assert.strictEqual(result[0].role, 'system', '第一条应为 system');
-    assert.ok(result[0].content.includes('get_current_time'), 'system 应包含 get_current_time');
     assert.ok(result[0].content.includes('calculator'), 'system 应包含 calculator');
     assert.ok(result[0].content.includes('<<<TOOL:'), 'system 应包含协议标记');
     assert.strictEqual(result[1].role, 'user', 'user 消息应在 system 之后');
@@ -35,7 +40,7 @@ describe('B4 TOOL-1: injectToolDeclarations 工具声明注入', () => {
     assert.strictEqual(result.length, 2, '消息数不变');
     assert.ok(result[0].content.startsWith('你是助手'), '原 system 文本应保留在头部');
     assert.ok(result[0].content.includes('web_search'), '应追加工具声明');
-    assert.ok(result[0].content.includes('get_current_time'), '应包含 get_current_time');
+    assert.ok(result[0].content.includes('datetime'), '应包含 datetime');
   });
 
   test('第一条是 assistant 时应在头部插入 system', () => {
@@ -80,9 +85,9 @@ describe('B4 TOOL-1: injectToolDeclarations 工具声明注入', () => {
   });
 
   test('TOOL_SYSPROMPT 导出内容应至少包含 4 个工具名', () => {
-    assert.ok(TOOL_SYSPROMPT.includes('get_current_time'));
-    assert.ok(TOOL_SYSPROMPT.includes('web_search'));
     assert.ok(TOOL_SYSPROMPT.includes('calculator'));
-    assert.ok(TOOL_SYSPROMPT.includes('knowledge_base_search'));
+    assert.ok(TOOL_SYSPROMPT.includes('datetime'));
+    assert.ok(TOOL_SYSPROMPT.includes('web_search'));
+    assert.ok(TOOL_SYSPROMPT.includes('file_read'));
   });
 });
