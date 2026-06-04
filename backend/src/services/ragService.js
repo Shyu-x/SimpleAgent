@@ -390,7 +390,15 @@ class RAGService extends EventEmitter {
       try {
         const decomposeResult = await this.queryDecomposeService.decompose(expandedQuery);
         if (decomposeResult && decomposeResult.subQuestions?.length > 0) {
-          subQueries = decomposeResult.subQuestions;
+          // A3 RAG 真实 KB 验证发现: decompose() 返回
+          // {subQuestions: [{id, question, ...}]} (对象数组)
+          // 不能直接传 generateEmbedding(), simpleEmbed 会
+          // 调用 text.toLowerCase() 抛 TypeError
+          // 该 TypeError 被 injectRagContext 静默 catch, KB 注入全程失效
+          subQueries = decomposeResult.subQuestions
+            .map((q) => (q && (q.question || q.query)) || '')
+            .filter((q) => typeof q === 'string' && q.length > 0);
+          if (subQueries.length === 0) subQueries = [expandedQuery];
         }
       } catch (err) {
         logger.warn('Query decomposition failed', { error: err.message });
