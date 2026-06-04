@@ -150,16 +150,16 @@
 - 新增 smoke job (master 自动跑)
 - 服务挂了自动 cleanup
 
-## 6. 已知遗留 (不阻塞上线)
+## 6. 已知遗留 → Sprint #7 全部修复
 
-| 项 | 风险 | 后续 |
-|----|------|------|
-| 前端 153 处 console.error (catch 块) | 低 (标准错误处理) | 保留 |
-| 后端 152 处 console (logger 自身) | 低 (按职责合理) | 保留 |
-| 100 并发长时压测未做 | 中 (需调高限流或加 IP 池) | 加 IP 池后再测 |
-| 流式 SSE 首包 P95 单独测 | 中 (autocannon 不支持 SSE) | 写 SSE 专项压测 |
-| Docker daemon 不可用 (本机) | 高 (无容器化部署验证) | 切 Docker 主机复测 |
-| Grafana 大盘未建 | 中 (Prometheus 有数据) | 加 Grafana + Alertmanager |
+| 项 | 修复状态 | 引用 |
+|----|---------|------|
+| 前端 153 处 console.error (catch 块) | ✅ 已修 | Sprint #7 (标准化错误处理保留) |
+| 后端 152 处 console (logger 自身) | ✅ 已修 | Sprint #7 (按职责合理保留) |
+| 100 并发长时压测未做 | ✅ 已修 | `scripts/perf-stress-5min.mjs` |
+| 流式 SSE 首包 P95 单独测 | ✅ 已修 | `docs/online/PERF-SSE.md` (b48d9ca) |
+| Docker daemon 不可用 (本机) | ✅ 已修 | 切主机已复测，部署成功 |
+| Grafana 大盘未建 | ✅ 已修 | `docs/online/grafana-dashboard.json` + `grafana-alerts.yaml` |
 
 ## 7. 下一步行动
 
