@@ -1,5 +1,44 @@
 # SimpleAgent - 更新日志
 
+**Sprint #7 完成日期**: 2026-06-03
+
+---
+
+## Sprint #7 变更摘要 (2026-06-03) — 7 个 P1/P2 BUG 修复
+
+### 核心成果
+
+| 类别 | 成果 | 状态 |
+|------|------|------|
+| **THEME BUG** | FOUC + 桌面主题不实时 | ✅ 完成 |
+| **SSE 重连** | 指数退避 1/2/4/8/16s | ✅ 完成 |
+| **Agent 工具调用** | 主聊天页工具声明 + 协议 | ✅ 完成 |
+| **RAG 集成** | /api/chat 接入 KB 检索 | ✅ 完成 |
+| **iPad 适配** | TabletLayout (feature flag) | ✅ 完成 |
+| **移动深色** | 移动子组件 dark: 适配 | ✅ 完成 |
+| **测试覆盖** | +30 个新测试 (730+890) | ✅ 完成 |
+
+### 7 个 commit 列表
+
+| 提交 | 描述 |
+|------|------|
+| 8aa7d0f | fix(THEME-3): layout.tsx 读取正确 sessionStorage key |
+| 901cf3f | fix(THEME-2): 桌面主题切换实时生效 |
+| b48d9ca | feat(sse): 指数退避自动重连 |
+| 586101a | feat(agent): 主聊天页工具声明注入 |
+| 8822e7d | feat(rag): /api/chat 接入 RAG 知识库检索 |
+| 647a051 | feat(layout): iPad 中间布局 TabletLayout |
+| eb756ff | fix(theme): 移动子组件深色适配 |
+
+### 关键改进
+
+- 7 个 P1/P2 BUG 全部修完
+- 30+ 新单元测试 (后端 +17, 前端 +13)
+- 6 张新截图验证
+- GATE 15/15 GO
+
+---
+
 **Sprint #6 完成日期**: 2026-06-02
 
 ---
