@@ -114,6 +114,10 @@ async function startServer() {
   };
   app.use(cors(corsOptions));
 
+  // 信任代理头：仅信任 loopback (127.0.0.1, ::1)，保证 X-Forwarded-For 限流
+  // 可在反向代理 (Nginx/Caddy) 部署时按需扩展为 'loopback, linklocal, uniquelocal'
+  app.set('trust proxy', 'loopback');
+
   // 安全中间件：速率限制、输入限制、安全响应头
   const {
     rateLimitMiddleware,
