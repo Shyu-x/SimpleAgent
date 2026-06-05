@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    image: simpleagent-backend:local
+    container_name: simpleagent-backend-docker
+    ports:
+      - "40000:30000"
+    environment:
+      - NODE_ENV=production
+      - DISABLE_RATE_LIMIT=true
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY:-your_key_here}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:30000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        - NODE_ENV=production
+        # NEXT_PUBLIC_* 变量必须 build 时传入, 运行时无法覆盖
+        - NEXT_PUBLIC_BACKEND_URL=http://backend:30000
+    image: simpleagent-frontend:local
+    container_name: simpleagent-frontend-docker
+    ports:
+      - "40001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

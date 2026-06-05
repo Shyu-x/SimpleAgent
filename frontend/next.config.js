@@ -7,10 +7,8 @@ const backendOrigin = isGitHubPages
 
 const nextConfig = {
   reactStrictMode: true,
-  // Fix for multiple lockfiles warning
-  turbopack: {
-    root: '/home/xu/Develop/longTermProject/SimpleAgent/frontend',
-  },
+  // Fix for multiple lockfiles warning (Docker 时路径不同, 需通过 env 或 unset)
+  ...(process.env.TURBOPACK_ROOT ? { turbopack: { root: process.env.TURBOPACK_ROOT } } : {}),
   // GitHub Pages: use static export
   // Docker: use standalone
   // Dev: use default

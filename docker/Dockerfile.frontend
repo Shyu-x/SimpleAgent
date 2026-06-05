@@ -1,32 +1,42 @@
 # SimpleAgent Frontend Dockerfile
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+# NEXT_PUBLIC_* 变量需在 build 时传入 (默认 backend 服务名)
+ARG NEXT_PUBLIC_BACKEND_URL=http://backend:30000
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+
+WORKDIR /app/frontend
 
 RUN npm install -g pnpm
 
 COPY frontend/package.json frontend/pnpm-lock.yaml* ./
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
+# 复制源码到正确的位置 (因为 WORKDIR 在 frontend/)
 COPY frontend/src ./src
 COPY frontend/public ./public
 COPY frontend/next.config.js ./
 COPY frontend/tsconfig.json ./
+COPY frontend/next-env.d.ts ./
 
 RUN pnpm build
 
 FROM node:20-alpine
 
-WORKDIR /app
+ARG NEXT_PUBLIC_BACKEND_URL=http://backend:30000
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+
+WORKDIR /app/frontend
 
 RUN npm install -g pnpm
 
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./
+COPY --from=builder /app/frontend/.next ./.next
+COPY --from=builder /app/frontend/public ./public
+COPY --from=builder /app/frontend/package.json ./
+COPY --from=builder /app/frontend/pnpm-lock.yaml ./
 
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 EXPOSE 3001
 
