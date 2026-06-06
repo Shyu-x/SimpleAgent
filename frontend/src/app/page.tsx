@@ -536,6 +536,7 @@ interface HITLConfirmationDialogWrapperProps {
 }
 
 function HITLConfirmationDialogWrapper({ checkpoint, onApprove, onReject }: HITLConfirmationDialogWrapperProps) {
+  const tHitl = useTranslations('hitl');
   const typeMap: Record<string, 'action' | 'permission' | 'data_access' | 'external_call' | 'file_operation' | 'code_execution' | 'cost_warning' | 'sensitive_data'> = {
     high_risk: 'action',
     decision: 'action',
