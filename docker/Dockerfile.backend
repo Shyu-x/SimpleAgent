@@ -1,19 +1,51 @@
-# SimpleAgent Backend Dockerfile
-FROM node:20-alpine
+# ============================================
+# SimpleAgent Backend - 多阶段 Dockerfile
+# 目标: < 200MB 镜像
+# ============================================
+
+# --- Stage 1: deps 准备 (利用 pnpm 缓存) ---
+FROM node:20-alpine AS deps
+
+# 国内/国外 mirror 自适应 (Alpine 内置 corepack 自带 pnpm, 无需 npm install -g)
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
-RUN npm install -g pnpm
-
+# 只拷贝 lockfile 和 package.json 优先利用缓存
 COPY backend/package.json backend/pnpm-lock.yaml* ./
+RUN pnpm fetch --frozen-lockfile
 
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# 离线安装生产依赖
+RUN pnpm install --frozen-lockfile --offline --ignore-scripts --prod
 
-COPY backend/src ./src
+# --- Stage 2: runtime ---
+FROM node:20-alpine AS runtime
+
+# 健康检查工具
+RUN apk add --no-cache wget tini
+
+WORKDIR /app
+
+ENV NODE_ENV=production \
+    PORT=30000 \
+    NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NODE_OPTIONS="--max-old-space-size=512"
+
+# 非 root 用户
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+
+# 只拷贝生产 node_modules (来自 deps stage)
+COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=deps --chown=nodejs:nodejs /app/package.json ./package.json
+COPY --chown=nodejs:nodejs backend/src ./src
+
+USER nodejs
 
 EXPOSE 30000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:30000/api/health || exit 1
 
+# tini 正确处理 PID 1 信号
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["node", "src/index.js"]

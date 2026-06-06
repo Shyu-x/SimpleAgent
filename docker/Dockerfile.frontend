@@ -1,46 +1,64 @@
-# SimpleAgent Frontend Dockerfile
-FROM node:20-alpine AS builder
+# ============================================
+# SimpleAgent Frontend - 多阶段 Dockerfile
+# 目标: < 200MB 镜像 (基于 Next.js standalone output)
+# ============================================
 
-# NEXT_PUBLIC_* 变量需在 build 时传入 (默认 backend 服务名)
-ARG NEXT_PUBLIC_BACKEND_URL=http://backend:30000
-ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+# --- Stage 1: deps ---
+FROM node:20-alpine AS deps
 
-WORKDIR /app/frontend
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
-RUN npm install -g pnpm
+WORKDIR /app
 
 COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+RUN pnpm fetch --frozen-lockfile
+RUN pnpm install --frozen-lockfile --offline --ignore-scripts
 
-RUN pnpm install --frozen-lockfile --ignore-scripts
-
-# 复制源码到正确的位置 (因为 WORKDIR 在 frontend/)
-COPY frontend/src ./src
-COPY frontend/public ./public
-COPY frontend/next.config.js ./
-COPY frontend/tsconfig.json ./
-COPY frontend/next-env.d.ts ./
-
-RUN pnpm build
-
-FROM node:20-alpine
+# --- Stage 2: builder ---
+FROM node:20-alpine AS builder
 
 ARG NEXT_PUBLIC_BACKEND_URL=http://backend:30000
-ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+    DOCKER_BUILD=true \
+    NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1
 
-WORKDIR /app/frontend
+WORKDIR /app
 
-RUN npm install -g pnpm
+# 拷贝完整 node_modules (含 dev 依赖, build 时需要)
+COPY --from=deps /app/node_modules ./node_modules
+COPY frontend/ ./
 
-COPY --from=builder /app/frontend/.next ./.next
-COPY --from=builder /app/frontend/public ./public
-COPY --from=builder /app/frontend/package.json ./
-COPY --from=builder /app/frontend/pnpm-lock.yaml ./
+# 编译 (NEXT_TELEMETRY_DISABLED=1 已在上方 ENV 设置)
+RUN npx next build 2>&1 | tail -20
 
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+# --- Stage 3: runtime ---
+FROM node:20-alpine AS runtime
+
+RUN apk add --no-cache wget tini && \
+    addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+
+ARG NEXT_PUBLIC_BACKEND_URL=http://backend:30000
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL \
+    NODE_ENV=production \
+    PORT=3001 \
+    HOSTNAME=0.0.0.0 \
+    NEXT_TELEMETRY_DISABLED=1 \
+    NPM_CONFIG_UPDATE_NOTIFIER=false
+
+WORKDIR /app
+
+# Next.js standalone 输出包含最小 node_modules (仅生产依赖)
+COPY --from=builder --chown=nodejs:nodejs /app/public ./public
+COPY --from=builder --chown=nodejs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nodejs:nodejs /app/.next/static ./.next/static
+
+USER nodejs
 
 EXPOSE 3001
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001 || exit 1
 
-CMD ["pnpm", "start"]
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "server.js"]
