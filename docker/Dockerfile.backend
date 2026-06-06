@@ -21,8 +21,8 @@ RUN pnpm install --frozen-lockfile --offline --ignore-scripts --prod
 # --- Stage 2: runtime ---
 FROM node:20-alpine AS runtime
 
-# 健康检查工具
-RUN apk add --no-cache wget tini
+# 健康检查工具 + ca-certificates (修复 SSE 调用 LLM 时 TLS 握手失败)
+RUN apk add --no-cache wget tini ca-certificates
 
 ENV NODE_ENV=production \
     PORT=30000 \
