@@ -84,6 +84,54 @@ groups:
           summary: "限流触发频繁 (tier={{ $labels.tier }})"
           description: "可能客户端失控或 DDoS"
 
+      # === Sprint6 新增告警 — P99 / 严重错误率 / 连接掉线 ===
+
+      - alert: HighErrorRateCritical
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_requests_total[5m])), 1)
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: simpleagent
+        annotations:
+          summary: "5xx 错误率 > 5% 持续 5 分钟 (严重)"
+          description: "当前错误率 {{ $value | humanizePercentage }}, 立即排查后端日志, 5% 是严重故障阈值"
+          runbook: "docs/online/RUNBOOK.md#r-1-服务挂"
+
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          ) > 3
+        for: 5m
+        labels:
+          severity: warning
+          service: simpleagent
+        annotations:
+          summary: "P99 延迟 > 3s 持续 5 分钟"
+          description: "当前 P99 {{ $value }}s, P99 比 P95 慢 1.5x+ 通常意味着尾部慢请求堆积, 可能是 MiniMax 慢或限流"
+          runbook: "docs/online/RUNBOOK.md#r-3-接口慢"
+
+      - alert: ActiveConnectionsDropped
+        # http_requests_active 是 in-flight HTTP 请求数, SSE 连接走长连接 HTTP
+        # 因此该指标可作为活跃 SSE 连接的代理
+        # 触发条件: 1 分钟前活跃连接 > 50 (系统在忙), 当前活跃连接 < 5 (几乎全掉)
+        expr: |
+          http_requests_active < 5
+          and
+          http_requests_active offset 1m > 50
+        for: 1m
+        labels:
+          severity: critical
+          service: simpleagent
+        annotations:
+          summary: "活跃 HTTP/SSE 连接断崖式下跌 (1m 前 > 50, 当前 < 5)"
+          description: "SSE/长连接客户端大规模断连, 可能是网络分区、服务 hang 或前端 SDK bug. 立即查 sseService 日志"
+          runbook: "docs/online/RUNBOOK.md#r-6-sse-断连"
+
   - name: simpleagent-info
     interval: 60s
     rules:
