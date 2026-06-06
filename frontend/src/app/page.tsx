@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import ConversationList from '@/components/ConversationList';
 import MultiWindowChat, { LayoutSwitcher } from '@/components/MultiWindowChat';
 import FocusModeChat from '@/components/FocusModeChat';
@@ -41,17 +42,17 @@ import HumanConfirmationDialog, { type ConfirmationRequest, type ConfirmationRes
 type SidePanelContent = 'none' | 'memory' | 'agents' | 'tools' | 'kb' | 'settings';
 type PanelTab = {
   id: Exclude<SidePanelContent, 'none'>;
-  label: string;
+  key: 'settings' | 'memory' | 'agents' | 'tools' | 'knowledgeBase';
   icon: LucideIcon;
   colorVar: string;
 };
 
 const SIDE_PANEL_TABS: PanelTab[] = [
-  { id: 'settings', label: '设置', icon: SettingsIcon, colorVar: '--guide-10' },
-  { id: 'memory', label: '记忆', icon: PanelRight, colorVar: '--guide-8' },
-  { id: 'agents', label: '智能体', icon: Bot, colorVar: '--guide-5' },
-  { id: 'tools', label: '工具', icon: Wrench, colorVar: '--guide-3' },
-  { id: 'kb', label: '知识库', icon: BookOpen, colorVar: '--guide-7' },
+  { id: 'settings', key: 'settings', icon: SettingsIcon, colorVar: '--guide-10' },
+  { id: 'memory', key: 'memory', icon: PanelRight, colorVar: '--guide-8' },
+  { id: 'agents', key: 'agents', icon: Bot, colorVar: '--guide-5' },
+  { id: 'tools', key: 'tools', icon: Wrench, colorVar: '--guide-3' },
+  { id: 'kb', key: 'knowledgeBase', icon: BookOpen, colorVar: '--guide-7' },
 ];
 
 // 禁用 SSR 防止 WelcomeGuide hydration mismatch
@@ -73,6 +74,10 @@ function useMediaQuery(query: string) {
 }
 
 export default function Home() {
+  const t = useTranslations('page');
+  const tConv = useTranslations('conversation');
+  const tCommon = useTranslations('common');
+  const tHitl = useTranslations('hitl');
   const {
     settings,
     conversations,
@@ -316,7 +321,7 @@ export default function Home() {
 
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-[hsl(var(--text-main))]">
-                      {activeConversation?.title || '新对话'}
+                      {activeConversation?.title || t('newChat')}
                     </p>
                     <p className="mt-0.5 flex items-center gap-1 text-xs text-[hsl(var(--text-muted))]">
                       <Clock3 size={12} />
@@ -327,7 +332,7 @@ export default function Home() {
                             hour: '2-digit',
                             minute: '2-digit',
                           })
-                        : '刚刚'}
+                        : t('justNow')}
                     </p>
                   </div>
                 </div>
@@ -340,10 +345,10 @@ export default function Home() {
                   <Link
                     href="/agent"
                     className="relative flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all border border-primary/50 bg-primary/8 text-primary hover:bg-primary/16 hover:border-primary/70"
-                    title="进入 Agent 模式"
+                    title={t('agentModeTitle')}
                   >
                     <Bot size={14} />
-                    <span className="relative">Agent</span>
+                    <span className="relative">{t('agentMode')}</span>
                   </Link>
 
                   <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
@@ -358,10 +363,10 @@ export default function Home() {
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'border border-[hsl(var(--border-subtle))] text-[hsl(var(--text-muted))] hover:border-primary/40 hover:text-primary'
                     }`}
-                    title={focusMode ? '退出专注模式' : '进入专注模式'}
+                    title={focusMode ? t('exitFocusModeTitle') : t('focusModeTitle')}
                   >
                     {focusMode ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-                    {focusMode ? '退出专注' : '专注模式'}
+                    {focusMode ? t('exitFocusMode') : t('focusMode')}
                   </motion.button>
 
                   <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
@@ -370,20 +375,21 @@ export default function Home() {
                   <Link
                     href="/admin"
                     className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium border border-[hsl(var(--border-subtle))] text-[hsl(var(--text-muted))] hover:border-primary/40 hover:text-primary transition-all"
-                    title="管理后台"
+                    title={t('adminTitle')}
                   >
                     <Shield size={14} />
-                    <span className="hidden xl:inline">管理后台</span>
+                    <span className="hidden xl:inline">{t('admin')}</span>
                   </Link>
 
                   <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
 
                   <div className="flex items-center gap-1 rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/90 p-1 backdrop-blur">
-                    {SIDE_PANEL_TABS.map(({ id, icon: Icon, label, colorVar }) => {
+                    {SIDE_PANEL_TABS.map(({ id, icon: Icon, key, colorVar }) => {
                       const isActive = sidePanelContent === id;
                       const accentColor = `hsl(var(${colorVar}))`;
                       const accentBg = `hsl(var(${colorVar}) / ${isActive ? '0.24' : '0.12'})`;
                       const isKb = id === 'kb';
+                      const label = tCommon(key);
 
                       return (
                         <motion.button
@@ -546,12 +552,12 @@ function HITLConfirmationDialogWrapper({ checkpoint, onApprove, onReject }: HITL
     id: checkpoint.id,
     type: typeMap[checkpoint.type] || 'action',
     title: checkpoint.title,
-    message: checkpoint.description || '此操作需要您的确认。',
+    message: checkpoint.description || tHitl('defaultMessage'),
     details: checkpoint.context?.reason as string | undefined,
     dataPreview: checkpoint.context?.input ? JSON.stringify(checkpoint.context.input, null, 2) : undefined,
     options: [
-      { id: 'confirm', label: '确认执行', description: '允许此操作继续执行', style: 'primary' as const, value: 'confirm' },
-      { id: 'cancel', label: '取消操作', description: '阻止此操作', style: 'danger' as const, value: 'cancel' }
+      { id: 'confirm', label: tHitl('confirm'), description: tHitl('confirmDesc'), style: 'primary' as const, value: 'confirm' },
+      { id: 'cancel', label: tHitl('cancelOp'), description: tHitl('cancelDesc'), style: 'danger' as const, value: 'cancel' }
     ],
     timeout: 60,
     allowSkip: false
@@ -561,12 +567,12 @@ function HITLConfirmationDialogWrapper({ checkpoint, onApprove, onReject }: HITL
     if (response.selectedOption === 'confirm') {
       await onApprove(checkpoint.id, 'confirm');
     } else {
-      await onReject(checkpoint.id, '用户取消');
+      await onReject(checkpoint.id, tHitl('userCancel'));
     }
   };
 
   const handleDismiss = async () => {
-    await onReject(checkpoint.id, '用户关闭对话框');
+    await onReject(checkpoint.id, tHitl('userDismiss'));
   };
 
   return (

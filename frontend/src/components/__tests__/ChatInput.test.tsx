@@ -1,7 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
 import { ToastProvider } from '../Toast';
 import ChatInput from '../ChatInput';
+import zhCNMessages from '../../../locales/zh-CN.json';
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
@@ -72,12 +74,14 @@ describe('ChatInput', () => {
     vi.restoreAllMocks();
   });
 
-  // Helper to render with ToastProvider
+  // Helper to render with ToastProvider + NextIntlClientProvider (测试用 zh-CN 默认 locale)
   const renderChatInput = (props: any) => {
     return render(
-      <ToastProvider>
-        <ChatInput {...props} />
-      </ToastProvider>
+      <NextIntlClientProvider locale="zh-CN" messages={zhCNMessages}>
+        <ToastProvider>
+          <ChatInput {...props} />
+        </ToastProvider>
+      </NextIntlClientProvider>
     );
   };
 

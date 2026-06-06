@@ -13,6 +13,7 @@
  */
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { SafeAdminWrapper } from './SafeAdminWrapper';
 import QdrantMonitor from './QdrantMonitor';
 import { useAdminPolling, type SystemStats } from '@/hooks/useAdminSSE';
@@ -28,6 +29,7 @@ const defaultStats: SystemStats = {
 };
 
 export default function AdminDashboard() {
+  const t = useTranslations('admin');
   // 使用通用 Admin SSE Hook 获取 stats 数据
   const { data: statsData, loading, error, refresh } = useAdminPolling<SystemStats>({
     endpoint: '/api/admin/stats',
@@ -47,7 +49,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">系统仪表盘</h1>
+      <h1 className="text-2xl font-bold">{t('dashboard')}</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -57,15 +59,15 @@ export default function AdminDashboard() {
 
       {/* 概览卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard title="总请求数" value={stats.totalRequests} />
-        <StatCard title="成功率" value={`${(stats.successRate * 100).toFixed(1)}%`} />
-        <StatCard title="平均延迟" value={`${stats.avgLatency.toFixed(0)}ms`} />
-        <StatCard title="活跃会话" value={stats.activeSessions} />
+        <StatCard title={t('totalRequests')} value={stats.totalRequests} />
+        <StatCard title={t('successRate')} value={`${(stats.successRate * 100).toFixed(1)}%`} />
+        <StatCard title={t('avgLatency')} value={`${stats.avgLatency.toFixed(0)}ms`} />
+        <StatCard title={t('activeSessions')} value={stats.activeSessions} />
       </div>
 
       {/* 模型调用统计 */}
       <div className="bg-white border rounded-lg p-4">
-        <h2 className="text-lg font-semibold mb-4">模型调用分布</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('modelDistribution')}</h2>
         <div className="space-y-2">
           {stats.modelCalls.map((item, idx) => (
             <div key={`model-${item.model}-${idx}`} className="flex items-center gap-4">
@@ -86,7 +88,7 @@ export default function AdminDashboard() {
 
       {/* 工具使用统计 */}
       <div className="bg-white border rounded-lg p-4">
-        <h2 className="text-lg font-semibold mb-4">工具调用分布</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('toolDistribution')}</h2>
         <div className="space-y-2">
           {stats.toolCalls.map((item, idx) => (
             <div key={`tool-${item.tool}-${idx}`} className="flex items-center gap-4">
@@ -107,13 +109,13 @@ export default function AdminDashboard() {
 
       {/* 知识库状态 */}
       <div className="bg-white border rounded-lg p-4">
-        <h2 className="text-lg font-semibold mb-4">知识库状态</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('knowledgeBaseStatus')}</h2>
         <table className="w-full">
           <thead>
             <tr className="text-left border-b">
-              <th className="pb-2">名称</th>
-              <th className="pb-2">文档数</th>
-              <th className="pb-2">状态</th>
+              <th className="pb-2">{t('columnName')}</th>
+              <th className="pb-2">{t('columnDocs')}</th>
+              <th className="pb-2">{t('columnStatus')}</th>
             </tr>
           </thead>
           <tbody>
@@ -123,7 +125,7 @@ export default function AdminDashboard() {
                 <td className="py-2">{kb.docCount}</td>
                 <td className="py-2">
                   <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
-                    正常
+                    {t('statusOk')}
                   </span>
                 </td>
               </tr>
