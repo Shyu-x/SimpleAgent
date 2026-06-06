@@ -182,11 +182,55 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
         console.log('[ErrorBoundary] Sentry Event (模拟):', JSON.stringify(sentryEvent, null, 2));
 
-        // TODO: 可在此处调用其他监控服务（如 Sentry、Logrocket、Bugsnag 等）
-        // 示例：fetch('/api/monitoring', { method: 'POST', body: JSON.stringify(sentryEvent) });
+        // 接入监控服务 (Sentry / Logrocket / Bugsnag):
+        // 1. Sentry: 通过 @sentry/nextjs SDK 集成, 这里走全局对象守卫避免硬依赖
+        // 2. 自建监控: 通过 fetch 上报到后端 /api/monitoring
+        // 任一上报失败不影响后续上报, 全部 try/catch 隔离
+        this.reportToMonitoring(sentryEvent);
       }
     } catch (reportError) {
       console.error('[ErrorBoundary] Sentry 上报失败:', reportError);
+    }
+  }
+
+  /**
+   * 多通道错误上报
+   * - Sentry SDK (浏览器全局对象 Sentry, 由 @sentry/nextjs 注入)
+   * - 自建监控 fetch (POST /api/monitoring)
+   * 所有通道并行, 互不影响; 单通道失败仅记录日志
+   */
+  private reportToMonitoring(event: Record<string, unknown>): void {
+    // 1. Sentry 全局对象守卫 (避免未安装 SDK 时 ReferenceError)
+    try {
+      if (typeof window !== 'undefined' && typeof (window as unknown as { Sentry?: { captureException: (e: unknown) => void } }).Sentry !== 'undefined') {
+        (window as unknown as { Sentry: { captureException: (e: unknown) => void } }).Sentry.captureException(event);
+      }
+    } catch (err) {
+      console.warn('[ErrorBoundary] Sentry 上报失败:', err);
+    }
+
+    // 2. 自建监控 fetch (后端 /api/monitoring, 当前为 stub 端点)
+    try {
+      if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
+        const body = JSON.stringify({
+          level: 'error',
+          event,
+          timestamp: Date.now(),
+          url: window.location?.href || null,
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+        });
+        // fire-and-forget, 不阻塞错误边界渲染
+        window.fetch('/api/monitoring', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          keepalive: true,
+        }).catch((err) => {
+          console.warn('[ErrorBoundary] 自建监控 fetch 失败:', err);
+        });
+      }
+    } catch (err) {
+      console.warn('[ErrorBoundary] 监控上报构造失败:', err);
     }
   }
 

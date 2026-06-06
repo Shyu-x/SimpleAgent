@@ -290,13 +290,16 @@ class DatabasePersister {
   }
 
   async write(trace) {
-    // TODO: 实现数据库写入
+    // 数据库未配置 (DatabasePersister 仅为可选接入点), 暂不写入
+    // 当前仅输出结构化日志, 后续接入 ClickHouse / Postgres 时实现批量插入
     console.log(`[TraceService] Would persist trace ${trace.traceId} to database`);
+    return null;
   }
 
   async writeBatch(traces) {
-    // TODO: 实现批量写入
+    // 数据库未配置, 暂不写入; 批量接口为未来 ClickHouse / 时序数据库预留
     console.log(`[TraceService] Would persist ${traces.length} traces to database`);
+    return null;
   }
 }
 
