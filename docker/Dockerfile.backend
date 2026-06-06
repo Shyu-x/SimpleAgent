@@ -24,8 +24,6 @@ FROM node:20-alpine AS runtime
 # 健康检查工具
 RUN apk add --no-cache wget tini
 
-WORKDIR /app
-
 ENV NODE_ENV=production \
     PORT=30000 \
     NPM_CONFIG_UPDATE_NOTIFIER=false \
@@ -33,6 +31,11 @@ ENV NODE_ENV=production \
 
 # 非 root 用户
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+
+WORKDIR /app
+
+# WORKDIR 归 nodejs 用户所有 (允许 nodejs 写入 logs/ 等运行时目录)
+RUN chown nodejs:nodejs /app
 
 # 只拷贝生产 node_modules (来自 deps stage)
 COPY --from=deps --chown=nodejs:nodejs /app/node_modules ./node_modules
