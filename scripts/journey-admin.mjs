@@ -19,6 +19,22 @@ const LIVE = process.argv.includes('--live');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+function check(p) {
+  const s = existsSync(p) ? statSync(p).size : 0;
+  console.log(`  [${s > 1024 ? 'OK' : 'EMPTY'}] ${p.split('/').pop()} (${(s / 1024).toFixed(1)} KB)`);
+}
+
+async function capturePage(page, url, outPath) {
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await sleep(2500);
+  } catch (e) {
+    console.log(`  [WARN] ${url} goto 失败: ${e.message}`);
+  }
+  await page.screenshot({ path: outPath, fullPage: false });
+  check(outPath);
+}
+
 async function run() {
   if (!LIVE) {
     console.log('[journey-admin] dry-run 模式: 仅占位, 加 --live 启动 chromium');
@@ -27,19 +43,18 @@ async function run() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: VIEWPORT });
   try {
-    await page.goto(FRONTEND, { waitUntil: 'domcontentloaded', timeout: 15000 });
-    await sleep(2000);
-    // TODO: 遍历 6 个 admin 模块
-    //   - 01-dashboard.png   -> /admin             (AdminDashboard)
-    //   - 02-knowledge.png   -> /admin/knowledge   (KnowledgeBase)
-    //   - 03-tools.png       -> /admin/tools       (ToolRegistry)
-    //   - 04-models.png      -> /admin/models      (ModelConfig)
-    //   - 05-prompts.png     -> /admin/prompts     (PromptTemplate)
-    //   - 06-traces.png      -> /admin/traces      (TraceViewer)
-    //   每个模块: page.goto -> waitForSelector -> 截图 -> 验证非空
-    await page.screenshot({ path: join(OUT, '01-placeholder.png'), fullPage: false });
-    const size = existsSync(join(OUT, '01-placeholder.png')) ? statSync(join(OUT, '01-placeholder.png')).size : 0;
-    console.log(`  [${size > 1024 ? 'OK' : 'EMPTY'}] 01-placeholder.png (${(size / 1024).toFixed(1)} KB)`);
+    // 1) 总览仪表盘
+    await capturePage(page, `${FRONTEND}/admin`, join(OUT, '01-dashboard.png'));
+    // 2) 工具注册
+    await capturePage(page, `${FRONTEND}/admin/tools`, join(OUT, '02-tools.png'));
+    // 3) 知识库
+    await capturePage(page, `${FRONTEND}/admin/kb`, join(OUT, '03-kb.png'));
+    // 4) 模型配置
+    await capturePage(page, `${FRONTEND}/admin/models`, join(OUT, '04-models.png'));
+    // 5) Prompt 模板
+    await capturePage(page, `${FRONTEND}/admin/prompts`, join(OUT, '05-prompts.png'));
+    // 6) 链路追踪
+    await capturePage(page, `${FRONTEND}/admin/traces`, join(OUT, '06-traces.png'));
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);

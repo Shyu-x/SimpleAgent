@@ -19,6 +19,11 @@ const LIVE = process.argv.includes('--live');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+function check(p) {
+  const s = existsSync(p) ? statSync(p).size : 0;
+  console.log(`  [${s > 1024 ? 'OK' : 'EMPTY'}] ${p.split('/').pop()} (${(s / 1024).toFixed(1)} KB)`);
+}
+
 async function run() {
   if (!LIVE) {
     console.log('[journey-login] dry-run 模式: 仅占位, 加 --live 启动 chromium');
@@ -27,15 +32,18 @@ async function run() {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: VIEWPORT });
   try {
-    await page.goto(FRONTEND, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    // 1) 首屏 landing
+    await page.goto(FRONTEND, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await sleep(3000);
+    const p1 = join(OUT, '01-landing.png');
+    await page.screenshot({ path: p1, fullPage: false });
+    check(p1);
+
+    // 2) 等待欢迎/聊天内容加载
     await sleep(2000);
-    // TODO: 检查 API Key 输入框/登录入口是否渲染
-    //   - const apiKeyInput = await page.$('input[name="apiKey"]');
-    //   - const loginBtn = await page.$('button:has-text("登录")');
-    //   - 若缺失, 记录到 console.warn
-    await page.screenshot({ path: join(OUT, '01-placeholder.png'), fullPage: false });
-    const size = existsSync(join(OUT, '01-placeholder.png')) ? statSync(join(OUT, '01-placeholder.png')).size : 0;
-    console.log(`  [${size > 1024 ? 'OK' : 'EMPTY'}] 01-placeholder.png (${(size / 1024).toFixed(1)} KB)`);
+    const p2 = join(OUT, '02-main-chat.png');
+    await page.screenshot({ path: p2, fullPage: true });
+    check(p2);
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);
