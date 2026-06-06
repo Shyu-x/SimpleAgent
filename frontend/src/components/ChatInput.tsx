@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, KeyboardEvent, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Send, Loader2, Mic, Image, X, Play, Square, Trash2, Check, ChevronDown, Sparkles, Settings, MessageSquare, Zap, Search, CheckCircle, Cpu, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 import { useToast } from './Toast';
 import type { Attachment } from '@/types';
 import { useChatStore } from '@/store/chatStore';
@@ -24,6 +25,8 @@ export interface ChatInputRef {
 }
 
 const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, compact = false }, ref) => {
+  const t = useTranslations('chat');
+  const tCommon = useTranslations('common');
   const [input, setInput] = useState('');
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
@@ -179,8 +182,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
       });
     }
     setShowModelSelector(false);
-    showToast(`已切换到 ${model.name}`, 'success');
-  }, [setApiConfig, showToast]);
+    showToast(t('input.modelSwitchSuccess', { model: model.name }), 'success');
+  }, [setApiConfig, showToast, t]);
 
   // Handle custom model input
   const handleCustomModelSubmit = useCallback(() => {
@@ -198,8 +201,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
     });
     setShowModelSelector(false);
     setCustomModelInput('');
-    showToast(`已添加并切换到: ${customModelInput.trim()}`, 'success');
-  }, [customModelInput, apiConfig, addConfiguredModel, setApiConfig, showToast]);
+    showToast(t('input.customModelAdded', { model: customModelInput.trim() }), 'success');
+  }, [customModelInput, apiConfig, addConfiguredModel, setApiConfig, showToast, t]);
 
   // Handle quick settings save
   const handleSaveQuickSettings = useCallback(() => {
@@ -209,8 +212,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
     });
     setSettings({ typingSpeed: localTypingSpeed });
     setShowQuickSettings(false);
-    showToast('设置已保存', 'success');
-  }, [localTemperature, localMaxTokens, localTypingSpeed, setApiConfig, setSettings, showToast]);
+    showToast(t('input.settingsSaved'), 'success');
+  }, [localTemperature, localMaxTokens, localTypingSpeed, setApiConfig, setSettings, showToast, t]);
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
@@ -405,12 +408,12 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
 
     Array.from(files).forEach(file => {
       if (!file.type.startsWith('image/')) {
-        showToast('请上传图片文件', 'error');
+        showToast(t('input.imageTypeError'), 'error');
         return;
       }
 
       if (file.size > 10 * 1024 * 1024) {
-        showToast('图片大小不能超过 10MB', 'error');
+        showToast(t('input.imageTooLarge'), 'error');
         return;
       }
 
@@ -426,7 +429,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
           preview,
         };
         setAttachments(prev => [...prev, newFile]);
-        showToast('图片上传成功', 'success');
+        showToast(t('input.imageUploadSuccess'), 'success');
       };
       reader.readAsDataURL(file);
     });
@@ -435,7 +438,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
   // 移除附件
   const removeAttachment = useCallback((id: string) => {
@@ -480,14 +483,14 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
 
         const newFile: Attachment = {
           id: `audio_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: `语音_${new Date().toLocaleTimeString('zh-CN')}.webm`,
+          name: t('input.audioFileName', { time: new Date().toLocaleTimeString('zh-CN') }),
           type: 'audio',
           url: audioUrl,
           size: audioBlob.size,
           duration: recordingTime,
         };
         setAttachments(prev => [...prev, newFile]);
-        showToast('语音录制完成', 'success');
+        showToast(t('input.recordingDone'), 'success');
 
         // 停止所有音轨
         stream.getTracks().forEach(track => track.stop());
@@ -511,9 +514,9 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
 
     } catch (err) {
       console.error('录音权限被拒绝:', err);
-      showToast('请允许麦克风权限以使用语音输入', 'error');
+      showToast(t('input.micPermissionDenied'), 'error');
     }
-  }, [isRecording, recordingTime, showToast, stopRecording]);
+  }, [isRecording, recordingTime, showToast, stopRecording, t]);
 
   // 播放语音预览
   const togglePlayAudio = useCallback(() => {
@@ -649,7 +652,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                     <div className="absolute inset-0 w-3 h-3 rounded-full bg-destructive animate-ping" />
                   </div>
                   <span className="text-sm font-medium text-destructive">
-                    录音中 {formatRecordingTime(recordingTime)}
+                    {t('input.recording', { time: formatRecordingTime(recordingTime) })}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -658,14 +661,14 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-muted text-sm hover:bg-muted/80 transition-colors"
                   >
                     <Trash2 size={14} />
-                    取消
+                    {t('input.recordingCancel')}
                   </button>
                   <button
                     onClick={toggleRecording}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-destructive text-primary-foreground text-sm hover:bg-destructive/90 transition-colors"
                   >
                     <Check size={14} />
-                    完成
+                    {t('input.recordingFinish')}
                   </button>
                 </div>
               </div>
@@ -709,8 +712,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                           <Sparkles size={14} className="text-white" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-sm">选择 AI 模型</h3>
-                          <p className="text-[10px] text-[hsl(var(--text-muted))]">实时获取 MiniMax 平台模型</p>
+                          <h3 className="font-semibold text-sm">{t('model.selector')}</h3>
+                          <p className="text-[10px] text-[hsl(var(--text-muted))]">{t('model.platform')}</p>
                         </div>
                       </div>
                       <button
@@ -723,7 +726,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                           });
                         }}
                         className="p-2 rounded-lg hover:bg-[hsl(var(--bg-muted))] transition-colors"
-                        title="刷新模型列表"
+                        title={t('model.refresh')}
                       >
                         <RefreshCw size={14} className="text-[hsl(var(--text-muted))]" />
                       </button>
@@ -737,7 +740,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                       <input
                         type="text"
                         id="model-search"
-                        placeholder="搜索模型..."
+                        placeholder={t('model.search')}
                         value={modelSearch}
                         onChange={(e) => setModelSearch(e.target.value)}
                         className="w-full pl-9 pr-3 py-2 text-sm bg-[hsl(var(--bg-muted))]/50 rounded-lg border border-transparent focus:border-[hsl(var(--border-strong))] outline-none transition-colors"
@@ -749,7 +752,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                   <div className="px-4 py-2 bg-blue-500/5 border-b border-blue-500/20">
                     <div className="flex items-center gap-2 text-xs text-blue-600">
                       <CheckCircle size={12} />
-                      <span>当前: <span className="font-medium">{isCustomModel ? apiConfig.model : currentModel.name}</span></span>
+                      <span>{t('model.current', { name: isCustomModel ? apiConfig.model : currentModel.name })}</span>
                     </div>
                   </div>
 
@@ -760,7 +763,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                         <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[hsl(var(--bg-muted))] flex items-center justify-center">
                           <Loader2 size={20} className="animate-spin text-[hsl(var(--text-muted))]" />
                         </div>
-                        <p className="text-sm text-[hsl(var(--text-muted))]">正在加载模型列表...</p>
+                        <p className="text-sm text-[hsl(var(--text-muted))]">{t('model.loadingModels')}</p>
                       </div>
                     ) : (
                       platformModels
@@ -792,7 +795,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                                 }
                               });
                               setShowModelSelector(false);
-                              showToast(`已切换到 ${info.name}`, 'success');
+                              showToast(t('input.modelSwitchSuccess', { model: info.name }), 'success');
                             }}
                             className={`w-full px-4 py-3 flex items-start gap-3 transition-all hover:bg-[hsl(var(--bg-muted))]/80 ${
                               isSelected ? 'bg-blue-500/10 border-l-2 border-blue-500' : ''
@@ -814,7 +817,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                                 <span className="font-medium text-sm">{info.name}</span>
                                 {isSelected && (
                                   <span className="px-1.5 py-0.5 text-[10px] bg-blue-500 text-white rounded-full">
-                                    当前
+                                    {tCommon('current')}
                                   </span>
                                 )}
                               </div>
@@ -846,7 +849,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                   <div className="px-4 py-2 border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-muted))]/30">
                     <p className="text-[10px] text-[hsl(var(--text-muted))] flex items-center gap-1">
                       <Zap size={10} className="text-[hsl(var(--guide-6))]" />
-                      数据来源: MiniMax 平台 · {platformModels.length} 个可用模型
+                      {t('model.dataSource', { count: platformModels.length })}
                     </p>
                   </div>
                 </motion.div>
@@ -866,7 +869,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
               >
                 <MessageSquare size={12} />
               </span>
-              <span className="text-muted-foreground">短语</span>
+              <span className="text-muted-foreground">{t('quickPhrases')}</span>
             </button>
 
             {/* 快捷短语下拉菜单 */}
@@ -917,7 +920,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
               >
                 <Settings size={12} />
               </span>
-              <span className="text-muted-foreground">设置</span>
+              <span className="text-muted-foreground">{tCommon('settings')}</span>
             </button>
 
             {/* 快捷设置面板 */}
@@ -933,7 +936,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                     {/* 温度设置 */}
                     <div className="rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-muted))]/55 p-3">
                       <div className="flex items-center justify-between mb-2">
-                        <label className="text-sm font-medium">Temperature</label>
+                        <label className="text-sm font-medium">{t('settings.temperature')}</label>
                         <span className="text-xs text-muted-foreground">{localTemperature}</span>
                       </div>
                       <input
@@ -946,24 +949,24 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                         className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>精确</span>
-                        <span>平衡</span>
-                        <span>创意</span>
+                        <span>{t('settings.precise')}</span>
+                        <span>{t('settings.balanced')}</span>
+                        <span>{t('settings.creative')}</span>
                       </div>
                     </div>
 
                     {/* 最大Token设置 */}
                     <div className="rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-muted))]/55 p-3">
                       <div className="flex items-center justify-between mb-2">
-                        <label className="text-sm font-medium">Max Tokens</label>
+                        <label className="text-sm font-medium">{t('settings.maxTokens')}</label>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">{localMaxTokens.toLocaleString()}</span>
                           <button
                             onClick={() => setLocalMaxTokens(currentModelMaxTokens)}
                             className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                            title={`设为模型最大值 (${currentModelMaxTokens.toLocaleString()})`}
+                            title={t('settings.setToMax', { max: currentModelMaxTokens.toLocaleString() })}
                           >
-                            最大
+                            {t('settings.max')}
                           </button>
                         </div>
                       </div>
@@ -982,7 +985,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                         <span>{currentModelMaxTokens.toLocaleString()}</span>
                       </div>
                       <p className="text-[10px] text-muted-foreground/70 mt-1">
-                        {currentModel.name} 支持最大 {currentModelMaxTokens.toLocaleString()} tokens
+                        {t('settings.maxTokensForModel', { model: currentModel.name, max: currentModelMaxTokens.toLocaleString() })}
                       </p>
                     </div>
 
@@ -991,7 +994,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                       <div className="flex items-center justify-between mb-2">
                         <label className="text-sm font-medium flex items-center gap-1">
                           <Zap size={14} />
-                          打字速度
+                          {t('settings.typingSpeed')}
                         </label>
                         <span className="text-xs text-muted-foreground">{localTypingSpeed}ms/字</span>
                       </div>
@@ -1005,8 +1008,8 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                         className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>快</span>
-                        <span>慢</span>
+                        <span>{t('settings.fast')}</span>
+                        <span>{t('settings.slow')}</span>
                       </div>
                     </div>
 
@@ -1015,7 +1018,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
                       onClick={handleSaveQuickSettings}
                       className="w-full py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
                     >
-                      保存设置
+                      {t('settings.saveSettings')}
                     </button>
                   </div>
                 </motion.div>
@@ -1062,7 +1065,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
             onKeyDown={handleKeyDown}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
-            placeholder="发送消息..."
+            placeholder={t('input.placeholder')}
             disabled={disabled}
             rows={1}
             // Prevent iOS zoom
@@ -1098,6 +1101,7 @@ const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(({ onSend, disabled, 
             data-testid="send-button"
             onClick={handleSend}
             disabled={(!input.trim() && attachments.length === 0) || disabled}
+            aria-label="发送消息"
             className={`
               relative flex items-center justify-center rounded-lg
               transition-all duration-200 touch-manipulation w-11 h-11 sm:w-9 sm:h-9

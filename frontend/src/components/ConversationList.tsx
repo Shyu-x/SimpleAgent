@@ -8,6 +8,7 @@ import ConversationContextMenu from './ConversationContextMenu';
 import { useToast } from './Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import DraggableConversationItem from './DraggableConversationItem';
+import { useTranslations } from 'next-intl';
 
 interface ConversationListProps {
   onCloseSidebar?: () => void;
@@ -35,7 +36,7 @@ const GUIDE_COLOR_VARS = [
   '--guide-12',
 ] as const;
 
-function getTimeBucket(updatedAt: number): { id: string; label: string } {
+function getTimeBucket(updatedAt: number, t: ReturnType<typeof useTranslations<'conversation'>>): { id: string; label: string } {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const messageDay = new Date(updatedAt);
@@ -46,17 +47,19 @@ function getTimeBucket(updatedAt: number): { id: string; label: string } {
   ).getTime();
   const diffDays = Math.floor((todayStart - messageDayStart) / DAY_MS);
 
-  if (diffDays <= 0) return { id: 'today', label: '今天' };
-  if (diffDays === 1) return { id: 'yesterday', label: '昨天' };
-  if (diffDays <= 7) return { id: 'week', label: '最近 7 天' };
-  if (diffDays <= 30) return { id: 'month', label: '最近 30 天' };
+  if (diffDays <= 0) return { id: 'today', label: t('time.today') };
+  if (diffDays === 1) return { id: 'yesterday', label: t('time.yesterday') };
+  if (diffDays <= 7) return { id: 'week', label: t('time.lastWeek') };
+  if (diffDays <= 30) return { id: 'month', label: t('time.lastMonth') };
 
   const monthId = `${messageDay.getFullYear()}-${String(messageDay.getMonth() + 1).padStart(2, '0')}`;
-  const monthLabel = `${messageDay.getFullYear()} 年 ${messageDay.getMonth() + 1} 月`;
+  const monthLabel = t('time.monthYear', { year: messageDay.getFullYear(), month: messageDay.getMonth() + 1 });
   return { id: monthId, label: monthLabel };
 }
 
 export default function ConversationList({ onCloseSidebar }: ConversationListProps) {
+  const t = useTranslations('conversation');
+  const tCommon = useTranslations('common');
   const {
     conversations,
     activeConversationId,
@@ -116,15 +119,15 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
 
   const groupedConversations = useMemo<ConversationGroup[]>(() => {
     const orderedGroups: ConversationGroup[] = [
-      { id: 'today', label: '今天', items: [] },
-      { id: 'yesterday', label: '昨天', items: [] },
-      { id: 'week', label: '最近 7 天', items: [] },
-      { id: 'month', label: '最近 30 天', items: [] },
+      { id: 'today', label: t('time.today'), items: [] },
+      { id: 'yesterday', label: t('time.yesterday'), items: [] },
+      { id: 'week', label: t('time.lastWeek'), items: [] },
+      { id: 'month', label: t('time.lastMonth'), items: [] },
     ];
     const dynamicGroups = new Map<string, ConversationGroup>();
 
     filteredConversations.forEach((conversation) => {
-      const bucket = getTimeBucket(conversation.updatedAt);
+      const bucket = getTimeBucket(conversation.updatedAt, t);
       const staticGroup = orderedGroups.find((item) => item.id === bucket.id);
 
       if (staticGroup) {
@@ -143,7 +146,7 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
     );
 
     return [...orderedGroups, ...monthGroups].filter((group) => group.items.length > 0);
-  }, [filteredConversations]);
+  }, [filteredConversations, t]);
 
   const formatTime = useCallback((timestamp: number) => {
     const date = new Date(timestamp);
@@ -155,15 +158,15 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
   }, []);
 
   const getConversationPreview = useCallback((conversation: Conversation) => {
-    if (conversation.messages.length === 0) return '开始新的对话';
+    if (conversation.messages.length === 0) return t('newConversation');
 
     const lastMessage = conversation.messages[conversation.messages.length - 1].content
       .replace(/\s+/g, ' ')
       .trim();
 
-    if (!lastMessage) return '继续当前对话';
+    if (!lastMessage) return t('continue');
     return lastMessage.length > 64 ? `${lastMessage.slice(0, 64)}...` : lastMessage;
-  }, []);
+  }, [t]);
 
   const openConversationMenu = useCallback(
     (position: { x: number; y: number }, conversation: Conversation) => {
@@ -200,13 +203,13 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
       const conv = conversations.find((c) => c.id === deleteConfirmId);
       if (conv && index !== -1) {
         deleteConversation(deleteConfirmId);
-        showToast('对话已删除', 'info', '撤销', () => {
+        showToast(t('deleted'), 'info', tCommon('cancel'), () => {
           restoreConversation(conv, index);
         });
       }
       setDeleteConfirmId(null);
     }
-  }, [conversations, deleteConfirmId, deleteConversation, restoreConversation, showToast]);
+  }, [conversations, deleteConfirmId, deleteConversation, restoreConversation, showToast, t, tCommon]);
 
   // 拖拽事件处理
   const handleDragStart = useCallback((conversationId: string) => {
@@ -223,8 +226,8 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
       <div className="shrink-0 space-y-4 border-b border-[hsl(var(--border-subtle))] p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base font-semibold tracking-tight text-[hsl(var(--text-main))]">对话历史</h2>
-            <p className="mt-0.5 text-xs text-[hsl(var(--text-muted))]">{conversations.length} 条会话</p>
+            <h2 className="text-base font-semibold tracking-tight text-[hsl(var(--text-main))]">{t('title')}</h2>
+            <p className="mt-0.5 text-xs text-[hsl(var(--text-muted))]">{t('count', { count: conversations.length })}</p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -234,7 +237,7 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                 whileTap={{ scale: 0.95 }}
                 onClick={onCloseSidebar}
                 className="rounded-xl p-2 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))] hover:text-[hsl(var(--text-main))]"
-                title="关闭侧边栏"
+                title={t('closeSidebar')}
               >
                 <X size={18} />
               </motion.button>
@@ -246,10 +249,10 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
               className="inline-flex items-center gap-2 rounded-xl bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40"
             >
               <Plus size={14} />
-              新建
+              {t('newButton')}
             </motion.button>
             <span className="hidden text-[10px] text-[hsl(var(--text-muted))] opacity-60 lg:inline">
-              或拖拽到窗口
+              {t('dragHint')}
             </span>
           </div>
         </div>
@@ -261,7 +264,7 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
           />
           <input
             type="text"
-            placeholder="搜索对话..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-muted))]/45 py-2 pl-10 pr-3 text-sm text-[hsl(var(--text-main))] outline-none transition-all placeholder:text-[hsl(var(--text-muted))]/70 focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
@@ -354,14 +357,14 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                       <div className="min-w-0 flex-1 pr-6">
                         <div className="flex items-center gap-2">
                           <span className="truncate text-sm font-medium text-[hsl(var(--text-main))]">
-                            {conversation.title || '新对话'}
+                            {conversation.title || t('new')}
                           </span>
                           {isActive && (
                             <span
                               className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
                               style={{ backgroundColor: itemTint, color: itemColor }}
                             >
-                              当前
+                              {t('active')}
                             </span>
                           )}
                         </div>
@@ -371,7 +374,7 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                         </p>
 
                         <p className="mt-1 text-[11px] text-[hsl(var(--text-muted))]/90">
-                          {formatTime(conversation.updatedAt)} · {conversation.messages.length} 条消息
+                          {formatTime(conversation.updatedAt)} · {t('messageCount', { count: conversation.messages.length })}
                         </p>
                       </div>
 
@@ -406,7 +409,7 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
         {groupedConversations.length === 0 && (
           <div className="flex h-44 flex-col items-center justify-center gap-2 text-[hsl(var(--text-muted))]">
             <Search size={32} className="opacity-20" />
-            <p className="text-xs">未找到相关对话</p>
+            <p className="text-xs">{t('empty')}</p>
           </div>
         )}
       </div>
@@ -426,21 +429,21 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                   <AlertTriangle size={24} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[hsl(var(--text-main))]">确认删除对话？</h3>
-                  <p className="mt-1 text-sm text-[hsl(var(--text-muted))]">此操作后可在 5 秒内撤销</p>
+                  <h3 className="font-semibold text-[hsl(var(--text-main))]">{t('deleteConfirm')}</h3>
+                  <p className="mt-1 text-sm text-[hsl(var(--text-muted))]">{t('deleteHint')}</p>
                 </div>
                 <div className="mt-2 flex w-full gap-2">
                   <button
                     onClick={() => setDeleteConfirmId(null)}
                     className="flex-1 rounded-xl bg-[hsl(var(--bg-muted))] px-4 py-2 text-sm font-medium text-[hsl(var(--text-main))] transition-colors hover:bg-[hsl(var(--bg-muted))]/80"
                   >
-                    取消
+                    {tCommon('cancel')}
                   </button>
                   <button
                     onClick={handleConfirmDelete}
                     className="flex-1 rounded-xl bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
                   >
-                    删除
+                    {tCommon('delete')}
                   </button>
                 </div>
               </div>
@@ -472,7 +475,7 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              a.download = `${conversation.title || '对话'}_${Date.now()}.json`;
+              a.download = `${conversation.title || t('new')}_${Date.now()}.json`;
               a.click();
               URL.revokeObjectURL(url);
             }}
