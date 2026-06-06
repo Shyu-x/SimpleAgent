@@ -355,15 +355,13 @@ const MissionControl = memo(function MissionControl({
   }, [addTask]);
 
   return (
-    <main
-      aria-label="Agent 任务控制台"
+    <section
       data-mission-control
       className={`flex flex-col h-full bg-slate-900 text-white overflow-hidden ${className}`}
     >
-      {/* A11Y 修复: 加 h1 heading (axe landmark-one-main + page-has-heading-one) */}
-      <h1 className="sr-only">Agent 任务控制台</h1>
-      {/* AgentStatusBar 顶部状态栏 */}
-      <div className="flex-shrink-0">
+      {/* AgentStatusBar 顶部状态栏 - landmark region */}
+      <div className="flex-shrink-0" role="region" aria-label="状态栏">
+        <h2 className="sr-only">任务控制台主区域</h2>
         <AgentStatusBar
           agents={agents}
           totalTasks={totalTasks}
@@ -392,6 +390,8 @@ const MissionControl = memo(function MissionControl({
             border-r border-white/10
             overflow-hidden
           "
+          role="region"
+          aria-label="Agent 池"
         >
           {/* AgentPool 头部 */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
@@ -457,6 +457,8 @@ const MissionControl = memo(function MissionControl({
             flex flex-col
             overflow-hidden
           "
+          role="region"
+          aria-label="任务与结果"
         >
           {/* 右上: TaskQueue + TaskBroadcast */}
           <div className="flex flex-col border-b border-white/10">
@@ -503,7 +505,7 @@ const MissionControl = memo(function MissionControl({
             </div>
 
             {/* Tab 内容 */}
-            <div className="h-64 overflow-hidden">
+            <div className="h-64 overflow-hidden" role="tabpanel" aria-label="任务面板">
               <AnimatePresence mode="wait">
                 {activeTab === 'queue' ? (
                   <motionClass.div
@@ -544,6 +546,8 @@ const MissionControl = memo(function MissionControl({
           <motionClass.div
             layout
             className="flex-1 overflow-hidden"
+            role="region"
+            aria-label="执行结果"
           >
             <ResultsFeed />
           </motionClass.div>
@@ -556,6 +560,8 @@ const MissionControl = memo(function MissionControl({
             col-span-2
             border-t border-white/10
           "
+          role="region"
+          aria-label="任务操作栏"
         >
             <ActionBar
               onPublishAll={handlePublishAll}
@@ -640,7 +646,7 @@ const MissionControl = memo(function MissionControl({
         onClose={() => setShowFullViz(false)}
         traceId={activeTraceId || undefined}
       />
-    </main>
+    </section>
   );
 });
 
