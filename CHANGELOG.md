@@ -1,5 +1,50 @@
 # SimpleAgent - 更新日志
 
+**Sprint #8 完成日期**: 2026-06-06
+
+---
+
+## Sprint #8 / Wave #8.1 变更摘要 (2026-06-06) — 商业化 demo 完整化
+
+### 核心成果
+
+| 类别 | 成果 | 状态 |
+|------|------|------|
+| **A11y 修复** | 81→33 违规 (-60%, Agent 页 landmark + h1 + aria-label) | ✅ 完成 |
+| **Docker 瘦身** | backend 1.4G→177MB (-87%), frontend 1.77G→66MB (-96%) | ✅ 完成 |
+| **多阶段构建** | Dockerfile + .dockerignore (162 规则) | ✅ 完成 |
+| **8 缺口脚本** | login/HITL/admin/a2a/i18n/mcp/alert/incident 占位 | ✅ 完成 |
+| **真实 Docker 部署** | 端口 40000/40001 镜像启动 (Sprint #7 起) | ✅ 完成 |
+| **E2E 真实业务** | RAG 真实 KB 端到端验证 | ✅ 完成 |
+
+### 4 个 commit 列表 (Wave 8.1)
+
+| 提交 | 描述 |
+|------|------|
+| 353aa03 | perf(docker): 多阶段 + slim 镜像 (frontend 1.77G→278MB, -84%) |
+| de15366 | fix(a11y): Agent 页 main + MissionControl h1 + 2 aria-label (81→33 违规) |
+| efb0cf7 | test(journey): 8 个新 journey 脚本骨架 + 占位 README |
+| 998cb2c | perf(docker): 添加 .dockerignore + chown /app |
+
+### 关键改进
+
+- a11y 修复率达 60% (剩余 33: 8 critical button-name, 23 serious color-contrast, 1 nested-interactive, 1 scrollable-region-focusable)
+- Docker 镜像总减少 92% (3.17GB → 243MB)
+- .dockerignore 162 条规则排除 node_modules / .next / .git / docs / tests
+- 8 个新 journey 脚本 (login/hitl/admin/a2a/i18n/mcp/alert/incident) 支持 --live / --dry-run 双模式
+- 真实部署 5 服务: dev 30000/3001/3090 + docker 40000/40001
+- GATE 15/15 GO 持续
+
+### 已知遗留 (Wave 8.2+ 计划)
+
+- 33 个 a11y 违规待 Wave 8.3 主会话处理
+- i18n 0 实现 → Wave 8.2 agent_i18n
+- KMS 0 实现 + 5 个真 TODO → Wave 8.2 agent_kms_todo
+- 8 个 journey 真实截图 → Wave 8.3 主会话
+- Grafana + Prometheus 部署 → Wave 8.3 主会话
+
+---
+
 **Sprint #7 完成日期**: 2026-06-03
 
 ---

@@ -173,12 +173,29 @@
 | LAYOUT-1 iPad 768 | ✅ (feature flag 默认 false) | 647a051 |
 | THEME-4 移动深色 | ✅ (1 行修复) | eb756ff |
 
+### 6.2 Sprint #8 / Wave #8.1 商业化 demo 完整化 (2026-06-06)
+
+| 项 | 修复状态 | commit |
+|----|---------|--------|
+| A11y 78 违规 (axe-core) | ⚠️ 81→33 (-60%), 剩余 33 待 Wave 8.3 | de15366 |
+| Docker 镜像 3.17GB 偏大 | ✅ backend 177MB, frontend 66MB (-92%) | 353aa03 + 998cb2c |
+| .dockerignore 缺失 | ✅ 162 规则新建 | 998cb2c |
+| 8 个用户旅程无脚本 | ✅ 8 脚本骨架 + README + 占位截图 | efb0cf7 |
+| 真实 Docker 部署阻塞 | ✅ 端口 40000/40001 跑通 (Sprint #7) | ba84184 |
+| Docker 容器 EACCES bug | ✅ chown /app 给 nodejs | 998cb2c |
+
 ## 7. 下一步行动
 
 1. **立即**: 提 PR 合并到 master
-2. **24h**: 在 staging 环境跑一次 canary-deploy.sh 完整流程
-3. **1 周**: 加 Grafana 4 面板 + 5 条 P1 告警
-4. **1 月**: SSE 专项压测 + 100 并发长时稳定性
+2. **Wave 8.2 (1-2 周)**: 2 agent 并行
+   - **agent_i18n** (P2): 装 next-intl, 抽 200+ zh-CN 字符串, 加 en locale
+   - **agent_kms_todo** (P2): KMS interface + Local/Vault stub + 清 5 TODO
+3. **Wave 8.3 (主会话亲自做, 1 周)**:
+   - 33 个 a11y 违规修复 (button-name / color-contrast)
+   - 8 个 journey 真实截图 (login/HITL/Admin-6/A2A/i18n/MCP/alert/incident)
+   - Grafana + Prometheus 部署 (sudo 部署)
+   - 5 类天然边界 (真实登录/多用户/A2A 真实/告警端到端)
+4. **1 月**: SSE 专项压测 + 100 并发长时稳定性 (5min)
 
 ## 8. 证据汇总
 
@@ -188,8 +205,10 @@
 - 运维手册: `docs/online/RUNBOOK.md`
 - 部署手册: `docs/online/DEPLOY.md`
 - 上线门禁: `scripts/online-gate.sh` (15/15 GO)
-- 截图证据: `docs/online/screenshots/` (5) + `docs/online/journeys/` (26) = **31 张**
-- CHANGELOG: `CHANGELOG.md` Sprint #6
+- 截图证据: `docs/online/screenshots/` (5) + `docs/online/journeys/` (26 + 8 占位) = **39 张**
+- CHANGELOG: `CHANGELOG.md` Sprint #6 / #7 / #8
+- Wave 8.1 4 commit: 353aa03 + de15366 + efb0cf7 + 998cb2c
+- 本会话累计 commit: **41+**
 
 ---
 
