@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import './globals.css';
 import { RouterProvider } from '@/contexts/RouterContext';
 import { GlobalErrorBoundary } from '@/utils/ErrorBoundary';
@@ -12,13 +14,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" />
         {/* 主题初始化脚本 - 在 React 水合前运行，防止闪烁 */}
@@ -55,7 +60,9 @@ export default function RootLayout({
       <body className="h-screen font-sans">
         <GlobalErrorBoundary>
           <RouterProvider>
-            {children}
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              {children}
+            </NextIntlClientProvider>
           </RouterProvider>
         </GlobalErrorBoundary>
       </body>

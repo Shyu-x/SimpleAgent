@@ -1,9 +1,14 @@
 /** @type {import('next').NextConfig} */
+const createNextIntlPlugin = require('next-intl/plugin');
+
 const isGitHubPages = process.env.GITHUB_PAGES === 'true';
 
 const backendOrigin = isGitHubPages
   ? process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000'
   : (process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000');
+
+// 集成 next-intl 插件（必须在 nextConfig 之前）
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig = {
   reactStrictMode: true,
@@ -45,4 +50,4 @@ const nextConfig = {
   }),
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);
