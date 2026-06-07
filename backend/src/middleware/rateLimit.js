@@ -211,7 +211,18 @@ function createRateLimitMiddleware(options = {}) {
     limiterType = 'minute'
   } = options;
 
+  // 完全禁用速率限制（性能测试/内网部署时使用）
+  const RATE_LIMIT_DISABLED =
+    process.env.DISABLE_RATE_LIMIT === 'true' ||
+    process.env.DISABLE_RATE_LIMIT === '1';
+
   return async (req, res, next) => {
+    // DISABLE_RATE_LIMIT 短路：跳过 Redis 限流器（修复 storeClient 未注入导致 500）
+    if (RATE_LIMIT_DISABLED) {
+      res.set('X-RateLimit-Status', 'disabled');
+      return next();
+    }
+
     const ip = getClientIP(req);
     const tier = getUserTier(req);
     const path = req.path;
