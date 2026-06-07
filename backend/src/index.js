@@ -156,6 +156,61 @@ async function startServer() {
     prometheusService.initialize(metricsCollector);
   }
 
+  // 注册 5 条默认告警规则 (US-007)
+  if (metricsCollector && typeof metricsCollector.registerAlertRule === 'function') {
+    metricsCollector.registerAlertRule({
+      id: 'high_error_rate',
+      name: 'HighErrorRate',
+      description: '5xx 错误率超过 5% 持续 5 分钟',
+      level: 'critical',
+      metric: 'http_requests_total',
+      condition: '>',
+      threshold: 5,
+      duration: 5 * 60 * 1000,
+      labels: { status: '500' },
+    });
+    metricsCollector.registerAlertRule({
+      id: 'high_p99_latency',
+      name: 'HighP99Latency',
+      description: 'P99 延迟超过 3 秒持续 5 分钟',
+      level: 'warning',
+      metric: 'http_request_duration_seconds',
+      condition: '>',
+      threshold: 3,
+      duration: 5 * 60 * 1000,
+    });
+    metricsCollector.registerAlertRule({
+      id: 'sse_connections_drop',
+      name: 'SSEConnectionsDrop',
+      description: 'SSE 连接数 (http_requests_active) 突然下降',
+      level: 'critical',
+      metric: 'http_requests_active',
+      condition: '<',
+      threshold: 1,
+      duration: 60 * 1000,
+    });
+    metricsCollector.registerAlertRule({
+      id: 'queue_backlog',
+      name: 'QueueBacklog',
+      description: '队列长度超过 100',
+      level: 'warning',
+      metric: 'queue_length',
+      condition: '>',
+      threshold: 100,
+      duration: 0,
+    });
+    metricsCollector.registerAlertRule({
+      id: 'model_errors',
+      name: 'ModelErrors',
+      description: '5 分钟内模型错误数超过 10',
+      level: 'warning',
+      metric: 'model_errors_total',
+      condition: '>',
+      threshold: 10,
+      duration: 5 * 60 * 1000,
+    });
+  }
+
   // 请求指标收集中间件（需要 prometheusService 和 gatewayService）
   const { requestMetricsMiddleware, setPrometheusService, setGatewayService } = require('./middleware/metricsMiddleware');
   setPrometheusService(prometheusService);
