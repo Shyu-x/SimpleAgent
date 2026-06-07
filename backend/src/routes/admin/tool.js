@@ -65,12 +65,18 @@ router.get('/categories', (req, res) => {
 router.get('/', (req, res) => {
   try {
     const registry = getRegistry(req);
-    const { category, keyword } = req.query;
+    const { category, keyword, enabled } = req.query;
     let tools = registry.listTools();
 
-    // 按分类过滤
-    if (category) {
+    // 按分类过滤: 'all' 或空 = 不过滤
+    if (category && category !== 'all') {
       tools = tools.filter(t => t.category === category);
+    }
+
+    // 按启用状态过滤: 'all' 或空 = 不过滤, 'true'/'false' = 精确匹配
+    if (enabled && enabled !== 'all') {
+      const wantEnabled = enabled === 'true';
+      tools = tools.filter(t => Boolean(t.enabled) === wantEnabled);
     }
 
     // 按关键词搜索

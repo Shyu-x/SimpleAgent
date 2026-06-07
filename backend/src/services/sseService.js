@@ -9,12 +9,59 @@ const { classifyRetryableError } = require('../common/errors/errorClassifier');
 
 // 工具声明注入（B4 TOOL-1）- 让 LLM 知道可用工具
 // MiniMax M2.7 工具调用协议: 输出 <<<TOOL:tool_name:args>>> 触发调用
+// 协议触发后由本文件的 detectAndExecuteTool() 解析并执行
 const TOOL_SYSPROMPT = `\n\n[可用工具]
-- get_current_time(): 返回当前 ISO 时间
-- web_search(query): 联网搜索
-- calculator(expression): 数学计算
-- knowledge_base_search(query): 查询知识库
-需要时在回复末尾输出 <<<TOOL:tool_name:args>>> 格式。`;
+- calculator(expression): 数学计算，例如 <<<TOOL:calculator:123 * 456>>>
+- datetime(operation='now'): 获取当前时间，例如 <<<TOOL:datetime:now>>>
+- web_search(query): 联网搜索，例如 <<<TOOL:web_search:人工智能最新进展>>>
+- file_read(path): 读取本地文件，例如 <<<TOOL:file_read:/etc/hostname>>>
+需要使用工具时，在回复末尾单独一行输出 <<<TOOL:tool_name:args>>> 格式。
+args 仅为纯文本参数，多个参数用空格分隔，系统会自动转换。`;
+
+// B4 TOOL-1 + B4b TOOL-2: 工具名映射（LLM 声明 → 工具注册表实际名）
+const TOOL_NAME_ALIAS = {
+  get_current_time: 'datetime',
+  get_time: 'datetime',
+  current_time: 'datetime',
+  calc: 'calculator',
+  calculate: 'calculator',
+  search: 'web_search',
+  knowledge_base_search: 'web_search',
+  knowledge_search: 'web_search',
+  read_file: 'file_read',
+  file_read: 'file_read'
+};
+
+// B4b TOOL-2: 工具参数归一化（LLM 输出的纯文本 → 注册表期望的 JSON）
+function normalizeToolArgs(toolName, rawArgs) {
+  const args = (rawArgs || '').trim();
+  switch (toolName) {
+    case 'datetime':
+      // LLM 可能输出: "now" / "" / "now,timezone=Asia/Shanghai"
+      if (!args) return { operation: 'now' };
+      if (args.startsWith('{')) {
+        try { return JSON.parse(args); } catch { /* fallthrough */ }
+      }
+      const firstToken = args.split(/[\s,]+/)[0];
+      if (['now', 'format', 'parse', 'add', 'subtract', 'diff'].includes(firstToken)) {
+        return { operation: firstToken };
+      }
+      return { operation: 'now' };
+    case 'calculator':
+      // 直接当表达式
+      return { expression: args };
+    case 'web_search':
+      return { query: args };
+    case 'file_read':
+      return { path: args };
+    default:
+      // 尝试 JSON → 否则当 query
+      if (args.startsWith('{')) {
+        try { return JSON.parse(args); } catch { return { query: args }; }
+      }
+      return { query: args };
+  }
+}
 
 // RAG 注入（B5 RAG-1）- 懒加载
 let _intentClassifier = null;
@@ -39,6 +86,16 @@ function getRagService() {
     _ragService = RAGService.getSharedRagService();
   }
   return _ragService;
+}
+
+// B4b TOOL-2: 获取默认工具注册表（懒加载）
+let _defaultToolRegistry = null;
+function getDefaultToolRegistry() {
+  if (!_defaultToolRegistry) {
+    const { createDefaultToolRegistry } = require('./tools');
+    _defaultToolRegistry = createDefaultToolRegistry();
+  }
+  return _defaultToolRegistry;
 }
 
 // 创建日志记录器

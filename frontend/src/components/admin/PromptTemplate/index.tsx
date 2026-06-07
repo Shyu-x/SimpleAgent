@@ -86,8 +86,8 @@ export default function PromptTemplatePage() {
   const { data: templatesData, loading, refresh: refreshTemplates } = useAdminPolling<PromptTemplate[]>({
     endpoint: '/api/admin/prompts',
     parser: (res: unknown) => {
-      const response = res as { data: { data: { templates: RawTemplate[] } } };
-      const rTemplates = response?.data?.data?.templates || [];
+      const response = res as { data: { templates: RawTemplate[] } };
+      const rTemplates = response?.data?.templates || [];
       return rTemplates.map((t: RawTemplate): PromptTemplate => ({
         id: t.id,
         name: t.name,
