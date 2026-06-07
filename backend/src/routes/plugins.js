@@ -71,9 +71,27 @@ router.get('/roles', (req, res) => {
 });
 
 // 执行工具
+// US-014: 修复 500 — 原实现仅依赖未初始化的 pluginManager(只有 2 个内置插件且需 enable),
+// 实际工具列表在 app.toolRegistry(23 个)。先查 pluginManager, 找不到则回退到真实 toolRegistry,
+// 避免与 /api/tools/execute 行为不一致。
 router.post('/execute/:toolName', async (req, res) => {
-  try { ok(res, { result: await pluginManager.executeTool(req.params.toolName, req.body) }); }
-  catch (error) { err(res, error); }
+  const { toolName } = req.params;
+  try {
+    let result;
+    try {
+      result = await pluginManager.executeTool(toolName, req.body);
+    } catch (pluginErr) {
+      const registry = req.app.get('toolRegistry');
+      if (registry && typeof registry.executeTool === 'function') {
+        // 真实工具注册表: { tool, params, options } 形态
+        const out = await registry.executeTool(toolName, req.body || {}, {});
+        // 标准化输出: registry 已返回 { success, ... }, 直接透传
+        return ok(res, { result: out });
+      }
+      throw pluginErr;
+    }
+    ok(res, { result });
+  } catch (error) { err(res, error); }
 });
 
 module.exports = router;
