@@ -124,6 +124,7 @@ const SortableTaskItem = memo(function SortableTaskItem({
         <button
           onClick={() => onToggleExpand(task.id)}
           className="mt-1 p-0.5 hover:bg-white/10 rounded transition-colors"
+          aria-label={isExpanded ? '折叠任务详情' : '展开任务详情'}
         >
           {isExpanded ? (
             <ChevronDown size={14} className="text-slate-400" />

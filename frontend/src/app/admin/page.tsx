@@ -269,7 +269,12 @@ function AdminDashboardContent() {
       {/* 知识库状态 */}
       <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg p-4 overflow-hidden">
         <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">知识库状态</h2>
-        <div className="overflow-x-auto max-h-64 overflow-y-auto">
+        <div
+          className="overflow-x-auto max-h-64 overflow-y-auto"
+          tabIndex={0}
+          role="region"
+          aria-label="知识库状态列表"
+        >
           <table className="w-full min-w-[400px]">
             <thead className="sticky top-0 bg-gray-50 dark:bg-gray-800">
               <tr className="text-left border-b dark:border-gray-700">

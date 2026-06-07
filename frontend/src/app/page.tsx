@@ -255,7 +255,11 @@ export default function Home() {
         <MobileExperienceProvider>
           <MobileLayout />
           <PromptSelector isOpen={promptSelectorOpen} onClose={() => setPromptSelectorOpen(false)} />
-          {hasHydrated && showWelcomeGuide && <WelcomeGuide onComplete={() => setShowWelcomeGuide(false)} />}
+          {hasHydrated && showWelcomeGuide && (
+            <div role="dialog" aria-label="Welcome guide" aria-modal="false">
+              <WelcomeGuide onComplete={() => setShowWelcomeGuide(false)} />
+            </div>
+          )}
         </MobileExperienceProvider>
       </ToastProvider>
     );
@@ -506,7 +510,11 @@ export default function Home() {
 
         <KeyboardShortcuts isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
         <PromptSelector isOpen={promptSelectorOpen} onClose={() => setPromptSelectorOpen(false)} />
-        {showWelcomeGuide && <WelcomeGuide onComplete={() => setShowWelcomeGuide(false)} />}
+        {showWelcomeGuide && (
+          <div role="dialog" aria-label="Welcome guide" aria-modal="false">
+            <WelcomeGuide onComplete={() => setShowWelcomeGuide(false)} />
+          </div>
+        )}
 
         {/* 人机协作确认对话框 */}
         {currentConfirmation && (
