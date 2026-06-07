@@ -56,21 +56,27 @@ h1{color:#a5b4fc;margin:0 0 24px}
 <div id="content">加载中...</div>
 <script>
 Promise.all([fetch('${BACKEND}/api/minimax/status').then(r=>r.json()),
+             fetch('${BACKEND}/api/mcp/status').then(r=>r.json()).catch(()=>({success:false,tools:[]})),
              fetch('${BACKEND}/api/admin/tools/categories/list').then(r=>r.json()).catch(()=>({success:false}))])
-.then(([s,c])=>{
+.then(([s,m,c])=>{
   const mcp=s.mcp_server||{};
-  const tools=(s.registered_tools||[]);
+  const registered=s.registered_tools||[];
   const cfg=s.api_config||{};
+  const mcpTools=(m.tools||[]);
+  const categories=(c.data&&c.data.categories)?c.data.categories.map(x=>x.name):[];
   document.getElementById('content').innerHTML=
-    '<div class="card"><div class="status '+(mcp.connected?'':'off')+'">'+(mcp.connected?'已连接':'未连接')+'</div><div style="color:#cbd5e1;margin-top:8px">MCP Server: '+(mcp.server_name||'无')+'</div></div>'+
+    '<div class="card"><div class="status '+(mcp.connected?'':'off')+'">'+(mcp.connected?'已连接':'未连接')+'</div><div style="color:#cbd5e1;margin-top:8px">MCP Server: '+(mcp.server_name||'未配置')+'</div></div>'+
     '<div class="card"><h3 style="margin:0 0 12px">连接详情</h3>'+
-    '<div class="kv"><span class="k">连接状态</span><span class="v">'+(mcp.connected?'OK':'OFF')+'</span></div>'+
-    '<div class="kv"><span class="k">工具数</span><span class="v">'+(mcp.tools_count||0)+'</span></div>'+
+    '<div class="kv"><span class="k">MiniMax MCP 连接</span><span class="v">'+(mcp.connected?'OK':'OFF')+'</span></div>'+
+    '<div class="kv"><span class="k">MCP 工具总数</span><span class="v">'+(mcpTools.length||0)+'</span></div>'+
+    '<div class="kv"><span class="k">Agent 工具分类</span><span class="v">'+categories.length+'</span></div>'+
     '<div class="kv"><span class="k">API Host</span><span class="v">'+cfg.api_host+'</span></div>'+
     '<div class="kv"><span class="k">API Key</span><span class="v">'+(cfg.has_api_key?'已配置':'未配置')+'</span></div>'+(mcp.error?'<div class="kv"><span class="k">错误</span><span class="v">'+mcp.error+'</span></div>':'')+
     '</div>'+
-    '<div class="card"><h3 style="margin:0 0 12px">已注册工具 ('+tools.length+')</h3>'+
-    (tools.length?tools.map(t=>'<span class="tool">'+t+'</span>').join(''):'<div style="color:#94a3b8">无</div>')+'</div>';
+    '<div class="card"><h3 style="margin:0 0 12px">MCP 工具 ('+mcpTools.length+')</h3>'+
+    (mcpTools.length?mcpTools.slice(0,8).map(t=>'<span class="tool">'+t.name+'</span>').join('')+(mcpTools.length>8?'<div style="color:#94a3b8;margin-top:8px">... 共 '+mcpTools.length+' 个</div>':''):'<div style="color:#94a3b8">无</div>')+'</div>'+
+    '<div class="card"><h3 style="margin:0 0 12px">已注册工具 ('+registered.length+')</h3>'+
+    (registered.length?registered.map(t=>'<span class="tool">'+t+'</span>').join(''):'<div style="color:#94a3b8">无</div>')+'</div>';
 }).catch(e=>document.getElementById('content').innerHTML='<div class="card">错误: '+e.message+'</div>');
 </script></body></html>`;
     await page.setContent(html, { waitUntil: 'load' });
