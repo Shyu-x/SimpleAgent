@@ -79,12 +79,12 @@ const intentConfig: Record<IntentType, {
 // 置信度等级
 function getConfidenceLevel(confidence: number, t: ReturnType<typeof useTranslations>): { label: string; color: string } {
   if (confidence >= 0.8) {
-    return { label: t('intent.confidence.high'), color: 'text-[hsl(var(--success-500))]' };
+    return { label: t('confidence.high'), color: 'text-[hsl(var(--success-500))]' };
   }
   if (confidence >= 0.5) {
-    return { label: t('intent.confidence.medium'), color: 'text-[hsl(var(--warning-500))]' };
+    return { label: t('confidence.medium'), color: 'text-[hsl(var(--warning-500))]' };
   }
-  return { label: t('intent.confidence.low'), color: 'text-muted-foreground' };
+  return { label: t('confidence.low'), color: 'text-muted-foreground' };
 }
 
 // 属性

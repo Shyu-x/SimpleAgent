@@ -229,15 +229,21 @@ export function useAdminPolling<T>(options: UseAdminPollingOptions<T>): UseAdmin
   const isFirstLoadRef = useRef(true);
   const previousDataRef = useRef<T | null>(null);
 
+  // 用 ref 持有最新 options, 避免 inline parser/options 导致 useCallback 身份变化
+  // 进而引发 useEffect 重复执行 → 无限请求循环 (修复: 1 个 endpoint 不再被请求 400+ 次)
+  const optionsRef = useRef({ endpoint, parser, enabled, onInitialLoad, onUpdate, onError });
+  optionsRef.current = { endpoint, parser, enabled, onInitialLoad, onUpdate, onError };
+
   const loadData = useCallback(async (isInitial = false) => {
-    if (!enabled) return;
+    const opts = optionsRef.current;
+    if (!opts.enabled) return;
 
     try {
-      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+      const response = await fetch(`${BACKEND_URL}${opts.endpoint}`, {
         headers: { 'Content-Type': 'application/json' },
       });
       const json = await response.json();
-      const parsedData = parser(json);
+      const parsedData = opts.parser(json);
 
       if (isFirstLoadRef.current && previousDataRef.current === parsedData) {
         setLoading(false);
@@ -254,16 +260,16 @@ export function useAdminPolling<T>(options: UseAdminPollingOptions<T>): UseAdmin
         isFirstLoadRef.current = false;
         setLoading(false);
         setIsConnected(true);
-        onInitialLoad?.(parsedData);
+        opts.onInitialLoad?.(parsedData);
       } else {
-        onUpdate?.(parsedData);
+        opts.onUpdate?.(parsedData);
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('未知错误');
       setError(error);
-      onError?.(error);
+      opts.onError?.(error);
     }
-  }, [endpoint, parser, enabled, onInitialLoad, onUpdate, onError]);
+  }, []);
 
   const refresh = useCallback(async () => {
     await loadData(false);

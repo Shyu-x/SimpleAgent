@@ -64,7 +64,7 @@ export default function ModelConfigPage() {
   // SSE 订阅 models 数据
   const { data: modelsData, loading: modelsLoading, refresh: refreshModels } = useAdminPolling<ModelConfig[]>({
     endpoint: '/api/admin/models',
-    parser: (res: unknown) => (res as { data?: { data?: { models: ModelConfig[] } } })?.data?.data?.models || [],
+    parser: (res: unknown) => (res as { data?: { models: ModelConfig[] } })?.data?.models || [],
     interval: 30000,
   });
 

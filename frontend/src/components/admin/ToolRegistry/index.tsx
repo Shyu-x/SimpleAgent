@@ -82,7 +82,7 @@ export default function ToolRegistryPage() {
   // SSE 订阅 categories 数据
   const { data: categoriesData, loading, refresh } = useAdminPolling<ToolCategory[]>({
     endpoint: '/api/admin/tools/categories',
-    parser: (res: unknown) => (res as { data?: { data?: { categories: ToolCategory[] } } })?.data?.data?.categories || [],
+    parser: (res: unknown) => (res as { data?: { categories: ToolCategory[] } })?.data?.categories || [],
     interval: 30000,
   });
 
@@ -316,18 +316,25 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
                 {tool.description}
               </p>
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>调用 {tool.stats.callCount} 次</span>
-                <span>平均 {tool.stats.avgLatency.toFixed(0)}ms</span>
-                <span
-                  className={
-                    tool.stats.callCount === 0 ? 'text-gray-500'
-                    : tool.stats.successCount / tool.stats.callCount > 0.9 ? 'text-green-600'
-                    : tool.stats.successCount / tool.stats.callCount > 0.7 ? 'text-yellow-600'
-                    : 'text-red-600'
-                  }
-                >
-                  成功率 {tool.stats.callCount === 0 ? 0 : (tool.stats.successCount / tool.stats.callCount * 100).toFixed(0)}%
-                </span>
+                {(() => {
+                  const s = safeStats(tool.stats);
+                  return (
+                    <>
+                      <span>调用 {s.callCount} 次</span>
+                      <span>平均 {s.avgLatency.toFixed(0)}ms</span>
+                      <span
+                        className={
+                          s.callCount === 0 ? 'text-gray-500'
+                          : s.successCount / s.callCount > 0.9 ? 'text-green-600'
+                          : s.successCount / s.callCount > 0.7 ? 'text-yellow-600'
+                          : 'text-red-600'
+                        }
+                      >
+                        成功率 {s.callCount === 0 ? 0 : (s.successCount / s.callCount * 100).toFixed(0)}%
+                      </span>
+                    </>
+                  );
+                })()}
               </div>
               <div className="flex gap-2 mt-3">
                 <button
@@ -427,32 +434,39 @@ function ToolDetailPanel({ tool, onClose }: { tool: ToolInfo; onClose: () => voi
         {/* 调用统计 */}
         <div>
           <h3 className="text-sm font-medium text-gray-500 mb-2">调用统计</h3>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
-              <div className="text-lg font-bold text-blue-600">{tool.stats.callCount}</div>
-              <div className="text-xs text-gray-500">总调用</div>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
-              <div className="text-lg font-bold text-green-600">{tool.stats.successCount}</div>
-              <div className="text-xs text-gray-500">成功</div>
-            </div>
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2">
-              <div className="text-lg font-bold text-red-600">{tool.stats.failureCount}</div>
-              <div className="text-xs text-gray-500">失败</div>
-            </div>
-          </div>
-          <div className="mt-2 space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">平均延迟</span>
-              <span className="text-gray-900 dark:text-white">{tool.stats.avgLatency.toFixed(0)}ms</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">最后调用</span>
-              <span className="text-gray-900 dark:text-white">
-                {tool.stats.lastCalled ? formatDate(tool.stats.lastCalled) : '从未'}
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const s = safeStats(tool.stats);
+            return (
+              <>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-blue-600">{s.callCount}</div>
+                    <div className="text-xs text-gray-500">总调用</div>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-green-600">{s.successCount}</div>
+                    <div className="text-xs text-gray-500">成功</div>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-red-600">{s.failureCount}</div>
+                    <div className="text-xs text-gray-500">失败</div>
+                  </div>
+                </div>
+                <div className="mt-2 space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">平均延迟</span>
+                    <span className="text-gray-900 dark:text-white">{s.avgLatency.toFixed(0)}ms</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">最后调用</span>
+                    <span className="text-gray-900 dark:text-white">
+                      {s.lastCalled ? formatDate(s.lastCalled) : '从未'}
+                    </span>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>
