@@ -104,7 +104,10 @@
 - **我想要** 浏览 / 启用 / 禁用 MCP 工具
 - **以便** 扩展 Agent 能力
 - **路径**: `/admin/tools` → 工具列表 → 启用/禁用 toggle → 配置 API key
-- **API 验证**: `GET /api/tools`, `POST /api/tools/:id/toggle`
+- **API 验证** (实际路径): 
+  - `GET /api/tools` 200 (工具列表)
+  - `GET /api/admin/tools/categories` 200 (分类)
+  - `GET /api/mcp/status` 200 (MCP 状态)
 - **UI 验收**: 工具分类, 状态徽章, 启用/禁用响应快
 
 ### US-007 告警链路
@@ -144,7 +147,12 @@
 - **我想要** Agent 自动选择工具完成任务
 - **以便** 自动化
 - **路径**: 输入任务 → Agent 推理 → 工具调用 → 结果整合 → 最终响应
-- **API 验证**: 工具调用 trace, 结果回填
+- **API 验证** (实际路径): 
+  - `GET /api/mission/tasks` 200
+  - `GET /api/mission/agents` 200
+  - `GET /api/multiagent/templates` 200
+  - `GET /api/pool/status` 200
+  - `GET /api/a2a/agents` 200 (与 US-004 共用)
 - **UI 验收**: 思考链可视化, 工具调用状态
 
 ### US-012 RAG + 知识库
