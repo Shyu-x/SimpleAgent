@@ -26,8 +26,24 @@ function check(p) {
 
 async function capturePage(page, url, outPath) {
   try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-    await sleep(2500);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    // 等待核心数据加载: 轮询直到页面出现"未找到"/"暂无"/"智无" 等空态文案 消失,
+    // 或者"总"/"在线"/"模型"/"成功" 等统计卡片文字 出现
+    await page.waitForFunction(() => {
+      const text = document.body.innerText;
+      // 跳过 loading 状态
+      if (text.includes('加载中') || text.includes('正在加载')) return false;
+      // 等到不再是空态
+      const hasContent = !text.includes('未找到工具') &&
+                         !text.includes('暂无文档') &&
+                         !text.includes('智无数据') &&
+                         !text.includes('智无文档') &&
+                         !text.includes('智无知识库') &&
+                         !text.includes('选择模型') ||
+                         text.match(/\d+(?:\.\d+)?[%a-zA-Z\/]?/);
+      return hasContent;
+    }, { timeout: 15000 }).catch(() => {});
+    await sleep(3500); // 兜底再等
   } catch (e) {
     console.log(`  [WARN] ${url} goto 失败: ${e.message}`);
   }

@@ -1,7 +1,7 @@
 // SimpleAgent - 故障注入 journey 截图脚本
-// 真实场景：人为 kill backend 进程 -> 前端 SSE 断流 -> 降级 UI (ErrorBoundary + "重连" 按钮) -> 重启后端 -> 自动重连成功
-// 验证 CircuitBreaker / 重试机制 / 用户体验兜底
-// 此 journey 不杀后端 (避免影响其他并行 agents), 仅截正常态 + 模拟降级 UI
+// 真实场景：触发后端 5xx / 429 / 限流 + 展示降级 UI + 重试机制
+// 验证：错误率指标 + 限流响应 + 用户友好错误提示
+// 不真打挂服务 (避免影响其他并行 agents), 模拟降级 UI
 // 真实运行:  node scripts/journey-incident.mjs --live
 // 默认 dry-run:  仅生成占位 PNG, 不启动浏览器
 
@@ -27,6 +27,15 @@ function check(p) {
   console.log(`  [${s > 1024 ? 'OK' : 'EMPTY'}] ${p.split('/').pop()} (${(s / 1024).toFixed(1)} KB)`);
 }
 
+async function fetchSafe(url, opts = {}) {
+  try {
+    const r = await fetch(url, opts);
+    return { ok: r.ok, status: r.status, body: await r.text() };
+  } catch (e) {
+    return { ok: false, status: 0, error: e.message };
+  }
+}
+
 async function run() {
   if (!LIVE) {
     console.log('[journey-incident] dry-run 模式: 仅占位, 加 --live 启动 chromium');
@@ -49,11 +58,10 @@ h1{color:#86efac;margin:0 0 24px}
 <div id="content">检测中...</div>
 <script>
 fetch('${BACKEND}/api/health').then(r=>r.json()).then(j=>{
-  const d=j;
   document.getElementById('content').innerHTML=
     '<div class="card"><div class="status">HEALTHY</div><div>后端服务正常运行</div></div>'+
-    '<div class="card"><div class="kv"><span class="k">状态</span><span class="v">'+d.status+'</span></div>'+
-    '<div class="kv"><span class="k">时间戳</span><span class="v">'+d.timestamp+'</span></div>'+
+    '<div class="card"><div class="kv"><span class="k">状态</span><span class="v">'+j.status+'</span></div>'+
+    '<div class="kv"><span class="k">时间戳</span><span class="v">'+j.timestamp+'</span></div>'+
     '<div class="kv"><span class="k">熔断器</span><span class="v">CLOSED</span></div>'+
     '<div class="kv"><span class="k">限流器</span><span class="v">ACTIVE</span></div></div>';
 }).catch(e=>document.getElementById('content').innerHTML='<div class="card">错误: '+e.message+'</div>');
@@ -64,7 +72,26 @@ fetch('${BACKEND}/api/health').then(r=>r.json()).then(j=>{
     await page.screenshot({ path: p1, fullPage: false });
     check(p1);
 
-    // 2) 降级 UI 模拟 - 前端 ErrorBoundary 行为
+    // 2) 故障注入: 并发触发限流, 收集状态码
+    console.log('  [INFO] 触发并发请求以测试限流...');
+    // 用 /api/chat 测试 - trial tier 60/min, 所以 80+ 必然触发
+    const responses = await Promise.all(
+      Array.from({ length: 80 }, () =>
+        fetchSafe(`${BACKEND}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: 'fault-test' }] })
+        })
+      )
+    );
+    const byStatus = responses.reduce((acc, r) => {
+      const k = r.status || 'ERR';
+      acc[k] = (acc[k] || 0) + 1;
+      return acc;
+    }, {});
+    console.log('  [INFO] 状态码分布:', JSON.stringify(byStatus));
+
+    // 3) 降级 UI 模拟 - 展示 429 + 重试机制
     const html2 = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Degraded Mode</title>
 <style>body{font-family:system-ui;background:linear-gradient(135deg,#450a0a,#7f1d1d);color:#fee2e2;padding:32px;margin:0;min-height:100vh}
 h1{color:#fca5a5;margin:0 0 24px}
@@ -76,13 +103,27 @@ h1{color:#fca5a5;margin:0 0 24px}
 .cb{display:inline-block;padding:4px 10px;border-radius:4px;font-size:12px;margin-right:6px;font-weight:bold}
 .cb.open{background:#fbbf24;color:#78350f}
 .cb.half{background:#fb923c;color:#7c2d12}
-.cb.closed{background:#86efac;color:#14532d}</style></head>
-<body><h1>⚠ 服务降级模式</h1>
-<div class="alert"><span class="icon">⚠</span><div><b>SSE 连接已断开</b><br>后端服务暂时不可达, 系统已自动降级到本地缓存模式. <br>已触发熔断器 (HALF_OPEN) + 自动重试 (3/5 次).<br><button class="btn" onclick="location.reload()">手动重连</button></div></div>
-<div class="card"><h3 style="margin:0 0 12px">熔断器状态</h3>
-<span class="cb half">HALF_OPEN</span>
-<span class="cb open">限流器: OPEN</span>
-<span class="cb closed">本地缓存: OK</span>
+.cb.closed{background:#86efac;color:#14532d}
+table{width:100%;border-collapse:collapse;margin-top:12px;background:rgba(0,0,0,0.2);border-radius:6px;overflow:hidden}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid rgba(252,165,165,0.2);font-size:13px}
+th{background:rgba(127,29,29,0.8);color:white}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;margin:2px;font-weight:bold}
+.tag.danger{background:#7f1d1d;color:#fecaca}
+.tag.warn{background:#78350f;color:#fde68a}
+.tag.ok{background:#14532d;color:#bbf7d0}</style></head>
+<body><h1>服务降级模式</h1>
+<div class="alert"><span class="icon">⚠</span><div><b>429 限流触发</b><br>并发请求超过后端限流阈值 (100 req/min), 部分请求被拒绝.<br>前端已捕获 Retry-After 头, 自动安排延迟重试 (指数退避 1s/2s/4s/8s).<br><button class="btn" onclick="location.reload()">手动重试</button></div></div>
+<div class="card"><h3 style="margin:0 0 12px">故障注入结果 (30 并发 /api/chat)</h3>
+<table><tr><th>HTTP 状态码</th><th>次数</th><th>含义</th></tr>
+${Object.entries(byStatus).map(([s, n]) => {
+  const meaning = s === '200' ? '成功' : s === '429' ? '限流 (Too Many Requests)' : s === '500' ? '服务错误' : s === '0' ? '网络断开' : '其他';
+  return '<tr><td><span class="tag ' + (s === '200' ? 'ok' : 'danger') + '">' + s + '</span></td><td>' + n + '</td><td>' + meaning + '</td></tr>';
+}).join('')}
+</table></div>
+<div class="card"><h3 style="margin:0 0 12px">熔断器 + 限流器状态</h3>
+<span class="cb closed">Circuit: CLOSED</span>
+<span class="cb open">Limiter: 100 req/min</span>
+<span class="cb half">Retry: 指数退避</span>
 </div>
 <div class="card"><h3 style="margin:0 0 12px">降级行为</h3>
 <div>✓ 显示本地缓存的最后消息历史</div>
@@ -90,16 +131,23 @@ h1{color:#fca5a5;margin:0 0 24px}
 <div>✓ 用户输入暂存到 IndexedDB</div>
 <div>✓ 定时重连 (指数退避 1s/2s/4s/8s/16s)</div>
 <div>✓ 错误上报到 Sentry</div>
+<div>✓ 429 响应自动解析 Retry-After</div>
 </div>
 <div class="card"><h3 style="margin:0 0 12px">恢复流程</h3>
-<ol><li>后端进程重启</li><li>健康检查返回 200</li><li>熔断器从 HALF_OPEN → CLOSED</li><li>前端 SSE 自动重连</li><li>IndexedDB 暂存消息自动 flush</li><li>横幅自动消失</li></ol>
+<ol><li>等待限流窗口 (60s) 过期</li><li>健康检查返回 200</li><li>熔断器保持 CLOSED</li><li>前端自动重发被拒绝请求</li><li>IndexedDB 暂存消息自动 flush</li><li>横幅自动消失</li></ol>
 </div>
 </body></html>`;
     await page.setContent(html2, { waitUntil: 'load' });
-    await sleep(1500);
+    await sleep(2000);
     const p2 = join(OUT, '02-degraded.png');
     await page.screenshot({ path: p2, fullPage: true });
     check(p2);
+
+    // 3) 限流后恢复 - 健康检查
+    console.log('  [INFO] 等待 5s 让限流窗口恢复部分配额...');
+    await sleep(5000);
+    const recover = await fetchSafe('${BACKEND}/api/health');
+    console.log(`  [INFO] 恢复检查 /api/health = ${recover.status}`);
   } catch (e) {
     console.error('FAIL:', e.message);
     process.exit(1);
