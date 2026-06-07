@@ -20,8 +20,28 @@
           }
         }
       ]
+    },
+    {
+      "id": "doc_1780396485932",
+      "title": "test",
+      "type": "text",
+      "metadata": {
+        "originalFilename": "test.txt"
+      },
+      "createdAt": 1780396485932,
+      "chunks": [
+        {
+          "id": "chunk_doc_1780396485932_0",
+          "content": "SimpleAgent 是一个 AI 聊天平台，基于 React 19 + Next.js 16 + Zustand 5 + Express 技术栈构建。主要功能包括：。- SSE 流式响应和打字机效果。- MiniMax Token Plan API 支持。- 知识库管理和 RAG 检索。- 工具系统与多 Agent 协作。- HITL 人机协作确认。",
+          "index": 0,
+          "metadata": {
+            "documentId": "doc_1780396485932",
+            "documentTitle": "test"
+          }
+        }
+      ]
     }
   ],
   "createdAt": 1775231596634,
-  "updatedAt": 1775231596695
+  "updatedAt": 1780396485933
 }
