@@ -1,11 +1,15 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { I18nWrapper } from '@/lib/test-utils/i18n-wrapper';
 import AgentCollaborationPanel from '../AgentCollaborationPanel';
 import type { ErrorInfo, ErrorType, ErrorSeverity } from '../ErrorRecoveryUI';
 import type { ToolCallInfo } from '../ToolCallDisplay';
 import type { ConfirmationRequest } from '../HumanConfirmationDialog';
 import type { WorkflowExecutionState } from '../AgentCollaborationPanel';
+
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nWrapper>{ui}</I18nWrapper>);
+
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
@@ -92,7 +96,7 @@ describe('AgentCollaborationPanel', () => {
 
   describe('基础渲染', () => {
     test('显示工作流名称', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -103,7 +107,7 @@ describe('AgentCollaborationPanel', () => {
 
     test('显示执行进度', () => {
       const executionState = { ...createMockExecutionState(), progress: 50 };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={executionState}
@@ -114,7 +118,7 @@ describe('AgentCollaborationPanel', () => {
 
     test('显示任务统计', () => {
       const workflow = createMockWorkflow();
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={workflow}
           executionState={createMockExecutionState()}
@@ -126,7 +130,7 @@ describe('AgentCollaborationPanel', () => {
 
   describe('控制按钮', () => {
     test('空闲状态显示开始按钮', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -137,7 +141,7 @@ describe('AgentCollaborationPanel', () => {
 
     test('点击开始按钮触发回调', () => {
       const onStart = vi.fn();
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -150,7 +154,7 @@ describe('AgentCollaborationPanel', () => {
 
     test('运行状态显示暂停按钮', () => {
       const runningState = { ...createMockExecutionState(), status: 'running' as const };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={runningState}
@@ -161,7 +165,7 @@ describe('AgentCollaborationPanel', () => {
 
     test('运行状态显示停止按钮', () => {
       const runningState = { ...createMockExecutionState(), status: 'running' as const };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={runningState}
@@ -172,7 +176,7 @@ describe('AgentCollaborationPanel', () => {
 
     test('暂停状态显示继续按钮', () => {
       const pausedState = { ...createMockExecutionState(), status: 'paused' as const };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={pausedState}
@@ -183,7 +187,7 @@ describe('AgentCollaborationPanel', () => {
 
     test('错误状态显示重试按钮', () => {
       const errorState = { ...createMockExecutionState(), status: 'error' as const };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={errorState}
@@ -195,7 +199,7 @@ describe('AgentCollaborationPanel', () => {
 
   describe('标签页切换', () => {
     test('默认显示 Agents 标签', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -205,7 +209,7 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('显示任务标签', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -215,7 +219,7 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('显示工具标签', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -225,7 +229,7 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('显示 A2A 标签', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -235,7 +239,7 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('切换到任务标签显示任务列表', async () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -250,7 +254,7 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('切换到工具标签显示空状态', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -265,7 +269,7 @@ describe('AgentCollaborationPanel', () => {
         ...createMockExecutionState(),
         errors: [{ id: 'e1', type: 'api_error', severity: 'high', recoverable: false, message: '测试错误', timestamp: '2024-01-01' }]
       };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={stateWithErrors}
@@ -277,7 +281,7 @@ describe('AgentCollaborationPanel', () => {
 
   describe('任务列表', () => {
     test('显示任务名称', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -289,7 +293,7 @@ describe('AgentCollaborationPanel', () => {
     });
 
     test('显示分配到的 Agent', async () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -311,7 +315,7 @@ describe('AgentCollaborationPanel', () => {
         ]
       };
 
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={workflow}
           executionState={createMockExecutionState()}
@@ -327,7 +331,7 @@ describe('AgentCollaborationPanel', () => {
 
   describe('A2A 协议', () => {
     test('A2A 标签显示', () => {
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -350,7 +354,7 @@ describe('AgentCollaborationPanel', () => {
         })
       });
 
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -373,7 +377,7 @@ describe('AgentCollaborationPanel', () => {
           { id: 'e2', type: 'api_error', severity: 'high', recoverable: false, message: '错误2', timestamp: '2024-01-01' }
         ]
       };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={stateWithErrors}
@@ -386,7 +390,7 @@ describe('AgentCollaborationPanel', () => {
   describe('进度显示', () => {
     test('显示进度百分比', () => {
       const progressState = { ...createMockExecutionState(), progress: 75 };
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={progressState}
@@ -399,7 +403,7 @@ describe('AgentCollaborationPanel', () => {
       const runningState = createMockExecutionState();
       const workflow = createMockWorkflow();
 
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={workflow}
           executionState={runningState}
@@ -419,7 +423,7 @@ describe('AgentCollaborationPanel', () => {
       };
       const runningState = { ...createMockExecutionState(), status: 'running' as const };
 
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={workflow}
           executionState={runningState}
@@ -431,7 +435,7 @@ describe('AgentCollaborationPanel', () => {
 
   describe('折叠状态', () => {
     test('支持 collapsed 属性', () => {
-      const { container } = render(
+      const { container } = renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={createMockExecutionState()}
@@ -447,7 +451,7 @@ describe('AgentCollaborationPanel', () => {
       const onPause = vi.fn();
       const runningState = { ...createMockExecutionState(), status: 'running' as const };
 
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={runningState}
@@ -462,7 +466,7 @@ describe('AgentCollaborationPanel', () => {
       const onResume = vi.fn();
       const pausedState = { ...createMockExecutionState(), status: 'paused' as const };
 
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={pausedState}
@@ -477,7 +481,7 @@ describe('AgentCollaborationPanel', () => {
       const onStop = vi.fn();
       const runningState = { ...createMockExecutionState(), status: 'running' as const };
 
-      render(
+      renderWithI18n(
         <AgentCollaborationPanel
           workflow={createMockWorkflow()}
           executionState={runningState}

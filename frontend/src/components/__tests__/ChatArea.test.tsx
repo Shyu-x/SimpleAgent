@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { NextIntlClientProvider } from 'next-intl';
 import ChatArea from '../ChatArea';
 import { ToastProvider } from '../Toast';
+import zhCNMessages from '../../../locales/zh-CN.json';
 
 // Use hoisted to create mock function that can be referenced in vi.mock
 const mockChatStore = vi.hoisted(() => vi.fn());
@@ -81,9 +83,11 @@ describe('ChatArea', () => {
 
   test('空状态显示欢迎消息和快速开始按钮', () => {
     render(
-      <ToastProvider>
-        <ChatArea />
-      </ToastProvider>
+      <NextIntlClientProvider locale="zh-CN" messages={zhCNMessages}>
+        <ToastProvider>
+          <ChatArea />
+        </ToastProvider>
+      </NextIntlClientProvider>
     );
     expect(screen.getByText(/从一个问题开始/i)).toBeInTheDocument();
   });
@@ -112,9 +116,11 @@ describe('ChatArea', () => {
     });
 
     render(
-      <ToastProvider>
-        <ChatArea />
-      </ToastProvider>
+      <NextIntlClientProvider locale="zh-CN" messages={zhCNMessages}>
+        <ToastProvider>
+          <ChatArea />
+        </ToastProvider>
+      </NextIntlClientProvider>
     );
     // User message and assistant message should both be visible
     expect(screen.getByText('你好')).toBeInTheDocument();
@@ -124,9 +130,11 @@ describe('ChatArea', () => {
 
   test('功能切换按钮存在', () => {
     render(
-      <ToastProvider>
-        <ChatArea />
-      </ToastProvider>
+      <NextIntlClientProvider locale="zh-CN" messages={zhCNMessages}>
+        <ToastProvider>
+          <ChatArea />
+        </ToastProvider>
+      </NextIntlClientProvider>
     );
     expect(screen.getByText(/联网搜索/i)).toBeInTheDocument();
     expect(screen.getByText(/深度思考/i)).toBeInTheDocument();

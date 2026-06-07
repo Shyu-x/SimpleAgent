@@ -1,7 +1,10 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { I18nWrapper } from '@/lib/test-utils/i18n-wrapper';
 import AgentTeamOrchestrator from '../AgentTeamOrchestrator';
+
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nWrapper>{ui}</I18nWrapper>);
 
 // Mock fetch
 global.fetch = vi.fn(() =>
@@ -28,7 +31,7 @@ describe('AgentTeamOrchestrator', () => {
 
   describe('空闲状态', () => {
     test('显示 Agent Team 编排器标题', async () => {
-      render(<AgentTeamOrchestrator />);
+      renderWithI18n(<AgentTeamOrchestrator />);
 
       await waitFor(() => {
         expect(screen.getByText('Agent Team 编排器')).toBeInTheDocument();
@@ -36,7 +39,7 @@ describe('AgentTeamOrchestrator', () => {
     });
 
     test('显示 Agent 和任务统计', async () => {
-      render(<AgentTeamOrchestrator />);
+      renderWithI18n(<AgentTeamOrchestrator />);
 
       await waitFor(() => {
         expect(screen.getByText(/0 个 Agent/)).toBeInTheDocument();
@@ -52,7 +55,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '2', name: '前端开发', role: 'coder' as const, status: 'working' as const, progress: 50, capabilities: ['code_write'], lastActive: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} />);
 
       await waitFor(() => {
         expect(screen.getByText('技术调研员')).toBeInTheDocument();
@@ -65,7 +68,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '1', name: '测试Agent', role: 'reviewer' as const, status: 'idle' as const, progress: 0, capabilities: ['code_review'], lastActive: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} />);
 
       await waitFor(() => {
         expect(screen.getByText('评审')).toBeInTheDocument();
@@ -77,7 +80,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '1', name: '忙碌Agent', role: 'coder' as const, status: 'working' as const, progress: 30, capabilities: [], lastActive: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} />);
 
       await waitFor(() => {
         expect(screen.getByText('工作中')).toBeInTheDocument();
@@ -92,7 +95,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '2', title: '任务二', description: '描述2', status: 'running' as const, priority: 'medium' as const, dependencies: [], progress: 50, createdAt: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialTasks={tasks} />);
+      renderWithI18n(<AgentTeamOrchestrator initialTasks={tasks} />);
 
       await waitFor(() => {
         expect(screen.getByText('任务一')).toBeInTheDocument();
@@ -105,7 +108,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '1', title: '紧急任务', description: '', status: 'pending' as const, priority: 'critical' as const, dependencies: [], progress: 0, createdAt: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialTasks={tasks} />);
+      renderWithI18n(<AgentTeamOrchestrator initialTasks={tasks} />);
 
       await waitFor(() => {
         expect(screen.getByText('紧急')).toBeInTheDocument();
@@ -117,7 +120,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '1', name: '空闲Agent', role: 'researcher' as const, status: 'idle' as const, progress: 0, capabilities: [], lastActive: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} />);
 
       await waitFor(() => {
         expect(screen.getByText('空闲')).toBeInTheDocument();
@@ -134,7 +137,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '1', title: '任务', description: '', status: 'pending' as const, priority: 'medium' as const, dependencies: [], progress: 0, createdAt: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} initialTasks={tasks} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} initialTasks={tasks} />);
 
       await waitFor(() => {
         const startButton = screen.getByRole('button', { name: /开始执行/i }) ||
@@ -144,7 +147,7 @@ describe('AgentTeamOrchestrator', () => {
     });
 
     test('协作模式选项存在', async () => {
-      render(<AgentTeamOrchestrator />);
+      renderWithI18n(<AgentTeamOrchestrator />);
 
       await waitFor(() => {
         expect(screen.getByText('协作模式')).toBeInTheDocument();
@@ -176,7 +179,7 @@ describe('AgentTeamOrchestrator', () => {
 
   describe('布局切换', () => {
     test('支持单列布局', async () => {
-      render(<AgentTeamOrchestrator />);
+      renderWithI18n(<AgentTeamOrchestrator />);
 
       await waitFor(() => {
         expect(screen.getByText('Agent Team 编排器')).toBeInTheDocument();
@@ -186,7 +189,7 @@ describe('AgentTeamOrchestrator', () => {
 
   describe('操作功能', () => {
     test('添加 Agent 按钮存在', async () => {
-      render(<AgentTeamOrchestrator />);
+      renderWithI18n(<AgentTeamOrchestrator />);
 
       await waitFor(() => {
         // 查找添加按钮（Plus图标按钮）
@@ -196,7 +199,7 @@ describe('AgentTeamOrchestrator', () => {
     });
 
     test('添加任务区域存在', async () => {
-      render(<AgentTeamOrchestrator />);
+      renderWithI18n(<AgentTeamOrchestrator />);
 
       await waitFor(() => {
         // 查找添加按钮（Plus图标按钮）
@@ -210,7 +213,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '1', name: 'Agent', role: 'coder' as const, status: 'completed' as const, progress: 100, capabilities: [], lastActive: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} />);
 
       await waitFor(() => {
         const buttons = screen.getAllByRole('button');
@@ -226,7 +229,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '2', name: 'Agent2', role: 'reviewer' as const, status: 'working' as const, progress: 50, capabilities: [], lastActive: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} />);
 
       await waitFor(() => {
         expect(screen.getByText('2 个 Agent')).toBeInTheDocument();
@@ -240,7 +243,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: '3', title: '任务3', description: '', status: 'failed' as const, priority: 'low' as const, dependencies: [], progress: 0, createdAt: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialTasks={tasks} />);
+      renderWithI18n(<AgentTeamOrchestrator initialTasks={tasks} />);
 
       await waitFor(() => {
         expect(screen.getByText('3 个任务')).toBeInTheDocument();
@@ -257,7 +260,7 @@ describe('AgentTeamOrchestrator', () => {
         { id: 'task-1', title: '待分配任务', description: '', status: 'pending' as const, priority: 'high' as const, dependencies: [], progress: 0, createdAt: Date.now() }
       ];
 
-      render(<AgentTeamOrchestrator initialAgents={agents} initialTasks={tasks} />);
+      renderWithI18n(<AgentTeamOrchestrator initialAgents={agents} initialTasks={tasks} />);
 
       await waitFor(() => {
         expect(screen.getByText('待分配任务')).toBeInTheDocument();

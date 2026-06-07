@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { I18nWrapper } from '@/lib/test-utils/i18n-wrapper';
 import Message from '../Message';
 import { ToastProvider } from '../Toast';
 import type { Message as MessageType } from '@/types';
@@ -22,9 +23,11 @@ describe('Message', () => {
 
   const renderMessage = (message: MessageType, isLast = false) => {
     return render(
-      <ToastProvider>
-        <Message message={message} isLast={isLast} />
-      </ToastProvider>
+      <I18nWrapper>
+        <ToastProvider>
+          <Message message={message} isLast={isLast} />
+        </ToastProvider>
+      </I18nWrapper>
     );
   };
 

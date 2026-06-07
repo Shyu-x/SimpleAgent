@@ -174,25 +174,34 @@ describe('SSE 流式处理', () => {
   });
 
   it('应该在 fetch 响应不 ok 时调用 onError', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      status: 500,
-      json: async () => ({ error: { message: '服务器错误' } }),
-    }));
+    vi.useFakeTimers();
+    try {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: async () => ({ error: { message: '服务器错误' } }),
+      });
+      vi.stubGlobal('fetch', mockFetch);
 
-    const { sendSSEChatMessage } = await import('../sse');
-    const onError = vi.fn();
-    const onMessage = vi.fn();
+      const { sendSSEChatMessage } = await import('../sse');
+      const onError = vi.fn();
+      const onMessage = vi.fn();
 
-    await sendSSEChatMessage(
-      'key',
-      'url',
-      'MiniMax-M2.7',
-      [{ role: 'user', content: '你好' }],
-      { onMessage, onError }
-    );
+      // 指数退避: 1+2+4+8+16 = 31s, 略大于此确保所有重试触发完毕
+      const promise = sendSSEChatMessage(
+        'key',
+        'url',
+        'MiniMax-M2.7',
+        [{ role: 'user', content: '你好' }],
+        { onMessage, onError }
+      );
+      await vi.advanceTimersByTimeAsync(31000);
+      await promise;
 
-    expect(onError).toHaveBeenCalledWith(expect.any(Error));
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   // 注意: 当前代码中 type=error 会被空 catch 块吞没 (sse.ts:148)
@@ -271,26 +280,34 @@ describe('SSE 流式处理', () => {
   // jsdom中 DOMException 继承自 Error，与真实浏览器行为不同
   // 在真实浏览器中 AbortError 不继承 Error，此检查会通过并静默返回
   it('AbortError 在 jsdom 中会被报告为错误（环境差异）', async () => {
-    const abortError = new DOMException('Aborted', 'AbortError');
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(abortError));
+    vi.useFakeTimers();
+    try {
+      const abortError = new DOMException('Aborted', 'AbortError');
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(abortError));
 
-    const { sendSSEChatMessage } = await import('../sse');
-    const onError = vi.fn();
-    const onComplete = vi.fn();
-    const onMessage = vi.fn();
+      const { sendSSEChatMessage } = await import('../sse');
+      const onError = vi.fn();
+      const onComplete = vi.fn();
+      const onMessage = vi.fn();
 
-    await sendSSEChatMessage(
-      'key',
-      'url',
-      'MiniMax-M2.7',
-      [{ role: 'user', content: '你好' }],
-      { onMessage, onError, onComplete }
-    );
+      // 5 次重试后才上报 onError, 总耗时 31s
+      const promise = sendSSEChatMessage(
+        'key',
+        'url',
+        'MiniMax-M2.7',
+        [{ role: 'user', content: '你好' }],
+        { onMessage, onError, onComplete }
+      );
+      await vi.advanceTimersByTimeAsync(31000);
+      await promise;
 
-    // 在 jsdom 环境中，DOMException 继承自 Error，
-    // 因此被转换为 '未知错误' 并传递给 onError
-    expect(onError).toHaveBeenCalled();
-    const calledError = onError.mock.calls[0][0];
-    expect(calledError).toBeInstanceOf(Error);
+      // 在 jsdom 环境中，DOMException 继承自 Error，
+      // 因此被转换为 '未知错误' 并传递给 onError
+      expect(onError).toHaveBeenCalled();
+      const calledError = onError.mock.calls[0][0];
+      expect(calledError).toBeInstanceOf(Error);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
