@@ -6,9 +6,12 @@
 const crypto = require('crypto');
 
 // IP 速率限制 (简单的内存实现)
+// 默认: production 100/分钟, development 300/分钟 (避免 journey 脚本 / 并发测试 429)
+// 显式环境变量 RATE_LIMIT_MAX 始终优先
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1分钟
 const MAX_REQUESTS_PER_WINDOW = parseInt(
-  process.env.RATE_LIMIT_MAX || '100',
+  process.env.RATE_LIMIT_MAX
+    || (process.env.NODE_ENV === 'development' ? '300' : '100'),
   10
 );
 // 完全禁用速率限制（仅在性能测试 / 内网部署时使用）
