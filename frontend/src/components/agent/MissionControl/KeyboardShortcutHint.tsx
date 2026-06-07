@@ -84,6 +84,7 @@ const KeyboardShortcutHint = memo(function KeyboardShortcutHint({
               </span>
               <button
                 onClick={() => setShowBanner(false)}
+                aria-label="关闭快捷键提示"
                 className="p-0.5 rounded hover:bg-white/10 text-slate-500 hover:text-slate-300 transition-colors"
               >
                 <X size={14} />
