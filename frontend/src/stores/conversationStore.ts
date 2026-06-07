@@ -3,22 +3,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Conversation } from '@/types';
 import { useSettingsStore } from './settingsStore';
-
-// SessionStorage 适配器
-const sessionStorageAdapter = {
-  getItem: (name: string): string | null => {
-    if (typeof window === 'undefined') return null;
-    return window.sessionStorage.getItem(name);
-  },
-  setItem: (name: string, value: string): void => {
-    if (typeof window === 'undefined') return;
-    window.sessionStorage.setItem(name, value);
-  },
-  removeItem: (name: string): void => {
-    if (typeof window === 'undefined') return;
-    window.sessionStorage.removeItem(name);
-  },
-};
+import { sessionStorageAdapter } from './storage';
 
 export interface ConversationState {
   conversations: Conversation[];

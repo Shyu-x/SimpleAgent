@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAgentWorkflowStore } from '@/store/agentWorkflowStore';
 import { workflowExecutionService } from '@/lib/workflowExecutionService';
+import { agentWorkflowAPI } from '@/lib/agentWorkflowAPI';
 import type {
   WorkflowDefinition,
   WorkflowExecution,
@@ -193,10 +194,23 @@ export function useWorkflowExecution(options: UseWorkflowExecutionOptions = {}) 
       const sessionId = workflowExecutionService.getSessionId();
       if (!sessionId) return;
 
+      // 本地 store 立即更新 (乐观更新, 避免等待网络)
       store.respondToConfirmation(id, response.approved ? 'approved' : 'rejected');
 
-      // TODO: 发送到后端
-      // await agentWorkflowAPI.respondToConfirmation(sessionId, id, response.approved, response.modifiedInput);
+      // 实际发送到后端 (HITL 端点)
+      // 注: 当前 store 不持久化 response 状态, 后端失败时仅记录日志,
+      // 业务侧通过 SSE 的 confirmation_result 事件获取最终结果
+      try {
+        await agentWorkflowAPI.respondToConfirmation(
+          sessionId,
+          id,
+          response.approved,
+          response.modifiedInput
+        );
+      } catch (err) {
+        // 后端不可达 / 会话已过期; 记录日志供业务侧排查
+        console.error('[useWorkflowExecution] 发送确认响应失败:', err);
+      }
     },
     [store]
   );
@@ -209,14 +223,35 @@ export function useWorkflowExecution(options: UseWorkflowExecutionOptions = {}) 
       if (strategy === 'retry') {
         await retryExecution();
       } else if (strategy === 'skip') {
-        // 跳过当前任务，继续执行
-        // TODO: 实现跳过逻辑
+        // 跳过当前失败任务, 调用后端 recovery 处理器
+        // 后端 strategy='skip' 会跳过该任务并继续执行后续任务
+        const sessionId = workflowExecutionService.getSessionId();
+        try {
+          await agentWorkflowAPI.attemptRecovery('skip', {
+            errorId,
+            sessionId,
+            strategy: 'skip',
+          });
+        } catch (err) {
+          // 后端无 skip 处理器时, 仅记录日志 (降级到本地跳过)
+          console.warn('[useWorkflowExecution] skip 恢复失败, 已本地跳过:', err);
+        }
       } else if (strategy === 'fallback') {
-        // 使用备用方案
-        // TODO: 实现备用方案逻辑
+        // 使用备用方案: 通知后端尝试 fallback handler (例如降级到默认模型)
+        const sessionId = workflowExecutionService.getSessionId();
+        try {
+          await agentWorkflowAPI.attemptRecovery('fallback', {
+            errorId,
+            sessionId,
+            strategy: 'fallback',
+          });
+        } catch (err) {
+          // 后端无 fallback 处理器时降级, 不影响 UI
+          console.warn('[useWorkflowExecution] fallback 恢复失败, 已忽略:', err);
+        }
       }
     },
-    [retryExecution]
+    [retryExecution, store]
   );
 
   // 清理

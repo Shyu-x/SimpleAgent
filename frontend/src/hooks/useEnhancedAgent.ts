@@ -2,8 +2,34 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { API_ENDPOINTS } from '@/lib/apiConfig';
+import type { ConfirmationRequest } from '@/store/agentWorkflowStore';
 
 const API_BASE = API_ENDPOINTS.enhancedAgent;
+
+// ==================== Types ====================
+
+/**
+ * 检查点类型
+ */
+export interface Checkpoint {
+  id: string;
+  timestamp: number;
+  state: Record<string, unknown>;
+  description?: string;
+}
+
+/**
+ * 记忆项类型
+ */
+export interface MemoryItem {
+  id: string;
+  content?: string;
+  type?: string;
+  timestamp: number;
+  importance?: 'high' | 'medium' | 'low';
+  accessCount?: number;
+  metadata?: Record<string, unknown>;
+}
 
 /**
  * 增强版 Agent Hook
@@ -14,10 +40,10 @@ export function useEnhancedAgent() {
   const [status, setStatus] = useState<'idle' | 'running' | 'paused' | 'waiting_confirmation' | 'completed' | 'error'>('idle');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
-  const [checkpoints, setCheckpoints] = useState<any[]>([]);
-  const [pendingConfirmations, setPendingConfirmations] = useState<any[]>([]);
-  const [memoryStats, setMemoryStats] = useState<any>(null);
+  const [result, setResult] = useState<unknown>(null);
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
+  const [pendingConfirmations, setPendingConfirmations] = useState<ConfirmationRequest[]>([]);
+  const [memoryStats, setMemoryStats] = useState<object | null>(null);
 
   // 轮询检查待确认请求
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,7 +51,7 @@ export function useEnhancedAgent() {
   /**
    * 执行任务
    */
-  const execute = useCallback(async (task: string, context: Record<string, any> = {}) => {
+  const execute = useCallback(async (task: string, context: Record<string, unknown> = {}) => {
     setIsLoading(true);
     setError(null);
     setStatus('running');
@@ -203,7 +229,7 @@ export function useEnhancedAgent() {
   const respondToConfirmation = useCallback(async (
     confirmationId: string,
     approved: boolean,
-    modifiedInput?: any
+    modifiedInput?: Record<string, unknown>
   ) => {
     if (!sessionId) return { success: false, error: 'No active session' };
 
@@ -369,9 +395,9 @@ export function useEnhancedAgent() {
  * 人机协作确认组件 Hook
  */
 export function useHumanLoopConfirmation() {
-  const [confirmations, setConfirmations] = useState<any[]>([]);
+  const [confirmations, setConfirmations] = useState<ConfirmationRequest[]>([]);
 
-  const addConfirmation = useCallback((confirmation: any) => {
+  const addConfirmation = useCallback((confirmation: ConfirmationRequest) => {
     setConfirmations(prev => [...prev, confirmation]);
   }, []);
 
@@ -389,7 +415,7 @@ export function useHumanLoopConfirmation() {
     return { approved: false };
   }, [removeConfirmation]);
 
-  const modifyAndApprove = useCallback((id: string, modifiedInput: any) => {
+  const modifyAndApprove = useCallback((id: string, modifiedInput: Record<string, unknown>) => {
     removeConfirmation(id);
     return { approved: true, modifiedInput };
   }, [removeConfirmation]);
@@ -409,10 +435,10 @@ export function useHumanLoopConfirmation() {
  * 检查点管理 Hook
  */
 export function useCheckpointManager() {
-  const [checkpoints, setCheckpoints] = useState<any[]>([]);
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<string | null>(null);
 
-  const addCheckpoint = useCallback((checkpoint: any) => {
+  const addCheckpoint = useCallback((checkpoint: Checkpoint) => {
     setCheckpoints(prev => [...prev, checkpoint]);
   }, []);
 
@@ -443,28 +469,43 @@ export function useCheckpointManager() {
 /**
  * 双记忆系统 Hook
  */
-export function useDualMemory() {
-  const [shortTermMemory, setShortTermMemory] = useState<any[]>([]);
-  const [longTermMemory, setLongTermMemory] = useState<any[]>([]);
+const MAX_SHORT_TERM = 100;
+const MAX_LONG_TERM = 500;
 
-  const addToShortTerm = useCallback((item: any) => {
-    const memoryItem = {
-      ...item,
+export function useDualMemory() {
+  const [shortTermMemory, setShortTermMemory] = useState<MemoryItem[]>([]);
+  const [longTermMemory, setLongTermMemory] = useState<MemoryItem[]>([]);
+
+  const addToShortTerm = useCallback((item: Partial<MemoryItem>) => {
+    const memoryItem: MemoryItem = {
+      content: item.content,
+      type: item.type,
+      importance: item.importance,
+      metadata: item.metadata,
       id: `stm_${Date.now()}`,
       timestamp: Date.now()
     };
-    setShortTermMemory(prev => [...prev, memoryItem]);
+    setShortTermMemory(prev => {
+      const updated = [...prev, memoryItem];
+      return updated.length > MAX_SHORT_TERM ? updated.slice(-MAX_SHORT_TERM) : updated;
+    });
     return memoryItem;
   }, []);
 
-  const addToLongTerm = useCallback((item: any) => {
-    const memoryItem = {
-      ...item,
+  const addToLongTerm = useCallback((item: Partial<MemoryItem>) => {
+    const memoryItem: MemoryItem = {
+      content: item.content,
+      type: item.type,
+      importance: item.importance,
+      metadata: item.metadata,
       id: `ltm_${Date.now()}`,
       timestamp: Date.now(),
       accessCount: 0
     };
-    setLongTermMemory(prev => [...prev, memoryItem]);
+    setLongTermMemory(prev => {
+      const updated = [...prev, memoryItem];
+      return updated.length > MAX_LONG_TERM ? updated.slice(-MAX_LONG_TERM) : updated;
+    });
     return memoryItem;
   }, []);
 

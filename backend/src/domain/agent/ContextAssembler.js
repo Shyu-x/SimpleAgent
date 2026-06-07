@@ -22,7 +22,7 @@
 
 const EventEmitter = require('events');
 const AppError = require('../../common/errors/AppError');
-const createLogger = require('../../../common/logger');
+const createLogger = require('../../common/logger');
 const logger = createLogger('ContextAssembler');
 
 // Token 估算平均值（中文约 2 字符/token，英文约 4 字符/token）

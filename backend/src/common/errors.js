@@ -11,6 +11,10 @@
  *   6xxx  - INTERNAL (系统级)
  */
 
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('errors');
+
 const ErrorCode = {
   // ========== VALIDATION (1000-1999) ==========
   INVALID_PARAM: { code: 1000, status: 400, type: 'VALIDATION', message: '参数错误' },
@@ -273,7 +277,7 @@ async function safeAsync(fn, errorName = 'INTERNAL_ERROR') {
     if (isAppError(err)) {
       throw err;
     }
-    console.error(`[SafeAsync] ${errorName}:`, err);
+    logger.error('SafeAsync caught error', { errorName, error: err.message });
     throw createError(errorName, { message: err.message });
   }
 }

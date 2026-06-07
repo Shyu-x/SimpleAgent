@@ -4,6 +4,10 @@
  */
 // mockVectorStore 不需要数据库连接，使用内存存储
 
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('mockVectorStore');
+
 // 内存向量存储
 const vectorStore = new Map();
 
@@ -32,7 +36,7 @@ function cosineSimilarity(a, b) {
  * 初始化模拟向量存储
  */
 async function initializeVectorStore() {
-  console.log('⚠️ 使用模拟向量存储 (内存模式)');
+  logger.warn('使用模拟向量存储 (内存模式)');
   return true;
 }
 

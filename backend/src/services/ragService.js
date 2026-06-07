@@ -306,7 +306,7 @@ class RAGService extends EventEmitter {
           return data.data[0].embedding;
         }
       } catch (error) {
-        console.warn('OpenAI embedding failed, using simple embedding');
+        logger.warn('OpenAI embedding failed, using simple embedding');
       }
     }
 
@@ -369,7 +369,7 @@ class RAGService extends EventEmitter {
           changes: rewriteResult.changes || []
         };
       } catch (err) {
-        console.warn('[RAGService] Query rewrite failed, using original query:', err.message);
+        logger.warn('Query rewrite failed, using original query', { error: err.message });
       }
     }
 
@@ -380,7 +380,7 @@ class RAGService extends EventEmitter {
         const expandResult = await this.queryRewriteService.expand(rewrittenQuery);
         expandedQuery = expandResult.query;
       } catch (err) {
-        console.warn('[RAGService] Query expansion failed:', err.message);
+        logger.warn('Query expansion failed', { error: err.message });
       }
     }
 
@@ -389,11 +389,19 @@ class RAGService extends EventEmitter {
     if (this.queryDecomposeService) {
       try {
         const decomposeResult = await this.queryDecomposeService.decompose(expandedQuery);
-        if (decomposeResult && decomposeResult.length > 0) {
-          subQueries = decomposeResult;
+        if (decomposeResult && decomposeResult.subQuestions?.length > 0) {
+          // A3 RAG 真实 KB 验证发现: decompose() 返回
+          // {subQuestions: [{id, question, ...}]} (对象数组)
+          // 不能直接传 generateEmbedding(), simpleEmbed 会
+          // 调用 text.toLowerCase() 抛 TypeError
+          // 该 TypeError 被 injectRagContext 静默 catch, KB 注入全程失效
+          subQueries = decomposeResult.subQuestions
+            .map((q) => (q && (q.question || q.query)) || '')
+            .filter((q) => typeof q === 'string' && q.length > 0);
+          if (subQueries.length === 0) subQueries = [expandedQuery];
         }
       } catch (err) {
-        console.warn('[RAGService] Query decomposition failed:', err.message);
+        logger.warn('Query decomposition failed', { error: err.message });
       }
     }
 
@@ -711,4 +719,24 @@ class RAGService extends EventEmitter {
   }
 }
 
+// 共享单例 - 避免多实例导致 KB 数据不同步
+let _singletonInstance = null;
+function getSharedRagService() {
+  if (!_singletonInstance) {
+    const RAGService = module.exports;
+    _singletonInstance = new RAGService({
+      storagePath: process.env.RAG_STORAGE_PATH || './data/rag',
+      chunkSize: 500,
+      overlap: 50,
+      topK: 5
+    });
+    // 首次访问时从磁盘异步加载（不阻塞）
+    _singletonInstance.loadAllKnowledgeBases().catch(err => {
+      // 加载失败不影响基本服务
+    });
+  }
+  return _singletonInstance;
+}
+
 module.exports = RAGService;
+module.exports.getSharedRagService = getSharedRagService;

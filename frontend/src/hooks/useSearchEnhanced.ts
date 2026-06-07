@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import type { SearchResult } from '@/components/SearchResults';
+import { BACKEND_URL } from '@/lib/config';
 
 interface SearchResponse {
   success: boolean;
@@ -48,7 +49,7 @@ interface UseSearchEnhancedReturn {
  * 提供并行搜索、内容抓取和结果管理功能
  */
 export function useSearchEnhanced(options: UseSearchEnhancedOptions = {}): UseSearchEnhancedReturn {
-  const backendUrl = options.backendUrl || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+  const backendUrl = options.backendUrl || BACKEND_URL;
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);

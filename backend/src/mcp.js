@@ -8,6 +8,9 @@ const { Client } = require('@modelcontextprotocol/sdk/client/index.js');
 const { StdioClientTransport } = require('@modelcontextprotocol/sdk/client/stdio.js');
 const EnhancedSearchTool = require('./services/tools/enhancedSearchTool');
 const AppError = require('./common/errors/AppError');
+const { createLogger } = require('./infra/logger/AgentLogger');
+
+const logger = createLogger('mcpClient');
 
 /**
  * MCP 工具定义
@@ -550,7 +553,7 @@ class MCPClientManager {
     });
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`[MCP] 已注册 ${this.tools.size} 个内置工具`);
+      logger.info('已注册内置工具', { count: this.tools.size });
     }
   }
 
@@ -1076,11 +1079,11 @@ class MCPClientManager {
       }
 
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`[MCP] 已连接到服务器: ${serverName}, 工具数: ${tools.tools?.length || 0}`);
+        logger.info('已连接到服务器', { serverName, toolsCount: tools.tools?.length || 0 });
       }
       return { success: true, toolsCount: tools.tools?.length || 0 };
     } catch (error) {
-      console.error(`[MCP] 连接服务器失败: ${serverName}`, error.message);
+      logger.error('连接服务器失败', { serverName, error: error.message });
       return { success: false, error: error.message };
     }
   }

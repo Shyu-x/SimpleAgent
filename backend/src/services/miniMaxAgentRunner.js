@@ -563,9 +563,10 @@ ${this.tools.map(t => `- **${t.name}**: ${t.description}`).join('\n')}
    * 初始化消息历史
    */
   initMessages() {
-    this.messages = [
-      new Message('system', this.buildSystemPrompt())
-    ];
+    // 防御: 如果首条已是 system, 不重复 init
+    if (this.messages.length > 0 && this.messages[0]?.role === 'system') return;
+    // 已有 user/assistant 消息 → unshift 保留, 避免清空 addUserMessage 添加的内容
+    this.messages.unshift(new Message('system', this.buildSystemPrompt()));
   }
 
   /**

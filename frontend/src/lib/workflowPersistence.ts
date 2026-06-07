@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { isClient } from '@/lib/ssrStorage';
 import { useAgentWorkflowStore, type WorkflowDefinition, type AgentConfig, type TaskConfig, type WorkflowExecution } from '@/store/agentWorkflowStore';
 import { agentWorkflowAPI } from '@/lib/agentWorkflowAPI';
+import { BACKEND_URL } from '@/lib/config';
 
 // ==================== 高可用性配置 ====================
 
@@ -273,7 +274,7 @@ class HealthCheckService {
     const start = Date.now();
     try {
       const response = await retryService.withRetry(() =>
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000'}/api/health`, {
+        fetch(`${BACKEND_URL}/api/health`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         })

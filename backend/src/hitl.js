@@ -4,6 +4,10 @@
  * 实现关键决策点的暂停和人工确认功能
  */
 
+const { createLogger } = require('./infra/logger/AgentLogger');
+
+const logger = createLogger('hitl');
+
 // 检查点状态
 const CheckpointStatus = {
   PENDING: 'pending',       // 等待确认
@@ -306,7 +310,7 @@ class HumanInTheLoopManager {
         try {
           handler(data);
         } catch (error) {
-          console.error(`[HITL] Event handler error:`, error);
+          logger.error('Event handler error', { error: error.message });
         }
       });
     }

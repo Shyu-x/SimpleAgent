@@ -64,6 +64,9 @@ async function startServer() {
   const app = express();
   const PORT = process.env.PORT || 30000;
 
+  // 禁用 X-Powered-By 响应头
+  app.disable('x-powered-by');
+
   // 设置全局工具注册表
   app.set('toolRegistry', globalToolRegistry);
 
@@ -111,8 +114,25 @@ async function startServer() {
   };
   app.use(cors(corsOptions));
 
+  // 信任代理头：仅信任 loopback (127.0.0.1, ::1)，保证 X-Forwarded-For 限流
+  // 可在反向代理 (Nginx/Caddy) 部署时按需扩展为 'loopback, linklocal, uniquelocal'
+  app.set('trust proxy', 'loopback');
+
+  // 安全中间件：速率限制、输入限制、安全响应头
+  const {
+    rateLimitMiddleware,
+    inputLimitMiddleware,
+    securityHeadersMiddleware,
+  } = require('./middleware/security');
+
   // 全链路追踪中间件
   app.use(tracingMiddleware(tracingService));
+
+  // 安全中间件：IP速率限制 (100请求/分钟)
+  app.use(rateLimitMiddleware);
+
+  // 安全中间件：输入长度限制 (10MB)
+  app.use(inputLimitMiddleware);
 
   // 安全中间件：基本请求验证
   app.use((req, _res, next) => {
@@ -134,6 +154,61 @@ async function startServer() {
   const prometheusService = getPrometheusService();
   if (metricsCollector) {
     prometheusService.initialize(metricsCollector);
+  }
+
+  // 注册 5 条默认告警规则 (US-007)
+  if (metricsCollector && typeof metricsCollector.registerAlertRule === 'function') {
+    metricsCollector.registerAlertRule({
+      id: 'high_error_rate',
+      name: 'HighErrorRate',
+      description: '5xx 错误率超过 5% 持续 5 分钟',
+      level: 'critical',
+      metric: 'http_requests_total',
+      condition: '>',
+      threshold: 5,
+      duration: 5 * 60 * 1000,
+      labels: { status: '500' },
+    });
+    metricsCollector.registerAlertRule({
+      id: 'high_p99_latency',
+      name: 'HighP99Latency',
+      description: 'P99 延迟超过 3 秒持续 5 分钟',
+      level: 'warning',
+      metric: 'http_request_duration_seconds',
+      condition: '>',
+      threshold: 3,
+      duration: 5 * 60 * 1000,
+    });
+    metricsCollector.registerAlertRule({
+      id: 'sse_connections_drop',
+      name: 'SSEConnectionsDrop',
+      description: 'SSE 连接数 (http_requests_active) 突然下降',
+      level: 'critical',
+      metric: 'http_requests_active',
+      condition: '<',
+      threshold: 1,
+      duration: 60 * 1000,
+    });
+    metricsCollector.registerAlertRule({
+      id: 'queue_backlog',
+      name: 'QueueBacklog',
+      description: '队列长度超过 100',
+      level: 'warning',
+      metric: 'queue_length',
+      condition: '>',
+      threshold: 100,
+      duration: 0,
+    });
+    metricsCollector.registerAlertRule({
+      id: 'model_errors',
+      name: 'ModelErrors',
+      description: '5 分钟内模型错误数超过 10',
+      level: 'warning',
+      metric: 'model_errors_total',
+      condition: '>',
+      threshold: 10,
+      duration: 5 * 60 * 1000,
+    });
   }
 
   // 请求指标收集中间件（需要 prometheusService 和 gatewayService）
@@ -190,6 +265,20 @@ async function startServer() {
   const alertsRoutes = require('./routes/alerts');
   const workflowRoutes = require('./routes/workflow');
 
+  const { aiRateLimitMiddleware, minuteRateLimitMiddleware } = require('./middleware/rateLimit');
+  const analyticsRoutes = require('./routes/analytics');
+
+  // 使用新的 Redis 限流中间件（非 AI 端点）
+  app.use(minuteRateLimitMiddleware);
+
+  // AI 对话端点使用更严格的限流
+  app.use('/api/chat', aiRateLimitMiddleware);
+  app.use('/api/agent', aiRateLimitMiddleware);
+  app.use('/api/completion', aiRateLimitMiddleware);
+
+  // 统计和分析 API
+  app.use('/api', analyticsRoutes);
+
   // 模块化架构初始化
   const moduleConfig = require('./config/module.config');
   const eventBus = require('./common/event-bus');
@@ -225,9 +314,9 @@ async function startServer() {
   app.use('/api/hitl', hitlRoutes);
   app.use('/api/hitl', hitlSseRoutes);
   app.use('/api/enhanced-agent', enhancedAgentRoutes);
-  app.use('/api/memory', enhancedMemoryRoutes);
+  app.use('/api/memory', memoryRoutes); // 记忆系统 API (标准路由，优先匹配)
+  app.use('/api/memory', enhancedMemoryRoutes); // 增强记忆路由
   app.use('/api/router', routerRoutes);
-  app.use('/api/rag', ragRoutes);
   app.use('/api/tasks', taskQueueRoutes);
   app.use('/api/plugins', pluginRoutes);
   app.use('/api/skills', skillRoutes);
@@ -249,6 +338,7 @@ async function startServer() {
   app.use('/api/mission', missionControlRoutes); // MissionControl API
   app.use('/api/execution', executionRoutes); // 执行历史 API
   app.use('/api/alerts', alertsRoutes); // Alerts API
+  app.use('/api/rag', ragRoutes); // RAG 知识库 API
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -270,9 +360,15 @@ async function startServer() {
   // 挂载 Prometheus 指标路由
   app.use('/metrics', prometheusService.createRouter());
 
-  // 保留简单健康检查（向后兼容）
+  // 安全中间件：安全响应头 (在所有路由之后设置)
+  app.use(securityHeadersMiddleware);
+
+  // 保留简单健康检查（向后兼容）- 始终返回200避免监控误报
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString()
+    });
   });
 
   // 网关降级状态查询

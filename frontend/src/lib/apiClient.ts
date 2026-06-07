@@ -178,14 +178,29 @@ apiClient.addRequestInterceptor((config) => {
 // ============ API 错误类 ============
 
 export class ApiError extends Error {
+  public status: number;
+  public code?: string;
+  public url?: string;
+  public rateLimitInfo?: {
+    code: string;
+    message: string;
+    quota?: number;
+    used?: number;
+    remaining?: number;
+    resetAt?: string;
+  };
+
   constructor(
     message: string,
-    public status: number,
-    public code?: string,
-    public url?: string
+    status: number,
+    code?: string,
+    url?: string
   ) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    this.url = url;
   }
 
   static fromResponse(response: Response, data?: { error?: { message?: string; code?: string } }): ApiError {
@@ -231,8 +246,8 @@ export class ApiError extends Error {
 
   /** 获取错误类型分类 */
   getErrorType(): ApiErrorCode {
-    if (this.isNetworkError()) return 'NETWORK';
     if (this.isTimeout()) return 'TIMEOUT';
+    if (this.isNetworkError()) return 'NETWORK';
     if (this.isUnauthorized()) return 'UNAUTHORIZED';
     if (this.isForbidden()) return 'FORBIDDEN';
     if (this.isNotFound()) return 'NOT_FOUND';
@@ -381,15 +396,26 @@ export async function fetchApi<T = unknown>(
       }
 
       if (!response.ok) {
-        const error = ApiError.fromResponse(
-          response,
-          typeof data === 'object' ? (data as { error?: { message?: string; code?: string } }) : undefined
-        );
+        const errorData = typeof data === 'object' ? (data as { error?: { message?: string; code?: string; quota?: number; used?: number; remaining?: number; resetAt?: string } }) : undefined;
+        const error = ApiError.fromResponse(response, errorData);
         error.url = url;
+        
+        // 提取限流信息
+        if (response.status === 429 && errorData?.error) {
+          error.rateLimitInfo = {
+            code: errorData.error.code || 'RATE_LIMIT_EXCEEDED',
+            message: errorData.error.message || '请求过于频繁',
+            quota: errorData.error.quota,
+            used: errorData.error.used,
+            remaining: errorData.error.remaining,
+            resetAt: errorData.error.resetAt,
+          };
+        }
 
         processErrorInterceptors(error);
 
-        if (throwOnError) throw error;
+        // 429 错误不自动重试（配额耗尽，重试也无用）
+        if (throwOnError || response.status === 429) throw error;
 
         return { data: null, error, status: response.status };
       }

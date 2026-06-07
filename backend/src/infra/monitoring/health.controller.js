@@ -133,10 +133,10 @@ class MiniMaxHealthChecker extends ModuleHealthChecker {
   }
 
   async performCheck() {
-    const MiniMaxRouter = require('../../services/router/modelRouter').getMiniMaxRouter?.() ||
-                          require('../../services/router/modelRouter').MiniMaxRouter?.getInstance?.();
+    const modelRouter = require('../../services/router/modelRouter');
+    const router = modelRouter.router;
 
-    if (!MiniMaxRouter) {
+    if (!router) {
       return { healthy: false, message: 'MiniMaxRouter 未初始化' };
     }
 
@@ -146,16 +146,19 @@ class MiniMaxHealthChecker extends ModuleHealthChecker {
     }
 
     try {
-      // 尝试获取健康状态（如果有方法的话）
-      if (MiniMaxRouter.getHealthStatus) {
-        const healthStatus = MiniMaxRouter.getHealthStatus();
-        return {
-          healthy: healthStatus.healthy,
-          message: healthStatus.message || 'OK',
-          metadata: healthStatus.metadata || {},
-        };
-      }
-      return { healthy: true, message: 'MiniMax API 已配置' };
+      // 获取统计信息
+      const stats = router.getStats?.() || {};
+      return {
+        healthy: true,
+        message: 'MiniMax API 已配置',
+        metadata: {
+          defaultModel: stats.defaultModel || 'MiniMax-M2.7',
+          totalRequests: stats.totalRequests || 0,
+          successRate: stats.totalRequests > 0 
+            ? ((stats.successRequests || 0) / stats.totalRequests * 100).toFixed(1) + '%' 
+            : 'N/A',
+        },
+      };
     } catch (error) {
       return { healthy: false, message: error.message };
     }
@@ -232,27 +235,52 @@ class CircuitBreakerHealthChecker extends ModuleHealthChecker {
 
   async performCheck() {
     try {
-      // 尝试获取熔断器实例
-      const CircuitBreakerFactory = require('../../infra/circuitBreaker/CircuitBreakerFactory');
-
-      if (!CircuitBreakerFactory) {
-        return { healthy: true, message: '无熔断器配置' };
+      // 获取自定义熔断器工厂状态
+      let customCircuits = [];
+      let openCustomCircuits = [];
+      try {
+        const CircuitBreakerFactory = require('../../infra/circuitBreaker/CircuitBreakerFactory');
+        if (CircuitBreakerFactory) {
+          customCircuits = CircuitBreakerFactory.getAllCircuits?.() || [];
+          openCustomCircuits = customCircuits.filter(c => c.state === 'OPEN' || c.state === 'open');
+        }
+      } catch (e) {
+        // 忽略
       }
 
-      const circuits = CircuitBreakerFactory.getAllCircuits?.() || [];
-      const openCircuits = circuits.filter(c => c.state === 'OPEN' || c.state === 'open');
+      // 获取 Opossum 熔断器状态
+      let opossumBreakers = [];
+      let openOpossumBreakers = [];
+      try {
+        const { getAllBreakersStatus, CB_STATES } = require('../../middleware/circuitBreaker');
+        opossumBreakers = getAllBreakersStatus();
+        openOpossumBreakers = opossumBreakers.filter(b => b.state === CB_STATES.OPEN);
+      } catch (e) {
+        // Opossum 熔断器未初始化
+      }
+
+      const totalOpen = openCustomCircuits.length + openOpossumBreakers.length;
 
       return {
-        healthy: openCircuits.length === 0,
-        message: openCircuits.length === 0 ? '所有熔断器正常' : `${openCircuits.length} 个熔断器打开`,
+        healthy: totalOpen === 0,
+        message: totalOpen === 0 ? '所有熔断器正常' : `${totalOpen} 个熔断器打开`,
         metadata: {
-          totalCircuits: circuits.length,
-          openCircuits: openCircuits.length,
-          circuits: circuits.map(c => ({
-            name: c.name,
-            state: c.state,
-            failureCount: c.failureCount,
-          })),
+          customCircuits: {
+            total: customCircuits.length,
+            open: openCustomCircuits.length,
+          },
+          opossumBreakers: {
+            total: opossumBreakers.length,
+            open: openOpossumBreakers.length,
+            breakers: opossumBreakers.map(b => ({
+              name: b.name,
+              state: b.state,
+              failures: b.failures,
+              successes: b.successes,
+              fallbacks: b.fallbacks,
+              rejections: b.rejections,
+            })),
+          },
         },
       };
     } catch (error) {

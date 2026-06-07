@@ -5,6 +5,9 @@
  */
 
 const axios = require('axios');
+const { createLogger } = require('./infra/logger/AgentLogger');
+
+const logger = createLogger('n8n');
 
 // n8n 配置
 const N8N_CONFIG = {
@@ -54,7 +57,7 @@ class N8NClient {
         status: response.status
       };
     } catch (error) {
-      console.error('[n8n] Webhook trigger error:', error.message);
+      logger.error('Webhook trigger error', { error: error.message });
       return {
         success: false,
         error: error.message,
@@ -84,7 +87,7 @@ class N8NClient {
         workflows: response.data.data || []
       };
     } catch (error) {
-      console.error('[n8n] Get workflows error:', error.message);
+      logger.error('Get workflows error', { error: error.message });
       return {
         success: false,
         error: error.message
@@ -113,7 +116,7 @@ class N8NClient {
         workflow: response.data
       };
     } catch (error) {
-      console.error('[n8n] Get workflow error:', error.message);
+      logger.error('Get workflow error', { error: error.message });
       return {
         success: false,
         error: error.message
@@ -147,7 +150,7 @@ class N8NClient {
         data: response.data.data
       };
     } catch (error) {
-      console.error('[n8n] Execute workflow error:', error.message);
+      logger.error('Execute workflow error', { error: error.message });
       return {
         success: false,
         error: error.message
@@ -177,7 +180,7 @@ class N8NClient {
         executions: response.data.data || []
       };
     } catch (error) {
-      console.error('[n8n] Get executions error:', error.message);
+      logger.error('Get executions error', { error: error.message });
       return {
         success: false,
         error: error.message

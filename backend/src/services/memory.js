@@ -13,6 +13,7 @@ class MemoryService {
   constructor(options = {}) {
     this.maxMessages = options.maxMessages || 100;
     this.maxTokens = options.maxTokens || 4000;
+    this.logger = require('../infra/logger/AgentLogger').createLogger('memory');
     this.AppError = require('../common/errors/AppError');
     this.compressionThreshold = options.compressionThreshold || 3000;
     // 压缩阈值（双维度）
@@ -331,7 +332,7 @@ class MemoryService {
         const summaryPrompt = this._buildSummaryPrompt(messages, options);
         return llmSummaryFn(summaryPrompt);
       } catch (error) {
-        console.warn('LLM摘要失败，回退到规则摘要:', error.message);
+        this.logger?.warn('LLM摘要失败，回退到规则摘要', { error: error.message });
       }
     }
 

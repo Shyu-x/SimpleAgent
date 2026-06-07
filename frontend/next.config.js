@@ -1,12 +1,19 @@
 /** @type {import('next').NextConfig} */
+const createNextIntlPlugin = require('next-intl/plugin');
+
 const isGitHubPages = process.env.GITHUB_PAGES === 'true';
 
 const backendOrigin = isGitHubPages
   ? process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000'
   : (process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000');
 
+// 集成 next-intl 插件（必须在 nextConfig 之前）
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
 const nextConfig = {
   reactStrictMode: true,
+  // Fix for multiple lockfiles warning (Docker 时路径不同, 需通过 env 或 unset)
+  ...(process.env.TURBOPACK_ROOT ? { turbopack: { root: process.env.TURBOPACK_ROOT } } : {}),
   // GitHub Pages: use static export
   // Docker: use standalone
   // Dev: use default
@@ -43,4 +50,4 @@ const nextConfig = {
   }),
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);

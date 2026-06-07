@@ -1,7 +1,10 @@
 // Centralized API Configuration
 // All API base URLs should be imported from here
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { BACKEND_URL } from './config';
+
+// Re-export API_BASE for convenience (same as BACKEND_URL)
+export const API_BASE = BACKEND_URL;
 
 // Export individual endpoints for different services
 export const API_ENDPOINTS = {

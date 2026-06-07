@@ -64,14 +64,14 @@ export default function ModelConfigPage() {
   // SSE 订阅 models 数据
   const { data: modelsData, loading: modelsLoading, refresh: refreshModels } = useAdminPolling<ModelConfig[]>({
     endpoint: '/api/admin/models',
-    parser: (res) => res?.data?.data?.models || [],
+    parser: (res: unknown) => (res as { data?: { models: ModelConfig[] } })?.data?.models || [],
     interval: 30000,
   });
 
   // SSE 订阅 stats 数据
   const { data: statsData, loading: statsLoading, refresh: refreshStats } = useAdminPolling<ModelStats | null>({
     endpoint: '/api/admin/models/stats',
-    parser: (res) => res?.data?.data || null,
+    parser: (res: unknown) => (res as { data?: ModelStats })?.data || null,
     interval: 30000,
   });
 

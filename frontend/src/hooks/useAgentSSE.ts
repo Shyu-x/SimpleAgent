@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAgentWorkflowStore, SSEEvent } from '@/store/agentWorkflowStore';
 import { agentWorkflowAPI } from '@/lib/agentWorkflowAPI';
+import { BACKEND_URL } from '@/lib/config';
 
 interface UseAgentSSEOptions {
   sessionId: string | null;
@@ -202,7 +203,7 @@ export function useRealAgentSSE(options: UseRealAgentSSEOptions) {
   useEffect(() => {
     if (!sessionId) return;
 
-    const sseUrl = url || `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000'}/api/multiagent/sse/${sessionId}`;
+    const sseUrl = url || `${BACKEND_URL}/api/multiagent/sse/${sessionId}`;
 
     const eventSource = new EventSource(sseUrl);
     eventSourceRef.current = eventSource;

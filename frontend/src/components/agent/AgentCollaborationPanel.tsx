@@ -46,6 +46,7 @@ import HumanConfirmationDialog, {
   ConfirmationRequest,
   ConfirmationResponse
 } from './HumanConfirmationDialog';
+import { BACKEND_URL } from '@/lib/config';
 
 // A2A 消息类型
 type A2AMessageType =
@@ -483,7 +484,7 @@ const AgentCollaborationPanel = memo(function AgentCollaborationPanel({
               transition={{ duration: 0.2 }}
             >
               <A2ATab
-                backendUrl={process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000'}
+                backendUrl={BACKEND_URL}
                 currentAgentId="frontend-user"
                 onError={(e) => console.error('[A2A]', e)}
               />

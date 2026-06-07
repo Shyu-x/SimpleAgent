@@ -76,7 +76,7 @@ const cardVariants: Variants = {
   hover: {
     y: -3,
     scale: 1.02,
-    boxShadow: '0 12px 24px hsl(var(--text-main) / 0.12)',
+    boxShadow: '0 12px 24px hsl(var(--foreground) / 0.12)',
     transition: { duration: 0.2 }
   }
 };
@@ -85,9 +85,9 @@ const cardVariants: Variants = {
 const statusColors: Record<string, { bg: string; text: string; icon: string; border?: string }> = {
   idle: { bg: 'bg-muted', text: 'text-muted-foreground', icon: 'text-muted-foreground', border: 'border-border' },
   pending: { bg: 'bg-muted/70', text: 'text-muted-foreground', icon: 'text-muted-foreground', border: 'border-border' },
-  assigned: { bg: 'bg-[hsl(var(--accent-500))/0.14]', text: 'text-[hsl(var(--accent-500))]', icon: 'text-[hsl(var(--accent-500))]', border: 'border-[hsl(var(--accent-500))/0.32]' },
+  assigned: { bg: 'bg-accent/0.14', text: 'text-accent', icon: 'text-accent', border: 'border-accent/0.32' },
   running: { bg: 'bg-primary/15', text: 'text-primary', icon: 'text-primary', border: 'border-primary/30' },
-  completed: { bg: 'bg-[hsl(var(--success-500))/0.14]', text: 'text-[hsl(var(--success-500))]', icon: 'text-[hsl(var(--success-500))]', border: 'border-[hsl(var(--success-500))/0.32]' },
+  completed: { bg: 'bg-green-500/0.14', text: 'text-green-500', icon: 'text-green-500', border: 'border-green-500/0.32' },
   error: { bg: 'bg-destructive/15', text: 'text-destructive', icon: 'text-destructive', border: 'border-destructive/30' }
 };
 
@@ -744,7 +744,7 @@ export function MultiAgentPanel({ isOpen, onClose }: MultiAgentPanelProps) {
                   </div>
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-primary via-[hsl(var(--accent-500))] to-accent"
+                      className="h-full bg-gradient-to-r from-primary via-accent to-accent"
                       initial={{ width: 0 }}
                       animate={{ width: `${overallProgress}%` }}
                       transition={{ duration: 0.5, ease: "easeOut" }}
@@ -759,7 +759,7 @@ export function MultiAgentPanel({ isOpen, onClose }: MultiAgentPanelProps) {
                       </span>
                     </div>
                     <div className={`flex items-center gap-1.5 font-medium ${
-                      workflow.status === 'completed' ? 'text-[hsl(var(--success-500))]' :
+                      workflow.status === 'completed' ? 'text-green-500' :
                       workflow.status === 'error' ? 'text-destructive' :
                       workflow.status === 'running' ? 'text-primary' : 'text-muted-foreground'
                     }`}>
@@ -833,7 +833,7 @@ export function MultiAgentPanel({ isOpen, onClose }: MultiAgentPanelProps) {
                               {agent.status === 'running' && (
                                 <div className="h-2 bg-muted rounded-full overflow-hidden mb-2">
                                   <motion.div
-                                    className="h-full bg-gradient-to-r from-primary to-[hsl(var(--accent-500))]"
+                                    className="h-full bg-gradient-to-r from-primary to-accent"
                                     initial={{ width: 0 }}
                                     animate={{ width: `${agent.progress}%` }}
                                   />
@@ -854,14 +854,14 @@ export function MultiAgentPanel({ isOpen, onClose }: MultiAgentPanelProps) {
                     {/* Tasks 面板 */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 sticky top-0 bg-background/95 backdrop-blur-sm py-3 z-10 rounded-xl">
-                        <div className="w-8 h-8 rounded-lg bg-[hsl(var(--warning-500))/0.14] flex items-center justify-center">
-                          <Target size={16} className="text-[hsl(var(--warning-500))]" />
+                        <div className="w-8 h-8 rounded-lg bg-yellow-500/0.14 flex items-center justify-center">
+                          <Target size={16} className="text-yellow-500" />
                         </div>
                         <h3 className="font-semibold">任务流 ({workflow.tasks.length})</h3>
                       </div>
                       <div className="space-y-4 relative">
                         {/* 连接线 */}
-                        <div className="absolute left-[22px] top-[10px] bottom-[10px] w-0.5 bg-gradient-to-b from-primary via-[hsl(var(--warning-500))] to-[hsl(var(--success-500))] opacity-30" />
+                        <div className="absolute left-[22px] top-[10px] bottom-[10px] w-0.5 bg-gradient-to-b from-primary via-yellow-500 to-green-500 opacity-30" />
 
                         {workflow.tasks.map((task, i) => {
                           const status = statusColors[task.status];
@@ -983,8 +983,8 @@ export function MultiAgentPanel({ isOpen, onClose }: MultiAgentPanelProps) {
                   className="p-4 border-b flex items-center justify-between hover:bg-muted/30 transition-colors shrink-0 bg-gradient-to-r from-muted/20 to-muted/5"
                 >
                   <span className="font-medium flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-[hsl(var(--warning-500))/0.14] flex items-center justify-center">
-                      <Zap size={14} className="text-[hsl(var(--warning-500))]" />
+                    <div className="w-7 h-7 rounded-lg bg-yellow-500/0.14 flex items-center justify-center">
+                      <Zap size={14} className="text-yellow-500" />
                     </div>
                     执行日志 ({workflow.logs.length})
                   </span>
@@ -1008,9 +1008,9 @@ export function MultiAgentPanel({ isOpen, onClose }: MultiAgentPanelProps) {
                           animate={{ opacity: 1, x: 0, y: 0 }}
                           transition={{ duration: 0.2 }}
                           className={`text-xs p-3 rounded-xl backdrop-blur-sm shadow-sm ${
-                            log.type === 'success' ? 'bg-[hsl(var(--success-500))/0.14] border border-[hsl(var(--success-500))/0.32] text-[hsl(var(--success-500))]' :
+                            log.type === 'success' ? 'bg-green-500/0.14 border border-green-500/0.32 text-green-500' :
                             log.type === 'error' ? 'bg-destructive/10 border border-destructive/20 text-destructive' :
-                            log.type === 'warning' ? 'bg-[hsl(var(--warning-500))/0.14] border border-[hsl(var(--warning-500))/0.32] text-[hsl(var(--warning-500))]' :
+                            log.type === 'warning' ? 'bg-yellow-500/0.14 border border-yellow-500/0.32 text-yellow-500' :
                             'bg-muted border border-border'
                           }`}
                         >

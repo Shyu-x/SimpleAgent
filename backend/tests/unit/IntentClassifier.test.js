@@ -9,28 +9,14 @@
  */
 const assert = require('assert');
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 const { IntentClassifier, INTENT_TYPES, CONFIDENCE_THRESHOLDS, TOOL_SUB_TYPES, TASK_SUB_TYPES } = require('../../src/services/agent/IntentClassifier');
 
 describe('IntentClassifier 构造函数', () => {
   test('默认配置应该正确', () => {
     const classifier = new IntentClassifier({ enableLLM: false });
-    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7-highspeed');
+    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7');
     assert.strictEqual(classifier.confidenceThreshold, CONFIDENCE_THRESHOLDS.MEDIUM);
     assert.strictEqual(classifier.enableLLM, false);
     assert.strictEqual(classifier.enableKeywordFallback, true);
@@ -253,4 +239,3 @@ describe('IntentClassifier 边界条件', () => {
   });
 });
 
-console.log('\n');

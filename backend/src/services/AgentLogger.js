@@ -163,6 +163,32 @@ class AgentLogger {
   }
 
   /**
+   * 信息日志 (兼容 trace 调用)
+   */
+  info(message, meta = {}) {
+    this._writeLog({
+      type: 'info',
+      runId: this.currentRunId,
+      timestamp: new Date().toISOString(),
+      message,
+      ...meta
+    });
+  }
+
+  /**
+   * 调试日志 (兼容 trace 调用)
+   */
+  debug(message, meta = {}) {
+    this._writeLog({
+      type: 'debug',
+      runId: this.currentRunId,
+      timestamp: new Date().toISOString(),
+      message,
+      ...meta
+    });
+  }
+
+  /**
    * 截断参数（避免日志过长）
    */
   _truncateArgs(args, maxLength = 200) {

@@ -1,0 +1,33 @@
+{
+  "config": {
+    "target": "http://localhost:30000/api/health",
+    "connections": 100,
+    "duration": 300
+  },
+  "totalWallTimeMs": 300659,
+  "requests": {
+    "total": 1814302,
+    "avgRps": 6048,
+    "errors": 0,
+    "timeouts": 0,
+    "non2xx": 0,
+    "successRate": "100.00"
+  },
+  "statusCodeStats": {
+    "200": {
+      "count": 1814302
+    }
+  },
+  "latency": {
+    "avg": 16.04,
+    "p50": 12,
+    "p90": 23,
+    "p99": 80,
+    "max": 286
+  },
+  "memory": {
+    "startHeapMb": "9.8",
+    "endHeapMb": "12.4",
+    "deltaMb": "2.6"
+  }
+}

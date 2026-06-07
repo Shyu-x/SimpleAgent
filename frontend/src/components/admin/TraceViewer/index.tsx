@@ -15,8 +15,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { fetchApi } from '@/lib/apiClient';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
-
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { API_BASE } from '@/lib/apiConfig';
 
 // ============ 类型定义 ============
 
@@ -110,7 +109,6 @@ export default function TraceViewerPage() {
       eventSource = new EventSource(`${API_BASE}/api/admin/traces/subscribe`);
 
       eventSource.onopen = () => {
-        console.log('[TraceViewer] SSE connected');
         setConnected(true);
         setTracesLoading(false);
         setStatsLoading(false);
@@ -120,7 +118,7 @@ export default function TraceViewerPage() {
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'connected') {
-            console.log('[TraceViewer] SSE ready, clientId:', data.clientId);
+            // SSE 已就绪
           } else if (data.type === 'traces_update' || data.type === 'traces') {
             setTraces(data.data || []);
             if (data.stats) setStats(data.stats);
@@ -130,8 +128,14 @@ export default function TraceViewerPage() {
             setStats(data.stats);
             setStatsLoading(false);
           } else if (data.type === 'heartbeat' && data.stats) {
-            // 心跳包也更新统计
-            setStats(data.stats);
+            // 心跳包只在新数据时才更新，避免不必要的 re-render
+            setStats(prev => {
+              const newStats = data.stats;
+              if (prev && newStats && prev.totalTraces === newStats.totalTraces) {
+                return prev; // 数据相同，跳过更新
+              }
+              return newStats;
+            });
           }
         } catch (error) {
           console.error('[TraceViewer] Failed to parse SSE message:', error);

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"omc ultragoal checkpoint --goal-id G008-qualitygate --status complete \\\\\\n  --evidence \\\"前端测试: 393 tests passed (25 test files)；TDD覆盖: ui-state-tdd(30), full-chain-tdd(60), backend-tdd(43)...",
+  "error": "Exit code 1\n[ultragoal] No ultragoal plan found at .omc/ultragoal/goals.json. Run `omc ultragoal create-goals ...` first.",
+  "timestamp": "2026-05-18T23:59:50.038Z",
+  "retry_count": 1
+}

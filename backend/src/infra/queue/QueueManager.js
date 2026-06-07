@@ -12,6 +12,9 @@
 
 const { EventEmitter } = require('events');
 const AppError = require('../../common/errors/AppError');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('queueManager');
 
 // 优先级常量
 const PRIORITY = {
@@ -376,7 +379,7 @@ class QueueManager extends EventEmitter {
       try {
         callback(data);
       } catch (error) {
-        console.error('SSE通知失败:', error);
+        logger.error('SSE通知失败', { error: error.message });
       }
     }
   }

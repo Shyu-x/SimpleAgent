@@ -8,19 +8,11 @@ const SSEService = require('../services/sseService');
 const { AgentLogger } = require('../infra/logger/AgentLogger');
 const chatService = require('../services/chatService');
 
-// 导入熔断器和限流器
-const { getBreakerWithPreset } = require('../common/resilience/integration');
+// 导入限流器
 const { chatRateLimiter } = require('../common/rate-limiter/integration');
 
 // 导入指标采集器
 const { getMetricsCollector } = require('../infra/metrics');
-
-// 获取 MiniMax API 熔断器
-const minimaxBreaker = getBreakerWithPreset('minimax-api', 'STANDARD', {
-  onStateChange: (from, to, reason) => {
-    logger.warn(`CircuitBreaker [minimax-api] state: ${from} -> ${to}${reason ? ` (${reason})` : ''}`);
-  },
-});
 
 const logger = new AgentLogger('chat');
 
@@ -52,25 +44,18 @@ router.post('/', async (req, res) => {
     if (stream !== false) {
       req.body.messages = result.data;
 
-      // 使用熔断器保护 SSE 调用
-      return await minimaxBreaker.execute(
-        async () => {
-          const result = await SSEService.handleChat(req, res);
-          // SSE 流式响应结束后记录
-          const latency = Date.now() - startTime;
-          collector.incrementCounter('http_requests_total', { endpoint: '/api/chat', status: 200 });
-          collector.recordHistogram('http_request_duration_seconds', latency / 1000, { endpoint: '/api/chat' });
-          return result;
-        },
-        () => {
-          // 降级：返回服务暂时不可用提示
-          res.setHeader('Content-Type', 'text/event-stream');
-          res.setHeader('X-Circuit-Breaker', 'fallback');
-          res.write('data: {"error": "服务暂时不可用，请稍后重试", "circuit": "open"}\n\n');
-          res.end();
-          collector.endRequest(requestId, 503);
-        }
-      );
+      // SSE 流式响应 - 直接调用 SSEService（熔断器在 MiniMaxRouter 内部处理）
+      try {
+        const result = await SSEService.handleChat(req, res);
+        const latency = Date.now() - startTime;
+        collector.incrementCounter('http_requests_total', { endpoint: '/api/chat', status: 200 });
+        collector.recordHistogram('http_request_duration_seconds', latency / 1000, { endpoint: '/api/chat' });
+        return result;
+      } catch (error) {
+        logger.error('SSE Chat error', { error: error.message, stack: error.stack });
+        collector.endRequest(requestId, 500);
+        return;
+      }
     }
 
     const origin = `${req.protocol}://${req.get('host')}`;
@@ -126,28 +111,13 @@ router.post('/completions', async (req, res) => {
 
   req.body = { messages: result.data, model, stream: false };
   try {
-    // 使用熔断器保护 completions 调用
-    await minimaxBreaker.execute(
-      async () => {
-        const result = await SSEService.handleChat(req, res);
-        const latency = Date.now() - startTime;
-        collector.incrementCounter('http_requests_total', { endpoint: '/api/chat/completions', status: 200 });
-        collector.recordHistogram('http_request_duration_seconds', latency / 1000, { endpoint: '/api/chat/completions' });
-        collector.endRequest(requestId, 200);
-        return result;
-      },
-      () => {
-        collector.endRequest(requestId, 503);
-        res.status(503).json({
-          success: false,
-          error: {
-            type: 'service_unavailable',
-            message: '服务暂时不可用，请稍后重试',
-            circuit: 'open',
-          },
-        });
-      }
-    );
+    // 直接调用 SSEService（熔断器在 MiniMaxRouter 内部处理）
+    const result = await SSEService.handleChat(req, res);
+    const latency = Date.now() - startTime;
+    collector.incrementCounter('http_requests_total', { endpoint: '/api/chat/completions', status: 200 });
+    collector.recordHistogram('http_request_duration_seconds', latency / 1000, { endpoint: '/api/chat/completions' });
+    collector.endRequest(requestId, 200);
+    return result;
   } catch (error) {
     const latency = Date.now() - startTime;
     collector.incrementCounter('http_requests_total', { endpoint: '/api/chat/completions', status: 500 });

@@ -159,19 +159,19 @@ export default function ModelSelector() {
           />
 
           {/* 下拉内容 */}
-          <div className="absolute right-0 top-full mt-2 w-80 bg-[hsl(var(--bg-surface))] border border-[hsl(var(--border-subtle))] rounded-2xl shadow-xl z-50 overflow-hidden">
+          <div className="absolute right-0 top-full mt-2 w-80 bg-muted border border-border rounded-2xl shadow-xl z-50 overflow-hidden">
             {/* 头部 */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border-subtle))]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <div>
                 <h3 className="font-semibold text-sm">选择模型</h3>
-                <p className="text-xs text-[hsl(var(--text-muted))]">
+                <p className="text-xs text-muted-foreground">
                   {lastRefresh ? `更新于 ${lastRefresh.toLocaleTimeString()}` : '加载中...'}
                 </p>
               </div>
               <button
                 onClick={fetchModels}
                 disabled={loading}
-                className="p-2 rounded-lg hover:bg-[hsl(var(--bg-muted))] transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                 title="刷新模型列表"
               >
                 <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
@@ -200,7 +200,7 @@ export default function ModelSelector() {
                   <button
                     key={model.id}
                     onClick={() => handleModelSelect(model.id)}
-                    className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-[hsl(var(--bg-muted))] transition-colors text-left ${
+                    className={`w-full px-4 py-3 flex items-start gap-3 hover:bg-muted transition-colors text-left ${
                       isSelected ? 'bg-blue-500/10' : ''
                     }`}
                   >
@@ -211,14 +211,14 @@ export default function ModelSelector() {
                           <Check size={14} className="text-blue-500 shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-[hsl(var(--text-muted))] mt-0.5 truncate">
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
                         {info.description}
                       </p>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {info.features.map((feature) => (
                           <span
                             key={feature}
-                            className="px-1.5 py-0.5 text-[10px] bg-[hsl(var(--bg-muted))] rounded"
+                            className="px-1.5 py-0.5 text-[10px] bg-muted rounded"
                           >
                             {feature}
                           </span>
@@ -233,14 +233,14 @@ export default function ModelSelector() {
               })}
 
               {loading && models.length === 0 && (
-                <div className="px-4 py-8 text-center text-sm text-[hsl(var(--text-muted))]">
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                   加载中...
                 </div>
               )}
             </div>
 
             {/* 底部 */}
-            <div className="px-4 py-2 border-t border-[hsl(var(--border-subtle))] text-[10px] text-[hsl(var(--text-muted))]">
+            <div className="px-4 py-2 border-t border-border text-[10px] text-muted-foreground">
               模型数据来自 MiniMax 平台 · API 调用可能需要配额
             </div>
           </div>

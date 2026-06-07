@@ -3,6 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { agentWorkflowAPI } from '@/lib/agentWorkflowAPI';
 import { retryService } from '@/lib/workflowPersistence';
+import { BACKEND_URL } from '@/lib/config';
+import {
+  AgentSSEClient,
+  type AgentSSEEvent,
+  type AgentSSEClientOptions,
+  type ConnectionState,
+} from '@/lib/sse-clients';
 
 // ==================== 类型定义 ====================
 
@@ -14,205 +21,6 @@ export interface SSEEvent {
 export interface SSECredentials {
   sessionId: string;
   apiKey?: string;
-}
-
-interface SSEOptions {
-  url: string;
-  credentials?: SSECredentials;
-  reconnect?: boolean;
-  reconnectInterval?: number;
-  maxReconnectAttempts?: number;
-  onOpen?: () => void;
-  onMessage?: (event: SSEEvent) => void;
-  onError?: (error: Error) => void;
-  onClose?: () => void;
-}
-
-interface ConnectionState {
-  status: 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
-  lastEventTime: number | null;
-  reconnectAttempts: number;
-  error?: string;
-}
-
-// ==================== SSE 客户端类 ====================
-
-class SSEClient {
-  private eventSource: EventSource | null = null;
-  private options: SSEOptions;
-  private reconnectTimeout: NodeJS.Timeout | null = null;
-  private heartbeatInterval: NodeJS.Timeout | null = null;
-  private destroyed = false;
-
-  constructor(options: SSEOptions) {
-    this.options = {
-      reconnect: true,
-      reconnectInterval: 3000,
-      maxReconnectAttempts: 10,
-      ...options,
-    };
-  }
-
-  connect(): void {
-    if (this.destroyed) return;
-
-    const { url, credentials, reconnect, reconnectInterval, maxReconnectAttempts, onOpen, onMessage, onError, onClose } = this.options;
-
-    try {
-      // 构建URL
-      const urlObj = new URL(url);
-      if (credentials?.sessionId) {
-        urlObj.searchParams.set('sessionId', credentials.sessionId);
-      }
-
-      // 创建 EventSource
-      this.eventSource = new EventSource(urlObj.toString(), {
-        withCredentials: true,
-      });
-
-      // 连接打开
-      this.eventSource.onopen = () => {
-        console.log('[SSE] 连接已建立');
-        onOpen?.();
-
-        // 启动心跳
-        this.startHeartbeat();
-      };
-
-      // 任务开始
-      this.eventSource.addEventListener('task_start', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'task_start', ...data });
-      });
-
-      // 任务进度
-      this.eventSource.addEventListener('task_progress', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'task_progress', ...data });
-      });
-
-      // 任务完成
-      this.eventSource.addEventListener('task_complete', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'task_complete', ...data });
-      });
-
-      // 任务错误
-      this.eventSource.addEventListener('task_error', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'task_error', ...data });
-      });
-
-      // Agent状态
-      this.eventSource.addEventListener('agent_status', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'agent_status', ...data });
-      });
-
-      // 工具调用
-      this.eventSource.addEventListener('tool_call', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'tool_call', ...data });
-      });
-
-      // 工作流完成
-      this.eventSource.addEventListener('workflow_complete', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'workflow_complete', ...data });
-      });
-
-      // 工作流错误
-      this.eventSource.addEventListener('workflow_error', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'workflow_error', ...data });
-      });
-
-      // 人机确认
-      this.eventSource.addEventListener('confirmation', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'confirmation', ...data });
-      });
-
-      // 进度更新
-      this.eventSource.addEventListener('progress', (e) => {
-        const data = this.parseEventData(e);
-        onMessage?.({ type: 'progress', ...data });
-      });
-
-      // 心跳响应
-      this.eventSource.addEventListener('heartbeat', (e) => {
-        // 心跳响应，忽略数据
-      });
-
-      // 错误处理
-      this.eventSource.onerror = (e) => {
-        console.error('[SSE] 连接错误:', e);
-        const error = new Error('SSE连接错误');
-
-        if (reconnect && !this.destroyed) {
-          this.scheduleReconnect();
-        }
-
-        onError?.(error);
-      };
-
-    } catch (error) {
-      console.error('[SSE] 创建连接失败:', error);
-      onError?.(error instanceof Error ? error : new Error(String(error)));
-    }
-  }
-
-  private parseEventData(e: MessageEvent): Record<string, unknown> {
-    try {
-      return JSON.parse(e.data);
-    } catch {
-      return { data: e.data };
-    }
-  }
-
-  private startHeartbeat(): void {
-    this.heartbeatInterval = setInterval(() => {
-      // 发送心跳请求
-      fetch('/api/health', { method: 'HEAD' }).catch(() => {
-        // 忽略心跳错误
-      });
-    }, 30000); // 30秒心跳
-  }
-
-  private scheduleReconnect(): void {
-    if (this.destroyed) return;
-
-    const { reconnectInterval, maxReconnectAttempts, reconnect } = this.options;
-    if (!reconnect) return;
-
-    this.reconnectTimeout = setTimeout(() => {
-      this.destroy();
-      this.connect();
-    }, reconnectInterval);
-  }
-
-  disconnect(): void {
-    this.destroy();
-  }
-
-  private destroy(): void {
-    this.destroyed = true;
-
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
-    }
-
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-      this.heartbeatInterval = null;
-    }
-
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
-    }
-  }
 }
 
 // ==================== Hook ====================
@@ -255,7 +63,7 @@ export function useRealAgentSSE(
     reconnectAttempts: 0,
   });
 
-  const clientRef = useRef<SSEClient | null>(null);
+  const clientRef = useRef<AgentSSEClient | null>(null);
   const sessionIdRef = useRef(sessionId);
 
   // 更新sessionIdRef
@@ -278,12 +86,11 @@ export function useRealAgentSSE(
       return;
     }
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+    const backendUrl = BACKEND_URL;
     const sseUrl = `${backendUrl}/api/multiagent/sse`;
 
-    const client = new SSEClient({
-      url: sseUrl,
-      credentials: { sessionId },
+    const client = new AgentSSEClient({
+      sessionId,
       reconnect,
       onOpen: () => {
         setConnectionState((prev) => ({
@@ -403,26 +210,31 @@ export function useRealAgentSSE(
 interface MultiChannelSSE {
   id: string;
   sessionId: string;
-  client: SSEClient;
+  client: AgentSSEClient;
+}
+
+interface ChannelStatus {
+  id: string;
+  status: 'connecting' | 'connected' | 'disconnected' | 'reconnecting' | 'error';
 }
 
 export function useMultiChannelSSE() {
   const channelsRef = useRef<Map<string, MultiChannelSSE>>(new Map());
-  const [channels, setChannels] = useState<Array<{ id: string; status: ConnectionState['status'] }>>([]);
+  const [channels, setChannels] = useState<ChannelStatus[]>([]);
 
   const createChannel = useCallback(
-    (id: string, sessionId: string, handlers: SSEOptions) => {
+    (id: string, sessionId: string, handlers: AgentSSEClientOptions) => {
       // 关闭已有通道
       const existing = channelsRef.current.get(id);
       if (existing) {
         existing.client.disconnect();
       }
 
-      // 创建新通道
-      const client = new SSEClient({
-        ...handlers,
-        url: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000'}/api/multiagent/sse`,
-        credentials: { sessionId },
+      // 创建新通道 - 使用解构避免 sessionId 重复
+      const { sessionId: _, ...restHandlers } = handlers;
+      const client = new AgentSSEClient({
+        ...restHandlers,
+        sessionId,
       });
 
       client.connect();

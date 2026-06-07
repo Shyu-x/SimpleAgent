@@ -3,8 +3,11 @@
  * 直接使用 MiniMax API 实现联网搜索功能
  */
 
-const { withRetry, withTimeout } = require('../utils/retry');
+const { withRetry, withTimeout, sleep } = require('../utils/retry');
 const AppError = require('../common/errors/AppError');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('miniMaxSearchTool');
 
 class MiniMaxSearchTool {
   constructor(options = {}) {
@@ -75,7 +78,7 @@ class MiniMaxSearchTool {
           return { success: false, error: `Unknown action: ${action}` };
       }
     } catch (error) {
-      console.error('[MiniMaxSearchTool] 执行失败:', error.message);
+      logger.error('执行失败', { error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -120,12 +123,12 @@ class MiniMaxSearchTool {
     const results = [];
     const errors = [];
 
-    console.log(`[MiniMaxSearch] 批量搜索开始: ${limitedQueries.length} 个查询`);
+    logger.info('批量搜索开始', { count: limitedQueries.length });
 
     // 串行执行避免 API 限流
     for (let i = 0; i < limitedQueries.length; i++) {
       const q = limitedQueries[i];
-      console.log(`[MiniMaxSearch] [${i + 1}/${limitedQueries.length}] 搜索: ${q}`);
+      logger.info('搜索进度', { index: i + 1, total: limitedQueries.length, query: q });
 
       try {
         const result = await this.search(q, { ...options, maxResults });
@@ -133,14 +136,14 @@ class MiniMaxSearchTool {
 
         // 添加延迟避免限流
         if (i < limitedQueries.length - 1) {
-          await this.sleep(500);
+          await sleep(500);
         }
       } catch (error) {
         errors.push({ query: q, error: error.message });
       }
     }
 
-    console.log(`[MiniMaxSearch] 批量搜索完成: 成功 ${results.length}, 失败 ${errors.length}`);
+    logger.info('批量搜索完成', { success: results.length, failed: errors.length });
 
     return {
       success: results.length > 0,
@@ -162,11 +165,11 @@ class MiniMaxSearchTool {
       return { success: false, error: '研究主题不能为空' };
     }
 
-    console.log(`[MiniMaxSearch] 深度研究开始: ${topic}`);
+    logger.info('深度研究开始', { topic });
 
     // 生成多角度查询
     const queries = this.generateResearchQueries(topic);
-    console.log(`[MiniMaxSearch] 生成 ${queries.length} 个研究查询`);
+    logger.info('生成研究查询', { count: queries.length });
 
     // 并行执行批量搜索
     const batchResult = await this.batchSearch(queries, {
@@ -197,7 +200,7 @@ class MiniMaxSearchTool {
     }
 
     const limitedQueries = queries.slice(0, 5);
-    console.log(`[MiniMaxSearch] 对比搜索: ${limitedQueries.join(' vs ')}`);
+    logger.info('对比搜索', { queries: limitedQueries.join(' vs ') });
 
     const results = [];
     for (const q of limitedQueries) {
@@ -298,7 +301,7 @@ class MiniMaxSearchTool {
                 : block.content;
               searchResults = toolData.results || [];
             } catch (e) {
-              console.warn('[MiniMaxSearch] 解析搜索结果失败:', e.message);
+              logger.warn('解析搜索结果失败', { error: e.message });
             }
           }
         }
@@ -317,7 +320,7 @@ class MiniMaxSearchTool {
         usage: data.usage
       };
     } catch (error) {
-      console.error('[MiniMaxSearch] API调用失败:', error.message);
+      logger.error('API调用失败', { error: error.message });
       return {
         success: false,
         error: error.message,
@@ -406,13 +409,6 @@ class MiniMaxSearchTool {
       resultCount: r.results?.length || 0,
       topResult: r.results?.[0] || null
     }));
-  }
-
-  /**
-   * 睡眠
-   */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**

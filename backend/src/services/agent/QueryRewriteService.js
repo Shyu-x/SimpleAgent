@@ -23,6 +23,15 @@ class QueryRewriteService {
     this.enableColloquialNormalization = options.enableColloquialNormalization !== false;
     this.enableCoreferenceResolution = options.enableCoreferenceResolution !== false;
 
+    // 预编译正则表达式，提高效率
+    this._compiledPatterns = {
+      quoted: /"([^"]+)"/g,
+      isPattern: /([^，,。\n]+)是一个?([^，,。\n]+)/g,
+      isOfPattern: /([^，,。\n]+)是的?([^，]*的[^，,。\n]+)/g,
+      aboutPattern: /关于([^，,。\n]+)/g,
+      corefRegex: /它|他|她|他们|她们|它们|这个|那个|这些|那些|之前|之后|刚才|现在|目前|这次|那次|上次的|之前的|这事|那事|这个问题|那个问题|这项|那项/g
+    };
+
     // 缩写词典（可扩展）
     this.abbreviationDict = {
       // 技术术语
@@ -82,8 +91,7 @@ class QueryRewriteService {
       'ARR': 'Annual Recurring Revenue',
 
       // 项目管理
-      'PM': 'Product Manager',
-      'PM': 'Project Manager',
+      'PM': 'Product Manager / Project Manager',
       'UI': 'User Interface',
       'UX': 'User Experience',
       'PRD': 'Product Requirements Document',
@@ -157,9 +165,9 @@ class QueryRewriteService {
       '她们': { type: 'pronoun', entities: [] },
       '它们': { type: 'pronoun', entities: [] },
 
-      // 指示代词
-      '这个': { type: 'demonstrative', entities: [] },
-      '那个': { type: 'demonstrative', entities: [] },
+      // 指示代词/事物指示（可复用）
+      '这个': { type: 'demonstrative_or_object', entities: [] },
+      '那个': { type: 'demonstrative_or_object', entities: [] },
       '这些': { type: 'demonstrative', entities: [] },
       '那些': { type: 'demonstrative', entities: [] },
 
@@ -175,8 +183,6 @@ class QueryRewriteService {
       '之前的': { type: 'temporal', entities: [] },
 
       // 事物指示
-      '这个': { type: 'object', entities: [] },
-      '那个': { type: 'object', entities: [] },
       '这事': { type: 'object', entities: [] },
       '那事': { type: 'object', entities: [] },
       '这个问题': { type: 'object', entities: [] },
@@ -331,9 +337,7 @@ class QueryRewriteService {
     let original = '';
 
     // 检查是否包含共指词
-    const corefRegex = /它|他|她|他们|她们|它们|这个|那个|这些|那些|之前|之后|刚才|现在|目前|这次|那次|上次的|之前的|这事|那事|这个问题|那个问题|这项|那项/g;
-
-    if (!corefRegex.test(resolved)) {
+    if (!this._compiledPatterns.corefRegex.test(resolved)) {
       return { changed: false, original: '', resolved };
     }
 
@@ -374,7 +378,7 @@ class QueryRewriteService {
         const content = typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content);
 
         // 提取被引用的实体（引号内的内容）
-        const quotedMatches = content.match(/"([^"]+)"/g);
+        const quotedMatches = content.match(this._compiledPatterns.quoted);
         if (quotedMatches) {
           for (const match of quotedMatches) {
             const entity = match.replace(/"/g, '');
@@ -389,14 +393,31 @@ class QueryRewriteService {
         }
 
         // 提取明确命名的实体（简单的启发式规则）
-        // 匹配 "X 是 Y" 模式
-        const isPatterns = content.match(/([^，,。\n]+)是一个?([^，,。\n]+)/g);
-        if (isPatterns) {
-          for (const pattern of isPatterns) {
-            const match = pattern.match(/([^，,。\n]+)是一个?([^，,。\n]+)/);
-            if (match && match[1]) {
+        // 匹配 "X 是一个 Y" 模式 - 直接从 match 结果解析
+        let isMatch;
+        this._compiledPatterns.isPattern.lastIndex = 0;
+        while ((isMatch = this._compiledPatterns.isPattern.exec(content)) !== null) {
+          if (isMatch[1]) {
+            entities.push({
+              text: isMatch[1].trim(),
+              type: 'definition',
+              timestamp: Date.now()
+            });
+          }
+        }
+
+        // 提取 "X 是 Y 的 Z" 模式（如 "机器学习是人工智能的一个分支"）
+        let isOfMatch;
+        this._compiledPatterns.isOfPattern.lastIndex = 0;
+        while ((isOfMatch = this._compiledPatterns.isOfPattern.exec(content)) !== null) {
+          // 提取主语：取 "X 是" 之前的部分
+          const fullMatch = isOfMatch[0];
+          const isIndex = fullMatch.indexOf('是');
+          if (isIndex > 0) {
+            const subject = fullMatch.substring(0, isIndex);
+            if (subject.length > 1) {
               entities.push({
-                text: match[1].trim(),
+                text: subject.trim(),
                 type: 'definition',
                 timestamp: Date.now()
               });
@@ -405,17 +426,16 @@ class QueryRewriteService {
         }
 
         // 提取"关于X"模式
-        const aboutPatterns = content.match(/关于([^，,。\n]+)/g);
-        if (aboutPatterns) {
-          for (const pattern of aboutPatterns) {
-            const topic = pattern.replace(/关于/, '').trim();
-            if (topic.length > 1 && topic.length < 50) {
-              entities.push({
-                text: topic,
-                type: 'topic',
-                timestamp: Date.now()
-              });
-            }
+        let aboutMatch;
+        this._compiledPatterns.aboutPattern.lastIndex = 0;
+        while ((aboutMatch = this._compiledPatterns.aboutPattern.exec(content)) !== null) {
+          const topic = aboutMatch[1];
+          if (topic && topic.length > 1 && topic.length < 50) {
+            entities.push({
+              text: topic.trim(),
+              type: 'topic',
+              timestamp: Date.now()
+            });
           }
         }
       }
@@ -446,6 +466,7 @@ class QueryRewriteService {
         break;
 
       case 'demonstrative':
+      case 'demonstrative_or_object':
       case 'object':
         // 指示代词优先使用引号内的实体
         relevantEntities = entities.filter(e => e.type === 'quoted' || e.type === 'definition');

@@ -23,12 +23,16 @@ const SemanticMemory = require('./SemanticMemory');
 const { StatePersistence, CheckpointStatus } = require('./statePersistence');
 const { LLMIntentClassifier } = require('./llmIntentClassifier');
 const FileCheckpointManager = require('./FileCheckpointManager');
-const { hitlManager, CheckpointType } = require('../routes/hitl');
+const { hitlManager, CheckpointType } = require('../hitl');
 const { A2AService, A2A_MESSAGE_TYPES, A2A_TASK_STATUS } = require('./a2aService');
 const { AgentLogger, formatConsole } = require('./AgentLogger');
 const { withRetry, withTimeout, sleep, TimeoutConfig } = require('../utils/retry');
 const SessionNoteTool = require('./tools/SessionNoteTool');
 const AppError = require('../common/errors/AppError');
+const { ERROR_CLASSIFICATION, RETRY_STRATEGY, classifyRetryableError, getRetryConfig, calculateBackoffDelay } = require('../common/errors/errorClassifier');
+
+// 引入 EventEmitter 用于 trace 广播
+require('../common/EventEmitter');
 const { createTokenManager } = require('./agent/TokenManager');
 const { agentVisualizer, StepType } = require('./agent/AgentVisualizer');
 
@@ -58,16 +62,6 @@ const REACT_PHASES = {
   CONTINUE: 'continue'
 };
 
-// 错误分类 - 用于结构化错误恢复
-const ERROR_CLASSIFICATION = {
-  TRANSIENT: 'transient',       // 临时错误（网络超时等），可重试
-  RESOURCE: 'resource',         // 资源错误（内存不足等），可重试但需降级
-  PARAMETER: 'parameter',        // 参数错误，不应重试
-  AUTHENTICATION: 'auth',        // 认证错误，不应重试
-  RATE_LIMIT: 'rate_limit',     // 限流错误，可重试但需退避
-  UNKNOWN: 'unknown'            // 未知错误，根据情况判断
-};
-
 // 工具执行结果质量等级
 const RESULT_QUALITY = {
   EXCELLENT: 'excellent',       // 结果完美，无需处理
@@ -75,20 +69,6 @@ const RESULT_QUALITY = {
   INCOMPLETE: 'incomplete',    // 结果不完整，可能需要补充
   ERROR: 'error',              // 执行出错，需要处理
   EMPTY: 'empty'               // 结果为空，需要处理
-};
-
-// 重试策略配置
-const RETRY_STRATEGY = {
-  maxRetries: 3,
-  initialDelayMs: 1000,
-  maxDelayMs: 30000,
-  exponentialBase: 2,
-  // 不同错误类型的重试配置
-  errorTypes: {
-    [ERROR_CLASSIFICATION.TRANSIENT]: { maxRetries: 3, backoffMultiplier: 1 },
-    [ERROR_CLASSIFICATION.RESOURCE]: { maxRetries: 2, backoffMultiplier: 1.5 },
-    [ERROR_CLASSIFICATION.RATE_LIMIT]: { maxRetries: 5, backoffMultiplier: 2 }
-  }
 };
 
 // 最大反思次数
@@ -185,6 +165,12 @@ class AgentEngine {
     this.cancelEvent = null;
     this._cancelCallback = null;
 
+    // Trace 功能
+    this.traceId = null;
+    this.spans = [];
+    this.startTime = null;
+    this.currentParentSpanId = null;
+
     this.state = {
       status: 'idle', // idle, running, paused, completed, error
       iteration: 0,
@@ -255,101 +241,116 @@ class AgentEngine {
     return messages.slice(0, lastCompleteIdx + 1);
   }
 
-  // ==================== 错误分类与结构化错误恢复 ====================
+  // ==================== Trace 功能 ====================
 
   /**
-   * 分类错误类型 - 用于决定重试策略
-   * @param {Error|string} error - 错误对象或错误消息
-   * @returns {string} 错误分类
+   * 初始化 trace
    */
-  _classifyError(error) {
-    if (!error) return ERROR_CLASSIFICATION.UNKNOWN;
-
-    const errorMsg = typeof error === 'string' ? error : error.message || '';
-    const errorCode = typeof error === 'object' ? (error.code || error.errno || '') : '';
-    const statusCode = typeof error === 'object' ? (error.status || error.statusCode || '') : '';
-
-    // 认证相关错误 - 不应重试
-    if (errorMsg.includes('401') || errorMsg.includes('403') ||
-        errorMsg.includes('unauthorized') || errorMsg.includes('forbidden') ||
-        errorMsg.includes('authentication') || errorMsg.includes('api key')) {
-      return ERROR_CLASSIFICATION.AUTHENTICATION;
-    }
-
-    // 参数错误 - 不应重试
-    if (errorMsg.includes('invalid') || errorMsg.includes('parameter') ||
-        errorMsg.includes('argument') || errorMsg.includes('schema') ||
-        errorMsg.includes('validation')) {
-      return ERROR_CLASSIFICATION.PARAMETER;
-    }
-
-    // 限流错误 - 可重试但需要更长退避
-    if (statusCode === 429 || errorMsg.includes('rate limit') ||
-        errorMsg.includes('too many requests') || errorMsg.includes('quota')) {
-      return ERROR_CLASSIFICATION.RATE_LIMIT;
-    }
-
-    // 网络临时错误 - 可重试
-    if (errorCode === 'ECONNRESET' || errorCode === 'ETIMEDOUT' ||
-        errorCode === 'ENOTFOUND' || errorCode === 'ECONNREFUSED' ||
-        errorMsg.includes('timeout') || errorMsg.includes('network') ||
-        errorMsg.includes('ECONNREFUSED')) {
-      return ERROR_CLASSIFICATION.TRANSIENT;
-    }
-
-    // 资源错误 - 可重试但可能需要降级
-    if (errorMsg.includes('memory') || errorMsg.includes('disk') ||
-        errorMsg.includes('storage') || errorMsg.includes('resource')) {
-      return ERROR_CLASSIFICATION.RESOURCE;
-    }
-
-    // 500/502/503/504 服务器错误 - 临时错误
-    if (statusCode >= 500 && statusCode < 600) {
-      return ERROR_CLASSIFICATION.TRANSIENT;
-    }
-
-    return ERROR_CLASSIFICATION.UNKNOWN;
+  initTrace() {
+    this.traceId = this._generateTraceId();
+    this.spans = [];
+    this.startTime = Date.now();
+    this.currentParentSpanId = null;
+    this.logger?.info('Trace initialized', { traceId: this.traceId });
   }
 
   /**
-   * 根据错误类型获取重试配置
-   * @param {string} errorType - 错误分类
-   * @returns {Object} 重试配置
+   * 生成 trace ID
    */
-  _getRetryConfigForError(errorType) {
-    const defaultConfig = {
-      maxRetries: RETRY_STRATEGY.maxRetries,
-      delayMs: RETRY_STRATEGY.initialDelayMs,
-      backoffMultiplier: 1
+  _generateTraceId() {
+    return `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 生成 span ID
+   */
+  _generateSpanId() {
+    return `span_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 记录 span
+   */
+  recordSpan(name, metadata = {}) {
+    if (!this.traceId) {
+      this.initTrace();
+    }
+
+    const span = {
+      spanId: this._generateSpanId(),
+      traceId: this.traceId,
+      parentSpanId: this.currentParentSpanId,
+      name,
+      startTime: Date.now(),
+      endTime: null,
+      duration: null,
+      status: 'running',
+      tags: metadata,
+      events: [],
+      childCount: 0
     };
 
-    const errorConfig = RETRY_STRATEGY.errorTypes[errorType];
-    if (!errorConfig) {
-      // UNKNOWN 或 PARAMETER/AUTH 类型使用默认配置
-      if (errorType === ERROR_CLASSIFICATION.UNKNOWN) {
-        return { maxRetries: 1, delayMs: 1000, backoffMultiplier: 1 };
+    this.spans.push(span);
+    this.currentParentSpanId = span.spanId;
+    this.logger?.debug('Span recorded', { spanId: span.spanId, name });
+
+    // 广播到 SSE (通过 global event emitter)
+    if (global.traceEventEmitter) {
+      global.traceEventEmitter.emit('span_update', span);
+    }
+
+    return span;
+  }
+
+  /**
+   * 完成 span
+   */
+  completeSpan(spanId, status = 'ok', extraTags = {}) {
+    const span = this.spans.find(s => s.spanId === spanId);
+    if (span) {
+      span.endTime = Date.now();
+      span.duration = span.endTime - span.startTime;
+      span.status = status;
+      Object.assign(span.tags, extraTags);
+
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('span_update', span);
       }
-      return defaultConfig;
     }
-
-    return {
-      maxRetries: errorConfig.maxRetries,
-      delayMs: RETRY_STRATEGY.initialDelayMs,
-      backoffMultiplier: errorConfig.backoffMultiplier
-    };
   }
 
   /**
-   * 计算退避延迟
-   * @param {number} attempt - 当前重试次数
-   * @param {number} baseDelay - 基础延迟
-   * @param {number} multiplier - 退避倍数
-   * @returns {number} 延迟毫秒数
+   * 完成 trace
    */
-  _calculateBackoffDelay(attempt, baseDelay, multiplier) {
-    const delay = baseDelay * Math.pow(multiplier, attempt);
-    return Math.min(delay, RETRY_STRATEGY.maxDelayMs);
+  finalizeTrace() {
+    if (!this.traceId) return null;
+
+    const trace = {
+      traceId: this.traceId,
+      operationName: this.prompt?.substring(0, 100) || 'agent_execution',
+      serviceName: 'agent-engine',
+      startTime: this.startTime,
+      endTime: Date.now(),
+      duration: Date.now() - this.startTime,
+      status: this.errorCount > 0 ? 'error' : 'ok',
+      totalSpans: this.spans.length,
+      spans: this.spans
+    };
+
+    if (global.traceEventEmitter) {
+      global.traceEventEmitter.emit('trace_complete', trace);
+    }
+
+    this.logger?.info('Trace finalized', {
+      traceId: trace.traceId,
+      totalSpans: trace.totalSpans,
+      duration: trace.duration
+    });
+
+    return trace;
   }
+
+  // ==================== 错误分类与结构化错误恢复 ====================
 
   /**
    * 评估工具执行结果质量
@@ -367,7 +368,7 @@ class AgentEngine {
 
     // 检查成功标记
     if (output.success === false) {
-      const errorType = this._classifyError(output.error);
+      const errorType = classifyRetryableError(output.error);
       if (errorType === ERROR_CLASSIFICATION.AUTHENTICATION) {
         return { quality: RESULT_QUALITY.ERROR, reason: '认证错误', suggestion: '检查 API 密钥配置' };
       }
@@ -438,7 +439,7 @@ class AgentEngine {
 
         // 如果结果质量为 ERROR，检查是否可重试
         if (quality.quality === RESULT_QUALITY.ERROR) {
-          const errorType = this._classifyError(result.error);
+          const errorType = classifyRetryableError(result.error);
 
           // 认证和参数错误不重试
           if (errorType === ERROR_CLASSIFICATION.AUTHENTICATION ||
@@ -464,7 +465,7 @@ class AgentEngine {
         lastError = error;
 
         // 检查错误是否可重试
-        const errorType = this._classifyError(error);
+        const errorType = classifyRetryableError(error);
 
         // 认证和参数错误不重试
         if (errorType === ERROR_CLASSIFICATION.AUTHENTICATION ||
@@ -479,7 +480,7 @@ class AgentEngine {
       }
 
       // 计算下一次延迟
-      const delay = this._calculateBackoffDelay(attempt, delayMs, backoffMultiplier);
+      const delay = calculateBackoffDelay(attempt, delayMs, backoffMultiplier);
       // Operational log - using formatConsole for colored output
 
       // 等待后重试
@@ -497,7 +498,7 @@ class AgentEngine {
    */
   async _findAlternativeTool(failedTool, error) {
     const availableTools = this.toolRegistry.listTools();
-    const errorType = this._classifyError(error);
+    const errorType = classifyRetryableError(error);
 
     // 根据错误类型选择替代策略
     if (errorType === ERROR_CLASSIFICATION.RATE_LIMIT) {
@@ -597,7 +598,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
           content: `[对话摘要] ${parsed.summary || '之前的对话已压缩'}`
         });
       } catch (e) {
-        console.warn('[Token] 摘要生成失败，使用默认摘要');
+        this.logger?.warn('摘要生成失败，使用默认摘要');
         summarizedMessages.push({
           role: 'assistant',
           content: `[对话摘要] 已完成 ${messagesToSummarize.length} 轮对话`
@@ -640,7 +641,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       try {
         this.toolRegistry.register(new CodeExecutionTool(toolOptions.codeExecution || {}));
       } catch (e) {
-        console.warn('CodeExecutionTool not loaded:', e.message);
+        this.logger?.warn('CodeExecutionTool not loaded', { error: e.message });
       }
     }
 
@@ -703,6 +704,9 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     const session = await this.persistence.createSession(task, context);
     this.sessionId = session.id;
 
+    // 初始化 trace
+    this.initTrace();
+
     // 创建 Agent 可视化轨迹
     const trace = agentVisualizer.createTrace(session.id, task);
     trace.metadata = {
@@ -710,6 +714,63 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       llmEnabled: this.llmEnabled,
       humanConfirmationEnabled: this.humanConfirmationEnabled
     };
+
+    // 监听 agentVisualizer 事件并转发到 global.traceEventEmitter
+    const handleStepStart = (traceId, step) => {
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('span_update', {
+          spanId: step.id,
+          traceId: traceId,
+          parentSpanId: null,
+          name: step.name,
+          startTime: step.startTime,
+          endTime: null,
+          duration: null,
+          status: 'running',
+          tags: step.metadata || {},
+          events: [],
+          childCount: 0
+        });
+      }
+    };
+
+    const handleStepComplete = (traceId, step) => {
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('span_update', {
+          spanId: step.id,
+          traceId: traceId,
+          parentSpanId: null,
+          name: step.name,
+          startTime: step.startTime,
+          endTime: step.endTime,
+          duration: step.duration,
+          status: step.status === 'success' ? 'ok' : step.status,
+          tags: step.metadata || {},
+          events: [],
+          childCount: 0
+        });
+      }
+    };
+
+    const handleTraceComplete = (traceId, traceData) => {
+      if (global.traceEventEmitter) {
+        global.traceEventEmitter.emit('trace_complete', {
+          traceId: traceId,
+          operationName: traceData.query?.substring(0, 100) || 'agent_execution',
+          serviceName: 'agent-engine',
+          startTime: traceData.startTime,
+          endTime: traceData.endTime,
+          duration: traceData.totalDuration,
+          status: traceData.status === 'success' ? 'ok' : traceData.status,
+          totalSpans: traceData.stats?.stepCount || 0,
+          spans: []
+        });
+      }
+    };
+
+    agentVisualizer.on('step_start', handleStepStart);
+    agentVisualizer.on('step_complete', handleStepComplete);
+    agentVisualizer.on('trace_complete', handleTraceComplete);
 
     // 记录执行开始时间（用于指标统计）
     this._executionStartTime = Date.now();
@@ -803,6 +864,8 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
         results.iterations = i + 1;
 
         // 步骤1: 思考 - 生成下一步行动
+        this.recordSpan('agent_thinking', { step: this.state.iteration });
+
         trace.startStep(StepType.MODEL_CALL, 'LLM Reasoning', {
           iteration: this.state.iteration,
           phase: 'reason'
@@ -826,6 +889,8 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
 
         if (thought.type === 'action') {
           // 步骤3: 执行行动
+          this.recordSpan('tool_execution', { tool: thought.tool });
+
           trace.startStep(StepType.TOOL_SELECTION, `Select Tool: ${thought.tool}`, {
             reasoning: thought.reasoning,
             confidence: thought.confidence
@@ -949,6 +1014,11 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
         trace.complete(results.finalResult);
       }
 
+      // 清理 agentVisualizer 事件监听器
+      agentVisualizer.off('step_start', handleStepStart);
+      agentVisualizer.off('step_complete', handleStepComplete);
+      agentVisualizer.off('trace_complete', handleTraceComplete);
+
       // 停止自动保存
       this.persistence.stopAutoSave();
 
@@ -956,7 +1026,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       try {
         await this._storeSemanticMemory(task, results.finalResult, results.success);
       } catch (err) {
-        console.warn('[AgentEngine] 语义记忆存储失败:', err.message);
+        this.logger?.warn('语义记忆存储失败', { error: err.message });
       }
 
       // 记录 Agent 执行指标
@@ -978,6 +1048,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
     }
 
     this.state.history = [...results.toolCalls];
+    this.finalizeTrace();
     return results;
   }
 
@@ -1011,7 +1082,7 @@ ${messagesToSummarize.map(m => `[${m.role}]: ${typeof m.content === 'string' ? m
       };
       await this.fileCheckpoint.save(this.sessionId, state);
     } catch (error) {
-      console.warn('[AgentEngine] 文件检查点保存失败:', error.message);
+      this.logger?.warn('文件检查点保存失败', { error: error.message });
     }
   }
 
@@ -1484,7 +1555,7 @@ ${contextText}
 
     // 使用增强的结果质量评估
     const quality = this._evaluateResultQuality(output);
-    const errorType = this._classifyError(output.error);
+    const errorType = classifyRetryableError(output.error);
 
     // 检查是否成功
     if (output.success === false) {
@@ -1495,7 +1566,7 @@ ${contextText}
 
       if (shouldRetry) {
         // 根据错误类型调整重试策略
-        const retryConfig = this._getRetryConfigForError(errorType);
+        const retryConfig = getRetryConfig(errorType);
         // Tool execution failed - operational warning
 
         return {
@@ -1597,27 +1668,6 @@ ${contextText}
     }
 
     return { isGood: true, reason: '结果看起来正常' };
-  }
-
-  /**
-   * 查找替代工具
-   */
-  async _findAlternativeTool(failedTool, error) {
-    const availableTools = this.toolRegistry.listTools();
-
-    // 简单策略：返回另一个同类别的工具
-    const failedToolInfo = this.toolRegistry.get(failedTool);
-    const category = failedToolInfo?.category || 'general';
-
-    const alternatives = availableTools.filter(t =>
-      t.category === category && t.name !== failedTool
-    );
-
-    if (alternatives.length > 0) {
-      return alternatives[0].name;
-    }
-
-    return null;
   }
 
   /**
@@ -1911,7 +1961,7 @@ ${context.customPrompt || ''}
         source: r.source
       }));
     } catch (err) {
-      console.warn('[AgentEngine] 语义记忆检索失败:', err.message);
+      this.logger?.warn('语义记忆检索失败', { error: err.message });
       return [];
     }
   }

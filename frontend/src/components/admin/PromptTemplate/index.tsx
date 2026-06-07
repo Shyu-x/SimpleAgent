@@ -16,22 +16,17 @@ import { fetchApi } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
+import type { PromptTemplate as SharedPromptTemplate } from '@/types/prompts';
+import ConfirmDialog from '@/components/agent/MissionControl/ConfirmDialog';
+import AlertDialog from '@/components/agent/MissionControl/AlertDialog';
 
-// ============ 类型定义 ============
-
-interface PromptTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  version: number;
-  variables: TemplateVariable[];
-  content: string; // 后端返回 template，前端映射为 content
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-  isActive: boolean;
-}
+// 扩展共享类型以支持后端返回的额外字段
+type PromptTemplate = SharedPromptTemplate & {
+  version?: number;
+  variables?: TemplateVariable[];
+  createdBy?: string;
+  isActive?: boolean;
+};
 
 interface TemplateVariable {
   name: string;
@@ -47,6 +42,29 @@ interface TemplateVersion {
   changedAt: string;
   changedBy: string;
   changeNote: string;
+}
+
+// 后端返回的原始模板结构 (template 字段)
+interface RawTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  template: string;  // 后端使用 template 而非 content
+  version?: number;
+  variables?: TemplateVariable[];
+  createdBy?: string;
+  isActive?: boolean;
+  createdAt?: number | string;
+  updatedAt?: number | string;
+}
+
+// 后端返回的原始版本结构
+interface RawTemplateVersion {
+  id: string;
+  version: number;
+  createdAt: number;
+  changes?: string;
 }
 
 interface TemplateTestResult {
@@ -67,11 +85,21 @@ export default function PromptTemplatePage() {
   // SSE 订阅 templates 数据
   const { data: templatesData, loading, refresh: refreshTemplates } = useAdminPolling<PromptTemplate[]>({
     endpoint: '/api/admin/prompts',
-    parser: (res) => {
-      const rawTemplates = res?.data?.data?.templates || res?.data?.templates || [];
-      return rawTemplates.map((t: any) => ({
-        ...t,
+    parser: (res: unknown) => {
+      const response = res as { data: { templates: RawTemplate[] } };
+      const rTemplates = response?.data?.templates || [];
+      return rTemplates.map((t: RawTemplate): PromptTemplate => ({
+        id: t.id,
+        name: t.name,
+        description: t.description || '',
         content: t.template,
+        category: (t.category || 'general') as PromptTemplate['category'],
+        version: t.version,
+        variables: t.variables,
+        createdBy: t.createdBy,
+        isActive: t.isActive,
+        createdAt: typeof t.createdAt === 'number' ? t.createdAt : Date.now(),
+        updatedAt: typeof t.updatedAt === 'number' ? t.updatedAt : Date.now(),
       }));
     },
     interval: 30000,
@@ -81,17 +109,17 @@ export default function PromptTemplatePage() {
 
   const fetchTemplates = refreshTemplates;
 
+  // 将前端模板字段映射到后端格式
+  const toBackendTemplate = (template: Partial<PromptTemplate>) => {
+    const { content, ...rest } = template;
+    return { ...rest, template: content };
+  };
+
   const createTemplate = async (template: Partial<PromptTemplate>) => {
     try {
-      // 映射 content -> template 以匹配后端接口
-      const backendTemplate = {
-        ...template,
-        template: template.content,
-      };
-      delete backendTemplate.content;
       const { error } = await fetchApi('/api/admin/prompts', {
         method: 'POST',
-        body: JSON.stringify(backendTemplate),
+        body: JSON.stringify(toBackendTemplate(template)),
       });
       if (error) throw new Error(error.message);
       fetchTemplates();
@@ -103,15 +131,9 @@ export default function PromptTemplatePage() {
 
   const updateTemplate = async (id: string, template: Partial<PromptTemplate>) => {
     try {
-      // 映射 content -> template 以匹配后端接口
-      const backendTemplate = {
-        ...template,
-        template: template.content,
-      };
-      delete backendTemplate.content;
       const { error } = await fetchApi(`/api/admin/prompts/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(backendTemplate),
+        body: JSON.stringify(toBackendTemplate(template)),
       });
       if (error) throw new Error(error.message);
       fetchTemplates();
@@ -121,12 +143,23 @@ export default function PromptTemplatePage() {
     }
   };
 
+  // 删除确认对话框状态
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; templateId?: string }>({
+    isOpen: false,
+  });
+
   const deleteTemplate = async (id: string) => {
-    if (!confirm('确定要删除这个模板吗？')) return;
+    setDeleteDialog({ isOpen: true, templateId: id });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { templateId } = deleteDialog;
+    if (!templateId) return;
+    setDeleteDialog({ isOpen: false });
     try {
-      const { error } = await fetchApi(`/api/admin/prompts/${id}`, { method: 'DELETE' });
+      const { error } = await fetchApi(`/api/admin/prompts/${templateId}`, { method: 'DELETE' });
       if (error) throw new Error(error.message);
-      if (selectedTemplate?.id === id) setSelectedTemplate(null);
+      if (selectedTemplate?.id === templateId) setSelectedTemplate(null);
       fetchTemplates();
     } catch (err) {
       console.error('Failed to delete template:', err);
@@ -154,6 +187,16 @@ export default function PromptTemplatePage() {
 
   return (
     <ErrorBoundary moduleName="PromptTemplatePage" fallback={<FallbackUI moduleName="Prompt模板" error="组件加载失败" style="detailed" showRetry={true} onRetry={() => window.location.reload()} />}>
+      <>
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        title="删除模板"
+        message="确定要删除这个模板吗？此操作不可恢复。"
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ isOpen: false })}
+      />
       <div className="p-6 space-y-6">
         {/* 页面标题 */}
         <div className="flex justify-between items-center">
@@ -229,28 +272,27 @@ export default function PromptTemplatePage() {
                   if (!selectedTemplate) setSelectedTemplate(null);
                 }}
               />
-            ) : selectedTemplate ? (
-              showVersionHistory ? (
-                <VersionHistoryPanel
-                  templateId={selectedTemplate.id}
-                  onBack={() => setShowVersionHistory(false)}
-                />
-              ) : (
-                <TemplateDetail
-                  template={selectedTemplate}
-                  onEdit={() => setIsEditing(true)}
-                  onDelete={() => deleteTemplate(selectedTemplate.id)}
-                  onShowHistory={() => setShowVersionHistory(true)}
-                />
-              )
-            ) : (
+            ) : !selectedTemplate ? (
               <div className="flex items-center justify-center h-96 text-gray-400">
                 选择一个模板查看详情
               </div>
+            ) : showVersionHistory ? (
+              <VersionHistoryPanel
+                templateId={selectedTemplate.id}
+                onBack={() => setShowVersionHistory(false)}
+              />
+            ) : (
+              <TemplateDetail
+                template={selectedTemplate}
+                onEdit={() => setIsEditing(true)}
+                onDelete={() => deleteTemplate(selectedTemplate.id)}
+                onShowHistory={() => setShowVersionHistory(true)}
+              />
             )}
           </div>
         </div>
       </div>
+      </>
     </ErrorBoundary>
   );
 }
@@ -373,7 +415,7 @@ function TemplateDetail({
       </div>
 
       {/* 模板变量 */}
-      {template.variables.length > 0 && (
+      {template.variables && template.variables.length > 0 && (
         <div>
           <h3 className="font-medium mb-2">模板变量</h3>
           <div className="flex flex-wrap gap-2">
@@ -408,7 +450,7 @@ function TemplateDetail({
         <h3 className="font-medium mb-2">模板测试</h3>
         <div className="space-y-4">
           {/* 变量输入 */}
-          {template.variables.length > 0 && (
+          {template.variables && template.variables.length > 0 && (
             <div className="grid grid-cols-2 gap-4">
               {template.variables.map((v, idx) => (
                 <div key={`test-var-${v.name}-${idx}`}>
@@ -489,22 +531,29 @@ function TemplateEditor({
 }) {
   const [name, setName] = useState(template?.name || '');
   const [description, setDescription] = useState(template?.description || '');
-  const [category, setCategory] = useState(template?.category || 'general');
+  const [category, setCategory] = useState<string>(template?.category || 'general');
   const [content, setContent] = useState(template?.content || '');
   const [variables, setVariables] = useState<TemplateVariable[]>(
     template?.variables || []
   );
   const [newVarName, setNewVarName] = useState('');
 
+  // 提示对话框状态
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+
   const handleSave = () => {
     if (!name.trim() || !content.trim()) {
-      alert('请填写名称和内容');
+      setAlertDialog({ isOpen: true, title: '输入验证', message: '请填写名称和内容' });
       return;
     }
     const templateData = {
       name,
       description,
-      category,
+      category: category as 'general' | 'coding' | 'writing' | 'analysis' | 'custom',
       content,
       variables,
       isActive: true,
@@ -521,7 +570,7 @@ function TemplateEditor({
   const addVariable = () => {
     if (!newVarName.trim()) return;
     if (variables.some((v) => v.name === newVarName)) {
-      alert('变量已存在');
+      setAlertDialog({ isOpen: true, title: '变量已存在', message: '变量名不能重复' });
       return;
     }
     setVariables([...variables, { name: newVarName, type: 'string', required: false }]);
@@ -533,26 +582,34 @@ function TemplateEditor({
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">{template ? '编辑模板' : '新建模板'}</h2>
-        <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
-          ✕
-        </button>
-      </div>
+    <>
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant="info"
+        onClose={() => setAlertDialog({ isOpen: false, title: '', message: '' })}
+      />
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold">{template ? '编辑模板' : '新建模板'}</h2>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600">
+            ✕
+          </button>
+        </div>
 
-      <div className="space-y-4">
-        {/* 基本信息 */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">名称 *</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="输入模板名称"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+        <div className="space-y-4">
+          {/* 基本信息 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">名称 *</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="输入模板名称"
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">分类</label>
@@ -646,6 +703,7 @@ function TemplateEditor({
         </button>
       </div>
     </div>
+    </>
   );
 }
 
@@ -661,15 +719,28 @@ function VersionHistoryPanel({
   const [versions, setVersions] = useState<TemplateVersion[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 对话框状态
+  const [rollbackDialog, setRollbackDialog] = useState<{ isOpen: boolean; version?: number }>({
+    isOpen: false,
+  });
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string; variant?: 'info' | 'success' | 'error' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+
   useEffect(() => {
     const fetchVersions = async () => {
       try {
-        const { data, error } = await fetchApi<{ data?: { versions: any[] } }>(`/api/admin/prompts/${templateId}/versions`);
+        const { data, error } = await fetchApi<{ data?: { versions: RawTemplateVersion[] } }>(`/api/admin/prompts/${templateId}/versions`);
         if (error) throw new Error(error.message);
         // 映射 createdAt -> changedAt 以匹配前端接口
         const mappedVersions: TemplateVersion[] = (data?.data?.versions || []).map((v) => ({
-          ...v,
-          changedAt: v.createdAt,
+          version: v.version,
+          content: '', // 后端版本历史可能不返回完整内容
+          changedAt: new Date(v.createdAt).toISOString(),
+          changedBy: 'system',
+          changeNote: v.changes || '',
         }));
         setVersions(mappedVersions);
       } catch (err) {
@@ -681,15 +752,21 @@ function VersionHistoryPanel({
     fetchVersions();
   }, [templateId]);
 
-  const rollbackToVersion = async (version: number) => {
-    if (!confirm(`确定要回滚到 v${version} 吗？`)) return;
+  const handleRollbackClick = (version: number) => {
+    setRollbackDialog({ isOpen: true, version });
+  };
+
+  const rollbackToVersion = async () => {
+    const { version } = rollbackDialog;
+    if (version === undefined) return;
+    setRollbackDialog({ isOpen: false });
     try {
       const { error } = await fetchApi(`/api/admin/prompts/${templateId}/rollback`, {
         method: 'POST',
         body: JSON.stringify({ version }),
       });
       if (error) throw new Error(error.message);
-      alert('回滚成功');
+      setAlertDialog({ isOpen: true, title: '回滚成功', message: `已回滚到 v${version}`, variant: 'success' });
       onBack();
     } catch (err) {
       console.error('Failed to rollback:', err);
@@ -697,8 +774,25 @@ function VersionHistoryPanel({
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
+    <>
+      <ConfirmDialog
+        isOpen={rollbackDialog.isOpen}
+        title="回滚模板"
+        message={rollbackDialog.version !== undefined ? `确定要回滚到 v${rollbackDialog.version} 吗？` : '确定要回滚吗？'}
+        confirmLabel="回滚"
+        variant="warning"
+        onConfirm={rollbackToVersion}
+        onCancel={() => setRollbackDialog({ isOpen: false })}
+      />
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+        onClose={() => setAlertDialog({ isOpen: false, title: '', message: '' })}
+      />
+      <div className="p-6 space-y-4">
+        <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">版本历史</h2>
         <button onClick={onBack} className="text-gray-400 hover:text-gray-600">
           ✕
@@ -722,7 +816,7 @@ function VersionHistoryPanel({
                   </span>
                 </div>
                 <button
-                  onClick={() => rollbackToVersion(v.version)}
+                  onClick={() => handleRollbackClick(v.version)}
                   className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                 >
                   回滚到此版本
@@ -738,6 +832,7 @@ function VersionHistoryPanel({
         </div>
       )}
     </div>
+    </>
   );
 }
 
@@ -748,10 +843,10 @@ function TemplateHighlighter({
   variables,
 }: {
   content: string;
-  variables: TemplateVariable[];
+  variables?: TemplateVariable[];
 }) {
   // 简单的变量高亮处理
-  const variableNames = new Set(variables.map((v) => v.name));
+  const variableNames = new Set((variables || []).map((v) => v.name));
 
   const parts = content.split(/(\{\{[^}]+\}\})/g);
 

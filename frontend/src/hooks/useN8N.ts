@@ -7,8 +7,8 @@ interface Workflow {
   id: string;
   name: string;
   active: boolean;
-  nodes: any[];
-  connections: any;
+  nodes: unknown[];
+  connections: unknown;
 }
 
 interface Execution {
@@ -90,7 +90,7 @@ export function useN8N() {
   }, []);
 
   // 执行工作流
-  const executeWorkflow = useCallback(async (workflowId: string, data: Record<string, any> = {}) => {
+  const executeWorkflow = useCallback(async (workflowId: string, data: Record<string, unknown> = {}) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -111,7 +111,7 @@ export function useN8N() {
   }, []);
 
   // 触发 Webhook
-  const triggerWebhook = useCallback(async (webhookUrl: string, data: Record<string, any> = {}) => {
+  const triggerWebhook = useCallback(async (webhookUrl: string, data: Record<string, unknown> = {}) => {
     setIsLoading(true);
     setError(null);
     try {

@@ -11,21 +11,7 @@
 
 const assert = require('assert');
 
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 const {
   TreeIntentClassifier,
@@ -41,7 +27,7 @@ const {
 describe('TreeIntentClassifier 构造函数', () => {
   test('默认配置应该正确', () => {
     const classifier = new TreeIntentClassifier({ enableLLM: false });
-    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7-highspeed');
+    assert.strictEqual(classifier.defaultModel, 'MiniMax-M2.7');
     assert.strictEqual(classifier.confidenceThreshold, 0.5);
     assert.strictEqual(classifier.enableLLM, false);
     assert.strictEqual(classifier.enableKeywordFallback, true);
@@ -337,4 +323,3 @@ describe('TreeIntentClassifier 兼容性别名', () => {
   });
 });
 
-console.log('\n');

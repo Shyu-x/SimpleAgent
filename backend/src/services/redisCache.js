@@ -10,6 +10,9 @@
 const NodeCache = require('node-cache');
 const Redis = require('ioredis');
 const { EventEmitter } = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('redisCache');
 
 // ============================================================
 // Redis 客户端管理器
@@ -47,21 +50,21 @@ function getRedisClient() {
 
     redisClient.on('connect', () => {
       redisStatus = 'connected';
-      console.log('[RedisCache] Redis 已连接');
+      logger.info('Redis 已连接');
     });
 
     redisClient.on('error', (err) => {
       redisStatus = 'error';
-      console.warn('[RedisCache] Redis 错误:', err.message);
+      logger.warn('Redis 错误', { error: err.message });
     });
 
     redisClient.on('close', () => {
       redisStatus = 'disconnected';
-      console.log('[RedisCache] Redis 连接已关闭');
+      logger.info('Redis 连接已关闭');
     });
 
     redisClient.on('reconnecting', () => {
-      console.log('[RedisCache] Redis 正在重连...');
+      logger.info('Redis 正在重连...');
     });
   }
   return redisClient;

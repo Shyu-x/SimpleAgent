@@ -1,19 +1,14 @@
 /**
- * Prometheus 指标服务
- * @description 提供符合 Prometheus 格式的指标收集和导出
- *
- * 核心指标：
- * - http_requests_total (Counter) - HTTP 请求总数
- * - http_request_duration_seconds (Histogram) - HTTP 请求延迟
- * - module_errors_total (Gauge) - 各模块错误数
- * - circuit_breaker_state (Gauge) - 熔断器状态
- *
- * @author AI Chat 玩具团队
- * @date 2026-05-13
+ * Prometheus 指标服务 - 提供符合 Prometheus 格式的指标收集和导出
  */
 
 const express = require('express');
 const MetricsCollector = require('../metrics/MetricsCollector');
+const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
+const { getStateValue } = require('../../utils/circuitStateUtils');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('prometheusService');
 
 /**
  * Prometheus 指标服务
@@ -41,7 +36,96 @@ class PrometheusService {
     // 注册业务相关指标
     this._registerBusinessMetrics();
 
-    console.log('[PrometheusService] 初始化完成');
+    logger.info('初始化完成');
+  }
+
+  /**
+   * 提取 Gauge 值（兼容对象和数字格式）
+   * @param {*} gauge - Gauge 值
+   * @returns {number}
+   * @private
+   */
+  _extractGaugeValue(gauge) {
+    if (typeof gauge === 'object' && gauge !== null) {
+      const vals = Object.values(gauge);
+      return vals[0] || 0;
+    }
+    return typeof gauge === 'number' ? gauge : 0;
+  }
+
+  /**
+   * 格式化标签字符串
+   * @param {string} labels - 原始标签字符串
+   * @returns {string} 格式化后的标签字符串
+   * @private
+   */
+  _formatLabels(labels) {
+    return labels === '{}' ? '' : `{${labels}}`;
+  }
+
+  /**
+   * 输出 Counter 指标
+   * @param {string} name - 指标名称
+   * @param {string} help - 帮助文本
+   * @param {Object} data - 指标数据
+   * @private
+   */
+  _outputCounter(name, help, data) {
+    const lines = [];
+    lines.push(`# HELP ${name} ${help}`);
+    lines.push(`# TYPE ${name} counter`);
+    const counterData = data || {};
+    for (const [labels, value] of Object.entries(counterData)) {
+      lines.push(`${name}${this._formatLabels(labels)} ${value}`);
+    }
+    lines.push('');
+    return lines.join('\n');
+  }
+
+  /**
+   * 输出 Histogram 指标
+   * @param {string} name - 指标名称
+   * @param {string} help - 帮助文本
+   * @param {Object} data - 指标数据
+   * @private
+   */
+  _outputHistogram(name, help, data) {
+    const lines = [];
+    lines.push(`# HELP ${name} ${help}`);
+    lines.push(`# TYPE ${name} histogram`);
+    const histogramData = data || {};
+    for (const [labels, histogram] of Object.entries(histogramData)) {
+      const labelStr = this._formatLabels(labels);
+      lines.push(`${name}_count${labelStr} ${histogram.count}`);
+      lines.push(`${name}_sum${labelStr} ${histogram.sum.toFixed(3)}`);
+      const buckets = histogram.buckets || {};
+      for (const [bucket, count] of Object.entries(buckets)) {
+        const bucketLabel = labelStr ? `${labelStr},le="${bucket}"}` : `{le="${bucket}"}`;
+        lines.push(`${name}_bucket${bucketLabel} ${count}`);
+      }
+    }
+    lines.push('');
+    return lines.join('\n');
+  }
+
+  /**
+   * 输出 Gauge 指标
+   * @param {string} name - 指标名称
+   * @param {string} help - 帮助文本
+   * @param {Object} data - 指标数据
+   * @private
+   */
+  _outputGauge(name, help, data) {
+    const lines = [];
+    lines.push(`# HELP ${name} ${help}`);
+    lines.push(`# TYPE ${name} gauge`);
+    const gaugeData = data || {};
+    for (const [labels, value] of Object.entries(gaugeData)) {
+      const formattedValue = typeof value === 'object' ? JSON.stringify(value) : value;
+      lines.push(`${name}${this._formatLabels(labels)} ${formattedValue}`);
+    }
+    lines.push('');
+    return lines.join('\n');
   }
 
   /**
@@ -60,7 +144,7 @@ class PrometheusService {
     // 活跃请求数 - Gauge
     // 标签: module
 
-    console.log('[PrometheusService] HTTP 指标已注册');
+    logger.info('HTTP 指标已注册');
   }
 
   /**
@@ -79,7 +163,7 @@ class PrometheusService {
     // 熔断器状态 - Gauge
     this._metricsCollector.setGauge('circuit_breaker_state', 0, { circuit: 'default' });
 
-    console.log('[PrometheusService] 业务指标已注册');
+    logger.info('业务指标已注册');
   }
 
   /**
@@ -98,13 +182,12 @@ class PrometheusService {
       // 记录请求开始
       this._metricsCollector.startRequest(requestId, {
         method: req.method,
-        path: this._normalizePath(req.path),
+        path: utilsNormalizePath(req.path),
         module: req.headers['x-module'] || 'unknown',
       });
 
-      // 拦截响应
-      const originalSend = res.send;
-      res.send = (body) => {
+      // 使用 response finish 事件记录请求完成
+      res.on('finish', () => {
         const duration = (Date.now() - startTime) / 1000;
 
         // 记录请求结束
@@ -113,30 +196,13 @@ class PrometheusService {
         // 记录延迟直方图
         this._metricsCollector.recordHistogram('http_request_duration_seconds', duration, {
           method: req.method,
-          path: this._normalizePath(req.path),
+          path: utilsNormalizePath(req.path),
           status: res.statusCode.toString(),
         });
-
-        return originalSend.call(res, body);
-      };
+      });
 
       next();
     };
-  }
-
-  /**
-   * 标准化路径（去除动态参数）
-   * @param {string} path - 请求路径
-   * @returns {string} 标准化后的路径
-   */
-  _normalizePath(path) {
-    // 移除 UUID
-    let normalized = path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id');
-
-    // 移除数字 ID
-    normalized = normalized.replace(/\/\d+/g, '/:id');
-
-    return normalized;
   }
 
   /**
@@ -147,11 +213,12 @@ class PrometheusService {
     if (!this._initialized) return;
 
     const { method, path, status, duration, module } = info;
+    const normalizedPath = utilsNormalizePath(path);
 
     // 增加请求计数器
     this._metricsCollector.incrementCounter('http_requests_total', {
       method,
-      path: this._normalizePath(path),
+      path: normalizedPath,
       status: status.toString(),
       module: module || 'unknown',
     });
@@ -159,7 +226,7 @@ class PrometheusService {
     // 记录延迟
     this._metricsCollector.recordHistogram('http_request_duration_seconds', duration / 1000, {
       method,
-      path: this._normalizePath(path),
+      path: normalizedPath,
     });
 
     // 记录错误
@@ -193,11 +260,7 @@ class PrometheusService {
   updateCircuitBreakerState(circuitName, state) {
     if (!this._initialized) return;
 
-    const stateValue = {
-      closed: 0,
-      open: 1,
-      half_open: 2,
-    }[state] ?? 0;
+    const stateValue = getStateValue(state);
 
     this._metricsCollector.setGauge('circuit_breaker_state', stateValue, {
       circuit: circuitName,
@@ -213,134 +276,105 @@ class PrometheusService {
       return this._generateEmptyMetrics();
     }
 
-    const lines = [];
     const metrics = this._metricsCollector.getMetrics();
+    const lines = [];
 
-    // 添加时间戳注释
-    lines.push(`# Prometheus metrics for AI Chat 玩具`);
+    // Header
+    lines.push(`# Prometheus metrics for AI Chat`);
     lines.push(`# Generated at: ${new Date().toISOString()}`);
     lines.push('');
 
-    // ==================== HTTP 请求总数 (Counter) ====================
-    lines.push('# HELP http_requests_total Total number of HTTP requests');
-    lines.push('# TYPE http_requests_total counter');
+    // HTTP 请求
+    lines.push(this._outputCounter('http_requests_total', 'Total number of HTTP requests',
+      metrics.counters?.http_requests_total));
 
-    const httpRequestsTotal = metrics.counters?.http_requests_total || {};
-    for (const [labels, value] of Object.entries(httpRequestsTotal)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`http_requests_total${labelStr} ${value}`);
+    // HTTP 延迟直方图
+    lines.push(this._outputHistogram('http_request_duration_seconds',
+      'HTTP request duration in seconds',
+      metrics.histograms?.http_request_duration_seconds));
+
+    // 模块错误
+    lines.push(this._outputGauge('module_errors_total', 'Number of errors by module',
+      metrics.gauges?.module_errors_total));
+
+    // 熔断器状态
+    lines.push(this._outputGauge('circuit_breaker_state',
+      'Circuit breaker state (0=closed, 1=open, 2=half_open)',
+      metrics.gauges?.circuit_breaker_state));
+
+    // 熔断器调用计数
+    lines.push(this._outputCounter('circuit_breaker_calls_total',
+      'Total number of circuit breaker calls',
+      metrics.counters?.circuit_breaker_calls_total));
+
+    // 限流指标
+    lines.push(this._outputCounter('rate_limit_exceeded_total',
+      'Total number of rate limit exceeded',
+      metrics.counters?.rate_limit_exceeded_total));
+
+    // 限流配额
+    lines.push(this._outputGauge('rate_limit_current_quota',
+      'Current rate limit quota usage',
+      metrics.gauges?.rate_limit_current_quota));
+
+    // Node.js 运行时指标
+    lines.push(`# HELP nodejs_active_handles Number of active handles`);
+    lines.push(`# TYPE nodejs_active_handles gauge`);
+    lines.push(`nodejs_active_handles ${this._extractGaugeValue(metrics.gauges?.nodejs_active_handles)}`);
+    lines.push('');
+
+    lines.push(`# HELP nodejs_active_requests Number of active requests`);
+    lines.push(`# TYPE nodejs_active_requests gauge`);
+    lines.push(`nodejs_active_requests ${this._extractGaugeValue(metrics.gauges?.nodejs_active_requests)}`);
+    lines.push('');
+
+    lines.push(`# HELP http_requests_active Number of active HTTP requests`);
+    lines.push(`# TYPE http_requests_active gauge`);
+    lines.push(`http_requests_active ${this._extractGaugeValue(metrics.gauges?.http_requests_active)}`);
+    lines.push('');
+
+    // 模型指标
+    lines.push(this._outputCounter('model_requests_total', 'Total number of model requests',
+      metrics.counters?.model_requests_total));
+
+    lines.push(`# HELP model_tokens_total Total number of tokens processed`);
+    lines.push(`# TYPE model_tokens_total counter`);
+    const modelTokensCounter = metrics.counters?.model_tokens_total;
+    let modelTokensValue = 0;
+    if (modelTokensCounter && typeof modelTokensCounter === 'object') {
+      const vals = Object.values(modelTokensCounter);
+      modelTokensValue = vals.reduce ? vals.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : (typeof vals[0] === 'number' ? vals[0] : 0);
+    } else if (typeof modelTokensCounter === 'number') {
+      modelTokensValue = modelTokensCounter;
     }
+    lines.push(`model_tokens_total ${modelTokensValue}`);
     lines.push('');
 
-    // ==================== HTTP 请求延迟 (Histogram) ====================
-    lines.push('# HELP http_request_duration_seconds HTTP request duration in seconds');
-    lines.push('# TYPE http_request_duration_seconds histogram');
-
-    const httpDuration = metrics.histograms?.http_request_duration_seconds || {};
-    for (const [labels, data] of Object.entries(httpDuration)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`http_request_duration_seconds_count${labelStr} ${data.count}`);
-      lines.push(`http_request_duration_seconds_sum${labelStr} ${data.sum.toFixed(3)}`);
-
-      // 桶
-      const buckets = data.buckets || {};
-      for (const [bucket, count] of Object.entries(buckets)) {
-        const bucketLabel = labelStr ? `${labelStr},le="${bucket}"}` : `{le="${bucket}"}`;
-        lines.push(`http_request_duration_seconds_bucket${bucketLabel} ${count}`);
-      }
-    }
+    lines.push(`# HELP model_errors_total Total number of model errors`);
+    lines.push(`# TYPE model_errors_total gauge`);
+    lines.push(`model_errors_total ${this._extractGaugeValue(metrics.gauges?.model_errors_total)}`);
     lines.push('');
 
-    // ==================== 模块错误数 (Gauge) ====================
-    lines.push('# HELP module_errors_total Number of errors by module');
-    lines.push('# TYPE module_errors_total gauge');
+    // 工具指标
+    lines.push(this._outputCounter('tool_calls_total', 'Total number of tool calls',
+      metrics.counters?.tool_calls_total));
 
-    const moduleErrors = metrics.gauges?.module_errors_total || {};
-    for (const [labels, value] of Object.entries(moduleErrors)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`module_errors_total${labelStr} ${value}`);
-    }
-    lines.push('');
+    lines.push(this._outputGauge('tool_errors_total', 'Total number of tool errors',
+      metrics.gauges?.tool_errors_total));
 
-    // ==================== 熔断器状态 (Gauge) ====================
-    lines.push('# HELP circuit_breaker_state Circuit breaker state (0=closed, 1=open, 2=half_open)');
-    lines.push('# TYPE circuit_breaker_state gauge');
+    // Agent 指标
+    lines.push(this._outputCounter('agent_executions_total', 'Total number of agent executions',
+      metrics.counters?.agent_executions_total));
 
-    const circuitBreakerState = metrics.gauges?.circuit_breaker_state || {};
-    for (const [labels, value] of Object.entries(circuitBreakerState)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`circuit_breaker_state${labelStr} ${value}`);
-    }
-    lines.push('');
-
-    // ==================== 活跃请求数 (Gauge) ====================
-    lines.push('# HELP http_requests_active Number of active HTTP requests');
-    lines.push('# TYPE http_requests_active gauge');
-    lines.push(`http_requests_active ${metrics.gauges?.http_requests_active || 0}`);
-    lines.push('');
-
-    // ==================== 模型指标 ====================
-    lines.push('# HELP model_requests_total Total number of model requests');
-    lines.push('# TYPE model_requests_total counter');
-
-    const modelRequests = metrics.counters?.model_requests_total || {};
-    for (const [labels, value] of Object.entries(modelRequests)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`model_requests_total${labelStr} ${value}`);
-    }
-    lines.push('');
-
-    lines.push('# HELP model_tokens_total Total number of tokens processed');
-    lines.push('# TYPE model_tokens_total counter');
-    lines.push(`model_tokens_total ${metrics.gauges?.model_tokens_total || 0}`);
-    lines.push('');
-
-    lines.push('# HELP model_errors_total Total number of model errors');
-    lines.push('# TYPE model_errors_total gauge');
-    lines.push(`model_errors_total ${metrics.gauges?.model_errors_total || 0}`);
-    lines.push('');
-
-    // ==================== 工具指标 ====================
-    lines.push('# HELP tool_calls_total Total number of tool calls');
-    lines.push('# TYPE tool_calls_total counter');
-
-    const toolCalls = metrics.counters?.tool_calls_total || {};
-    for (const [labels, value] of Object.entries(toolCalls)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`tool_calls_total${labelStr} ${value}`);
-    }
-    lines.push('');
-
-    lines.push('# HELP tool_errors_total Total number of tool errors');
-    lines.push('# TYPE tool_errors_total gauge');
-
-    const toolErrors = metrics.gauges?.tool_errors_total || {};
-    for (const [labels, value] of Object.entries(toolErrors)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`tool_errors_total${labelStr} ${value}`);
-    }
-    lines.push('');
-
-    // ==================== Agent 指标 ====================
-    lines.push('# HELP agent_executions_total Total number of agent executions');
-    lines.push('# TYPE agent_executions_total counter');
-
-    const agentExecutions = metrics.counters?.agent_executions_total || {};
-    for (const [labels, value] of Object.entries(agentExecutions)) {
-      const labelStr = labels === '{}' ? '' : `{${labels}}`;
-      lines.push(`agent_executions_total${labelStr} ${value}`);
-    }
-    lines.push('');
-
-    lines.push('# HELP agent_iterations_total Total number of agent iterations');
-    lines.push('# TYPE agent_iterations_total counter');
+    lines.push(`# HELP agent_iterations_total Total number of agent iterations`);
+    lines.push(`# TYPE agent_iterations_total counter`);
     lines.push(`agent_iterations_total ${metrics.counters?.agent_iterations_total || 0}`);
     lines.push('');
 
-    // ==================== 队列指标 ====================
-    lines.push('# HELP queue_length Current queue length');
-    lines.push('# TYPE queue_length gauge');
-    lines.push(`queue_length ${metrics.gauges?.queue_length || 0}`);
+    // 队列指标
+    lines.push(`# HELP queue_length Current queue length`);
+    lines.push(`# TYPE queue_length gauge`);
+    lines.push(`queue_length ${this._extractGaugeValue(metrics.gauges?.queue_length)}`);
     lines.push('');
 
     return lines.join('\n');
@@ -401,7 +435,7 @@ class PrometheusService {
 
     // 每分钟输出一次指标到日志
     setInterval(() => {
-      console.log('[PrometheusService] 指标采集:', {
+      logger.info('指标采集', {
         timestamp: new Date().toISOString(),
         requests: this._metricsCollector?.getCounterSum('http_requests_total') || 0,
         errors: this._metricsCollector?.getGaugeValue('module_errors_total') || 0,

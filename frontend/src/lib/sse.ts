@@ -1,60 +1,159 @@
 import { resolveProvider } from './modelConfig';
+import { BACKEND_URL } from './config';
 
+// 预编译正则表达式，避免高频调用时重复创建
+const THINK_CLOSE_REGEX = /<\/think>/g;
+const THINK_CLOSE_BRACKET_REGEX = /\[\/THINK\]/g;
+const THINK_OPEN_REGEX = /<think>/g;
+const THINK_BLOCK_REGEX = /<think>[\s\S]*?(\[\/THINK\]|<\/think>)/g;
+
+// SSE 事件类型定义
 interface SSEOptions {
   onMessage: (content: string) => void;
-  onThinking?: (content: string, isEnd: boolean) => void;  // 思维链回调
+  onThinking?: (content: string, isComplete: boolean) => void;
   onError?: (error: Error) => void;
   onComplete?: () => void;
-  signal?: AbortSignal;  // 取消信号支持
+  signal?: AbortSignal;
+  // 指数退避重连回调: attempt 从 1 开始, delayMs 是该次重连前等待的毫秒数
+  onReconnectAttempt?: (attempt: number, delayMs: number) => void;
 }
 
-// 后端代理地址 - API Key 在后端安全存储
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+// SSE 指数退避重连配置
+const MAX_RETRIES = 5;
+const MAX_RETRY_DELAY_MS = 30000;
+const BASE_RETRY_DELAY_MS = 1000;
 
 /**
- * 通过后端代理发送 SSE 聊天请求
- * API Key 由后端管理，前端不再直接暴露敏感信息
+ * 计算指数退避延迟, 上限 30s
+ * attempt 1 -> 1s, 2 -> 2s, 3 -> 4s, 4 -> 8s, 5 -> 16s, 6+ -> 30s
  */
+function calculateBackoffDelay(retryCount: number): number {
+  return Math.min(BASE_RETRY_DELAY_MS * 2 ** retryCount, MAX_RETRY_DELAY_MS);
+}
+
+// SSE 消息事件类型
+type SSEMessage =
+  | { type: 'thinking_delta'; content: string }
+  | { type: 'thinking_complete' }
+  | { type: 'thinking'; content: string }
+  | { type: 'chunk'; content: string }
+  | { type: 'error'; message: string }
+  | { type: 'done' }
+  | { choices: [{ delta?: { content?: string } }] };
+
+// 回调接口
+interface SSECallbacks {
+  onMessage: (content: string) => void;
+  onThinking?: (content: string, isComplete: boolean) => void;
+}
+
+function extractThinkingContent(content: string): { thinking: string; clean: string } {
+  const hasThinkingTags = content.includes('<think>') || content.includes('[/THINK]');
+  if (!hasThinkingTags) {
+    return { thinking: '', clean: content };
+  }
+
+  const thinkingContent = content
+    .replace(THINK_CLOSE_REGEX, '')
+    .replace(THINK_CLOSE_BRACKET_REGEX, '')
+    .replace(THINK_OPEN_REGEX, '');
+  const cleanContent = content.replace(THINK_BLOCK_REGEX, '');
+
+  return { thinking: thinkingContent, clean: cleanContent };
+}
+
+function parseSSEData(data: string): string | null {
+  const trimmed = data.trim();
+  if (!trimmed.startsWith('data:')) return null;
+  const content = trimmed.slice(5).trim();
+  if (content === '[DONE]') return null;
+  return content;
+}
+
+function processSSEMessage(
+  json: Record<string, unknown>,
+  callbacks: SSECallbacks
+) {
+  const type = json.type as string;
+
+  // 处理错误事件
+  if (type === 'error') {
+    throw new Error(String(json.message || '服务器错误'));
+  }
+  // 处理完成事件
+  if (type === 'done') return;
+
+  // 处理思维链事件
+  if (type === 'thinking_delta' && json.content) {
+    callbacks.onThinking?.(String(json.content), false);
+  }
+  if (type === 'thinking' && json.content) {
+    callbacks.onThinking?.(String(json.content), false);
+  }
+  if (type === 'thinking_complete') {
+    callbacks.onThinking?.('', true);
+  }
+
+  // 处理 chunk 事件
+  if (type === 'chunk' && json.content) {
+    const content = String(json.content);
+    const { thinking, clean } = extractThinkingContent(content);
+    if (thinking) callbacks.onThinking?.(thinking, content.includes('[/THINK]'));
+    if (clean) callbacks.onMessage(clean);
+  }
+
+  // 处理 choices delta content (OpenAI 兼容格式)
+  const choices = json.choices as Array<{ delta?: { content?: string } }> | undefined;
+  const contentDelta = choices?.[0]?.delta?.content;
+  if (contentDelta) {
+    const { thinking, clean } = extractThinkingContent(contentDelta);
+    if (thinking) callbacks.onThinking?.(thinking, contentDelta.includes('[/THINK]'));
+    if (clean) callbacks.onMessage(clean);
+  }
+}
+
 export async function sendSSEChatMessage(
-  apiKey: string,  // 优先使用前端传递的API Key
-  baseURL: string, // 优先使用前端传递的Base URL
+  apiKey: string,
+  baseURL: string,
   model: string,
   messages: { role: string; content: string }[],
   options: SSEOptions
 ): Promise<void> {
-  const { onMessage, onThinking, onError, onComplete, signal } = options;
-
-  // 调试日志：检查发送的消息
-  console.log('[SSE] 发送请求:', {
+  return _sendSSEChatMessageWithRetry(
+    apiKey,
+    baseURL,
     model,
-    messageCount: messages.length,
-    lastMessage: messages[messages.length - 1]?.content?.substring(0, 50),
-    lastMessageBytes: messages[messages.length - 1]?.content ? new TextEncoder().encode(messages[messages.length - 1].content.substring(0, 10)).toString() : null
-  });
+    messages,
+    options,
+    0
+  );
+}
+
+async function _sendSSEChatMessageWithRetry(
+  apiKey: string,
+  baseURL: string,
+  model: string,
+  messages: { role: string; content: string }[],
+  options: SSEOptions,
+  retryCount: number
+): Promise<void> {
+  const { onMessage, onThinking, onError, onComplete, signal, onReconnectAttempt } = options;
 
   try {
-    // 通过后端代理发送请求，保护 API Key
-    // 后端将 proxy 路由挂载在 /api/v1 下
     const requestBody = {
       model,
       messages,
       stream: true,
-      // 传递前端配置
       apiKey: apiKey || undefined,
       baseURL: baseURL || undefined,
-      // 优先使用 baseURL 推断，其次回退到模型归属
       provider: resolveProvider(baseURL, model),
     };
 
-    console.log('[SSE] 请求体:', JSON.stringify(requestBody).substring(0, 200) + '...');
-
     const response = await fetch(`${BACKEND_URL}/api/v1/chat/completions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-      },
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify(requestBody),
-      signal,  // 传递取消信号
+      signal,
     });
 
     if (!response.ok) {
@@ -69,86 +168,92 @@ export async function sendSSEChatMessage(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    const callbacks = { onMessage, onThinking };
 
     while (true) {
       const { done, value } = await reader.read();
-
-      if (done) {
-        onComplete?.();
-        break;
-      }
+      if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
 
       for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith('data:')) continue;
-
-        const data = trimmed.slice(5).trim();
-        if (data === '[DONE]') {
-          onComplete?.();
-          return;
-        }
+        const data = parseSSEData(line);
+        if (!data) continue;
 
         try {
-          const json = JSON.parse(data);
+          const json = JSON.parse(data) as Record<string, unknown>;
+          processSSEMessage(json, callbacks);
+        } catch {
+          // Skip invalid JSON
+        }
+      }
+    }
 
-          // 处理后端自定义消息类型
-          if (json.type === 'error') {
-            throw new Error(json.message || '服务器错误');
-          }
-          if (json.type === 'done') {
-            onComplete?.();
-            return;
-          }
+    if (buffer.trim()) {
+      const lines = buffer.split('\n');
+      for (const line of lines) {
+        const data = parseSSEData(line);
+        if (!data) continue;
 
-          // 处理思维链独立事件（来自 reasoning_split 的 thinking_delta）
-          if (json.type === 'thinking_delta' && json.content) {
-            onThinking?.(json.content, false);
-            return;
+        try {
+          const json = JSON.parse(data) as Record<string, unknown>;
+          const type = json.type as string;
+          if (type === 'thinking_delta' && json.content) {
+            onThinking?.(String(json.content), false);
           }
-
-          // 处理思维链完成事件
-          if (json.type === 'thinking_complete') {
-            onThinking?.('', true);
-            return;
+          const choices = json.choices as Array<{ delta?: { content?: string } }> | undefined;
+          const contentDelta = choices?.[0]?.delta?.content;
+          if (contentDelta) {
+            const { thinking, clean } = extractThinkingContent(contentDelta);
+            if (thinking) onThinking?.(thinking, contentDelta.includes('[/THINK]'));
+            if (clean) onMessage(clean);
           }
-
-          // OpenAI 格式响应
-          const content = json.choices?.[0]?.delta?.content;
-          if (content) {
-            // 检测并处理思维链标签
-            if (content.includes('<think>') || content.includes('[/THINK]')) {
-              // 提取并清理思维链内容
-              const thinkingContent = content
-                .replace(/<\/think>|$/g, '')  // 移除 </think> 结束标签（兼容性）
-                .replace(/\[\/THINK\]/g, '')  // 移除 [/THINK] 结束标签
-                .replace(/<think>/g, '');      // 移除开始标签
-              if (thinkingContent) {
-                onThinking?.(thinkingContent, content.includes('[/THINK]') || content.includes('</think>'));
-              }
-              // 提取纯回复内容（移除所有思维链标签）
-              const cleanContent = content
-                .replace(/<think>[\s\S]*?(\[\/THINK\]|<\/think>)/g, '');
-              if (cleanContent) {
-                onMessage(cleanContent);
-              }
-            } else {
-              onMessage(content);
-            }
+          if (type === 'chunk' && json.content) {
+            const content = String(json.content);
+            const { thinking, clean } = extractThinkingContent(content);
+            if (thinking) onThinking?.(thinking, content.includes('[/THINK]'));
+            if (clean) onMessage(clean);
           }
         } catch {
           // Skip invalid JSON
         }
       }
     }
+
+    onComplete?.();
   } catch (error) {
-    // 忽略取消错误
+    // 用户主动中止: 不重试, 静默返回
     if (error instanceof Error && error.name === 'AbortError') {
       return;
     }
+
+    // 指数退避重连: 最多 MAX_RETRIES 次, 间隔 1/2/4/8/16s (上限 30s)
+    if (retryCount < MAX_RETRIES) {
+      const delay = calculateBackoffDelay(retryCount);
+
+      // 通知上层 UI: 第 N 次重连, 延迟 N ms
+      onReconnectAttempt?.(retryCount + 1, delay);
+
+      await new Promise<void>((resolve) => setTimeout(resolve, delay));
+
+      // 中途被中止则停止重试
+      if (signal?.aborted) {
+        return;
+      }
+
+      return _sendSSEChatMessageWithRetry(
+        apiKey,
+        baseURL,
+        model,
+        messages,
+        options,
+        retryCount + 1
+      );
+    }
+
+    // 达到最大重试次数, 上报错误
     onError?.(error instanceof Error ? error : new Error('未知错误'));
   }
 }

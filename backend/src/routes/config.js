@@ -84,7 +84,9 @@ router.post('/keys', (req, res) => {
     return res.status(400).json({ error: 'provider and apiKey are required' });
   }
 
-  if (!apiConfig.apiKeys.hasOwnProperty(provider)) {
+  // 白名单校验, 防止 prototype pollution (__proto__/constructor) 注入未知 provider
+  const allowedProviders = Object.keys(apiConfig.apiKeys);
+  if (!allowedProviders.includes(provider)) {
     return res.status(400).json({ error: `Unknown provider: ${provider}` });
   }
 

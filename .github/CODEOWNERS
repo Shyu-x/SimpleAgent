@@ -1,0 +1,30 @@
+# CODEOWNERS - 强制审查规则
+# 详见: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# 任何 PR 修改这些路径, 必须有对应 owner 审查
+# 若 owner 不存在, 退化为 1 个任意 reviewer
+
+# 默认 owner: 仓库管理员
+*                           @Shyu-x
+
+# 安全敏感 (1+ admin 审查)
+/backend/src/middleware/     @Shyu-x
+/backend/src/common/kms/     @Shyu-x
+/.env                        @Shyu-x
+/docker/                    @Shyu-x
+/docker-compose*.yml        @Shyu-x
+
+# 基础设施
+/backend/src/infra/         @Shyu-x
+/backend/src/infra/metrics/ @Shyu-x
+/backend/src/infra/alert/   @Shyu-x
+
+# 工作流 / CI
+/.github/                   @Shyu-x
+/scripts/online-gate.sh     @Shyu-x
+/scripts/a11y-audit.mjs     @Shyu-x
+
+# 文档规范
+/CLAUDE.md                  @Shyu-x
+/CHANGELOG.md               @Shyu-x
+/docs/git-workflow.md       @Shyu-x

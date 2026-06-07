@@ -77,7 +77,7 @@ export default function MessageContextMenu({
   return (
     <div
       ref={menuRef}
-      className="fixed z-[110] min-w-[170px] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/98 shadow-2xl backdrop-blur-xl animate-scaleIn"
+      className="fixed z-[110] min-w-[170px] overflow-hidden rounded-xl border border-border bg-muted/98 shadow-2xl backdrop-blur-xl animate-scaleIn"
       style={{ left: adjustedPosition.x, top: adjustedPosition.y }}
     >
       {/* Text info */}
@@ -96,7 +96,7 @@ export default function MessageContextMenu({
         onClick={handleCopy}
         className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
       >
-        {isCopied ? <Check size={14} className="text-[hsl(var(--success-500))]" /> : <Copy size={14} />}
+        {isCopied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
         {isCopied ? '已复制' : '复制消息'}
       </button>
 

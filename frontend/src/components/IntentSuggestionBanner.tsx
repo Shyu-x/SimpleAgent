@@ -14,84 +14,77 @@ import {
   Check,
   Sparkles,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { IntentResult, IntentType } from '@/hooks/useIntentDetection';
 
 // 意图类型配置
 const intentConfig: Record<IntentType, {
   icon: React.ReactNode;
-  label: string;
+  key: string;
   color: string;
   bgColor: string;
   borderColor: string;
-  description: string;
 }> = {
   tool_use: {
     icon: <Wrench size={16} />,
-    label: '工具使用',
+    key: 'tool_use',
     color: 'text-[hsl(var(--accent-500))]',
     bgColor: 'bg-[hsl(var(--accent-500))/0.1]',
     borderColor: 'border-[hsl(var(--accent-500))/0.3]',
-    description: '检测到需要调用工具的操作',
   },
   creative: {
     icon: <PenLine size={16} />,
-    label: '创意生成',
+    key: 'creative',
     color: 'text-[hsl(var(--purple-500))]',
     bgColor: 'bg-[hsl(var(--purple-500))/0.1]',
     borderColor: 'border-[hsl(var(--purple-500))/0.3]',
-    description: '检测到需要生成内容的需求',
   },
   task: {
     icon: <ListTodo size={16} />,
-    label: '任务执行',
+    key: 'task',
     color: 'text-primary',
     bgColor: 'bg-primary/10',
     borderColor: 'border-primary/30',
-    description: '检测到需要多步骤处理的任务',
   },
   knowledge: {
     icon: <BookOpen size={16} />,
-    label: '知识问答',
+    key: 'knowledge',
     color: 'text-[hsl(var(--info-500))]',
     bgColor: 'bg-[hsl(var(--info-500))/0.1]',
     borderColor: 'border-[hsl(var(--info-500))/0.3]',
-    description: '检测到知识查询或解释需求',
   },
   vision: {
     icon: <ImageIcon size={16} />,
-    label: '视觉处理',
+    key: 'vision',
     color: 'text-[hsl(var(--warning-500))]',
     bgColor: 'bg-[hsl(var(--warning-500))/0.1]',
     borderColor: 'border-[hsl(var(--warning-500))/0.3]',
-    description: '检测到图片处理或视觉分析需求',
   },
   conversation: {
     icon: <MessageSquare size={16} />,
-    label: '智能对话',
+    key: 'conversation',
     color: 'text-muted-foreground',
     bgColor: 'bg-muted/50',
     borderColor: 'border-muted',
-    description: '普通对话模式',
   },
   image_generation: {
     icon: <Sparkles size={16} />,
-    label: '图片生成',
+    key: 'image_generation',
     color: 'text-[hsl(var(--success-500))]',
     bgColor: 'bg-[hsl(var(--success-500))/0.1]',
     borderColor: 'border-[hsl(var(--success-500))/0.3]',
-    description: '检测到图片生成需求，将调用 MiniMax API 生成图片',
   },
 };
 
 // 置信度等级
-function getConfidenceLevel(confidence: number): { label: string; color: string } {
+function getConfidenceLevel(confidence: number, t: ReturnType<typeof useTranslations>): { label: string; color: string } {
   if (confidence >= 0.8) {
-    return { label: '高置信', color: 'text-[hsl(var(--success-500))]' };
+    return { label: t('confidence.high'), color: 'text-[hsl(var(--success-500))]' };
   }
   if (confidence >= 0.5) {
-    return { label: '中置信', color: 'text-[hsl(var(--warning-500))]' };
+    return { label: t('confidence.medium'), color: 'text-[hsl(var(--warning-500))]' };
   }
-  return { label: '低置信', color: 'text-muted-foreground' };
+  return { label: t('confidence.low'), color: 'text-muted-foreground' };
 }
 
 // 属性
@@ -111,10 +104,12 @@ const IntentSuggestionBanner = memo(function IntentSuggestionBanner({
   showActions = true,
   className = '',
 }: IntentSuggestionBannerProps) {
+  const t = useTranslations('intent');
   if (!intent) return null;
 
   const config = intentConfig[intent.type];
-  const confidenceLevel = getConfidenceLevel(intent.confidence);
+  const confidenceLevel = getConfidenceLevel(intent.confidence, t);
+  const label = t(`${config.key}.label`);
 
   return (
     <AnimatePresence mode="wait">
@@ -143,7 +138,7 @@ const IntentSuggestionBanner = memo(function IntentSuggestionBanner({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className={`font-medium ${config.color}`}>
-                {config.label}
+                {label}
               </span>
               <span className={`text-xs ${confidenceLevel.color}`}>
                 {confidenceLevel.label} {Math.round(intent.confidence * 100)}%
@@ -151,7 +146,7 @@ const IntentSuggestionBanner = memo(function IntentSuggestionBanner({
               {intent.requiresAgent && (
                 <span className="flex items-center gap-0.5 text-xs text-primary">
                   <Sparkles size={10} />
-                  建议使用 Agent
+                  {t('suggestAgent')}
                 </span>
               )}
             </div>
@@ -191,7 +186,7 @@ const IntentSuggestionBanner = memo(function IntentSuggestionBanner({
                   whileTap={{ scale: 0.98 }}
                 >
                   <Check size={12} />
-                  应用
+                  {t('apply')}
                 </motion.button>
               )}
               {onDismiss && (

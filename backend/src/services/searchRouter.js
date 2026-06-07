@@ -5,6 +5,9 @@
 
 const axios = require('axios');
 const AppError = require('../common/errors/AppError');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('searchRouter');
 
 // 搜索源配置
 const SEARCH_PROVIDERS = {
@@ -193,7 +196,7 @@ class SearchRouter {
           };
         }
       } catch (mcpError) {
-        console.log('[SearchRouter] MiniMax MCP 不可用:', mcpError.message);
+        logger.info('MiniMax MCP 不可用', { error: mcpError.message });
       }
 
       // 备用：直接调用 MiniMax API
@@ -243,7 +246,7 @@ class SearchRouter {
 
       throw AppError.internalError('MiniMax API 不可用');
     } catch (error) {
-      console.error('[SearchRouter] MiniMax search error:', error.message);
+      logger.error('MiniMax search error', { error: error.message });
       throw error;
     }
   }
@@ -304,7 +307,7 @@ class SearchRouter {
         source: 'jina_ai'
       };
     } catch (error) {
-      console.error('[SearchRouter] Jina search error:', error.message);
+      logger.error('Jina search error', { error: error.message });
       throw error;
     }
   }
@@ -355,7 +358,7 @@ class SearchRouter {
         source: 'duckduckgo'
       };
     } catch (error) {
-      console.error('[SearchRouter] DuckDuckGo search error:', error.message);
+      logger.error('DuckDuckGo search error', { error: error.message });
       throw error;
     }
   }

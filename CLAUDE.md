@@ -1474,4 +1474,38 @@ backend/src/
 
 ---
 
+## Wave #8 历史 (2026-06-06)
+
+### Wave #8.1 完成 (3 agent 并行, 4 commit)
+- **A11y 修复**: 81→33 违规 (-60%) — de15366
+  - `frontend/src/app/agent/page.tsx` 加 `<main>` landmark + `<h1>`
+  - `frontend/src/components/agent/MissionControl/MissionControl.tsx` 加 2 aria-label
+- **Docker 瘦身**: 镜像 3.17GB → 243MB (-92%) — 353aa03 + 998cb2c
+  - 多阶段构建: backend 1.4G→177MB, frontend 1.77G→66MB
+  - `.dockerignore` 162 规则 (node_modules / .next / .git / docs / tests)
+  - 修复 EACCES bug: chown /app 给 nodejs
+- **8 Journey 脚本骨架** — efb0cf7
+  - login / hitl / admin / a2a / i18n / mcp / alert / incident
+  - `--live` / `--dry-run` 双模式
+  - 8 README + 8 占位 PNG
+
+### Wave #8.2 计划 (2 agent 并行)
+- **agent_i18n**: 装 next-intl, 抽 200+ zh-CN 字符串, 加 en locale
+- **agent_kms_todo**: KMS interface + Local/Vault stub + 清 5 TODO
+
+### Wave #8.3 计划 (主会话亲自做)
+- 33 个 a11y 违规修复 (8 critical button-name, 23 serious color-contrast)
+- 8 个 journey 真实截图
+- Grafana + Prometheus 部署
+- 5 类天然边界 (真实登录/多用户/A2A 真实/告警端到端/LLM 成本)
+
+### 累计
+- 本会话 commit: 41+ (35 前会话 + 6 当前)
+- 镜像减少: 92%
+- a11y 修复: 60%
+- GATE: 15/15 GO 持续
+
+---
+
 **企业级升级完成日期**: 2026-03-21
+**Wave #8 完成日期**: 2026-06-06

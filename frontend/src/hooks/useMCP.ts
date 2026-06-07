@@ -9,7 +9,7 @@ interface MCPTool {
   category: string;
   inputSchema: {
     type: string;
-    properties: Record<string, any>;
+    properties: Record<string, unknown>;
     required?: string[];
   };
 }
@@ -72,7 +72,7 @@ export function useMCP() {
   }, []);
 
   // 调用工具
-  const callTool = useCallback(async (toolName: string, args: Record<string, any> = {}) => {
+  const callTool = useCallback(async (toolName: string, args: Record<string, unknown> = {}) => {
     setIsLoading(true);
     setError(null);
     try {

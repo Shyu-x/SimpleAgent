@@ -434,22 +434,27 @@ router.post('/docs', upload.single('file'), async (req, res) => {
 
     // 文件上传模式
     if (req.file) {
-      const parsed = await ragService.parseDocument(req.file.path);
-      const result = await ragService.addDocument(targetKbId, {
-        title: title || path.basename(req.file.originalname, path.extname(req.file.originalname)),
-        content: parsed.content,
-        type: parsed.type,
-        metadata: { originalFilename: req.file.originalname, ...parsed.metadata }
-      });
-      fs.unlinkSync(req.file.path); // 清理临时文件
-      return res.json({
-        success: true,
-        data: {
-          documentId: result.docId,
-          chunks: result.chunks,
-          kbId: targetKbId
-        }
-      });
+      const uploadedPath = req.file.path;
+      try {
+        const parsed = await ragService.parseDocument(uploadedPath);
+        const result = await ragService.addDocument(targetKbId, {
+          title: title || path.basename(req.file.originalname, path.extname(req.file.originalname)),
+          content: parsed.content,
+          type: parsed.type,
+          metadata: { originalFilename: req.file.originalname, ...parsed.metadata }
+        });
+        return res.json({
+          success: true,
+          data: {
+            documentId: result.docId,
+            chunks: result.chunks,
+            kbId: targetKbId
+          }
+        });
+      } finally {
+        // 无论成功或失败, 清理 multer 临时文件, 避免孤儿堆积耗尽磁盘
+        try { fs.unlinkSync(uploadedPath); } catch (e) { /* 文件可能已不存在 */ }
+      }
     }
 
     // 文本内容模式

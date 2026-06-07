@@ -4,6 +4,9 @@
  */
 
 const EventEmitter = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('taskQueue');
 
 // 任务状态
 const TaskStatus = {
@@ -64,7 +67,7 @@ class DistributedTaskQueue extends EventEmitter {
   async init(redisClient) {
     this.redis = redisClient;
     this.memoryMode = false;
-    console.log('[TaskQueue] Redis connected, switched to distributed mode');
+    logger.info('Redis connected, switched to distributed mode');
     this.emit('redis:connected');
   }
 
@@ -110,7 +113,7 @@ class DistributedTaskQueue extends EventEmitter {
       this.emit('task:enqueued', taskData);
       return taskId;
     } catch (error) {
-      console.error('[TaskQueue] Enqueue error:', error);
+      logger.error('Enqueue error', { error: error.message });
       throw error;
     }
   }
@@ -155,7 +158,7 @@ class DistributedTaskQueue extends EventEmitter {
 
       return null;
     } catch (error) {
-      console.error('[TaskQueue] Dequeue error:', error);
+      logger.error('Dequeue error', { error: error.message });
       return null;
     }
   }
@@ -213,7 +216,7 @@ class DistributedTaskQueue extends EventEmitter {
 
       this.emit('task:completed', task);
     } catch (error) {
-      console.error('[TaskQueue] Complete error:', error);
+      logger.error('Complete error', { error: error.message });
     }
   }
 
@@ -273,7 +276,7 @@ class DistributedTaskQueue extends EventEmitter {
         this.emit('task:failed', { task, error });
       }
     } catch (err) {
-      console.error('[TaskQueue] Fail error:', err);
+      logger.error('Fail error', { error: err.message });
     }
   }
 
@@ -333,7 +336,7 @@ class DistributedTaskQueue extends EventEmitter {
 
       this.emit('task:cancelled', task);
     } catch (error) {
-      console.error('[TaskQueue] Cancel error:', error);
+      logger.error('Cancel error', { error: error.message });
     }
   }
 
@@ -349,7 +352,7 @@ class DistributedTaskQueue extends EventEmitter {
       const taskData = await this.redis.hget(`${this.namespace}:tasks`, taskId);
       return taskData ? JSON.parse(taskData) : null;
     } catch (error) {
-      console.error('[TaskQueue] Get status error:', error);
+      logger.error('Get status error', { error: error.message });
       return null;
     }
   }

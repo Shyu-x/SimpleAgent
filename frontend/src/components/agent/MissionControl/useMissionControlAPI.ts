@@ -5,8 +5,7 @@
 import { useCallback, useEffect } from 'react';
 import { useMissionControlStore } from './store';
 import type { MissionAgent, MissionTask, MissionEvent } from './types';
-
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { API_BASE } from '@/lib/apiConfig';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -17,16 +16,14 @@ interface ApiResponse<T> {
 interface TaskResponse {
   id: string;
   name: string;
-  description: string;
-  priority: string;
-  status: string;
-  assignedAgent: string | null;
+  description?: string;
+  priority?: 'critical' | 'high' | 'medium' | 'low';
+  assignedAgent?: string;
   createdAt: number;
   updatedAt: number;
-  startedAt: number | null;
-  completedAt: number | null;
-  result: string | null;
-  error: string | null;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  result?: string;
+  error?: string;
 }
 
 interface AgentResponse {
@@ -34,7 +31,7 @@ interface AgentResponse {
   name: string;
   role: string;
   avatar: string | null;
-  status: string;
+  status: 'idle' | 'busy' | 'offline';
   currentTask: string | null;
   progress: number;
   capabilities: string[];
@@ -100,7 +97,7 @@ function convertTask(task: TaskResponse): Omit<MissionTask, 'id' | 'createdAt' |
   return {
     id: task.id,
     title: task.name,
-    description: task.description,
+    description: task.description || '',
     priority: task.priority as MissionTask['priority'],
     status: task.status as MissionTask['status'],
     assignedAgent: task.assignedAgent || undefined,
@@ -156,7 +153,7 @@ export function useMissionControlAPI() {
   const syncEvents = useCallback(async () => {
     const response = await apiRequest<{ events: EventResponse[] }>('/api/mission/events?limit=50');
     if (response.success && response.data) {
-      console.log('[MissionControlAPI] Synced events from backend:', response.data.events.length);
+      // 静默同步后端事件
     }
   }, []);
 

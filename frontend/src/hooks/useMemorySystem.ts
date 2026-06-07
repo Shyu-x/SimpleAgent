@@ -7,7 +7,7 @@ import { Note, MemoryType, MemoryImportance, GlobalMemory } from '@/types';
 // 导入 API 客户端
 import { fetchApi, post, del, put } from '@/lib/apiClient';
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
+import { API_BASE } from '@/lib/apiConfig';
 
 // 记忆类型配置
 export const MEMORY_TYPE_CONFIG: Record<MemoryType, { label: string; color: string; icon: string }> = {
@@ -59,6 +59,29 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB) || 1);
 }
 
+// 语义哈希缓存，避免 O(n*m) 重复计算
+const hashCache = new Map<string, number[]>();
+const HASH_CACHE_MAX = 500;
+
+function getCachedSemanticHash(content: string): number[] {
+  // 使用内容长度的前64字符作为缓存键
+  const cacheKey = content.slice(0, 64);
+  if (hashCache.has(cacheKey)) {
+    return hashCache.get(cacheKey)!;
+  }
+
+  const hash = generateSemanticHash(content);
+
+  // 缓存清理：超过上限时清理一半最旧的条目
+  if (hashCache.size >= HASH_CACHE_MAX) {
+    const keysToDelete = Array.from(hashCache.keys()).slice(0, HASH_CACHE_MAX / 2);
+    keysToDelete.forEach(key => hashCache.delete(key));
+  }
+
+  hashCache.set(cacheKey, hash);
+  return hash;
+}
+
 type SessionMemoryMetadata = Partial<Pick<Note, 'type' | 'importance' | 'tags' | 'embedding'>>;
 
 // 防抖同步锁
@@ -66,6 +89,9 @@ let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 const SYNC_DEBOUNCE_MS = 500;
 
 export function useMemorySystem() {
+  // 使用 AbortController 支持清理
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const conversations = useChatStore((state) => state.conversations);
   const globalMemories = useChatStore((state) => state.globalMemories);
 
@@ -81,6 +107,17 @@ export function useMemorySystem() {
 
   const isLoading = false;
   const syncInProgress = useRef(false);
+
+  // 组件卸载时清理
+  useEffect(() => {
+    abortControllerRef.current = new AbortController();
+    return () => {
+      abortControllerRef.current?.abort();
+      if (syncDebounceTimer) {
+        clearTimeout(syncDebounceTimer);
+      }
+    };
+  }, []);
 
   // ========== 后端同步方法 ==========
 
@@ -105,7 +142,7 @@ export function useMemorySystem() {
           timestamp: Date.now(),
         });
         if (!res.error) {
-          console.debug('[MemorySystem] Synced to backend:', currentMemories.length, 'memories');
+          // Removed: console.debug for production
         }
       } catch (error) {
         console.error('[MemorySystem] Failed to sync to backend:', error);
@@ -140,12 +177,54 @@ export function useMemorySystem() {
         ];
 
         hydrateGlobalMemories(merged);
-        console.debug('[MemorySystem] Loaded from backend:', backendMemories.length, 'memories');
+        // Removed: console.debug for production
       }
     } catch (error) {
       console.error('[MemorySystem] Failed to load from backend:', error);
     }
   }, [hydrateGlobalMemories]);
+
+  /**
+   * 同步单个记忆到后端（创建）
+   */
+  const syncAddToBackend = useCallback(async (memory: GlobalMemory) => {
+    if (typeof window === 'undefined') return;
+    try {
+      await post(`${API_BASE}/api/memory/global`, {
+        content: memory.content,
+        type: memory.type,
+        importance: memory.importance,
+        tags: memory.tags,
+        userId: memory.userId,
+      });
+    } catch (error) {
+      console.error('[MemorySystem] Failed to sync add to backend:', error);
+    }
+  }, []);
+
+  /**
+   * 同步更新到后端
+   */
+  const syncUpdateToBackend = useCallback(async (memoryId: string, updates: Partial<Omit<GlobalMemory, 'id' | 'userId'>>) => {
+    if (typeof window === 'undefined') return;
+    try {
+      await put(`${API_BASE}/api/memory/global/${memoryId}`, updates);
+    } catch (error) {
+      console.error('[MemorySystem] Failed to sync update to backend:', error);
+    }
+  }, []);
+
+  /**
+   * 同步删除到后端
+   */
+  const syncDeleteToBackend = useCallback(async (memoryId: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+      await del(`${API_BASE}/api/memory/global/${memoryId}`);
+    } catch (error) {
+      console.error('[MemorySystem] Failed to sync delete to backend:', error);
+    }
+  }, []);
 
   // 启动时从后端加载数据
   useEffect(() => {
@@ -198,33 +277,40 @@ export function useMemorySystem() {
     deleteNote(conversationId, noteId);
   }, [deleteNote]);
 
-  // 全局记忆：统一走 chatStore
+  // 全局记忆：统一走 chatStore + 后端同步
   const addGlobalMemory = useCallback((
     content: string,
     type: MemoryType = 'general',
     importance: MemoryImportance = 'medium',
     tags: string[] = []
   ) => {
-    return addGlobalMemoryToStore(content, type, importance, tags);
-  }, [addGlobalMemoryToStore]);
+    const memory = addGlobalMemoryToStore(content, type, importance, tags);
+    // 同步到后端
+    syncAddToBackend(memory);
+    return memory;
+  }, [addGlobalMemoryToStore, syncAddToBackend]);
 
   const updateGlobalMemory = useCallback((
     id: string,
     updates: Partial<Omit<GlobalMemory, 'id' | 'userId'>>
   ) => {
     updateGlobalMemoryToStore(id, updates);
-  }, [updateGlobalMemoryToStore]);
+    // 同步到后端
+    syncUpdateToBackend(id, updates);
+  }, [updateGlobalMemoryToStore, syncUpdateToBackend]);
 
   const deleteGlobalMemory = useCallback((id: string) => {
     deleteGlobalMemoryToStore(id);
-  }, [deleteGlobalMemoryToStore]);
+    // 同步到后端
+    syncDeleteToBackend(id);
+  }, [deleteGlobalMemoryToStore, syncDeleteToBackend]);
 
   // 语义搜索记忆
   const searchMemories = useCallback((query: string, limit = 5): GlobalMemory[] => {
-    const queryHash = generateSemanticHash(query);
+    const queryHash = getCachedSemanticHash(query);
 
     const scored = globalMemories.map((memory) => {
-      const embedding = generateSemanticHash(memory.content);
+      const embedding = getCachedSemanticHash(memory.content);
       return {
         memory,
         score: cosineSimilarity(queryHash, embedding),

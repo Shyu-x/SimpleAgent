@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Attachment } from '@/types';
+import { BACKEND_URL } from '@/lib/config';
 
 // 简单的 ID 生成函数
 function generateId(): string {
@@ -72,6 +73,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     () => conversations.find((c) => c.id === activeConversationId),
     [conversations, activeConversationId]
   );
+
 
   // 检测用户滚动，优先用户控制
   const handleScroll = useCallback(() => {
@@ -163,8 +165,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
       addMessage(activeConversationId, assistantMessage);
 
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-        const response = await fetch(`${backendUrl}/api/minimax/image`, {
+        const response = await fetch(`${BACKEND_URL}/api/minimax/image`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -271,8 +272,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
       try {
         updateLastMessage(activeConversationId, '🔍 正在联网搜索相关信息...');
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-        const searchResponse = await fetch(`${backendUrl}/api/search/enhanced`, {
+        const searchResponse = await fetch(`${BACKEND_URL}/api/search/enhanced`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -308,13 +308,6 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
     }
 
     try {
-      // 调试日志：检查发送的消息内容
-      console.log('[ChatArea] 发送消息:', {
-        contentLength: content.length,
-        contentPreview: content.substring(0, 50),
-        contentBytes: new TextEncoder().encode(content.slice(0, 10)).toString()
-      });
-
       const assistantMessageId = assistantMessage.id;
 
       await sendSSEChatMessage(
@@ -327,7 +320,8 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
           onMessage: (chunk: string) => {
             const conv = useChatStore.getState().conversations.find((c) => c.id === activeConversationId);
             if (conv && conv.messages.length > 0) {
-              updateLastMessage(activeConversationId, conv.messages[conv.messages.length - 1].content + chunk);
+              const currentContent = conv.messages[conv.messages.length - 1].content;
+              updateLastMessage(activeConversationId, currentContent + chunk);
             }
           },
           onThinking: (thinkingChunk: string, isEnd: boolean) => {
@@ -435,6 +429,7 @@ export default function ChatArea({ conversationId }: ChatAreaProps) {
                   isLast={isLast}
                   status={getMessageStatus()}
                   onPreviewLink={triggerPreview}
+                  onEdit={(content) => activeConversationId && useChatStore.getState().updateMessageContent(activeConversationId, message.id, content)}
                 />
               );
             })}

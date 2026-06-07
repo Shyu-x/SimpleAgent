@@ -19,9 +19,142 @@ const { AgentLogger } = require('../../infra/logger/AgentLogger');
 
 const logger = new AgentLogger('admin-trace');
 
+// 时间常量（毫秒）
+const ONE_HOUR_MS = 60 * 60 * 1000;  // 1小时
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;  // 1天
+const SSE_PUSH_INTERVAL_MS = 5000;  // SSE推送间隔
+
 // 内存追踪存储 - 实际项目应使用分布式追踪系统（如 Jaeger/Zipkin）
 const traceStore = new Map();
 const MAX_TRACES = 1000;
+
+// SSE 广播客户端管理
+const traceSSEClients = new Set();
+
+// 确保 EventEmitter 已初始化
+if (!global.traceEventEmitter) {
+  require('../../common/EventEmitter');
+}
+
+const traceEmitter = global.traceEventEmitter;
+
+// 从 EventEmitter 事件中提取 traceId
+function extractTraceId(spanOrTrace) {
+  return spanOrTrace?.traceId || spanOrTrace?.id || null;
+}
+
+// 广播 span 更新到所有客户端 (via /subscribe/live)
+traceEmitter.on('span_update', (span) => {
+  const message = JSON.stringify({ type: 'span_update', data: span, timestamp: Date.now() });
+  traceSSEClients.forEach(client => {
+    try {
+      client.write(`data: ${message}\n\n`);
+    } catch (e) {
+      traceSSEClients.delete(client);
+    }
+  });
+
+  // 同时更新 traceStore - 查找或创建 trace
+  const traceId = extractTraceId(span);
+  if (traceId) {
+    let trace = traceStore.get(traceId);
+    if (!trace) {
+      // 创建新 trace
+      trace = {
+        traceId,
+        operationName: span.name || 'unknown',
+        serviceName: span.tags?.serviceName || 'agent-engine',
+        startTime: span.startTime || Date.now(),
+        endTime: null,
+        duration: 0,
+        totalSpans: 0,
+        status: 'running',
+        spans: []
+      };
+      traceStore.set(traceId, trace);
+    }
+
+    // 添加或更新 span
+    const existingIndex = trace.spans.findIndex(s => s.spanId === span.spanId);
+    if (existingIndex >= 0) {
+      trace.spans[existingIndex] = span;
+    } else {
+      trace.spans.push(span);
+      trace.totalSpans = trace.spans.length;
+    }
+
+    // 更新 trace 状态
+    if (span.status === 'error') {
+      trace.status = 'error';
+    }
+
+    // 限制存储大小
+    if (traceStore.size > MAX_TRACES) {
+      const oldestKey = traceStore.keys().next().value;
+      traceStore.delete(oldestKey);
+    }
+  }
+});
+
+// 广播 trace 完成到所有客户端 (via /subscribe/live)
+traceEmitter.on('trace_complete', (trace) => {
+  const message = JSON.stringify({ type: 'trace_complete', data: trace, timestamp: Date.now() });
+  traceSSEClients.forEach(client => {
+    try {
+      client.write(`data: ${message}\n\n`);
+    } catch (e) {
+      traceSSEClients.delete(client);
+    }
+  });
+
+  // 更新 traceStore 中的 trace
+  const traceId = extractTraceId(trace);
+  if (traceId) {
+    const existingTrace = traceStore.get(traceId);
+    if (existingTrace) {
+      existingTrace.endTime = trace.endTime;
+      existingTrace.duration = trace.duration;
+      existingTrace.status = trace.status || 'ok';
+    } else {
+      // 直接存储完成的 trace
+      traceStore.set(traceId, {
+        traceId,
+        operationName: trace.operationName || 'agent_execution',
+        serviceName: trace.serviceName || 'agent-engine',
+        startTime: trace.startTime || Date.now(),
+        endTime: trace.endTime || Date.now(),
+        duration: trace.duration || 0,
+        totalSpans: trace.totalSpans || 0,
+        status: trace.status || 'ok',
+        spans: trace.spans || []
+      });
+    }
+
+    // 限制存储大小
+    if (traceStore.size > MAX_TRACES) {
+      const oldestKey = traceStore.keys().next().value;
+      traceStore.delete(oldestKey);
+    }
+  }
+});
+
+// 监听 agent_engine 事件并同步到 traceStore
+traceEmitter.on('agent_execution_start', (data) => {
+  if (data.traceId) {
+    const trace = {
+      traceId: data.traceId,
+      operationName: data.task?.substring(0, 100) || 'agent_execution',
+      serviceName: 'agent-engine',
+      startTime: data.startTime || Date.now(),
+      endTime: null,
+      duration: 0,
+      totalSpans: 0,
+      status: 'running',
+      spans: []
+    };
+    traceStore.set(data.traceId, trace);
+  }
+});
 
 /**
  * 初始化追踪存储（空启动，等待真实追踪数据）
@@ -32,6 +165,52 @@ function initTraceStore() {
 }
 
 initTraceStore();
+
+/**
+ * GET /api/admin/traces/subscribe/live
+ * 实时订阅 trace 更新 (SSE) - 基于 EventEmitter 广播
+ */
+router.get('/subscribe/live', (req, res) => {
+  const { traceId: filterTraceId } = req.query;
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no'
+  });
+
+  // 添加到客户端集合
+  traceSSEClients.add(res);
+
+  // 发送连接成功消息
+  res.write(`data: ${JSON.stringify({
+    type: 'connected',
+    traceId: filterTraceId || null,
+    timestamp: Date.now()
+  })}\n\n`);
+
+  logger.info('Trace SSE Live客户端连接', { filterTraceId });
+
+  // 清理函数
+  const cleanup = () => {
+    traceSSEClients.delete(res);
+    logger.info('Trace SSE Live客户端断开', { filterTraceId });
+  };
+
+  req.on('close', cleanup);
+  req.on('error', cleanup);
+
+  // 心跳保活
+  const heartbeatId = setInterval(() => {
+    try {
+      res.write(`data: ${JSON.stringify({ type: 'heartbeat', timestamp: Date.now() })}\n\n`);
+    } catch (e) {
+      clearInterval(heartbeatId);
+      cleanup();
+    }
+  }, 30000);
+});
 
 /**
  * GET /api/admin/traces
@@ -98,8 +277,8 @@ router.get('/stats', (req, res) => {
   try {
     const traces = Array.from(traceStore.values());
     const now = Date.now();
-    const oneHourAgo = now - 3600000;
-    const oneDayAgo = now - 86400000;
+    const oneHourAgo = now - ONE_HOUR_MS;
+    const oneDayAgo = now - ONE_DAY_MS;
 
     // 时间范围过滤
     const recentTraces = traces.filter(t => t.startTime > oneHourAgo);
@@ -185,7 +364,7 @@ router.get('/subscribe', (req, res) => {
   // 发送连接成功消息
   res.write(`data: ${JSON.stringify({ type: 'connected', clientId })}\n\n`);
 
-  const PUSH_INTERVAL = 5000;
+  const PUSH_INTERVAL = SSE_PUSH_INTERVAL_MS;
   let lastTracesHash = '';
 
   const getTracesSummary = () => {
@@ -376,9 +555,10 @@ router.post('/', (req, res) => {
 router.delete('/', (req, res) => {
   try {
     const { password } = req.query;
+    const adminPassword = process.env.TRACE_ADMIN_PASSWORD || 'admin';
 
-    // 简单验证
-    if (password !== 'admin') {
+    // 验证
+    if (password !== adminPassword) {
       return res.status(403).json({
         success: false,
         error: '需要管理员密码'

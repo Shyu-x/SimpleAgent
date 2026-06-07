@@ -3,8 +3,8 @@
 import { useState, useCallback, memo, useRef } from 'react';
 import { Message as MessageType } from '@/types';
 import Typewriter from './Typewriter';
-import MarkdownRenderer from './MarkdownRenderer';
-import { Bot, User, Copy, Check, Trash2, RefreshCw, Edit2, Quote, Brain, ChevronDown, ChevronUp } from 'lucide-react';
+import { MemoizedMarkdownRenderer } from '@/lib/markdown';
+import { Bot, User, Copy, Check, Trash2, RefreshCw, Edit2, Quote, Brain } from 'lucide-react';
 import { useToast } from './Toast';
 import { motion } from 'framer-motion';
 import { useChatStore } from '@/store/chatStore';
@@ -18,9 +18,10 @@ interface MessageProps {
   onRegenerate?: () => void;
   onPreviewLink?: (url: string, title?: string) => void;
   onQuote?: (messageId: string) => void;
+  onEdit?: (content: string) => void;
 }
 
-const Message = memo(function Message({ message, isLast, status = 'complete', onDelete, onRegenerate, onPreviewLink, onQuote }: MessageProps) {
+const Message = memo(function Message({ message, isLast, status = 'complete', onDelete, onRegenerate, onPreviewLink, onQuote, onEdit }: MessageProps) {
   const isUser = message.role === 'user';
   const { showToast } = useToast();
   const [isCopied, setIsCopied] = useState(false);
@@ -67,19 +68,8 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
     setIsPressed(true);
   }, [isUser]);
 
-  const handlePointerUp = useCallback(() => {
-    setIsPressed(false);
-  }, []);
-
-  const handlePointerLeave = useCallback(() => {
-    setIsPressed(false);
-  }, []);
-
-  // 计算气泡相对于时间戳的位置
-  const getStatusPosition = () => {
-    if (isUser) return 'left';
-    return 'right';
-  };
+  const handlePointerUp = () => setIsPressed(false);
+  const handlePointerLeave = () => setIsPressed(false);
 
   return (
     <motion.div
@@ -103,7 +93,7 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
         {isUser ? <User size={16} /> : <Bot size={18} className={isStreaming ? 'animate-pulse' : ''} />}
       </motion.div>
 
-      <div className={`flex flex-col max-w-[82%] sm:max-w-[72%] ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`relative flex flex-col max-w-[82%] sm:max-w-[72%] ${isUser ? 'items-end' : 'items-start'}`}>
         {/* 元信息行 */}
         <div className={`mb-0.5 flex items-center gap-2 px-2 text-[10px] font-semibold uppercase tracking-[0.1em] ${isUser ? 'flex-row-reverse text-[hsl(var(--brand-500))]' : 'text-[hsl(var(--guide-8))]'}`}>
           <span>{isUser ? 'User' : 'Assistant'}</span>
@@ -158,7 +148,7 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
               />
               <div className="flex justify-end gap-2">
                 <button onClick={() => setIsEditing(false)} className="rounded-lg bg-background/10 px-3 py-1.5 text-xs hover:bg-background/20">取消</button>
-                <button className="rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-brand-600">保存</button>
+                <button onClick={() => { if (onEdit) { onEdit(editContent); setIsEditing(false); } }} className="rounded-lg bg-background px-3 py-1.5 text-xs font-bold text-brand-600" disabled={!editContent.trim()}>保存</button>
               </div>
             </div>
           ) : (
@@ -182,41 +172,41 @@ const Message = memo(function Message({ message, isLast, status = 'complete', on
                   onPreviewLink={onPreviewLink}
                 />
               ) : (
-                <MarkdownRenderer content={message.content} onPreviewLink={onPreviewLink} />
+                <MemoizedMarkdownRenderer content={message.content} onPreviewLink={onPreviewLink} />
               )}
             </div>
           )}
+        </div>
 
-          {/* 操作菜单 */}
-          <div className={`
-            absolute -top-2 z-10 flex items-center gap-1 rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/99 p-1 shadow-xl backdrop-blur-xl
-            opacity-0 translate-y-1 transition-all duration-150
-            ${showActions ? 'opacity-100 translate-y-0' : ''}
-            sm:opacity-0 sm:translate-y-1 sm:group-hover/message:opacity-100 sm:group-hover/message:translate-y-0 sm:group-focus-within/message:opacity-100 sm:group-focus-within/message:translate-y-0
-            ${isUser ? 'right-2' : 'left-2'}
-          `}>
-            {/* 引用按钮 */}
-            {onQuote && (
-              <button onClick={(e) => { e.stopPropagation(); onQuote(message.id); }} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))] hover:text-primary">
-                <Quote size={14} />
-              </button>
-            )}
-            <button onClick={(e) => { e.stopPropagation(); handleCopy(); }} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))] hover:text-primary">
-              {isCopied ? <Check size={14} className="text-[hsl(var(--success-500))]" /> : <Copy size={14} />}
+        {/* 操作菜单 - 移出气泡 div, 作为兄弟元素 (修 axe nested-interactive) */}
+        <div className={`
+          absolute -top-2 z-10 flex items-center gap-1 rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--bg-surface))]/99 p-1 shadow-xl backdrop-blur-xl
+          opacity-0 translate-y-1 transition-all duration-150
+          ${showActions ? 'opacity-100 translate-y-0' : ''}
+          sm:opacity-0 sm:translate-y-1 sm:group-hover/message:opacity-100 sm:group-hover/message:translate-y-0 sm:group-focus-within/message:opacity-100 sm:group-focus-within/message:translate-y-0
+          ${isUser ? 'right-2' : 'left-2'}
+        `}>
+          {/* 引用按钮 */}
+          {onQuote && (
+            <button onClick={() => onQuote(message.id)} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))] hover:text-primary">
+              <Quote size={14} />
             </button>
-            {isUser ? (
-              <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))]">
-                <Edit2 size={14} />
-              </button>
-            ) : (
-              <button onClick={(e) => { e.stopPropagation(); onRegenerate?.(); }} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))]">
-                <RefreshCw size={14} />
-              </button>
-            )}
-            <button onClick={(e) => { e.stopPropagation(); onDelete?.(); }} className="rounded-lg p-1.5 text-destructive transition-colors hover:bg-destructive/10">
-              <Trash2 size={14} />
+          )}
+          <button onClick={() => handleCopy()} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))] hover:text-primary">
+            {isCopied ? <Check size={14} className="text-[hsl(var(--success-500))]" /> : <Copy size={14} />}
+          </button>
+          {isUser ? (
+            <button onClick={() => setIsEditing(true)} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))]">
+              <Edit2 size={14} />
             </button>
-          </div>
+          ) : (
+            <button onClick={() => onRegenerate?.()} className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-muted))]">
+              <RefreshCw size={14} />
+            </button>
+          )}
+          <button onClick={() => onDelete?.()} className="rounded-lg p-1.5 text-destructive transition-colors hover:bg-destructive/10">
+            <Trash2 size={14} />
+          </button>
         </div>
       </div>
     </motion.div>

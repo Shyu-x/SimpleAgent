@@ -62,9 +62,16 @@ router.get('/platform', async (req, res) => {
   try {
     const apiKey = config.get?.('api.minimaxKey') || config.MINIMAX_API_KEY || process.env.MINIMAX_API_KEY;
     if (!apiKey) {
-      return res.status(503).json({
-        success: false,
-        error: 'MiniMax API Key 未配置'
+      // 无 API Key 时返回内置模型列表
+      const fallbackModels = getAvailableModelsFromAPI();
+      return res.json({
+        success: true,
+        data: {
+          models: fallbackModels.data,
+          total: fallbackModels.data.length,
+          has_more: fallbackModels.has_more,
+          source: 'fallback'
+        }
       });
     }
 
@@ -88,14 +95,22 @@ router.get('/platform', async (req, res) => {
         total: data.data?.length || 0,
         has_more: data.has_more || false,
         first_id: data.first_id,
-        last_id: data.last_id
+        last_id: data.last_id,
+        source: 'api'
       }
     });
   } catch (error) {
-    logger.error('获取平台模型列表失败:', { error: error.message, stack: error.stack });
-    res.status(500).json({
-      success: false,
-      error: error.message || '获取模型列表失败'
+    logger.warn('获取平台模型列表失败，使用内置列表:', { error: error.message });
+    // API 失败时使用内置模型列表作为 fallback
+    const fallbackModels = getAvailableModelsFromAPI();
+    res.json({
+      success: true,
+      data: {
+        models: fallbackModels.data,
+        total: fallbackModels.data.length,
+        has_more: fallbackModels.has_more,
+        source: 'fallback'
+      }
     });
   }
 });

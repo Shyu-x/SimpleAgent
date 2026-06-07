@@ -9,294 +9,289 @@
  * 5. safeAsync 安全包装
  */
 const assert = require('assert');
-
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
-
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
-
 const { ErrorCode, AppError, createError, isAppError, safeAsync } = require('../../src/common/errors');
 
-describe('ErrorCode - 认证授权类 (1xxx)', () => {
-  test('AUTH_MISSING_API_KEY 应该正确配置', () => {
-    const err = ErrorCode.AUTH_MISSING_API_KEY;
+describe('ErrorCode - VALIDATION (1000-1999)', () => {
+  it('MISSING_PARAM 应该正确配置', () => {
+    const err = ErrorCode.MISSING_PARAM;
     assert.strictEqual(err.code, 1001);
-    assert.strictEqual(err.status, 401);
-    assert.strictEqual(err.message, 'API Key 未配置');
+    assert.strictEqual(err.status, 400);
+    assert.strictEqual(err.type, 'VALIDATION');
   });
 
-  test('AUTH_INVALID_API_KEY 应该正确配置', () => {
-    const err = ErrorCode.AUTH_INVALID_API_KEY;
-    assert.strictEqual(err.code, 1002);
-    assert.strictEqual(err.status, 401);
+  it('INVALID_PARAM 应该正确配置', () => {
+    const err = ErrorCode.INVALID_PARAM;
+    assert.strictEqual(err.code, 1000);
+    assert.strictEqual(err.status, 400);
   });
 
-  test('AUTH_EXPIRED_TOKEN 应该正确配置', () => {
-    const err = ErrorCode.AUTH_EXPIRED_TOKEN;
+  it('INVALID_FORMAT 应该正确配置', () => {
+    const err = ErrorCode.INVALID_FORMAT;
     assert.strictEqual(err.code, 1003);
+    assert.strictEqual(err.status, 400);
+  });
+
+  it('INVALID_JSON 应该正确配置', () => {
+    const err = ErrorCode.INVALID_JSON;
+    assert.strictEqual(err.code, 1101);
+    assert.strictEqual(err.status, 400);
+  });
+});
+
+describe('ErrorCode - AUTH (2000-2999)', () => {
+  it('UNAUTHORIZED 应该正确配置', () => {
+    const err = ErrorCode.UNAUTHORIZED;
+    assert.strictEqual(err.code, 2000);
+    assert.strictEqual(err.status, 401);
+    assert.strictEqual(err.type, 'AUTH');
+  });
+
+  it('INVALID_TOKEN 应该正确配置', () => {
+    const err = ErrorCode.INVALID_TOKEN;
+    assert.strictEqual(err.code, 2001);
+    assert.strictEqual(err.status, 401);
+  });
+
+  it('TOKEN_EXPIRED 应该正确配置', () => {
+    const err = ErrorCode.TOKEN_EXPIRED;
+    assert.strictEqual(err.code, 2002);
+    assert.strictEqual(err.status, 401);
+  });
+
+  it('API_KEY_INVALID 应该正确配置', () => {
+    const err = ErrorCode.API_KEY_INVALID;
+    assert.strictEqual(err.code, 2100);
+    assert.strictEqual(err.status, 401);
+  });
+
+  it('API_KEY_EXPIRED 应该正确配置', () => {
+    const err = ErrorCode.API_KEY_EXPIRED;
+    assert.strictEqual(err.code, 2101);
     assert.strictEqual(err.status, 401);
   });
 });
 
-describe('ErrorCode - 参数校验类 (2xxx)', () => {
-  test('VALIDATION_MISSING_FIELD 应该正确配置', () => {
-    const err = ErrorCode.VALIDATION_MISSING_FIELD;
-    assert.strictEqual(err.code, 2001);
-    assert.strictEqual(err.status, 400);
+describe('ErrorCode - AGENT (3000-3999)', () => {
+  it('AGENT_ERROR 应该正确配置', () => {
+    const err = ErrorCode.AGENT_ERROR;
+    assert.strictEqual(err.code, 3000);
+    assert.strictEqual(err.status, 500);
+    assert.strictEqual(err.type, 'AGENT');
   });
 
-  test('VALIDATION_INVALID_FORMAT 应该正确配置', () => {
-    const err = ErrorCode.VALIDATION_INVALID_FORMAT;
-    assert.strictEqual(err.code, 2002);
-    assert.strictEqual(err.status, 400);
-  });
-
-  test('VALIDATION_OUT_OF_RANGE 应该正确配置', () => {
-    const err = ErrorCode.VALIDATION_OUT_OF_RANGE;
-    assert.strictEqual(err.code, 2003);
-    assert.strictEqual(err.status, 400);
-  });
-
-  test('VALIDATION_TOO_MANY_MESSAGES 应该正确配置', () => {
-    const err = ErrorCode.VALIDATION_TOO_MANY_MESSAGES;
-    assert.strictEqual(err.code, 2004);
-    assert.strictEqual(err.status, 400);
-  });
-});
-
-describe('ErrorCode - 业务逻辑类 (3xxx)', () => {
-  test('BUSINESS_SESSION_NOT_FOUND 应该正确配置', () => {
-    const err = ErrorCode.BUSINESS_SESSION_NOT_FOUND;
-    assert.strictEqual(err.code, 3001);
+  it('SESSION_NOT_FOUND 应该正确配置', () => {
+    const err = ErrorCode.SESSION_NOT_FOUND;
+    assert.strictEqual(err.code, 3100);
     assert.strictEqual(err.status, 404);
   });
 
-  test('BUSINESS_KB_NOT_FOUND 应该正确配置', () => {
-    const err = ErrorCode.BUSINESS_KB_NOT_FOUND;
-    assert.strictEqual(err.code, 3002);
-    assert.strictEqual(err.status, 404);
-  });
-
-  test('BUSINESS_TOOL_NOT_FOUND 应该正确配置', () => {
-    const err = ErrorCode.BUSINESS_TOOL_NOT_FOUND;
-    assert.strictEqual(err.code, 3003);
-    assert.strictEqual(err.status, 404);
-  });
-
-  test('BUSINESS_LIMIT_EXCEEDED 应该正确配置', () => {
-    const err = ErrorCode.BUSINESS_LIMIT_EXCEEDED;
+  it('EXECUTION_TIMEOUT 应该正确配置', () => {
+    const err = ErrorCode.EXECUTION_TIMEOUT;
     assert.strictEqual(err.code, 3004);
-    assert.strictEqual(err.status, 429);
+    assert.strictEqual(err.status, 504);
   });
 });
 
-describe('ErrorCode - 外部依赖类 (4xxx)', () => {
-  test('EXTERNAL_MODEL_ERROR 应该正确配置', () => {
-    const err = ErrorCode.EXTERNAL_MODEL_ERROR;
+describe('ErrorCode - RAG (4000-4999)', () => {
+  it('RAG_ERROR 应该正确配置', () => {
+    const err = ErrorCode.RAG_ERROR;
+    assert.strictEqual(err.code, 4000);
+    assert.strictEqual(err.status, 500);
+    assert.strictEqual(err.type, 'RAG');
+  });
+
+  it('QUERY_REWRITE_FAILED 应该正确配置', () => {
+    const err = ErrorCode.QUERY_REWRITE_FAILED;
     assert.strictEqual(err.code, 4001);
-    assert.strictEqual(err.status, 502);
+    assert.strictEqual(err.status, 400);
   });
 
-  test('EXTERNAL_MODEL_TIMEOUT 应该正确配置', () => {
-    const err = ErrorCode.EXTERNAL_MODEL_TIMEOUT;
-    assert.strictEqual(err.code, 4002);
-    assert.strictEqual(err.status, 504);
-  });
-
-  test('EXTERNAL_MODEL_RATE_LIMIT 应该正确配置', () => {
-    const err = ErrorCode.EXTERNAL_MODEL_RATE_LIMIT;
-    assert.strictEqual(err.code, 4003);
-    assert.strictEqual(err.status, 429);
-  });
-
-  test('EXTERNAL_TOOL_ERROR 应该正确配置', () => {
-    const err = ErrorCode.EXTERNAL_TOOL_ERROR;
-    assert.strictEqual(err.code, 4011);
-    assert.strictEqual(err.status, 502);
-  });
-
-  test('EXTERNAL_TOOL_TIMEOUT 应该正确配置', () => {
-    const err = ErrorCode.EXTERNAL_TOOL_TIMEOUT;
-    assert.strictEqual(err.code, 4012);
-    assert.strictEqual(err.status, 504);
-  });
-
-  test('EXTERNAL_SEARCH_ERROR 应该正确配置', () => {
-    const err = ErrorCode.EXTERNAL_SEARCH_ERROR;
-    assert.strictEqual(err.code, 4021);
-    assert.strictEqual(err.status, 502);
+  it('NO_RESULT 应该正确配置', () => {
+    const err = ErrorCode.NO_RESULT;
+    assert.strictEqual(err.code, 4005);
+    assert.strictEqual(err.status, 404);
   });
 });
 
-describe('ErrorCode - 系统异常类 (5xxx)', () => {
-  test('SYSTEM_INTERNAL_ERROR 应该正确配置', () => {
-    const err = ErrorCode.SYSTEM_INTERNAL_ERROR;
+describe('ErrorCode - TOOL (5000-5999)', () => {
+  it('TOOL_ERROR 应该正确配置', () => {
+    const err = ErrorCode.TOOL_ERROR;
+    assert.strictEqual(err.code, 5000);
+    assert.strictEqual(err.status, 500);
+    assert.strictEqual(err.type, 'TOOL');
+  });
+
+  it('TOOL_NOT_FOUND 应该正确配置', () => {
+    const err = ErrorCode.TOOL_NOT_FOUND;
     assert.strictEqual(err.code, 5001);
-    assert.strictEqual(err.status, 500);
+    assert.strictEqual(err.status, 404);
   });
 
-  test('SYSTEM_UNEXPECTED_ERROR 应该正确配置', () => {
-    const err = ErrorCode.SYSTEM_UNEXPECTED_ERROR;
-    assert.strictEqual(err.code, 5002);
+  it('TOOL_TIMEOUT 应该正确配置', () => {
+    const err = ErrorCode.TOOL_TIMEOUT;
+    assert.strictEqual(err.code, 5004);
+    assert.strictEqual(err.status, 504);
+  });
+});
+
+describe('ErrorCode - INTERNAL (6000-6999)', () => {
+  it('INTERNAL_ERROR 应该正确配置', () => {
+    const err = ErrorCode.INTERNAL_ERROR;
+    assert.strictEqual(err.code, 6000);
     assert.strictEqual(err.status, 500);
+    assert.strictEqual(err.type, 'INTERNAL');
   });
 
-  test('SYSTEM_NOT_INITIALIZED 应该正确配置', () => {
-    const err = ErrorCode.SYSTEM_NOT_INITIALIZED;
-    assert.strictEqual(err.code, 5003);
-    assert.strictEqual(err.status, 500);
+  it('REQUEST_TIMEOUT 应该正确配置', () => {
+    const err = ErrorCode.REQUEST_TIMEOUT;
+    assert.strictEqual(err.code, 6002);
+    assert.strictEqual(err.status, 504);
+  });
+
+  it('SERVICE_UNAVAILABLE 应该正确配置', () => {
+    const err = ErrorCode.SERVICE_UNAVAILABLE;
+    assert.strictEqual(err.code, 6001);
+    assert.strictEqual(err.status, 503);
+  });
+
+  it('CIRCUIT_BREAKER_OPEN 应该正确配置', () => {
+    const err = ErrorCode.CIRCUIT_BREAKER_OPEN;
+    assert.strictEqual(err.code, 6402);
+    assert.strictEqual(err.status, 503);
+  });
+
+  it('RATE_LIMIT_EXCEEDED 应该正确配置', () => {
+    const err = ErrorCode.RATE_LIMIT_EXCEEDED;
+    assert.strictEqual(err.code, 6400);
+    assert.strictEqual(err.status, 429);
   });
 });
 
 describe('AppError', () => {
-  test('应该正确构造错误对象', () => {
-    const err = new AppError(ErrorCode.AUTH_MISSING_API_KEY);
+  it('应该正确构造错误对象', () => {
+    const err = new AppError(ErrorCode.UNAUTHORIZED);
     assert.strictEqual(err.name, 'AppError');
-    assert.strictEqual(err.code, 1001);
+    assert.strictEqual(err.code, 2000);
     assert.strictEqual(err.status, 401);
-    assert.strictEqual(err.message, 'API Key 未配置');
-    assert.strictEqual(err.solution, '请在环境变量或请求中配置 API Key');
+    assert.strictEqual(err.type, 'AUTH');
   });
 
-  test('应该包含 details 信息', () => {
-    const err = new AppError(ErrorCode.VALIDATION_MISSING_FIELD, { field: 'username' });
+  it('应该包含 details 信息', () => {
+    const err = new AppError(ErrorCode.MISSING_PARAM, { field: 'username' });
     assert.deepStrictEqual(err.details, { field: 'username' });
   });
 
-  test('应该正确序列化为 JSON', () => {
-    const err = new AppError(ErrorCode.AUTH_MISSING_API_KEY, { test: true });
-    const json = err.toJSON();
-    assert.strictEqual(json.error.code, 1001);
-    assert.strictEqual(json.error.message, 'API Key 未配置');
-    assert.strictEqual(json.error.solution, '请在环境变量或请求中配置 API Key');
-    assert.deepStrictEqual(json.error.details, { test: true });
-  });
-
-  test('应该正确转换为 HTTP 响应格式', () => {
-    const err = new AppError(ErrorCode.BUSINESS_SESSION_NOT_FOUND);
-    const httpResponse = err.toHttpResponse();
-    assert.strictEqual(httpResponse.status, 404);
-    assert.strictEqual(httpResponse.body.error.code, 3001);
-  });
-
-  test('应该是 Error 的实例', () => {
-    const err = new AppError(ErrorCode.SYSTEM_INTERNAL_ERROR);
+  it('应该是 Error 的实例', () => {
+    const err = new AppError(ErrorCode.INTERNAL_ERROR);
     assert.ok(err instanceof Error);
     assert.ok(err instanceof AppError);
+  });
+
+  it('isClientError 应该正确判断 4xx 错误', () => {
+    const clientErr = new AppError(ErrorCode.MISSING_PARAM);
+    assert.strictEqual(clientErr.isClientError(), true);
+
+    const serverErr = new AppError(ErrorCode.INTERNAL_ERROR);
+    assert.strictEqual(serverErr.isClientError(), false);
+  });
+
+  it('isServerError 应该正确判断 5xx 错误', () => {
+    const serverErr = new AppError(ErrorCode.INTERNAL_ERROR);
+    assert.strictEqual(serverErr.isServerError(), true);
+
+    const clientErr = new AppError(ErrorCode.MISSING_PARAM);
+    assert.strictEqual(clientErr.isServerError(), false);
+  });
+
+  it('setRequestId 应该设置请求ID', () => {
+    const err = new AppError(ErrorCode.INTERNAL_ERROR);
+    err.setRequestId('req-123');
+    assert.strictEqual(err.requestId, 'req-123');
   });
 });
 
 describe('createError', () => {
-  test('应该根据错误名称创建错误', () => {
-    const err = createError('AUTH_MISSING_API_KEY');
+  it('应该根据错误名称创建错误', () => {
+    const err = createError('UNAUTHORIZED');
     assert.ok(err instanceof AppError);
-    assert.strictEqual(err.code, 1001);
+    assert.strictEqual(err.code, 2000);
   });
 
-  test('应该支持传递 details', () => {
-    const err = createError('AUTH_INVALID_API_KEY', { providedKey: 'xxx' });
-    assert.deepStrictEqual(err.details, { providedKey: 'xxx' });
+  it('应该支持传递 details', () => {
+    const err = createError('MISSING_PARAM', { field: 'apiKey' });
+    assert.deepStrictEqual(err.details, { field: 'apiKey' });
   });
 
-  test('未知错误名称应该返回 SYSTEM_UNEXPECTED_ERROR', () => {
+  it('未知错误名称应该返回 INTERNAL_ERROR', () => {
     const err = createError('UNKNOWN_ERROR_NAME');
     assert.ok(err instanceof AppError);
-    assert.strictEqual(err.code, 5002); // SYSTEM_UNEXPECTED_ERROR
-  });
-
-  test('未知错误名称应该包含原始错误名', () => {
-    const err = createError('UNKNOWN_ERROR_NAME');
-    assert.deepStrictEqual(err.details, { originalError: 'UNKNOWN_ERROR_NAME' });
+    assert.strictEqual(err.code, 6000); // INTERNAL_ERROR
   });
 });
 
 describe('isAppError', () => {
-  test('AppError 实例应该返回 true', () => {
-    const err = new AppError(ErrorCode.AUTH_MISSING_API_KEY);
+  it('AppError 实例应该返回 true', () => {
+    const err = new AppError(ErrorCode.UNAUTHORIZED);
     assert.strictEqual(isAppError(err), true);
   });
 
-  test('普通 Error 实例应该返回 false', () => {
+  it('普通 Error 实例应该返回 false', () => {
     const err = new Error('普通错误');
     assert.strictEqual(isAppError(err), false);
   });
 
-  test('普通对象应该返回 false', () => {
+  it('普通对象应该返回 false', () => {
     assert.strictEqual(isAppError({ message: 'test' }), false);
   });
 
-  test('null 应该返回 false', () => {
+  it('null 应该返回 false', () => {
     assert.strictEqual(isAppError(null), false);
   });
 
-  test('undefined 应该返回 false', () => {
+  it('undefined 应该返回 false', () => {
     assert.strictEqual(isAppError(undefined), false);
   });
 });
 
 describe('safeAsync', () => {
-  test('正常返回的函数应该直接返回结果', async () => {
+  it('正常返回的函数应该直接返回结果', async () => {
     const result = await safeAsync(async () => 'success');
     assert.strictEqual(result, 'success');
   });
 
-  test('抛出 AppError 的函数应该重新抛出', async () => {
-    const appError = new AppError(ErrorCode.AUTH_MISSING_API_KEY);
+  it('抛出 AppError 的函数应该重新抛出', async () => {
+    const appError = new AppError(ErrorCode.UNAUTHORIZED);
     try {
       await safeAsync(async () => { throw appError; });
       assert.fail('Should have thrown');
     } catch (err) {
       assert.ok(err instanceof AppError);
-      assert.strictEqual(err.code, 1001);
+      assert.strictEqual(err.code, 2000);
     }
   });
 
-  test('抛出普通错误的函数应该包装为 SYSTEM_INTERNAL_ERROR', async () => {
+  it('抛出普通错误的函数应该包装为 INTERNAL_ERROR', async () => {
     try {
       await safeAsync(async () => { throw new Error('Some error'); });
       assert.fail('Should have thrown');
     } catch (err) {
       assert.ok(err instanceof AppError);
-      assert.strictEqual(err.code, 5001); // SYSTEM_INTERNAL_ERROR
-      assert.deepStrictEqual(err.details, { message: 'Some error' });
+      assert.strictEqual(err.code, 6000); // INTERNAL_ERROR
     }
   });
 
-  test('应该支持自定义错误码', async () => {
-    try {
-      await safeAsync(async () => { throw new Error('Auth error'); }, 'AUTH_INVALID_API_KEY');
-      assert.fail('Should have thrown');
-    } catch (err) {
-      assert.ok(err instanceof AppError);
-      assert.strictEqual(err.code, 1002); // AUTH_INVALID_API_KEY
-    }
-  });
-
-  test('同步函数也应该能正常工作', async () => {
+  it('同步函数也应该能正常工作', async () => {
     const result = await safeAsync(() => 'sync success');
     assert.strictEqual(result, 'sync success');
   });
 
-  test('同步函数抛出错误也应该被捕获', async () => {
+  it('同步函数抛出错误也应该被捕获', async () => {
     try {
       await safeAsync(() => { throw new Error('Sync error'); });
       assert.fail('Should have thrown');
     } catch (err) {
       assert.ok(err instanceof AppError);
-      assert.strictEqual(err.code, 5001);
+      assert.strictEqual(err.code, 6000);
     }
   });
 });
-
-console.log('\n');

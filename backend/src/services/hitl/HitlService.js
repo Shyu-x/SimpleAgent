@@ -4,6 +4,9 @@
  */
 
 const { CheckpointStatus, CheckpointType } = require('../../hitl');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+
+const logger = createLogger('hitlService');
 
 /**
  * 创建检查点
@@ -295,7 +298,7 @@ function setupSSEConnection(req, res) {
   res.flushHeaders();
 
   const clientId = `client_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  console.log(`[HITL SSE] Client connected: ${clientId}`);
+  logger.info('SSE Client connected', { clientId });
 
   // 发送连接成功事件
   res.write(`data: ${JSON.stringify(handlers.createConnectedEvent(clientId))}\n\n`);
@@ -335,7 +338,7 @@ function setupSSEConnection(req, res) {
 
   // 客户端断开连接
   req.on('close', () => {
-    console.log(`[HITL SSE] Client disconnected: ${clientId}`);
+    logger.info('SSE Client disconnected', { clientId });
     clearInterval(heartbeat);
     hitlManager.off('checkpoint:created', handleCreated);
     hitlManager.off('checkpoint:approved', handleApproved);

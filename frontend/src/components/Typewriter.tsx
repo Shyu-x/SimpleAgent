@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, memo } from 'react';
 import { useChatStore } from '@/store/chatStore';
-import MarkdownRenderer from './MarkdownRenderer';
+import { MemoizedMarkdownRenderer } from '@/lib/markdown';
 
 interface TypewriterProps {
   text: string;
@@ -100,7 +100,7 @@ const Typewriter = memo(function Typewriter({ text, isComplete, onComplete, onPr
 
   return (
     <div className="typewriter-wrapper relative">
-      <MarkdownRenderer
+      <MemoizedMarkdownRenderer
         content={displayText}
         onPreviewLink={onPreviewLink}
       />

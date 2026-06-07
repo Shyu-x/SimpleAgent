@@ -16,21 +16,7 @@
 const assert = require('assert');
 
 // 简单的测试运行器
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 // 引入限流器
 const QueueRateLimiter = require('../../src/infra/rateLimiter/QueueRateLimiter');
@@ -545,4 +531,3 @@ describe('QueueRateLimiter 边界条件测试', () => {
   });
 });
 
-console.log('\n');

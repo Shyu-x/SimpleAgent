@@ -33,7 +33,7 @@ export default function ToolManagement() {
   // 使用通用 Admin Polling Hook
   const { data: toolsData, loading, error, refresh } = useAdminPolling<ToolsResponse>({
     endpoint: '/api/admin/tools',
-    parser: (res) => res || { tools: [] },
+    parser: (res: unknown) => ((res as { data?: ToolsResponse })?.data) || { tools: [] },
     interval: 30000,
   });
 

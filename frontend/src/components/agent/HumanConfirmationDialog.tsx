@@ -198,6 +198,8 @@ const HumanConfirmationDialog = memo(function HumanConfirmationDialog({
   const [showWarning, setShowWarning] = useState(false);
   const firstOptionRef = useRef<HTMLButtonElement>(null);
   const lastOptionRef = useRef<HTMLButtonElement>(null);
+  const timeoutHandledRef = useRef(false);
+  const prevTimeLeftRef = useRef<number | undefined>(undefined);
 
   const config = typeConfig[request.type];
   const risk = request.riskLevel ? riskConfig[request.riskLevel] : null;
@@ -207,20 +209,35 @@ const HumanConfirmationDialog = memo(function HumanConfirmationDialog({
 
   // 倒计时
   useEffect(() => {
+    // 重置标志当 timeLeft 变化时（重新开始倒计时）
+    if (timeLeft !== prevTimeLeftRef.current) {
+      prevTimeLeftRef.current = timeLeft;
+      if (timeLeft === request.timeout) {
+        timeoutHandledRef.current = false;
+      }
+    }
+
     if (request.timeout && timeLeft && timeLeft > 0) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     }
-    if (request.timeout && timeLeft === 0) {
+    if (request.timeout && timeLeft === 0 && !timeoutHandledRef.current) {
       // 超时处理：选择默认选项或取消
+      timeoutHandledRef.current = true;
       const defaultOption = request.options[0]?.id;
       if (defaultOption) {
-        handleConfirm(defaultOption);
+        // 直接调用 onConfirm，避免 handleConfirm 的闭包问题
+        const response: ConfirmationResponse = {
+          requestId: request.id,
+          selectedOption: defaultOption,
+          timestamp: new Date().toISOString(),
+        };
+        setTimeout(() => onConfirm(response), 200);
       } else {
         onDismiss?.();
       }
     }
-  }, [request.timeout, timeLeft]);
+  }, [request.timeout, request.options, request.id, timeLeft, onDismiss, onConfirm]);
 
   // 键盘快捷键
   useEffect(() => {

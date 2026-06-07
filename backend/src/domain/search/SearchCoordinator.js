@@ -31,6 +31,7 @@ const { Reranker } = require('../rag/Reranker');
 const AppError = require('../../common/errors/AppError');
 const createLogger = require('../../common/logger');
 const logger = createLogger('SearchCoordinator');
+const { sleep } = require('../../utils/retry');
 
 /**
  * 线程池执行器 - 控制并发数量的并行执行器
@@ -93,7 +94,7 @@ class ThreadPoolExecutor {
    */
   async waitForCompletion() {
     while (this.running > 0 || this.queue.length > 0) {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await sleep(10);
     }
     return this.results;
   }

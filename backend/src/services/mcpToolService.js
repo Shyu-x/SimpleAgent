@@ -4,6 +4,9 @@
  */
 const fs = require('fs').promises;
 const path = require('path');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('mcpToolService');
 
 const TOOL_REGISTRY_PATH = path.join(__dirname, '../../data/tool-registry.json');
 
@@ -28,7 +31,7 @@ async function saveToolRegistry(registry) {
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(TOOL_REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf-8');
   } catch (error) {
-    console.error('[MCP] 保存工具注册表失败:', error.message);
+    logger.error('保存工具注册表失败', { error: error.message });
   }
 }
 

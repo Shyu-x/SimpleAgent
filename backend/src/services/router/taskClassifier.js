@@ -6,6 +6,9 @@
 
 const EventEmitter = require('events');
 const { LLMIntentClassifier } = require('../llmIntentClassifier');
+const { createLogger } = require('../../infra/logger/AgentLogger');
+
+const logger = createLogger('taskClassifier');
 
 // 意图类型定义
 const INTENT_TYPES = {
@@ -178,7 +181,7 @@ class TaskClassifier extends EventEmitter {
       return this._classifyWithKeywords(text, startTime);
 
     } catch (error) {
-      console.error('TaskClassifier.classify error:', error.message);
+      logger.error('TaskClassifier.classify error', { error: error.message });
       return this.defaultClassification();
     }
   }
@@ -209,7 +212,7 @@ class TaskClassifier extends EventEmitter {
       return result;
 
     } catch (error) {
-      console.warn('LLM classification failed, falling back to keywords:', error.message);
+      logger.warn('LLM classification failed, falling back to keywords', { error: error.message });
       this.stats.keywordClassifications++;
       return this._classifyWithKeywords(text, startTime);
     }

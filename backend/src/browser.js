@@ -5,6 +5,9 @@
  */
 
 const { chromium, firefox, webkit } = require('playwright');
+const { createLogger } = require('./infra/logger/AgentLogger');
+
+const logger = createLogger('browser');
 
 // 浏览器会话管理
 const sessions = new Map();
@@ -37,10 +40,10 @@ class BrowserAgent {
       }
       this.browser = browser;
       this.defaultContext = await browser.newContext();
-      console.log(`[Browser] Initialized ${browserType}`);
+      logger.info('Initialized', { browserType });
       return { success: true, browserType };
     } catch (error) {
-      console.error('[Browser] Init error:', error.message);
+      logger.error('Init error', { error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -70,11 +73,11 @@ class BrowserAgent {
       };
 
       sessions.set(sessionId, session);
-      console.log(`[Browser] Created session: ${sessionId}`);
+      logger.info('Created session', { sessionId });
 
       return { success: true, sessionId };
     } catch (error) {
-      console.error('[Browser] Create session error:', error.message);
+      logger.error('Create session error', { error: error.message });
       return { success: false, error: error.message };
     }
   }
@@ -346,7 +349,7 @@ class BrowserAgent {
     try {
       await session.context.close();
       sessions.delete(sessionId);
-      console.log(`[Browser] Closed session: ${sessionId}`);
+      logger.info('Closed session', { sessionId });
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
@@ -362,7 +365,7 @@ class BrowserAgent {
       this.browser = null;
       this.defaultContext = null;
       sessions.clear();
-      console.log('[Browser] Closed');
+      logger.info('Closed');
     }
   }
 

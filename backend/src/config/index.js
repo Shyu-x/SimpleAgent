@@ -14,6 +14,7 @@
  */
 const DEFAULT_CONFIG = {
   AppError: require('../common/errors/AppError'),
+  logger: require('../infra/logger/AgentLogger').createLogger('config'),
   /**
    * 模型配置
    * @property {string} provider - 模型提供商 (minimax/openai/anthropic等)
@@ -233,7 +234,7 @@ function validateConfig() {
 
   if (errors.length > 0) {
     const errorMsg = errors.join('\n');
-    console.error(`统一配置中心验证失败:\n${errorMsg}`);
+    DEFAULT_CONFIG.logger.error(`统一配置中心验证失败: ${errorMsg}`);
     throw this.AppError.validationError('config', `配置验证失败:\n${errorMsg}`);
   }
 

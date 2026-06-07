@@ -290,13 +290,16 @@ class DatabasePersister {
   }
 
   async write(trace) {
-    // TODO: 实现数据库写入
+    // 数据库未配置 (DatabasePersister 仅为可选接入点), 暂不写入
+    // 当前仅输出结构化日志, 后续接入 ClickHouse / Postgres 时实现批量插入
     console.log(`[TraceService] Would persist trace ${trace.traceId} to database`);
+    return null;
   }
 
   async writeBatch(traces) {
-    // TODO: 实现批量写入
+    // 数据库未配置, 暂不写入; 批量接口为未来 ClickHouse / 时序数据库预留
     console.log(`[TraceService] Would persist ${traces.length} traces to database`);
+    return null;
   }
 }
 
@@ -312,7 +315,7 @@ class TraceService extends EventEmitter {
     this.version = options.version || '1.0.0';
 
     // 采样配置
-    this.sampleRate = options.sampleRate || 1.0; // 默认全量采样
+    this.sampleRate = options.sampleRate ?? 1.0; // 默认全量采样
     this.minSampleRate = options.minSampleRate || 0.01; // 最低采样率
     this.adaptiveSampling = options.adaptiveSampling !== false; // 自适应采样
 
@@ -403,20 +406,16 @@ class TraceService extends EventEmitter {
     let traceObj = null;
     let parentSpanId = null;
 
-    // 处理参数
-    if (trace instanceof Trace) {
+    // 处理参数 - 优先检查 parent
+    if (parent instanceof Span) {
+      parentSpanId = parent.spanId;
+      traceObj = this.traces.get(parent.traceId);
+    } else if (parent instanceof Trace) {
+      traceObj = parent;
+    } else if (trace instanceof Trace) {
       traceObj = trace;
     } else if (typeof trace === 'string') {
       traceObj = this.traces.get(trace);
-    } else if (parent instanceof Span) {
-      // parent实际上是trace
-      if (parent instanceof Trace) {
-        traceObj = parent;
-      } else {
-        // parent是span
-        parentSpanId = parent.spanId;
-        traceObj = this.traces.get(parent.traceId);
-      }
     }
 
     if (!traceObj) {
@@ -566,6 +565,11 @@ class TraceService extends EventEmitter {
    * 判断是否应该采样
    */
   shouldSample() {
+    // sampleRate=0 表示完全关闭采样
+    if (this.sampleRate === 0) {
+      return false;
+    }
+
     if (!this.adaptiveSampling) {
       return Math.random() < this.sampleRate;
     }

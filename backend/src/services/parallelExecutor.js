@@ -5,6 +5,7 @@
 
 const EventEmitter = require('events');
 const AppError = require('../common/errors/AppError');
+const { sleep } = require('../utils/retry');
 
 // 任务状态
 const TASK_STATUS = {
@@ -105,7 +106,7 @@ class ParallelExecutor extends EventEmitter {
     try {
       while (this.taskQueue.length > 0 || this.runningTasks.size > 0) {
         if (this.isPaused) {
-          await this._wait(100);
+          await sleep(100);
           continue;
         }
 
@@ -116,7 +117,7 @@ class ParallelExecutor extends EventEmitter {
         }
 
         // 等待一段时间再检查
-        await this._wait(50);
+        await sleep(50);
       }
     } finally {
       this.isRunning = false;
@@ -189,13 +190,6 @@ class ParallelExecutor extends EventEmitter {
           reject(error);
         });
     });
-  }
-
-  /**
-   * 等待
-   */
-  _wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -298,7 +292,7 @@ class ParallelExecutor extends EventEmitter {
         throw task.error;
       }
 
-      await this._wait(100);
+      await sleep(100);
     }
 
     throw AppError.internalError(`Task ${id} timeout`);

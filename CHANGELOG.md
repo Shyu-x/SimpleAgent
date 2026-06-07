@@ -1,5 +1,202 @@
 # SimpleAgent - 更新日志
 
+**Sprint #8 完成日期**: 2026-06-06
+
+---
+
+## Sprint #8 / Wave #8.1 变更摘要 (2026-06-06) — 商业化 demo 完整化
+
+### 核心成果
+
+| 类别 | 成果 | 状态 |
+|------|------|------|
+| **A11y 修复** | 81→33 违规 (-60%, Agent 页 landmark + h1 + aria-label) | ✅ 完成 |
+| **Docker 瘦身** | backend 1.4G→177MB (-87%), frontend 1.77G→66MB (-96%) | ✅ 完成 |
+| **多阶段构建** | Dockerfile + .dockerignore (162 规则) | ✅ 完成 |
+| **8 缺口脚本** | login/HITL/admin/a2a/i18n/mcp/alert/incident 占位 | ✅ 完成 |
+| **真实 Docker 部署** | 端口 40000/40001 镜像启动 (Sprint #7 起) | ✅ 完成 |
+| **E2E 真实业务** | RAG 真实 KB 端到端验证 | ✅ 完成 |
+
+### 4 个 commit 列表 (Wave 8.1)
+
+| 提交 | 描述 |
+|------|------|
+| 353aa03 | perf(docker): 多阶段 + slim 镜像 (frontend 1.77G→278MB, -84%) |
+| de15366 | fix(a11y): Agent 页 main + MissionControl h1 + 2 aria-label (81→33 违规) |
+| efb0cf7 | test(journey): 8 个新 journey 脚本骨架 + 占位 README |
+| 998cb2c | perf(docker): 添加 .dockerignore + chown /app |
+
+### 关键改进
+
+- a11y 修复率达 60% (剩余 33: 8 critical button-name, 23 serious color-contrast, 1 nested-interactive, 1 scrollable-region-focusable)
+- Docker 镜像总减少 92% (3.17GB → 243MB)
+- .dockerignore 162 条规则排除 node_modules / .next / .git / docs / tests
+- 8 个新 journey 脚本 (login/hitl/admin/a2a/i18n/mcp/alert/incident) 支持 --live / --dry-run 双模式
+- 真实部署 5 服务: dev 30000/3001/3090 + docker 40000/40001
+- GATE 15/15 GO 持续
+
+### 已知遗留 (Wave 8.2+ 计划)
+
+- 33 个 a11y 违规待 Wave 8.3 主会话处理
+- i18n 0 实现 → Wave 8.2 agent_i18n
+- KMS 0 实现 + 5 个真 TODO → Wave 8.2 agent_kms_todo
+- 8 个 journey 真实截图 → Wave 8.3 主会话
+- Grafana + Prometheus 部署 → Wave 8.3 主会话
+
+---
+
+**Sprint #7 完成日期**: 2026-06-03
+
+---
+
+## Sprint #7 变更摘要 (2026-06-03) — 7 个 P1/P2 BUG 修复
+
+### 核心成果
+
+| 类别 | 成果 | 状态 |
+|------|------|------|
+| **THEME BUG** | FOUC + 桌面主题不实时 | ✅ 完成 |
+| **SSE 重连** | 指数退避 1/2/4/8/16s | ✅ 完成 |
+| **Agent 工具调用** | 主聊天页工具声明 + 协议 | ✅ 完成 |
+| **RAG 集成** | /api/chat 接入 KB 检索 | ✅ 完成 |
+| **iPad 适配** | TabletLayout (feature flag) | ✅ 完成 |
+| **移动深色** | 移动子组件 dark: 适配 | ✅ 完成 |
+| **测试覆盖** | +30 个新测试 (730+890) | ✅ 完成 |
+
+### 7 个 commit 列表
+
+| 提交 | 描述 |
+|------|------|
+| 8aa7d0f | fix(THEME-3): layout.tsx 读取正确 sessionStorage key |
+| 901cf3f | fix(THEME-2): 桌面主题切换实时生效 |
+| b48d9ca | feat(sse): 指数退避自动重连 |
+| 586101a | feat(agent): 主聊天页工具声明注入 |
+| 8822e7d | feat(rag): /api/chat 接入 RAG 知识库检索 |
+| 647a051 | feat(layout): iPad 中间布局 TabletLayout |
+| eb756ff | fix(theme): 移动子组件深色适配 |
+
+### 关键改进
+
+- 7 个 P1/P2 BUG 全部修完
+- 30+ 新单元测试 (后端 +17, 前端 +13)
+- 6 张新截图验证
+- GATE 15/15 GO
+
+---
+
+**Sprint #6 完成日期**: 2026-06-02
+
+---
+
+## Sprint #6 变更摘要 (2026-06-02) — 商业化闭环
+
+### 核心成果
+
+| 类别 | 成果 | 状态 |
+|------|------|------|
+| **上线门禁** | 15 项检查，GO/NO-GO 单命令决策 | ✅ 完成 |
+| **运维手册** | 8 类故障标准处置 + 4 模式部署 | ✅ 完成 |
+| **性能基线** | 6 场景压测，p99 < 162ms | ✅ 完成 |
+| **截图验证** | 5+8+6+6+5=30 张关键状态截图 | ✅ 完成 |
+| **CI 升级** | 新增 smoke job 跑综合测试 | ✅ 完成 |
+| **生产可用性** | 服务起来 + 1612 测试全过 + GATE GO | ✅ 完成 |
+
+### 关键指标
+
+| 指标 | 数值 | 商业级门槛 |
+|------|------|----------|
+| 综合回归 | 26/26 PASS | 全绿 |
+| 后端单测 | 709/709 PASS | 全绿 |
+| 前端单测 | 877/877 PASS | 全绿 |
+| TypeScript | 0 错 | 0 错 |
+| 性能 p99 | < 162ms | < 3000ms |
+| 5xx 错误率 | 0% | < 1% |
+| 上线 GATE | 15/15 GO | 全部 YES |
+
+### 关键产出物
+
+- `docs/online/RUNBOOK.md` — 8 类故障 (R-1 ~ R-8) 标准处置
+- `docs/online/DEPLOY.md` — 4 模式部署 (PM2 / Docker / 后台 / 监控)
+- `docs/online/PERF.md` + `perf-results.json` — 性能报告
+- `docs/online/cleanup-report.md` — Console 清理报告
+- `docs/online/screenshots/*.png` — 5 张核心页面
+- `docs/online/journeys/{conversation,agent,resilience,rag}/*.png` — 25 张旅程截图
+- `scripts/online-gate.sh` — 15 项上线门禁
+- `scripts/smoke.sh` — 12 路径冒烟
+- `scripts/canary-deploy.sh` — 灰度发布
+- `scripts/perf-bench.js` — 6 场景压测
+- `scripts/screenshot.mjs` + 4 个 journey 脚本 — 截图自动化
+- `.github/workflows/ci.yml` — 升级加 smoke job
+
+### 主要变更
+
+**1. 上线门禁系统**
+- `scripts/online-gate.sh` 7 大类 15 项检查
+- 串行 3/3 稳定 GO
+- 文档化"单实例运行"避免并发抖动
+
+**2. 运维 Runbook**
+- R-1 服务挂 / R-2 MiniMax 401/429 / R-3 Qdrant 不可用
+- R-4 SSE 中断 / R-5 连接池耗尽 / R-6 前端 504
+- R-7 内存泄漏 / R-8 磁盘满
+- 每类配黄金 30 秒 + 处置命令
+
+**3. 性能基线**
+- autocannon 6 场景 (health/rag-kb/a2a/tools/admin-tools/admin-traces)
+- p99 < 162ms (门槛 3000ms 留 18x 余量)
+- 新增 `DISABLE_RATE_LIMIT` env 旁路
+- 5xx = 0, 错误率 < 1%
+
+**4. Console 清理 (G2 subagent 主导)**
+- 总扫描 498 → 实际清理 186 (160 REPLACE + 26 REMOVE)
+- 35 个 backend service 转 logger
+- 6 个 frontend 文件移除 debug console
+- 修复 1 处 sed 误改 (mcp.js)
+- 保留 280+ React catch 块 (标准错误处理)
+
+**5. CI 升级**
+- 新增 smoke job (master 自动跑)
+- 启动 backend+frontend → 跑 comprehensive-test
+- 服务挂了自动 cleanup
+
+**6. 截图验证体系**
+- 5 张基础页 (main/welcome/3 admin)
+- 4 个 journey 覆盖对话 / Agent / 响应式 / RAG
+- 共 30 张 PNG 截图，全部 1440×900
+
+### 26 个本 Sprint 提交 (按时间)
+
+| 提交 | 描述 | 类别 |
+|------|------|------|
+| `c6ef11d` | feat(ops): 商业级上线基础设施 | 基础设施 |
+| `25ac801` | refactor(services): a2a/agentEngine/taskQueue 转 logger | Console |
+| `118955b` | chore: remove .bak file | 清理 |
+| `0ef238e` | refactor(services): cacheService/database/redis/pluginManager | Console |
+| `7df4866` | refactor(services): redisCache/errorHandler/memory/extendedTools | Console |
+| `c5a59f2` | refactor(services): multiagent/enhancedAgent/MultiAgentCoordinator | Console |
+| `c58a036` | refactor(services): mcpToolService/mcpSearchService/mcp | Console |
+| `358584a` | refactor(services): QdrantService/ragService/miniMaxSearchTool | Console |
+| `a0a723b` | refactor(services): SemanticMemory/hybridSearch/searchRouter | Console |
+| `edaa5dd` | refactor(services): mockVectorStore/unifiedCache/ingestion | Console |
+| `136ce8d` | feat(perf): 性能基准 + 限流旁路 | 性能 |
+| `86a6abd` | refactor(root,lib): n8n/browser/enhancedMemory/hitl/mcp/search | Console |
+| `3a2e8c1` | refactor(infra/monitoring): gateway/prometheus/qdrant-monitor | Console |
+| `8e86f2c` | refactor(infra): rateLimiter/QueueManager/ConfigCenter/AlertManager | Console |
+| `ece5edf` | refactor(infra): MetricsCollector | Console |
+| `7b247a1` | refactor(middleware): circuitBreaker/rateLimit | Console |
+| `3a864f5` | refactor(utils,common,infra): retry/errors/QueueRateLimiter | Console |
+| `953095c` | refactor(domain,config,services): Reranker/SearchCoordinator | Console |
+| `3f35e69` | chore(verification): add Playwright screenshot script | 截图 |
+| `5d2eaa3` | fix(backend): restore mcp.js from corrupted sed | 修复 |
+| `b6e4f32` | refactor(frontend): useMemorySystem/ExecutionHistory | Console |
+| `eaad892` | refactor(frontend): TraceViewer SSE state | Console |
+| `75bb82a` | refactor(services): miniMaxSearchTool batch loop | Console |
+| `74ae0dc` | docs(online): add G2 console cleanup report | 文档 |
+| `c083bf2` | refactor(services): modelRouter | Console |
+| `b49ee01` | docs(ops): 明确 online-gate 单实例运行 | 文档 |
+
+---
+
 **Sprint #5 完成日期**: 2026-05-16
 
 ---

@@ -15,15 +15,16 @@
 const { withRetry, withTimeout, TimeoutConfig } = require('../../utils/retry');
 const EventEmitter = require('events');
 const AppError = require('../../common/errors/AppError');
+const { ERROR_CLASSIFICATION, classifyRetryableError } = require('../../common/errors/errorClassifier');
 
-// 错误分类
+// 向后兼容的错误类型别名
 const ModelErrorType = {
-  TRANSIENT: 'transient',       // 临时错误，可重试
-  AUTHENTICATION: 'auth',       // 认证错误，不重试
-  RATE_LIMIT: 'rate_limit',     // 限流错误，可重试但需退避
-  PARAMETER: 'parameter',       // 参数错误，不重试
-  NETWORK: 'network',           // 网络错误，可重试
-  UNKNOWN: 'unknown'            // 未知错误
+  TRANSIENT: ERROR_CLASSIFICATION.TRANSIENT,
+  AUTHENTICATION: ERROR_CLASSIFICATION.AUTHENTICATION,
+  RATE_LIMIT: ERROR_CLASSIFICATION.RATE_LIMIT,
+  PARAMETER: ERROR_CLASSIFICATION.PARAMETER,
+  NETWORK: ERROR_CLASSIFICATION.TRANSIENT,  // NETWORK 映射到 TRANSIENT
+  UNKNOWN: ERROR_CLASSIFICATION.UNKNOWN
 };
 
 // 流式回调接口
@@ -217,25 +218,7 @@ class BaseChatModelClient extends EventEmitter {
    * 分类错误类型
    */
   static classifyError(error) {
-    const message = error.message?.toLowerCase() || '';
-
-    if (message.includes('auth') || message.includes('api key') || message.includes('unauthorized')) {
-      return ModelErrorType.AUTHENTICATION;
-    }
-    if (message.includes('rate') || message.includes('limit') || message.includes('quota')) {
-      return ModelErrorType.RATE_LIMIT;
-    }
-    if (message.includes('param') || message.includes('invalid') || message.includes('bad request')) {
-      return ModelErrorType.PARAMETER;
-    }
-    if (message.includes('timeout') || message.includes('network') || message.includes('econnrefused')) {
-      return ModelErrorType.NETWORK;
-    }
-    if (message.includes('500') || message.includes('502') || message.includes('503')) {
-      return ModelErrorType.TRANSIENT;
-    }
-
-    return ModelErrorType.UNKNOWN;
+    return classifyRetryableError(error);
   }
 }
 

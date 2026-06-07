@@ -1215,21 +1215,11 @@ const AgentExecutionPanel = memo(function AgentExecutionPanel({
     }
   }, [state?.status, state?.startedAt]);
 
-  if (!state) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="text-sm text-[hsl(var(--text-muted))]">加载中...</div>
-      </div>
-    );
-  }
-
-  const statusStyle = executionStatusStyles[state.status];
-
   // 计算进度百分比
   const progressPercent = useMemo(() => {
-    if (state.maxIterations === 0) return 0;
-    return Math.round((state.currentIteration / state.maxIterations) * 100);
-  }, [state.currentIteration, state.maxIterations]);
+    if (state?.maxIterations === 0) return 0;
+    return Math.round(((state?.currentIteration || 0) / (state?.maxIterations || 1)) * 100);
+  }, [state?.currentIteration, state?.maxIterations]);
 
   // 切换展开状态
   const toggleSection = useCallback((section: string) => {
@@ -1288,7 +1278,7 @@ const AgentExecutionPanel = memo(function AgentExecutionPanel({
   const handleExportLogs = useCallback(() => {
     const exportData = {
       exportedAt: new Date().toISOString(),
-      executionStatus: state.status,
+      executionStatus: state?.status,
       totalEntries: localLogs.length,
       logs: localLogs.map(log => ({
         ...log,
@@ -1302,7 +1292,17 @@ const AgentExecutionPanel = memo(function AgentExecutionPanel({
     a.download = `workflow_log_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [localLogs, state.status]);
+  }, [localLogs, state?.status]);
+
+  if (!state) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-sm text-[hsl(var(--text-muted))]">加载中...</div>
+      </div>
+    );
+  }
+
+  const statusStyle = executionStatusStyles[state.status];
 
   return (
     <motion.div

@@ -5,6 +5,7 @@
 
 const EventEmitter = require('events');
 const AppError = require('../common/errors/AppError');
+const { sleep } = require('../utils/retry');
 
 // 生成简单UUID
 const generateId = () => {
@@ -388,7 +389,7 @@ class MultiModelRouter extends EventEmitter {
           }
 
           // 重试延迟
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+          await sleep(1000 * attempt);
         }
       }
 

@@ -2,34 +2,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { APIConfig, ConfiguredModel } from '@/types';
+import type { Settings } from '@/types/common';
 import { getBaseURLForModel } from '@/lib/modelConfig';
-
-// SessionStorage 适配器
-const sessionStorageAdapter = {
-  getItem: (name: string): string | null => {
-    if (typeof window === 'undefined') return null;
-    return window.sessionStorage.getItem(name);
-  },
-  setItem: (name: string, value: string): void => {
-    if (typeof window === 'undefined') return;
-    window.sessionStorage.setItem(name, value);
-  },
-  removeItem: (name: string): void => {
-    if (typeof window === 'undefined') return;
-    window.sessionStorage.removeItem(name);
-  },
-};
-
-export interface Settings {
-  theme: 'light' | 'dark' | 'system';
-  desktopPalette: 'aurora' | 'mint' | 'sunset';
-  typingSpeed: number;
-  fontSize: number;
-  windowLayout: 'single' | 'horizontal' | 'vertical' | 'grid';
-  animationsEnabled: boolean;
-  soundEnabled: boolean;
-  autoTitle: boolean;
-}
+import { sessionStorageAdapter } from './storage';
 
 export interface EnabledFeatures {
   webSearch: boolean;

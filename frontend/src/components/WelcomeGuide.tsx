@@ -317,7 +317,7 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md p-4 overflow-hidden"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -326,7 +326,7 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
       <FloatingDecorations />
 
       <motion.div
-        className="w-full max-w-2xl bg-background rounded-2xl shadow-2xl border overflow-hidden relative"
+        className="w-full max-w-2xl max-h-[90vh] bg-background rounded-2xl shadow-2xl border overflow-hidden relative flex flex-col"
         initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -365,8 +365,8 @@ export function WelcomeGuide({ onComplete }: WelcomeGuideProps) {
           </div>
         </div>
 
-        {/* 内容区域 */}
-        <div className="p-6 sm:p-8 min-h-[420px] relative">
+        {/* 内容区域 - 允许滚动 */}
+        <div className="p-6 sm:p-8 min-h-[420px] max-h-[50vh] overflow-y-auto relative flex-1">
           <AnimatePresence mode="wait">
             {/* 欢迎步骤 - 增强动画 */}
             {currentStep === 'welcome' && (

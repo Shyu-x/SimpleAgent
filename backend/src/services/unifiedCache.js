@@ -10,6 +10,9 @@
 
 const NodeCache = require('node-cache');
 const { EventEmitter } = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('unifiedCache');
 
 // ============================================================
 // Redis 客户端管理 (延迟加载)
@@ -58,7 +61,7 @@ function getRedisClient() {
         redisStatus = 'disconnected';
       });
     } catch (error) {
-      console.warn('[Cache] Redis 模块加载失败:', error.message);
+      logger.warn('Redis 模块加载失败', { error: error.message });
     }
   }
   return redisClient;
@@ -555,9 +558,9 @@ const cacheManager = {
 setTimeout(async () => {
   try {
     await cacheManager.initialize();
-    console.log(`[Cache] Redis ${isRedisAvailable() ? '已连接' : '未连接 (使用本地回退)'}`);
+    logger.info('Redis 状态', { connected: isRedisAvailable() });
   } catch (error) {
-    console.warn('[Cache] Redis 初始化失败:', error.message);
+    logger.warn('Redis 初始化失败', { error: error.message });
   }
 }, 2000);
 

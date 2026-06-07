@@ -1,0 +1,146 @@
+groups:
+  - name: simpleagent-critical
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_requests_total[5m])), 1)
+          > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          service: simpleagent
+        annotations:
+          summary: "5xx 错误率 > 1% 持续 5 分钟"
+          description: "当前错误率 {{ $value | humanizePercentage }}, 立即排查后端日志"
+          runbook: "docs/online/RUNBOOK.md#r-1-服务挂"
+
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          ) > 3
+        for: 5m
+        labels:
+          severity: warning
+          service: simpleagent
+        annotations:
+          summary: "P95 延迟 > 3s 持续 5 分钟"
+          description: "当前 P95 {{ $value }}s, 可能是 MiniMax 慢或限流"
+
+      - alert: HeapTooHigh
+        expr: nodejs_heap_size_used_bytes > 524288000
+        for: 10m
+        labels:
+          severity: warning
+          service: simpleagent
+        annotations:
+          summary: "Node Heap > 500MB 持续 10 分钟"
+          description: "当前 {{ $value | humanize1024 }}B, 可能内存泄漏"
+          runbook: "docs/online/RUNBOOK.md#r-7-内存泄漏"
+
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 1
+        for: 2m
+        labels:
+          severity: critical
+          service: simpleagent
+        annotations:
+          summary: "Circuit Breaker 打开"
+          description: "实例 {{ $labels.name }} 已熔断, 检查依赖服务"
+
+      - alert: MiniMaxErrors
+        expr: |
+          sum(rate(model_errors_total[5m])) * 60 > 10
+        for: 3m
+        labels:
+          severity: warning
+          service: simpleagent
+        annotations:
+          summary: "MiniMax 4xx/5xx 突增 > 10/min"
+          description: "可能 API key 失效或配额耗尽"
+          runbook: "docs/online/RUNBOOK.md#r-2-minimax-401429"
+
+      - alert: QueueBacklog
+        expr: queue_length > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: simpleagent
+        annotations:
+          summary: "队列堆积 > 100"
+          description: "可能下游处理慢或消费者挂掉"
+
+      - alert: RateLimitHigh
+        expr: |
+          sum by (tier) (rate(rate_limit_exceeded_total[5m])) * 60 > 50
+        for: 5m
+        labels:
+          severity: info
+          service: simpleagent
+        annotations:
+          summary: "限流触发频繁 (tier={{ $labels.tier }})"
+          description: "可能客户端失控或 DDoS"
+
+      # === Sprint6 新增告警 — P99 / 严重错误率 / 连接掉线 ===
+
+      - alert: HighErrorRateCritical
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_requests_total[5m])), 1)
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: simpleagent
+        annotations:
+          summary: "5xx 错误率 > 5% 持续 5 分钟 (严重)"
+          description: "当前错误率 {{ $value | humanizePercentage }}, 立即排查后端日志, 5% 是严重故障阈值"
+          runbook: "docs/online/RUNBOOK.md#r-1-服务挂"
+
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            sum by (le) (rate(http_request_duration_seconds_bucket[5m]))
+          ) > 3
+        for: 5m
+        labels:
+          severity: warning
+          service: simpleagent
+        annotations:
+          summary: "P99 延迟 > 3s 持续 5 分钟"
+          description: "当前 P99 {{ $value }}s, P99 比 P95 慢 1.5x+ 通常意味着尾部慢请求堆积, 可能是 MiniMax 慢或限流"
+          runbook: "docs/online/RUNBOOK.md#r-3-接口慢"
+
+      - alert: ActiveConnectionsDropped
+        # http_requests_active 是 in-flight HTTP 请求数, SSE 连接走长连接 HTTP
+        # 因此该指标可作为活跃 SSE 连接的代理
+        # 触发条件: 1 分钟前活跃连接 > 50 (系统在忙), 当前活跃连接 < 5 (几乎全掉)
+        expr: |
+          http_requests_active < 5
+          and
+          http_requests_active offset 1m > 50
+        for: 1m
+        labels:
+          severity: critical
+          service: simpleagent
+        annotations:
+          summary: "活跃 HTTP/SSE 连接断崖式下跌 (1m 前 > 50, 当前 < 5)"
+          description: "SSE/长连接客户端大规模断连, 可能是网络分区、服务 hang 或前端 SDK bug. 立即查 sseService 日志"
+          runbook: "docs/online/RUNBOOK.md#r-6-sse-断连"
+
+  - name: simpleagent-info
+    interval: 60s
+    rules:
+      - alert: NoTraffic
+        expr: sum(rate(http_requests_total[5m])) * 60 < 0.1
+        for: 10m
+        labels:
+          severity: info
+          service: simpleagent
+        annotations:
+          summary: "10 分钟内无流量"
+          description: "可能服务全挂或客户端断连"

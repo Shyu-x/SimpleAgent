@@ -9,10 +9,10 @@
 
   --brand-50: 199 100% 96%;
   --brand-100: 199 100% 93%;
-  --brand-400: 199 89% 60%;
-  --brand-500: 199 89% 53%;
-  --brand-600: 199 85% 45%;
-  --brand-700: 199 80% 35%;
+  --brand-400: 199 89% 50%;
+  --brand-500: 199 85% 32%;   /* A11Y: 再加深 1 档, 浅底白字对比度从 4.46 提升到 5.89 */
+  --brand-600: 199 80% 24%;
+  --brand-700: 199 75% 16%;
 
   --accent-400: 205 82% 68%;
   --accent-500: 205 80% 58%;
@@ -46,7 +46,7 @@
   --icon-history: 210 25% 52%;
 
   --text-main: 222 47% 11%;
-  --text-muted: 215 16% 47%;
+  --text-muted: 215 18% 35%;   /* A11Y: 加深 (原 47%), 浅底对比度 4.5 → 7.0 */
   --border-subtle: 214 32% 91%;
   --border-strong: 214 20% 80%;
   --guide-1: 12 88% 73%;
@@ -617,6 +617,44 @@ body {
       box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2);
     }
   }
+}
+
+@layer utilities {
+  /* ============================================
+     A11Y 修复: 颜色对比度 (WCAG AA 4.5:1)
+     2026-06-07 修复 24+ 个 color-contrast 违规
+     ============================================ */
+
+  /* ----- 全局: 浅底 text-gray-400 (管理后台空状态) ----- */
+  /* gray-400 #9ca3af 在白底对比度 2.53 → gray-500 #6b7280 = 4.83 */
+  .text-gray-400 { color: #6b7280; }
+
+  /* ----- 知识库 bg-blue-50 内 text-gray-500 (文档/向量/分块 统计标签) ----- */
+  /* gray-500 #6b7280 在 blue-50 #eff6ff 上 4.44 → gray-600 #4b5563 = 6.94 */
+  .bg-blue-50 .text-gray-500 { color: #4b5563; }
+
+  /* ----- MissionControl (深色 bg-slate-900) 内的浅色文字 ----- */
+  /* text-slate-500 #64748b 在 slate-900 #0f172a 上 3.75 → slate-400 #94a3b8 = 6.96 */
+  .bg-slate-900 .text-slate-500 { color: #94a3b8; }
+  /* text-slate-400 #94a3b8 在 slate-400/20 #333d4f 上 4.26 → slate-300 #cbd5e1 = 7.36 */
+  .bg-slate-900 .text-slate-400 { color: #cbd5e1; }
+  /* text-gray-400 #6b7280 (经上面 .text-gray-400 全局 override 后) 在 #0f172a 上 3.69 → slate-400 #94a3b8 = 6.96 */
+  .bg-slate-900 .text-gray-400 { color: #94a3b8; }
+
+  /* text-violet-400 #a78bfa 在 violet-400/20 #37385c 上 4.09 → violet-300 #c4b5fd = 6.04 */
+  .bg-violet-400\/20 { color: #c4b5fd; }
+
+  /* text-blue-400 #60a5fa 在 blue-400/20 #293d5c 上 4.31 → blue-300 #93c5fd = 6.08 */
+  .bg-blue-400\/20 { color: #93c5fd; }
+
+  /* text-slate-400 #94a3b8 在 slate-400/20 #333d4f 上 4.26 → slate-300 #cbd5e1 */
+  .bg-slate-400\/20 { color: #cbd5e1; }
+
+  /* text-slate-500 #64748b 在 white/5 #262e3f 上 2.85 → slate-400 #94a3b8 = 5.30 */
+  .bg-white\/5 { color: #94a3b8; }
+
+  /* white on bg-blue-500 #3b82f6 3.67 → 加深到 blue-600 #2563eb = 5.17 (发布全部按钮) */
+  .bg-slate-900 .bg-blue-500 { background-color: #2563eb; }
 }
 
 .split-screen-transition {

@@ -5,6 +5,9 @@
 
 const { spawn } = require('child_process');
 const { EventEmitter } = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('mcpSearchService');
 
 class MiniMaxMCPSearchService extends EventEmitter {
   constructor(options = {}) {
@@ -64,17 +67,17 @@ class MiniMaxMCPSearchService extends EventEmitter {
         });
 
         this.process.stderr.on('data', (data) => {
-          console.error('[MCP Search] stderr:', data.toString());
+          logger.error('MCP Search stderr', { data: data.toString() });
         });
 
         this.process.on('error', (error) => {
-          console.error('[MCP Search] 进程错误:', error);
+          logger.error('MCP Search 进程错误', { error: error.message });
           this.emit('error', error);
           reject(error);
         });
 
         this.process.on('exit', (code) => {
-          console.log('[MCP Search] 进程退出:', code);
+          logger.info('MCP Search 进程退出', { code });
           this.initialized = false;
           this.emit('exit', code);
         });
@@ -82,12 +85,12 @@ class MiniMaxMCPSearchService extends EventEmitter {
         // 等待进程启动
         setTimeout(() => {
           this.initialized = true;
-          console.log('[MCP Search] MCP 服务器已启动');
+          logger.info('MCP Search 服务器已启动');
           resolve();
         }, 2000);
 
       } catch (error) {
-        console.error('[MCP Search] 启动失败:', error);
+        logger.error('MCP Search 启动失败', { error: error.message });
         reject(error);
       }
     });
@@ -165,7 +168,7 @@ class MiniMaxMCPSearchService extends EventEmitter {
         totalResults: result.totalResults || 0
       };
     } catch (error) {
-      console.error('[MCP Search] 搜索失败:', error);
+      logger.error('MCP Search 搜索失败', { error: error.message });
       return {
         success: false,
         error: error.message,

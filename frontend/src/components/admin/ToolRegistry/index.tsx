@@ -16,6 +16,8 @@ import { fetchApi, fetchStream } from '@/lib/apiClient';
 import { useAdminPolling } from '@/hooks/useAdminSSE';
 import { ErrorBoundary } from '@/utils/ErrorBoundary';
 import { FallbackUI } from '@/components/FallbackUI';
+import ConfirmDialog from '@/components/agent/MissionControl/ConfirmDialog';
+import AlertDialog from '@/components/agent/MissionControl/AlertDialog';
 
 // ============ 类型定义 ============
 
@@ -80,7 +82,7 @@ export default function ToolRegistryPage() {
   // SSE 订阅 categories 数据
   const { data: categoriesData, loading, refresh } = useAdminPolling<ToolCategory[]>({
     endpoint: '/api/admin/tools/categories',
-    parser: (res) => res?.data?.data?.categories || [],
+    parser: (res: unknown) => (res as { data?: { categories: ToolCategory[] } })?.data?.categories || [],
     interval: 30000,
   });
 
@@ -164,6 +166,11 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
   const [filterEnabled, setFilterEnabled] = useState<string>('all');
   const [selectedTool, setSelectedTool] = useState<ToolInfo | null>(null);
 
+  // 删除确认对话框状态
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; toolName?: string }>({
+    isOpen: false,
+  });
+
   useEffect(() => {
     fetchTools();
   }, [search, filterCategory, filterEnabled]);
@@ -187,14 +194,31 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
   };
 
   const deleteTool = async (name: string) => {
-    if (!confirm(`确定要删除工具 "${name}" 吗？`)) return;
-    await fetchApi(`/api/admin/tools/${name}`, { method: 'DELETE' });
+    setDeleteDialog({ isOpen: true, toolName: name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { toolName } = deleteDialog;
+    if (!toolName) return;
+    setDeleteDialog({ isOpen: false });
+    await fetchApi(`/api/admin/tools/${toolName}`, { method: 'DELETE' });
     fetchTools();
     onRefresh();
   };
 
   return (
-    <div className="space-y-4">
+    <>
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        title="删除工具"
+        message={deleteDialog.toolName ? `确定要删除工具 "${deleteDialog.toolName}" 吗？` : '确定要删除该工具吗？'}
+        confirmLabel="删除"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteDialog({ isOpen: false })}
+      />
+      <div className="space-y-4">
       {/* 工具栏 */}
       <div className="flex gap-3 items-center">
         <div className="relative flex-1 max-w-md">
@@ -210,6 +234,7 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
+          aria-label="按分类筛选工具"
           className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
         >
           <option value="all">全部分类</option>
@@ -220,6 +245,7 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
         <select
           value={filterEnabled}
           onChange={(e) => setFilterEnabled(e.target.value)}
+          aria-label="按状态筛选工具"
           className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
         >
           <option value="all">全部状态</option>
@@ -273,7 +299,7 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
             >
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{tool.name}</h3>
+                  <h2 className="text-base font-semibold text-gray-900 dark:text-white">{tool.name}</h2>
                   <span className="text-xs text-gray-500">{tool.category}</span>
                 </div>
                 <span
@@ -290,19 +316,25 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
                 {tool.description}
               </p>
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>调用 {tool.stats.callCount} 次</span>
-                <span>平均 {tool.stats.avgLatency.toFixed(0)}ms</span>
-                <span
-                  className={
-                    tool.stats.successCount / Math.max(tool.stats.callCount, 1) > 0.9
-                      ? 'text-green-600'
-                      : tool.stats.successCount / Math.max(tool.stats.callCount, 1) > 0.7
-                      ? 'text-yellow-600'
-                      : 'text-red-600'
-                  }
-                >
-                  成功率 {(tool.stats.successCount / Math.max(tool.stats.callCount, 1) * 100).toFixed(0)}%
-                </span>
+                {(() => {
+                  const s = safeStats(tool.stats);
+                  return (
+                    <>
+                      <span>调用 {s.callCount} 次</span>
+                      <span>平均 {s.avgLatency.toFixed(0)}ms</span>
+                      <span
+                        className={
+                          s.callCount === 0 ? 'text-gray-500'
+                          : s.successCount / s.callCount > 0.9 ? 'text-green-600'
+                          : s.successCount / s.callCount > 0.7 ? 'text-yellow-600'
+                          : 'text-red-600'
+                        }
+                      >
+                        成功率 {s.callCount === 0 ? 0 : (s.successCount / s.callCount * 100).toFixed(0)}%
+                      </span>
+                    </>
+                  );
+                })()}
               </div>
               <div className="flex gap-2 mt-3">
                 <button
@@ -331,7 +363,8 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
       {selectedTool && (
         <ToolDetailPanel tool={selectedTool} onClose={() => setSelectedTool(null)} />
       )}
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -401,32 +434,39 @@ function ToolDetailPanel({ tool, onClose }: { tool: ToolInfo; onClose: () => voi
         {/* 调用统计 */}
         <div>
           <h3 className="text-sm font-medium text-gray-500 mb-2">调用统计</h3>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
-              <div className="text-lg font-bold text-blue-600">{tool.stats.callCount}</div>
-              <div className="text-xs text-gray-500">总调用</div>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
-              <div className="text-lg font-bold text-green-600">{tool.stats.successCount}</div>
-              <div className="text-xs text-gray-500">成功</div>
-            </div>
-            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2">
-              <div className="text-lg font-bold text-red-600">{tool.stats.failureCount}</div>
-              <div className="text-xs text-gray-500">失败</div>
-            </div>
-          </div>
-          <div className="mt-2 space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">平均延迟</span>
-              <span className="text-gray-900 dark:text-white">{tool.stats.avgLatency.toFixed(0)}ms</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">最后调用</span>
-              <span className="text-gray-900 dark:text-white">
-                {tool.stats.lastCalled ? formatDate(tool.stats.lastCalled) : '从未'}
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const s = safeStats(tool.stats);
+            return (
+              <>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-blue-600">{s.callCount}</div>
+                    <div className="text-xs text-gray-500">总调用</div>
+                  </div>
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-green-600">{s.successCount}</div>
+                    <div className="text-xs text-gray-500">成功</div>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-red-600">{s.failureCount}</div>
+                    <div className="text-xs text-gray-500">失败</div>
+                  </div>
+                </div>
+                <div className="mt-2 space-y-1 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">平均延迟</span>
+                    <span className="text-gray-900 dark:text-white">{s.avgLatency.toFixed(0)}ms</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">最后调用</span>
+                    <span className="text-gray-900 dark:text-white">
+                      {s.lastCalled ? formatDate(s.lastCalled) : '从未'}
+                    </span>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>
@@ -445,6 +485,13 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
     parameters: [] as ToolParameter[],
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // 提示对话框状态
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
 
   const addParameter = () => {
     setFormData(prev => ({
@@ -469,7 +516,7 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
 
   const handleSubmit = async () => {
     if (!formData.name.trim() || !formData.description.trim()) {
-      alert('请填写名称和描述');
+      setAlertDialog({ isOpen: true, title: '输入验证', message: '请填写名称和描述' });
       return;
     }
     setSubmitting(true);
@@ -483,8 +530,16 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* 基本信息 */}
+    <>
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant="info"
+        onClose={() => setAlertDialog({ isOpen: false, title: '', message: '' })}
+      />
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* 基本信息 */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <h3 className="font-medium text-gray-900 dark:text-white mb-4">基本信息</h3>
         <div className="space-y-4">
@@ -636,6 +691,7 @@ function ToolRegister({ onSuccess }: { onSuccess: () => void }) {
         </button>
       </div>
     </div>
+    </>
   );
 }
 
@@ -651,14 +707,8 @@ function ToolTester() {
   const outputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('[ToolRegistry] Fetching tools from /api/admin/tools');
     fetchApi<{ success: boolean; data: { tools: ToolInfo[] } }>('/api/admin/tools').then(({ data, error }) => {
-      console.log('[ToolRegistry] API response:', { data, error });
-      if (error) {
-        console.error('[ToolRegistry] API error:', error);
-      }
       if (data?.data) {
-        console.log('[ToolRegistry] Setting tools, count:', data.data.tools.length);
         setTools(data.data.tools);
       }
     });

@@ -38,6 +38,8 @@ import {
   Activity,
 } from 'lucide-react';
 import { fetchApi } from '@/lib/apiClient';
+import { BACKEND_MODE_MAP } from './CoordinationModeSelector';
+import type { CoordinationMode as SelectorCoordinationMode } from './CoordinationModeSelector';
 
 // ==================== 类型定义 ====================
 
@@ -721,7 +723,7 @@ export const AgentTeamOrchestrator = memo(function AgentTeamOrchestrator({
           title: 'Agent Team 协作任务',
           tasks: taskDefinitions,
           options: {
-            coordinationMode,
+            coordinationMode: BACKEND_MODE_MAP[coordinationMode as SelectorCoordinationMode] || coordinationMode,
             useSSE: true,
             enableHooks: true,
           },

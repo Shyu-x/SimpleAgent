@@ -427,7 +427,8 @@ export const ExecutionHistory = memo(function ExecutionHistory({
 
   // 恢复执行（模拟）
   const handleRestore = useCallback((id: string) => {
-    console.log('Restore execution:', id);
+    // 恢复执行 - 实际恢复逻辑待实现
+    void id;
   }, []);
 
   // 删除执行记录（前端本地）

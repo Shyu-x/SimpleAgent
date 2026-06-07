@@ -15,6 +15,7 @@
 const { AppError } = require('../../common/errors');
 const { withTimeout } = require('../../utils/retry');
 const createLogger = require('../../../common/logger');
+const { classifyRetryableError } = require('../../common/errors/errorClassifier');
 const logger = createLogger('MCPToolExecutor');
 
 /**
@@ -113,7 +114,7 @@ class MCPToolExecutor {
         success: false,
         tool: name,
         error: error.message || 'MCP tool execution failed',
-        errorType: this._classifyError(error),
+        errorType: classifyRetryableError(error),
         executionTime: Date.now() - startTime
       };
     }
@@ -396,18 +397,6 @@ class MCPToolExecutor {
       annotations: tool.annotations || null,
       mcpServer: mcpConfig.name
     }));
-  }
-
-  /**
-   * 分类错误类型
-   * @private
-   */
-  _classifyError(error) {
-    if (error.message?.includes('timeout')) return 'timeout';
-    if (error.message?.includes('401') || error.message?.includes('403')) return 'auth';
-    if (error.message?.includes('429')) return 'rate_limit';
-    if (error.message?.includes('ECONNREFUSED')) return 'network';
-    return 'execution';
   }
 
   /**

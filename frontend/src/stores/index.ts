@@ -14,10 +14,10 @@ export type { ConversationState } from './conversationStore';
 export { useMessageStore } from './messageStore';
 
 export { useUIStore } from './uiStore';
-export type { Settings, EnabledFeatures, SidePanelContent, AppMode } from './uiStore';
+export type { EnabledFeatures, SidePanelContent, AppMode } from './uiStore';
 
 export { useSettingsStore } from './settingsStore';
-export type { Settings as AppSettings } from './settingsStore';
+export type { Settings as AppSettings } from '@/types/common';
 
 export { useMemoryStore } from './memoryStore';
 

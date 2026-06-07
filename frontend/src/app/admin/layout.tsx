@@ -97,6 +97,7 @@ export default function AdminLayout({
           <button
             onClick={() => setMobileSidebarOpen(true)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label="打开管理菜单"
           >
             <ChevronLeft size={20} />
           </button>
@@ -108,6 +109,7 @@ export default function AdminLayout({
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="hidden lg:flex absolute top-4 left-4 z-10 p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          aria-label={sidebarOpen ? '折叠侧边栏' : '展开侧边栏'}
         >
           <ChevronLeft
             size={18}
@@ -152,6 +154,7 @@ function AdminSidebar({
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            aria-label="关闭侧边栏"
           >
             <X size={18} />
           </button>

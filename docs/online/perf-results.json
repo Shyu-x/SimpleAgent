@@ -1,0 +1,164 @@
+[
+  {
+    "scenario": "health-check",
+    "description": "健康检查（最低开销）",
+    "url": "http://localhost:30000/api/health",
+    "connections": 1,
+    "duration_sec": 10,
+    "requests": 81633,
+    "errors": 771,
+    "timeouts": 0,
+    "non2xx": 0,
+    "2xx": 81633,
+    "4xx": 0,
+    "5xx": 0,
+    "latency_ms": {
+      "p50": 98,
+      "p90": 111,
+      "p97_5": 130,
+      "p99": 162,
+      "p99_9": 311,
+      "mean": 101.49,
+      "max": 320
+    },
+    "throughput": {
+      "rps_mean": 7422,
+      "bytes_per_sec": 3888687
+    }
+  },
+  {
+    "scenario": "rag-kb-list",
+    "description": "RAG 知识库列表（DB 查询）",
+    "url": "http://localhost:30000/api/rag/kb",
+    "connections": 5,
+    "duration_sec": 10,
+    "requests": 9135,
+    "errors": 0,
+    "timeouts": 0,
+    "non2xx": 0,
+    "2xx": 9135,
+    "4xx": 0,
+    "5xx": 0,
+    "latency_ms": {
+      "p50": 4,
+      "p90": 8,
+      "p97_5": 10,
+      "p99": 13,
+      "p99_9": 20,
+      "mean": 4.93,
+      "max": 30
+    },
+    "throughput": {
+      "rps_mean": 914,
+      "bytes_per_sec": 443606630
+    }
+  },
+  {
+    "scenario": "a2a-agents",
+    "description": "A2A Agent 列表（内存）",
+    "url": "http://localhost:30000/api/a2a/agents",
+    "connections": 5,
+    "duration_sec": 10,
+    "requests": 94838,
+    "errors": 0,
+    "timeouts": 0,
+    "non2xx": 0,
+    "2xx": 94838,
+    "4xx": 0,
+    "5xx": 0,
+    "latency_ms": {
+      "p50": 0,
+      "p90": 0,
+      "p97_5": 1,
+      "p99": 1,
+      "p99_9": 3,
+      "mean": 0.05,
+      "max": 13
+    },
+    "throughput": {
+      "rps_mean": 8623,
+      "bytes_per_sec": 3181196
+    }
+  },
+  {
+    "scenario": "tools-list",
+    "description": "工具列表（注册表）",
+    "url": "http://localhost:30000/api/tools",
+    "connections": 5,
+    "duration_sec": 10,
+    "requests": 44889,
+    "errors": 0,
+    "timeouts": 0,
+    "non2xx": 0,
+    "2xx": 44889,
+    "4xx": 0,
+    "5xx": 0,
+    "latency_ms": {
+      "p50": 0,
+      "p90": 1,
+      "p97_5": 2,
+      "p99": 2,
+      "p99_9": 3,
+      "mean": 0.47,
+      "max": 10
+    },
+    "throughput": {
+      "rps_mean": 4490,
+      "bytes_per_sec": 64159744
+    }
+  },
+  {
+    "scenario": "admin-tools",
+    "description": "Admin 工具管理（DB）",
+    "url": "http://localhost:30000/api/admin/tools",
+    "connections": 3,
+    "duration_sec": 10,
+    "requests": 48667,
+    "errors": 0,
+    "timeouts": 0,
+    "non2xx": 0,
+    "2xx": 48667,
+    "4xx": 0,
+    "5xx": 0,
+    "latency_ms": {
+      "p50": 0,
+      "p90": 0,
+      "p97_5": 1,
+      "p99": 1,
+      "p99_9": 2,
+      "mean": 0.1,
+      "max": 7
+    },
+    "throughput": {
+      "rps_mean": 4425,
+      "bytes_per_sec": 65171084
+    }
+  },
+  {
+    "scenario": "admin-traces",
+    "description": "Admin 链路追踪（DB）",
+    "url": "http://localhost:30000/api/admin/traces",
+    "connections": 3,
+    "duration_sec": 10,
+    "requests": 89271,
+    "errors": 0,
+    "timeouts": 0,
+    "non2xx": 0,
+    "2xx": 89271,
+    "4xx": 0,
+    "5xx": 0,
+    "latency_ms": {
+      "p50": 0,
+      "p90": 0,
+      "p97_5": 0,
+      "p99": 0,
+      "p99_9": 2,
+      "mean": 0.01,
+      "max": 8
+    },
+    "throughput": {
+      "rps_mean": 8927,
+      "bytes_per_sec": 3713434
+    }
+  }
+]

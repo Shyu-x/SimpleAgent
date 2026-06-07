@@ -1,0 +1,162 @@
+# ============================================
+# SimpleAgent - 项目级 .dockerignore
+# 构建上下文: 项目根目录 (.)
+# ============================================
+
+# --- Git & VCS ---
+.git
+.gitignore
+.gitattributes
+.github
+.gitlab
+.svn
+.hg
+.idea
+.vscode
+*.swp
+*.swo
+
+# --- 环境与密钥 ---
+.env
+.env.*
+!.env.example
+.envrc
+*.pem
+*.key
+secrets/
+
+# --- Node 依赖 (镜像内重新安装) ---
+**/node_modules
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/.pnpm-store
+
+# --- 构建产物 ---
+**/.next
+**/dist
+**/build
+**/out
+**/coverage
+**/.cache
+**/.turbo
+**/.parcel-cache
+**/.tsbuildinfo
+**/*.tsbuildinfo
+
+# --- 日志与临时文件 ---
+**/*.log
+**/logs
+**/tmp
+**/temp
+**/.DS_Store
+**/Thumbs.db
+
+# --- 文档与报告 (对运行无意义) ---
+**/*.md
+**/README.md
+**/CHANGELOG.md
+!frontend/README.md
+docs/
+test-results/
+test-output/
+test-screenshots/
+screenshots/
+dogfood-output/
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.svg.bak
+**/*.pdf
+**/*.puml
+
+# --- 测试相关 ---
+**/test
+**/tests
+**/__tests__
+**/coverage
+**/jest.config.*
+**/jest.setup.js
+**/vitest.config.*
+**/playwright.config.*
+**/playwright-report
+**/.playwright
+**/test-data
+**/test-results
+**/test-*.js
+**/test-*.cjs
+**/test-*.mjs
+**/check-*.cjs
+**/check-*.js
+**/verify-*.js
+**/*-test.js
+**/*-test.cjs
+**/*.test.js
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.js
+**/*.spec.ts
+**/*.spec.tsx
+
+# --- Docker 自身 ---
+**/Dockerfile
+**/Dockerfile.*
+**/docker-compose*.yml
+**/docker-compose*.yaml
+**/.dockerignore
+docker/
+
+# --- 数据与运行时产物 ---
+**/data/
+**/workspace/
+**/plugins/
+**/prisma/
+**/prisma.config.ts
+**/coverage/
+**/2026-*
+**/*.bak
+**/*.tmp
+**/*.orig
+
+# --- CI/CD & 工具配置 ---
+.claude/
+.omc/
+.hooks/
+.cursorrules
+.cursor/
+.aider*
+.mcp.json
+.eslintcache
+.eslintignore
+**/eslint.config.*
+**/commitlint.config.*
+**/lint-staged.config.*
+
+# --- 性能/分析报告 ---
+**/*-REPORT.md
+**/*-REPORT.json
+**/*-report.md
+**/*-report.json
+**/PERFORMANCE-*
+**/BUNDLE-*
+**/test-output/
+
+# --- 后端特殊排除 (前端构建) ---
+# 注意: 这里不能用 frontend/ 排除, 因为前端 Dockerfile 需要 frontend/ 源码
+# 但后端 Dockerfile 只需要 backend/, 所以后端 Dockerfile 内显式只 COPY backend/
+
+# --- 前端特殊排除 (后端构建) ---
+# frontend/ 在后端构建时完全不需要
+# 但本 .dockerignore 是通用的, 实际后端/前端 Dockerfile 各自精准 COPY
+
+# --- 根目录的杂项 ---
+package-lock.json
+yarn.lock
+image_001.jpg
+conversation-view.png
+overview.puml
+check_*.cjs
+test-components/
+test-output/

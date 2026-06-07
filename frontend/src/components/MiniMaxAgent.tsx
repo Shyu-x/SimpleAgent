@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useChatStore } from '@/store/chatStore';
 import { Sparkles, Bot, Send, Square, Trash2, ChevronDown, ChevronUp, Loader2, Terminal } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
+import { BACKEND_URL } from '@/lib/config';
 
 interface AgentMessage {
   id: string;
@@ -12,8 +13,8 @@ interface AgentMessage {
   timestamp: number;
   toolCalls?: Array<{
     name: string;
-    input: any;
-    result?: any;
+    input: Record<string, unknown>;
+    result?: { success: boolean; content?: string; error?: string };
   }>;
 }
 
@@ -52,7 +53,6 @@ export default function MiniMaxAgent() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -67,7 +67,7 @@ export default function MiniMaxAgent() {
     try {
       const apiConfig = useChatStore.getState().apiConfig;
 
-      const response = await fetch(`${backendUrl}/api/minimax-agent/session`, {
+      const response = await fetch(`${BACKEND_URL}/api/minimax-agent/session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -95,7 +95,7 @@ export default function MiniMaxAgent() {
       } else {
         throw new Error(data.error);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('初始化会话失败:', error);
       setConfig(prev => ({ ...prev, status: 'error' }));
       return null;
@@ -124,7 +124,7 @@ export default function MiniMaxAgent() {
     setConfig(prev => ({ ...prev, status: 'running' }));
 
     try {
-      const response = await fetch(`${backendUrl}/api/minimax-agent/execute`, {
+      const response = await fetch(`${BACKEND_URL}/api/minimax-agent/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -277,14 +277,15 @@ export default function MiniMaxAgent() {
     }
 
     setIsLoading(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : '未知错误';
       console.error('执行任务失败:', error);
       setMessages(prev => [
         ...prev.filter(m => m.role !== 'thinking'),
         {
           id: `error_${Date.now()}`,
           role: 'assistant',
-          content: `错误: ${error.message}`,
+          content: `错误: ${message}`,
           timestamp: Date.now()
         }
       ]);
@@ -303,7 +304,7 @@ export default function MiniMaxAgent() {
   // 清除会话
   const clearSession = async () => {
     if (config.sessionId) {
-      await fetch(`${backendUrl}/api/minimax-agent/session/${config.sessionId}`, {
+      await fetch(`${BACKEND_URL}/api/minimax-agent/session/${config.sessionId}`, {
         method: 'DELETE'
       });
     }

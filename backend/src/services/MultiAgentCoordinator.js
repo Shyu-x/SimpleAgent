@@ -14,6 +14,9 @@
 const EventEmitter = require('events');
 const { v4: uuidv4 } = require('uuid');
 const AppError = require('../common/errors/AppError');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('MultiAgentCoordinator');
 
 /**
  * 协调模式枚举
@@ -999,11 +1002,11 @@ class MultiAgentCoordinator extends EventEmitter {
     };
 
     if (level === 'error') {
-      console.error(`[MultiAgentCoordinator] ${message}`, data);
+      logger.error(message, data);
     } else if (level === 'warn') {
-      console.warn(`[MultiAgentCoordinator] ${message}`, data);
+      logger.warn(message, data);
     } else {
-      console.log(`[MultiAgentCoordinator] ${message}`, data);
+      logger.info(message, data);
     }
   }
 

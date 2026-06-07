@@ -124,6 +124,7 @@ const SortableTaskItem = memo(function SortableTaskItem({
         <button
           onClick={() => onToggleExpand(task.id)}
           className="mt-1 p-0.5 hover:bg-white/10 rounded transition-colors"
+          aria-label={isExpanded ? '折叠任务详情' : '展开任务详情'}
         >
           {isExpanded ? (
             <ChevronDown size={14} className="text-slate-400" />
@@ -283,7 +284,10 @@ const SortableTaskItem = memo(function SortableTaskItem({
         </div>
 
         {/* 更多按钮 */}
-        <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded">
+        <button
+          aria-label="任务更多操作"
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/10 rounded"
+        >
           <MoreVertical size={14} className="text-slate-400" />
         </button>
       </div>

@@ -8,6 +8,34 @@ const router = express.Router();
 const { AgentLogger } = require('../infra/logger/AgentLogger');
 const AppError = require('../common/errors/AppError');
 
+// 导入 sseService 中的工具注入/RAG 注入函数（B4 TOOL-1 + B5 RAG-1）
+// 修复前端聊天页（/api/v1/chat/completions）不经过 sseService 的问题
+const { injectToolDeclarations, injectRagContext } = require('../services/sseService');
+
+// RAG 注入懒加载（避免循环依赖和启动开销）
+let _intentClassifier = null;
+let _ragService = null;
+
+function getIntentClassifier() {
+  if (!_intentClassifier) {
+    // 使用 services/agent/IntentClassifier：含 knowledge/tool_use/chat/task 语义
+    const { IntentClassifier } = require('../services/agent/IntentClassifier');
+    _intentClassifier = new IntentClassifier({
+      enableLLM: false,
+      enableKeywordFallback: true
+    });
+  }
+  return _intentClassifier;
+}
+
+function getRagService() {
+  if (!_ragService) {
+    const RAGService = require('../services/ragService');
+    _ragService = RAGService.getSharedRagService();
+  }
+  return _ragService;
+}
+
 // 导入熔断器
 const { getBreakerWithPreset } = require('../common/resilience/integration');
 
@@ -33,16 +61,31 @@ function getApiKey(req) {
 }
 
 // 转换请求格式
-function transformRequest(req) {
+async function transformRequest(req) {
   const { messages, model, temperature, max_tokens, stream, reasoning_split, thinking_budget } = req.body;
+  let augmentedMessages = injectToolDeclarations(messages || []);
+  // B5: RAG 注入
+  const lastUserMsg = (messages || []).filter(m => m.role === 'user').pop();
+  if (lastUserMsg && typeof lastUserMsg.content === 'string') {
+    try {
+      augmentedMessages = await injectRagContext(
+        augmentedMessages,
+        lastUserMsg.content,
+        {
+          intentClassifier: getIntentClassifier(),
+          ragService: getRagService()
+        }
+      );
+    } catch (e) {
+      logger.warn('RAG injection skipped (proxy)', { err: e.message });
+    }
+  }
   return {
     model: model || PROVIDER.defaultModel,
-    messages: messages.map(m => {
-      if (Array.isArray(m.content)) {
-        return { role: m.role === 'assistant' ? 'assistant' : m.role, content: m.content };
-      }
-      return { role: m.role === 'assistant' ? 'assistant' : m.role, content: m.content };
-    }),
+    messages: augmentedMessages.map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : m.role,
+      content: m.content
+    })),
     max_tokens: max_tokens || 8192,
     temperature: temperature !== undefined ? temperature : 0.7,
     stream: stream !== false,
@@ -65,15 +108,25 @@ router.post('/chat/completions', async (req, res) => {
   });
 
   const targetUrl = PROVIDER.baseUrl + PROVIDER.chatEndpoint;
-  const requestBody = transformRequest(req);
+  const requestBody = await transformRequest(req);
+  // 调试：记录注入结果
+  logger.info('proxy /chat/completions augmentation', {
+    msgCount: (req.body.messages || []).length,
+    augmentedCount: (requestBody.messages || []).length,
+    hasToolDecl: (requestBody.messages[0]?.content || '').includes('get_current_time'),
+    hasKBInject: requestBody.messages.some(m => m.content?.includes('[知识库:'))
+  });
 
   // 使用熔断器保护外部 API 调用
   await minimaxBreaker.execute(async () => {
     const response = await fetch(targetUrl, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      timeout: 120000
+      headers: {
+        'X-Api-Key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -91,10 +144,10 @@ router.post('/chat/completions', async (req, res) => {
       const decoder = new TextDecoder();
       let buffer = '';
 
-      const readChunk = async () => {
-        try {
+      try {
+        while (true) {
           const { done, value } = await reader.read();
-          if (done) { res.end(); return; }
+          if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split('\n');
@@ -110,14 +163,19 @@ router.post('/chat/completions', async (req, res) => {
                   res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: data.delta.text } }] })}\n\n`);
                 } else if (data.type === 'content_block_delta' && data.delta?.type === 'thinking_delta') {
                   res.write(`data: ${JSON.stringify({ type: 'thinking_delta', content: data.delta.thinking })}\n\n`);
+                } else if (data.type === 'message_delta' && data.delta?.stop_reason) {
+                  // 发送消息结束信号，然后发送 [DONE]
+                  res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+                  res.write('data: [DONE]\n\n');
                 }
               } catch (e) { /* ignore */ }
             }
           }
-          readChunk();
-        } catch (err) { logger.error('Stream error', { error: err.message, stack: err.stack }); res.end(); }
-      };
-      readChunk();
+        }
+      } catch (err) {
+        logger.error('Stream error', { error: err.message, stack: err.stack });
+      }
+      res.end();
     } else {
       const data = await response.json();
       res.json(data);
@@ -138,15 +196,18 @@ router.post('/chat', async (req, res) => {
   }
 
   const { messages, model, temperature, max_tokens } = req.body;
-  const requestBody = transformRequest({ body: { messages, model, temperature, max_tokens, stream: false } });
+  const requestBody = await transformRequest({ body: { messages, model, temperature, max_tokens, stream: false } });
 
   // 使用熔断器保护外部 API 调用
   await minimaxBreaker.execute(async () => {
     const response = await fetch(PROVIDER.baseUrl + PROVIDER.chatEndpoint, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'anthropic-version': '2023-06-01', 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      timeout: 120000
+      headers: {
+        'X-Api-Key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
@@ -165,6 +226,46 @@ router.post('/chat', async (req, res) => {
 // GET /health - 健康检查
 router.get('/health', (req, res) => {
   res.json({ status: 'ok', provider: PROVIDER.name, configured: !!getApiKey(req), baseUrl: PROVIDER.baseUrl, defaultModel: PROVIDER.defaultModel });
+});
+
+// POST /debug-augment - 调试用：返回注入后的消息，不调用 LLM
+router.post('/debug-augment', async (req, res) => {
+  const { messages = [] } = req.body;
+  const augmented = injectToolDeclarations(messages);
+  const lastUserMsg = messages.filter(m => m.role === 'user').pop();
+  let debugInfo = { ragInjected: false };
+  if (lastUserMsg && typeof lastUserMsg.content === 'string') {
+    let intent;
+    try {
+      const ic = getIntentClassifier();
+      intent = await ic.classify(lastUserMsg.content);
+      debugInfo.intent = intent.intent;
+      debugInfo.confidence = intent.confidence;
+    } catch (e) {
+      debugInfo.intentError = e.message;
+    }
+    try {
+      const kbs = getRagService().listKnowledgeBases();
+      debugInfo.kbCount = kbs.length;
+      debugInfo.kbNames = kbs.slice(0, 3).map(k => k.name);
+      const final = await injectRagContext(augmented, lastUserMsg.content, {
+        intentClassifier: getIntentClassifier(),
+        ragService: getRagService()
+      });
+      if (final.length > augmented.length) {
+        debugInfo.ragInjected = true;
+        debugInfo.ragContent = final[1].content.slice(0, 200);
+      }
+    } catch (e) {
+      debugInfo.ragError = e.message;
+    }
+  }
+  res.json({
+    inputCount: messages.length,
+    outputCount: augmented.length,
+    firstSystemHasTools: (augmented[0]?.content || '').includes('get_current_time'),
+    debug: debugInfo
+  });
 });
 
 module.exports = router;

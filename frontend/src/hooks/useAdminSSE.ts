@@ -1,211 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { BACKEND_URL } from '@/lib/config';
+import {
+  AdminSSEClient,
+  type AdminSSEEvent,
+  type SystemStats,
+  type QdrantStatus,
+  type CollectionInfo,
+  type AdminSSEClientOptions,
+} from '@/lib/sse-clients';
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:30000';
-
-/**
- * 系统统计数据
- */
-export interface SystemStats {
-  totalRequests: number;
-  successRate: number;
-  avgLatency: number;
-  activeSessions: number;
-  modelCalls: { model: string; count: number }[];
-  toolCalls: { tool: string; count: number }[];
-  knowledgeBases: { name: string; docCount: number }[];
-}
-
-/**
- * Qdrant 状态
- */
-export interface QdrantStatus {
-  success: boolean;
-  healthy: boolean;
-  status: string;
-  collection: string;
-}
-
-/**
- * 集合信息
- */
-export interface CollectionInfo {
-  name: string;
-  vectorsCount: number;
-  pointsCount: number;
-  status: string;
-  indexed: boolean;
-}
-
-/**
- * SSE 事件类型
- */
-export interface AdminSSEEvent {
-  type: 'connected' | 'stats' | 'qdrant_status' | 'qdrant_collections' | 'heartbeat' | 'error';
-  clientId?: string;
-  data?: SystemStats | QdrantStatus | CollectionInfo[];
-  timestamp?: number;
-  message?: string;
-}
-
-interface UseAdminSSEOptions<T = unknown> {
-  autoConnect?: boolean;
-  reconnect?: boolean;
-  reconnectInterval?: number;
-  maxReconnectAttempts?: number;
-  endpoint?: string;
-  parser?: (response: any) => T;
-  interval?: number;
-  onConnected?: () => void;
-  onDisconnected?: () => void;
-  onError?: (error: Error) => void;
-  onStatsUpdate?: (stats: SystemStats) => void;
-  onQdrantStatusChange?: (status: QdrantStatus) => void;
-  onCollectionsUpdate?: (collections: CollectionInfo[]) => void;
-}
-
-/**
- * Admin SSE 客户端类
- */
-class AdminSSEClient<T = unknown> {
-  private eventSource: EventSource | null = null;
-  private options: Required<UseAdminSSEOptions<T>>;
-  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
-  private destroyed = false;
-  private reconnectAttempts = 0;
-
-  constructor(options: UseAdminSSEOptions<T>) {
-    this.options = {
-      autoConnect: true,
-      reconnect: true,
-      reconnectInterval: 3000,
-      maxReconnectAttempts: 5,
-      endpoint: '',
-      parser: (res: any) => res as T,
-      interval: 0,
-      onConnected: () => {},
-      onDisconnected: () => {},
-      onError: () => {},
-      onStatsUpdate: () => {},
-      onQdrantStatusChange: () => {},
-      onCollectionsUpdate: () => {},
-      ...options
-    };
-  }
-
-  private getBaseUrl(): string {
-    return `${API_BASE}/api/admin/stream`;
-  }
-
-  connect(): void {
-    if (this.destroyed || !this.options.autoConnect) return;
-    if (this.eventSource) {
-      this.eventSource.close();
-    }
-
-    try {
-      this.eventSource = new EventSource(this.getBaseUrl());
-
-      this.eventSource.onopen = () => {
-        console.log('[AdminSSE] Connected');
-        this.reconnectAttempts = 0;
-        this.options.onConnected();
-      };
-
-      this.eventSource.onmessage = (event) => {
-        try {
-          const data: AdminSSEEvent = JSON.parse(event.data);
-          this._handleEvent(data);
-        } catch (error) {
-          console.error('[AdminSSE] Failed to parse message:', error);
-        }
-      };
-
-      this.eventSource.onerror = (error) => {
-        console.error('[AdminSSE] Error:', error);
-        this.options.onError(new Error('SSE connection error'));
-
-        if (!this.destroyed && this.options.reconnect) {
-          this._scheduleReconnect();
-        }
-      };
-    } catch (error) {
-      console.error('[AdminSSE] Failed to connect:', error);
-      this.options.onError(error as Error);
-    }
-  }
-
-  private _scheduleReconnect(): void {
-    if (this.reconnectAttempts >= this.options.maxReconnectAttempts) {
-      console.log('[AdminSSE] Max reconnect attempts reached');
-      return;
-    }
-
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-    }
-
-    this.reconnectAttempts++;
-    console.log(`[AdminSSE] Reconnecting... (${this.reconnectAttempts}/${this.options.maxReconnectAttempts})`);
-
-    this.reconnectTimeout = setTimeout(() => {
-      if (!this.destroyed) {
-        this.connect();
-      }
-    }, this.options.reconnectInterval);
-  }
-
-  private _handleEvent(data: AdminSSEEvent): void {
-    switch (data.type) {
-      case 'connected':
-        console.log('[AdminSSE] Connection confirmed, clientId:', data.clientId);
-        break;
-
-      case 'stats':
-        if (data.data) {
-          this.options.onStatsUpdate(data.data as SystemStats);
-        }
-        break;
-
-      case 'qdrant_status':
-        if (data.data) {
-          this.options.onQdrantStatusChange(data.data as QdrantStatus);
-        }
-        break;
-
-      case 'qdrant_collections':
-        if (data.data) {
-          this.options.onCollectionsUpdate(data.data as CollectionInfo[]);
-        }
-        break;
-
-      case 'heartbeat':
-        break;
-
-      case 'error':
-        console.error('[AdminSSE] Server error:', data.message);
-        break;
-    }
-  }
-
-  disconnect(): void {
-    this.destroyed = true;
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
-    }
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
-    }
-    this.options.onDisconnected();
-  }
-
-  isConnected(): boolean {
-    return this.eventSource !== null && !this.destroyed;
-  }
-}
+// Re-export types for backward compatibility
+export type { SystemStats, QdrantStatus, CollectionInfo, AdminSSEEvent } from '@/lib/sse-clients';
 
 /**
  * useAdminSSE - 管理后台 SSE 实时推送 Hook
@@ -218,7 +25,11 @@ class AdminSSEClient<T = unknown> {
  *   onQdrantStatusChange: (status) => setQdrantStatus(status),
  * });
  */
-export function useAdminSSE<T = unknown>(options: UseAdminSSEOptions = {}): {
+export function useAdminSSE<T = unknown>(options: AdminSSEClientOptions & {
+  endpoint?: string;
+  parser?: (response: unknown) => T;
+  interval?: number;
+} = {}): {
   connected: boolean;
   error: string | null;
   data: T | null;
@@ -248,7 +59,7 @@ export function useAdminSSE<T = unknown>(options: UseAdminSSEOptions = {}): {
     if (!options.endpoint) return;
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}${options.endpoint}`);
+      const response = await fetch(`${BACKEND_URL}${options.endpoint}`);
       if (response.ok) {
         const result = await response.json();
         const parsedData = options.parser ? options.parser(result) : (result as T);
@@ -274,7 +85,7 @@ export function useAdminSSE<T = unknown>(options: UseAdminSSEOptions = {}): {
   useEffect(() => {
     optionsRef.current = options;
     if (options.autoConnect !== undefined) autoConnectRef.current = options.autoConnect;
-  });
+  }, [options]);
 
   const initClient = useCallback(() => {
     if (clientRef.current) {
@@ -282,7 +93,10 @@ export function useAdminSSE<T = unknown>(options: UseAdminSSEOptions = {}): {
     }
 
     clientRef.current = new AdminSSEClient({
-      ...options,
+      autoConnect: options.autoConnect,
+      reconnect: options.reconnect,
+      reconnectInterval: options.reconnectInterval,
+      maxReconnectAttempts: options.maxReconnectAttempts,
       onConnected: () => {
         setConnected(true);
         setError(null);
@@ -353,7 +167,7 @@ interface UseAdminPollingOptions<T> {
   /** API 端点 */
   endpoint: string;
   /** 数据解析函数 */
-  parser: (response: any) => T;
+  parser: (response: unknown) => T;
   /** 轮询间隔（毫秒），默认 30s */
   interval?: number;
   /** 是否启用，默认 true */
@@ -415,15 +229,21 @@ export function useAdminPolling<T>(options: UseAdminPollingOptions<T>): UseAdmin
   const isFirstLoadRef = useRef(true);
   const previousDataRef = useRef<T | null>(null);
 
+  // 用 ref 持有最新 options, 避免 inline parser/options 导致 useCallback 身份变化
+  // 进而引发 useEffect 重复执行 → 无限请求循环 (修复: 1 个 endpoint 不再被请求 400+ 次)
+  const optionsRef = useRef({ endpoint, parser, enabled, onInitialLoad, onUpdate, onError });
+  optionsRef.current = { endpoint, parser, enabled, onInitialLoad, onUpdate, onError };
+
   const loadData = useCallback(async (isInitial = false) => {
-    if (!enabled) return;
+    const opts = optionsRef.current;
+    if (!opts.enabled) return;
 
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
+      const response = await fetch(`${BACKEND_URL}${opts.endpoint}`, {
         headers: { 'Content-Type': 'application/json' },
       });
       const json = await response.json();
-      const parsedData = parser(json);
+      const parsedData = opts.parser(json);
 
       if (isFirstLoadRef.current && previousDataRef.current === parsedData) {
         setLoading(false);
@@ -440,16 +260,16 @@ export function useAdminPolling<T>(options: UseAdminPollingOptions<T>): UseAdmin
         isFirstLoadRef.current = false;
         setLoading(false);
         setIsConnected(true);
-        onInitialLoad?.(parsedData);
+        opts.onInitialLoad?.(parsedData);
       } else {
-        onUpdate?.(parsedData);
+        opts.onUpdate?.(parsedData);
       }
     } catch (err) {
       const error = err instanceof Error ? err : new Error('未知错误');
       setError(error);
-      onError?.(error);
+      opts.onError?.(error);
     }
-  }, [endpoint, parser, enabled, onInitialLoad, onUpdate, onError]);
+  }, []);
 
   const refresh = useCallback(async () => {
     await loadData(false);

@@ -6,6 +6,9 @@
 const fs = require('fs');
 const path = require('path');
 const EventEmitter = require('events');
+const { createLogger } = require('../infra/logger/AgentLogger');
+
+const logger = createLogger('pluginManager');
 
 // 插件类型
 const PluginType = {
@@ -187,7 +190,7 @@ class PluginManager extends EventEmitter {
       try {
         await pluginInstance.hooks.onLoad(this.getPluginContext(pluginId));
       } catch (error) {
-        console.error(`Plugin ${pluginId} onLoad error:`, error);
+        logger.error('Plugin onLoad error', { pluginId, error: error.message });
       }
     }
 

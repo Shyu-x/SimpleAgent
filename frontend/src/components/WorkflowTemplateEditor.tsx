@@ -326,7 +326,23 @@ export default function WorkflowTemplateEditor() {
   }, []);
 
   // 导入模板
-  const handleImport = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  // 导入数据类型的接口
+interface ImportedAgentData {
+  name?: string;
+  role?: string;
+  goal?: string;
+  backstory?: string;
+  tools?: string[];
+}
+
+interface ImportedTaskData {
+  name?: string;
+  description?: string;
+  agentId?: string;
+  dependencies?: string[];
+}
+
+const handleImport = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -347,7 +363,7 @@ export default function WorkflowTemplateEditor() {
           name: data.name,
           description: data.description || '',
           process: data.process || 'sequential',
-          agents: data.agents.map((a: any, i: number) => ({
+          agents: data.agents.map((a: ImportedAgentData, i: number) => ({
             id: `agent-${i}`,
             name: a.name || a.role || `Agent ${i + 1}`,
             role: a.role || a.name || `Agent ${i + 1}`,
@@ -356,7 +372,7 @@ export default function WorkflowTemplateEditor() {
             tools: a.tools || [],
             status: 'idle' as const,
           })),
-          tasks: data.tasks.map((t: any, i: number) => ({
+          tasks: data.tasks.map((t: ImportedTaskData, i: number) => ({
             id: `task-${i}`,
             name: t.name || `任务 ${i + 1}`,
             description: t.description || '',

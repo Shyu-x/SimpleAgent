@@ -53,7 +53,6 @@ export default function TraceViewer() {
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
-        console.log('Trace SSE 连接已建立');
         setLoading(false);
       };
 

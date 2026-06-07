@@ -13,8 +13,16 @@
  */
 
 const fs = require('fs');
+
+// 孤立请求超时清理（5分钟）- 模块级常量（修复：原本定义在构造函数内部导致 ReferenceError）
+const ORPHAN_REQUEST_TIMEOUT = 5 * 60 * 1000;
 const path = require('path');
 const os = require('os');
+const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
+const { getStateValue } = require('../../utils/circuitStateUtils');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('metricsCollector');
 
 class MetricsCollector {
   /**
@@ -25,6 +33,9 @@ class MetricsCollector {
     WARNING: 'warning',
     INFO: 'info',
   };
+
+  // 预编译的正则表达式（带 g 标志，exec 循环才能推进 lastIndex）
+  static LABEL_KEY_REGEX = /(\w+)="([^"]*)"/g;
 
   /**
    * 创建指标采集器实例
@@ -51,6 +62,8 @@ class MetricsCollector {
     this._histogramBuckets = options.buckets || [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
     this._summaryQuantiles = options.quantiles || [0.5, 0.9, 0.95, 0.99];
 
+    // 孤立请求超时清理（5分钟）- 引用模块级常量
+
     // 活跃请求追踪
     this._activeRequests = 0;
     this._requestStartTimes = new Map();
@@ -58,6 +71,7 @@ class MetricsCollector {
     // 定时任务
     this._persistTimer = null;
     this._cleanupTimer = null;
+    this._nodejsMetricsTimer = null;
 
     // 告警规则
     this._alertRules = new Map();
@@ -87,8 +101,25 @@ class MetricsCollector {
     // 启动定时清理
     this._startCleanupTimer();
 
+    // 启动 Node.js 运行时指标更新
+    this._startNodejsMetricsTimer();
+
     // 注册默认指标
     this._registerDefaultMetrics();
+  }
+
+  /**
+   * 启动 Node.js 运行时指标定时更新
+   * @private
+   */
+  _startNodejsMetricsTimer() {
+    if (this._nodejsMetricsTimer) {
+      clearInterval(this._nodejsMetricsTimer);
+    }
+    // 每 10 秒更新一次 Node.js 运行时指标
+    this._nodejsMetricsTimer = setInterval(() => {
+      this.updateNodejsMetrics();
+    }, 10000);
   }
 
   /**
@@ -100,6 +131,10 @@ class MetricsCollector {
     this.setGauge('process_cpu_seconds_total', 0);
     this.setGauge('process_memory_bytes', 0);
     this.setGauge('process_open_handles', 0);
+
+    // Node.js 运行时指标
+    this.setGauge('nodejs_active_handles', 0);
+    this.setGauge('nodejs_active_requests', 0);
 
     // 请求指标
     this.setGauge('http_requests_active', 0);
@@ -119,6 +154,11 @@ class MetricsCollector {
     // 队列指标
     this.setGauge('queue_length', 0);
     this.setGauge('queue_capacity', 0);
+
+    // 限流指标
+    this.setGauge('rate_limit_current_quota', 0, { user_level: 'trial' });
+    this.setGauge('rate_limit_current_quota', 0, { user_level: 'registered' });
+    this.setGauge('rate_limit_current_quota', 0, { user_level: 'premium' });
   }
 
   // ==================== Counter 操作 ====================
@@ -166,11 +206,14 @@ class MetricsCollector {
   setGauge(name, value, labels = {}) {
     const labelKey = this._labelsToKey(labels);
 
+    // 确保值为数字类型
+    const numValue = typeof value === 'number' ? value : 0;
+
     if (!this._gauges.has(name)) {
       this._gauges.set(name, new Map());
     }
 
-    this._gauges.get(name).set(labelKey, value);
+    this._gauges.get(name).set(labelKey, numValue);
   }
 
   /**
@@ -270,12 +313,23 @@ class MetricsCollector {
     const data = histogram.get(labelKey);
     if (!data) return null;
 
+    const last100 = data.values.length > 0 ? data.values.slice(-100) : [];
+    // Single pass for min/max calculation
+    let min = 0, max = 0;
+    if (last100.length > 0) {
+      min = max = last100[0];
+      for (const v of last100) {
+        if (v < min) min = v;
+        if (v > max) max = v;
+      }
+    }
+
     return {
       count: data.count,
       sum: data.sum,
       mean: data.count > 0 ? data.sum / data.count : 0,
-      min: data.values.length > 0 ? Math.min(...data.values.slice(-100)) : 0,
-      max: data.values.length > 0 ? Math.max(...data.values.slice(-100)) : 0,
+      min,
+      max,
       buckets: { ...data.buckets },
     };
   }
@@ -360,13 +414,23 @@ class MetricsCollector {
   // ==================== 活跃请求追踪 ====================
 
   /**
+   * 确保值为数字类型
+   * @param {*} value - 任意值
+   * @returns {number}
+   * @private
+   */
+  _ensureNumeric(value) {
+    return typeof value === 'number' ? value : parseInt(value, 10) || 0;
+  }
+
+  /**
    * 记录请求开始
    * @param {string} requestId - 请求ID
    * @param {Object} [labels={}] - 标签
    * @returns {void}
    */
   startRequest(requestId, labels = {}) {
-    this._activeRequests++;
+    this._activeRequests = this._ensureNumeric(this._activeRequests) + 1;
     this._requestStartTimes.set(requestId, {
       startTime: Date.now(),
       labels,
@@ -386,8 +450,8 @@ class MetricsCollector {
       return null;
     }
 
-    const duration = (Date.now() - startData.startTime) / 1000; // 转换为秒
-    this._activeRequests = Math.max(0, this._activeRequests - 1);
+    const duration = (Date.now() - startData.startTime) / 1000;
+    this._activeRequests = Math.max(0, this._ensureNumeric(this._activeRequests) - 1);
     this._requestStartTimes.delete(requestId);
 
     // 更新指标
@@ -397,6 +461,15 @@ class MetricsCollector {
 
     // 检查是否需要告警
     this._checkAlerts();
+
+    // 清理孤立请求（超过5分钟未结束的）
+    const now = Date.now();
+    for (const [id, data] of this._requestStartTimes) {
+      if (now - data.startTime > ORPHAN_REQUEST_TIMEOUT) {
+        this._requestStartTimes.delete(id);
+        this._activeRequests = Math.max(0, this._ensureNumeric(this._activeRequests) - 1);
+      }
+    }
 
     return {
       duration,
@@ -432,8 +505,9 @@ class MetricsCollector {
   _keyToLabels(key) {
     if (!key) return {};
     const labels = {};
-    const matches = key.matchAll(/(\w+)="([^"]*)"/g);
-    for (const match of matches) {
+    const regex = MetricsCollector.LABEL_KEY_REGEX;
+    let match;
+    while ((match = regex.exec(key)) !== null) {
       labels[match[1]] = match[2];
     }
     return labels;
@@ -482,7 +556,22 @@ class MetricsCollector {
     for (const [name, data] of this._gauges) {
       result[name] = {};
       for (const [key, value] of data) {
-        result[name][key || '{}'] = value;
+        // 处理数组类型（转为长度）
+        if (Array.isArray(value)) {
+          result[name][key || '{}'] = value.length;
+        } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+          // 处理值为对象的情况（如 { current, total } 结构）
+          if ('current' in value) {
+            result[name][key || '{}'] = value.current;
+          } else if ('total' in value) {
+            result[name][key || '{}'] = value.total;
+          } else {
+            // 其他对象转为 JSON 字符串
+            result[name][key || '{}'] = JSON.stringify(value);
+          }
+        } else {
+          result[name][key || '{}'] = value;
+        }
       }
     }
     return result;
@@ -623,7 +712,7 @@ class MetricsCollector {
       const latestPath = path.join(this.persistPath, 'metrics_latest.json');
       await fs.promises.writeFile(latestPath, JSON.stringify(metrics, null, 2));
     } catch (error) {
-      console.error('[MetricsCollector] 持久化失败:', error);
+      logger.error('持久化失败', { error: error.message });
     }
   }
 
@@ -681,7 +770,7 @@ class MetricsCollector {
         }
       }
     } catch (error) {
-      console.error('[MetricsCollector] 清理失败:', error);
+      logger.error('清理失败', { error: error.message });
     }
   }
 
@@ -981,7 +1070,7 @@ class MetricsCollector {
     } catch (error) {
       // 使用上次缓存值而非随机值
       const lastValue = this._lastCpuUsage || 50;
-      console.warn('[MetricsCollector] CPU usage fallback to cached value:', lastValue);
+      logger.warn('CPU usage fallback to cached value', { value: lastValue });
       return lastValue;
     }
   }
@@ -1000,7 +1089,7 @@ class MetricsCollector {
     } catch (error) {
       // 使用上次缓存值而非随机值
       const lastValue = this._lastMemoryUsage || 50;
-      console.warn('[MetricsCollector] Memory usage fallback to cached value:', lastValue);
+      logger.warn('Memory usage fallback to cached value', { value: lastValue });
       return lastValue;
     }
   }
@@ -1106,6 +1195,33 @@ class MetricsCollector {
   }
 
   /**
+   * 更新 Node.js 运行时指标
+   * @returns {void}
+   */
+  updateNodejsMetrics() {
+    try {
+      // 获取活跃 handles 数量
+      let handleCount = 0;
+      if (typeof process._getActiveHandles === 'function') {
+        const handles = process._getActiveHandles();
+        handleCount = Array.isArray(handles) ? handles.length : (handles && typeof handles.length === 'number' ? handles.length : 0);
+      } else if (typeof process.resourceUsage === 'function') {
+        const usage = process.resourceUsage();
+        // resourceUsage returns { user: number, system: number, maxRSS: number, shared: number, ... }
+        handleCount = usage.maxRSS || 0;
+      }
+
+      // 获取活跃请求数量（确保是数字）
+      const requestCount = this._ensureNumeric(this._activeRequests);
+
+      this.setGauge('nodejs_active_handles', handleCount);
+      this.setGauge('nodejs_active_requests', requestCount);
+    } catch (e) {
+      // 忽略错误，保持上次值
+    }
+  }
+
+  /**
    * 获取摘要格式的完整指标
    * @returns {Object}
    */
@@ -1196,7 +1312,81 @@ class MetricsCollector {
     };
   }
 
+  // ==================== 限流指标 ====================
+
+  /**
+   * 记录限流触发事件
+   * @param {string} endpoint - 端点路径
+   * @param {string} userLevel - 用户级别 (trial/registered/premium)
+   * @returns {void}
+   */
+  recordRateLimitExceeded(endpoint, userLevel) {
+    this.incrementCounter('rate_limit_exceeded_total', {
+      endpoint: this._normalizeMetricPath(endpoint),
+      user_level: userLevel,
+    });
+  }
+
+  /**
+   * 更新限流配额使用
+   * @param {string} userLevel - 用户级别
+   * @param {number} current - 当前使用量
+   * @param {number} max - 最大配额
+   * @returns {void}
+   */
+  updateRateLimitQuota(userLevel, current, max) {
+    this.setGauge('rate_limit_current_quota', current, { user_level: userLevel });
+    this.setGauge('rate_limit_max_quota', max, { user_level: userLevel });
+  }
+
+  /**
+   * 记录熔断器状态
+   * @param {string} circuitName - 熔断器名称
+   * @param {string} state - 状态 (closed/open/half_open)
+   * @param {string} result - 调用结果 (success/failure/timeout)
+   * @returns {void}
+   */
+  recordCircuitBreakerState(circuitName, state, result) {
+    const stateValue = getStateValue(state);
+    this.setGauge('circuit_breaker_state', stateValue, { name: circuitName });
+
+    // 调用计数
+    this.incrementCounter('circuit_breaker_calls_total', {
+      name: circuitName,
+      result: result,
+    });
+  }
+
+  /**
+   * 标准化指标路径
+   * @param {string} path - 请求路径
+   * @returns {string}
+   * @private
+   */
+  _normalizeMetricPath(path) {
+    return utilsNormalizePath(path);
+  }
+
   // ==================== 生命周期 ====================
+
+  /**
+   * 销毁采集器（清理所有定时器）
+   */
+  destroy() {
+    if (this._persistTimer) {
+      clearInterval(this._persistTimer);
+      this._persistTimer = null;
+    }
+    if (this._cleanupTimer) {
+      clearInterval(this._cleanupTimer);
+      this._cleanupTimer = null;
+    }
+    if (this._nodejsMetricsTimer) {
+      clearInterval(this._nodejsMetricsTimer);
+      this._nodejsMetricsTimer = null;
+    }
+    this._requestStartTimes.clear();
+  }
 
   /**
    * 重置所有指标
@@ -1223,6 +1413,11 @@ class MetricsCollector {
     if (this._cleanupTimer) {
       clearInterval(this._cleanupTimer);
       this._cleanupTimer = null;
+    }
+
+    if (this._nodejsMetricsTimer) {
+      clearInterval(this._nodejsMetricsTimer);
+      this._nodejsMetricsTimer = null;
     }
 
     // 最后一次持久化

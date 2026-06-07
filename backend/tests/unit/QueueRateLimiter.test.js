@@ -12,21 +12,7 @@
 const assert = require('assert');
 
 // 简单的测试运行器
-function test(name, fn) {
-  try {
-    fn();
-    console.log('  \x1b[32m✓\x1b[0m ' + name);
-  } catch (e) {
-    console.log('  \x1b[31m✗\x1b[0m ' + name);
-    console.log('    ' + e.message);
-    process.exitCode = 1;
-  }
-}
 
-function describe(name, fn) {
-  console.log('\n' + name + ':');
-  fn();
-}
 
 // 由于 QueueRateLimiter 依赖 Redis，这里测试内存降级逻辑
 // Redis mock 总是失败，强制使用内存降级
@@ -229,4 +215,3 @@ describe('QueueRateLimiter enqueue', () => {
   });
 });
 
-console.log('\n');

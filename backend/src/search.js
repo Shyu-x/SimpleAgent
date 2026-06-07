@@ -11,6 +11,9 @@
 
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { createLogger } = require('./infra/logger/AgentLogger');
+
+const logger = createLogger('searchService');
 
 // 搜索超时配置（毫秒）
 const SEARCH_TIMEOUT = {
@@ -189,7 +192,7 @@ async function searchDuckDuckGo(query, limit = 10) {
       results: results.slice(0, limit)
     };
   } catch (error) {
-    console.error('[Search] DuckDuckGo search error:', error.message);
+    logger.error('DuckDuckGo search error', { error: error.message });
     return {
       success: false,
       error: error.message,
@@ -203,7 +206,7 @@ async function searchDuckDuckGo(query, limit = 10) {
  * 通用搜索接口 - 支持超时降级
  */
 async function searchWeb(query, limit = 10, source = 'duckduckgo') {
-  console.log(`[Search] Searching for: "${query}" (source: ${source})`);
+  logger.info('Searching for query', { query, source });
 
   // 创建超时控制器
   const timeoutController = new AbortController();
@@ -234,7 +237,7 @@ async function searchWeb(query, limit = 10, source = 'duckduckgo') {
     return result;
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error(`[Search] ${source} search timeout/error, trying fallback:`, error.message);
+    logger.error('search timeout/error, trying fallback', { source, error: error.message });
 
     // 降级策略：尝试其他搜索源
     return fallbackSearch(query, limit, source);
@@ -273,7 +276,7 @@ async function fallbackSearch(query, limit, failedSource) {
 
   for (const fallbackSource of availableSources) {
     try {
-      console.log(`[Search] 尝试降级到 ${fallbackSource}...`);
+      logger.info('尝试降级', { fallbackSource });
       const timeoutMs = fallbackSource === 'jina' ? SEARCH_TIMEOUT.fallback : SEARCH_TIMEOUT.primary;
 
       const result = await withTimeout(
@@ -285,11 +288,11 @@ async function fallbackSearch(query, limit, failedSource) {
         result.degraded = true;
         result.originalSource = failedSource;
         result.fallbackSource = fallbackSource;
-        console.log(`[Search] 降级搜索成功: ${fallbackSource}`);
+        logger.info('降级搜索成功', { fallbackSource });
         return result;
       }
     } catch (e) {
-      console.warn(`[Search] 降级源 ${fallbackSource} 也失败:`, e.message);
+      logger.warn('降级源也失败', { fallbackSource, error: e.message });
     }
   }
 
@@ -336,7 +339,7 @@ async function searchMiniMaxMCP(query, limit = 10) {
         };
       }
     } catch (mcpError) {
-      console.log('[Search] MiniMax MCP 不可用，尝试备用方案:', mcpError.message);
+      logger.info('MiniMax MCP 不可用，尝试备用方案', { error: mcpError.message });
     }
 
     // 如果 MCP 不可用，尝试直接调用 MiniMax API
@@ -347,7 +350,7 @@ async function searchMiniMaxMCP(query, limit = 10) {
     // 回退到 Jina AI
     return searchJinaAI(query, limit);
   } catch (error) {
-    console.error('[Search] MiniMax MCP search error:', error.message);
+    logger.error('MiniMax MCP search error', { error: error.message });
     return {
       success: false,
       error: error.message,
@@ -407,7 +410,7 @@ async function searchMiniMaxAPI(query, limit = 10) {
       source: 'minimax_api'
     };
   } catch (error) {
-    console.error('[Search] MiniMax API search error:', error.message);
+    logger.error('MiniMax API search error', { error: error.message });
     return {
       success: false,
       error: error.message,
@@ -477,7 +480,7 @@ async function searchJinaAI(query, limit = 10) {
       source: 'jina_ai'
     };
   } catch (error) {
-    console.error('[Search] Jina AI search error:', error.message);
+    logger.error('Jina AI search error', { error: error.message });
 
     // 最终回退到 DuckDuckGo
     return searchDuckDuckGo(query, limit);

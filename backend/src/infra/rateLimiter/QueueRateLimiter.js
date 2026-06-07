@@ -5,6 +5,9 @@
 
 const { createClient } = require('./client');
 const AppError = require('../../common/errors/AppError');
+const { createLogger } = require('../logger/AgentLogger');
+
+const logger = createLogger('queueRateLimiter');
 
 class QueueRateLimiter {
   /**
@@ -59,7 +62,7 @@ class QueueRateLimiter {
       await this.redis.ping();
       this.initialized = true;
     } catch (error) {
-      console.error('[QueueRateLimiter] Redis 连接失败:', error.message);
+      logger.error('Redis 连接失败', { error: error.message });
       // Redis 不可用时使用内存限流 (降级)
       this.redis = null;
       this.initialized = true;

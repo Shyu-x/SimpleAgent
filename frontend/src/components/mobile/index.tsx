@@ -82,8 +82,8 @@ export function MobileExperienceProvider({ children }: MobileExperienceProviderP
 
   return (
     <div className="mobile-experience-container">
-      {/* 移动端专属样式 */}
-      <style jsx global>{`
+      {/* 移动端专属样式（global，原本用 styled-jsx <style jsx global> 但与 React 19 不兼容）*/}
+      <style>{`
         :root {
           --touch-target-size: 44px;
           --min-tap-height: 44px;
