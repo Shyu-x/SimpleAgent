@@ -1,6 +1,262 @@
 {
-  "timestamp": "2026-06-07T08:52:50.947Z",
-  "counters": {},
+  "timestamp": "2026-06-07T10:34:07.794Z",
+  "counters": {
+    "http_requests_total": {
+      "endpoint=\"/api/health\",method=\"GET\",status=\"200\"": 9,
+      "method=\"GET\",module=\"unknown\",path=\"/api/health\",status=\"200\"": 9,
+      "endpoint=\"/api/alerts\",method=\"GET\",status=\"200\"": 1,
+      "method=\"GET\",module=\"unknown\",path=\"/\",status=\"200\"": 14,
+      "endpoint=\"/api/a2a/agents\",method=\"GET\",status=\"200\"": 4,
+      "method=\"GET\",module=\"unknown\",path=\"/agents\",status=\"200\"": 4,
+      "endpoint=\"/metrics\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api-docs/\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/kb\",method=\"GET\",status=\"200\"": 2,
+      "method=\"GET\",module=\"unknown\",path=\"/kb\",status=\"200\"": 2,
+      "endpoint=\"/api/hitl/health\",method=\"GET\",status=\"200\"": 2,
+      "method=\"GET\",module=\"unknown\",path=\"/health\",status=\"200\"": 3,
+      "endpoint=\"/api/tools\",method=\"GET\",status=\"200\"": 3,
+      "endpoint=\"/api/sessions\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/agents/types\",method=\"GET\",status=\"200\"": 2,
+      "method=\"GET\",module=\"unknown\",path=\"/types\",status=\"200\"": 2,
+      "endpoint=\"/api/config\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/models\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/tools\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/knowledge/stats\",method=\"GET\",status=\"200\"": 1,
+      "method=\"GET\",module=\"unknown\",path=\"/stats\",status=\"200\"": 2,
+      "endpoint=\"/api/admin/prompts\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/admin/traces\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/stats\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/kb\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/kb\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/kb/kb_1780828379834\",method=\"DELETE\",status=\"200\"": 1,
+      "method=\"DELETE\",module=\"unknown\",path=\"/kb/kb_1780828379834\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/search\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/search\",status=\"200\"": 1,
+      "endpoint=\"/api/rag/fetch\",method=\"POST\",status=\"500\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/fetch\",status=\"500\"": 1,
+      "endpoint=\"/api/search\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/search/config\",method=\"GET\",status=\"200\"": 1,
+      "method=\"GET\",module=\"unknown\",path=\"/config\",status=\"200\"": 1,
+      "endpoint=\"/api/search/providers\",method=\"GET\",status=\"200\"": 1,
+      "method=\"GET\",module=\"unknown\",path=\"/providers\",status=\"200\"": 1,
+      "endpoint=\"/api/search/health\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/metrics\",method=\"GET\",status=\"200\"": 1,
+      "endpoint=\"/api/search/web\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/web\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/calculator\",method=\"POST\",status=\"200\"": 4,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/calculator\",status=\"200\"": 4,
+      "endpoint=\"/api/plugins/execute/datetime\",method=\"POST\",status=\"200\"": 4,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/datetime\",status=\"200\"": 4,
+      "endpoint=\"/api/plugins/execute/web_search\",method=\"POST\",status=\"200\"": 4,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/web_search\",status=\"200\"": 4,
+      "endpoint=\"/api/plugins/execute/file_operations\",method=\"POST\",status=\"200\"": 2,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/file_operations\",status=\"200\"": 2,
+      "endpoint=\"/api/plugins/execute/shell\",method=\"POST\",status=\"200\"": 2,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/shell\",status=\"200\"": 2,
+      "endpoint=\"/api/search/enhanced\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/enhanced\",status=\"200\"": 1,
+      "endpoint=\"/api/mcp/status\",method=\"GET\",status=\"200\"": 1,
+      "method=\"GET\",module=\"unknown\",path=\"/status\",status=\"200\"": 1,
+      "endpoint=\"/api/hitl/pending\",method=\"GET\",status=\"200\"": 1,
+      "method=\"GET\",module=\"unknown\",path=\"/pending\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/file_read\",method=\"POST\",status=\"200\"": 3,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/file_read\",status=\"200\"": 3,
+      "endpoint=\"/api/plugins/execute/http_request\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/http_request\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/data_processing\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/data_processing\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/web_scraper\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/web_scraper\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/code_execution\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/code_execution\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/github\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/github\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/weather\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/weather\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/translation\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/translation\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/code_review\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/code_review\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/image_generation\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/image_generation\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/qrcode\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/qrcode\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/currency_converter\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/currency_converter\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/url_shortener\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/url_shortener\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/timezone_converter\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/timezone_converter\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/text_summary\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/text_summary\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/error_tracking\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/error_tracking\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/note\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/note\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/prompt_template\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/prompt_template\",status=\"200\"": 1,
+      "endpoint=\"/api/plugins/execute/meeting\",method=\"POST\",status=\"200\"": 1,
+      "method=\"POST\",module=\"unknown\",path=\"/execute/meeting\",status=\"200\"": 1
+    },
+    "rag_retrieve_total": {
+      "kb_id=\"kb_1775231509461\",result_count=\"1\"": 1,
+      "kb_id=\"kb_1775231596634\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775474987358\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477737330\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477737407\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477737410\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477743797\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477743865\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477743869\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477790844\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477790913\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477790916\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477796593\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477796662\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775477796665\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479245390\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479245474\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479245480\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479341425\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479341523\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479341527\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479351972\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479352047\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479352050\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479359343\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479359418\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479359420\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479411306\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479411368\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479411371\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479425382\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479431537\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479431540\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479441054\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479441121\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479441124\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479453714\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479453784\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479453787\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479502476\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479502747\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479502749\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479560081\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479560162\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479560165\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479583448\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479583678\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479583681\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479622890\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479622958\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479622961\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479661632\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479661875\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479661878\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479687912\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479687987\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1775479687991\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1776100273690\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1776100273795\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1776100311169\",result_count=\"3\"": 1,
+      "kb_id=\"kb_1776100399114\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301202868\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301202950\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301202954\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301211697\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301211743\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301211747\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301244401\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301244479\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301244483\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301252613\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301252677\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301252681\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301916955\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301916996\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777301916999\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777302040026\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777302040071\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777302040075\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305105032\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305105072\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305105077\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305226651\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305226689\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305226692\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305325506\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305325565\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305325568\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305392336\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305392382\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305392385\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305474611\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305474658\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305474662\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305535538\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305535594\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305535597\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305625880\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305625923\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305625927\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305694630\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305694683\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305694688\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305764731\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305764790\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305764793\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305854563\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305854610\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777305854614\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777306054374\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777306054425\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777306054429\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777307602031\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777307602071\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777307602075\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777307690256\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777307690308\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777307690311\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777308898802\",result_count=\"1\"": 1,
+      "kb_id=\"kb_1777333081934\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333081999\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333082002\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333085604\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333086992\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333087008\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333547170\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333547240\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333547243\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333548496\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333549239\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333549263\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333627959\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333628045\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333628049\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333630693\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333631099\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333631119\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333658992\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333659065\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333659070\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333660477\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333703318\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333703377\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333703385\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333704630\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333705009\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777333705020\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777380431549\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777388806527\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1777388818595\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1779649073535\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1780388050872\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1780579957008\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1780581671548\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1780828379834\",result_count=\"0\"": 1,
+      "kb_id=\"kb_1774028592007\",result_count=\"0\"": 1
+    }
+  },
   "gauges": {
     "process_cpu_seconds_total": {
       "{}": 0
@@ -12,7 +268,7 @@
       "{}": 0
     },
     "nodejs_active_handles": {
-      "{}": 1
+      "{}": 6
     },
     "nodejs_active_requests": {
       "{}": 0
@@ -59,9 +315,5276 @@
     },
     "circuit_breaker_state": {
       "circuit=\"default\"": 0
+    },
+    "module_errors_total": {
+      "module=\"unknown\",type=\"http_error\"": 1,
+      "module=\"unknown\",type=\"server_error\"": 1
     }
   },
-  "histograms": {},
+  "histograms": {
+    "http_request_duration_seconds": {
+      "endpoint=\"/api/health\",method=\"GET\"": {
+        "count": 18,
+        "sum": 0.015000000000000006,
+        "mean": 0.0008333333333333337,
+        "buckets": {
+          "1": 18,
+          "5": 18,
+          "10": 18,
+          "0.005": 18,
+          "0.01": 18,
+          "0.025": 18,
+          "0.05": 18,
+          "0.1": 18,
+          "0.25": 18,
+          "0.5": 18,
+          "2.5": 18
+        }
+      },
+      "method=\"GET\",path=\"/api/health\"": {
+        "count": 9,
+        "sum": 0.007,
+        "mean": 0.0007777777777777778,
+        "buckets": {
+          "1": 9,
+          "5": 9,
+          "10": 9,
+          "0.005": 9,
+          "0.01": 9,
+          "0.025": 9,
+          "0.05": 9,
+          "0.1": 9,
+          "0.25": 9,
+          "0.5": 9,
+          "2.5": 9
+        }
+      },
+      "endpoint=\"/\",method=\"GET\"": {
+        "count": 14,
+        "sum": 0.012,
+        "mean": 0.0008571428571428572,
+        "buckets": {
+          "1": 14,
+          "5": 14,
+          "10": 14,
+          "0.005": 14,
+          "0.01": 14,
+          "0.025": 14,
+          "0.05": 14,
+          "0.1": 14,
+          "0.25": 14,
+          "0.5": 14,
+          "2.5": 14
+        }
+      },
+      "endpoint=\"/api/alerts\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"GET\",path=\"/\"": {
+        "count": 14,
+        "sum": 0.012,
+        "mean": 0.0008571428571428572,
+        "buckets": {
+          "1": 14,
+          "5": 14,
+          "10": 14,
+          "0.005": 14,
+          "0.01": 14,
+          "0.025": 14,
+          "0.05": 14,
+          "0.1": 14,
+          "0.25": 14,
+          "0.5": 14,
+          "2.5": 14
+        }
+      },
+      "endpoint=\"/agents\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.002,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/a2a/agents\",method=\"GET\"": {
+        "count": 4,
+        "sum": 0.002,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "method=\"GET\",path=\"/agents\"": {
+        "count": 4,
+        "sum": 0.002,
+        "mean": 0.0005,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/metrics\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api-docs/\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/kb\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/rag/kb\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "method=\"GET\",path=\"/kb\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/health\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0.002,
+        "mean": 0.0006666666666666666,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/hitl/health\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.002,
+        "mean": 0.001,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "method=\"GET\",path=\"/health\"": {
+        "count": 3,
+        "sum": 0.002,
+        "mean": 0.0006666666666666666,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/tools\",method=\"GET\"": {
+        "count": 3,
+        "sum": 0.002,
+        "mean": 0.0006666666666666666,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/sessions\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/types\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/agents/types\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "method=\"GET\",path=\"/types\"": {
+        "count": 2,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/config\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/models\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/tools\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/stats\",method=\"GET\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/knowledge/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"GET\",path=\"/stats\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/admin/prompts\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/admin/traces\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/stats\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/kb\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/kb\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/kb\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/kb/kb_1780828379834\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/kb/kb_1780828379834\",method=\"DELETE\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"DELETE\",path=\"/kb/kb_1780828379834\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/search\",method=\"POST\"": {
+        "count": 1,
+        "sum": 2.157,
+        "mean": 2.157,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/search\",method=\"POST\"": {
+        "count": 1,
+        "sum": 2.157,
+        "mean": 2.157,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/search\"": {
+        "count": 1,
+        "sum": 2.157,
+        "mean": 2.157,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/fetch\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/rag/fetch\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/fetch\"": {
+        "count": 1,
+        "sum": 0.002,
+        "mean": 0.002,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/search\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/config\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/search/config\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"GET\",path=\"/config\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/providers\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/search/providers\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"GET\",path=\"/providers\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/search/health\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/metrics\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.003,
+        "mean": 0.003,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/web\",method=\"POST\"": {
+        "count": 1,
+        "sum": 3.133,
+        "mean": 3.133,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/api/search/web\",method=\"POST\"": {
+        "count": 1,
+        "sum": 3.133,
+        "mean": 3.133,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "method=\"POST\",path=\"/web\"": {
+        "count": 1,
+        "sum": 3.133,
+        "mean": 3.133,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/execute/calculator\",method=\"POST\"": {
+        "count": 4,
+        "sum": 0.003,
+        "mean": 0.00075,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/plugins/execute/calculator\",method=\"POST\"": {
+        "count": 4,
+        "sum": 0.003,
+        "mean": 0.00075,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "method=\"POST\",path=\"/execute/calculator\"": {
+        "count": 4,
+        "sum": 0.003,
+        "mean": 0.00075,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/execute/datetime\",method=\"POST\"": {
+        "count": 4,
+        "sum": 0.001,
+        "mean": 0.00025,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/plugins/execute/datetime\",method=\"POST\"": {
+        "count": 4,
+        "sum": 0.001,
+        "mean": 0.00025,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "method=\"POST\",path=\"/execute/datetime\"": {
+        "count": 4,
+        "sum": 0.001,
+        "mean": 0.00025,
+        "buckets": {
+          "1": 4,
+          "5": 4,
+          "10": 4,
+          "0.005": 4,
+          "0.01": 4,
+          "0.025": 4,
+          "0.05": 4,
+          "0.1": 4,
+          "0.25": 4,
+          "0.5": 4,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/execute/web_search\",method=\"POST\"": {
+        "count": 4,
+        "sum": 2.3819999999999997,
+        "mean": 0.5954999999999999,
+        "buckets": {
+          "1": 3,
+          "5": 4,
+          "10": 4,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/api/plugins/execute/web_search\",method=\"POST\"": {
+        "count": 4,
+        "sum": 2.3819999999999997,
+        "mean": 0.5954999999999999,
+        "buckets": {
+          "1": 3,
+          "5": 4,
+          "10": 4,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 4
+        }
+      },
+      "method=\"POST\",path=\"/execute/web_search\"": {
+        "count": 4,
+        "sum": 2.3819999999999997,
+        "mean": 0.5954999999999999,
+        "buckets": {
+          "1": 3,
+          "5": 4,
+          "10": 4,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 4
+        }
+      },
+      "endpoint=\"/execute/file_operations\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/plugins/execute/file_operations\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "method=\"POST\",path=\"/execute/file_operations\"": {
+        "count": 2,
+        "sum": 0.003,
+        "mean": 0.0015,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/execute/shell\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/api/plugins/execute/shell\",method=\"POST\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "method=\"POST\",path=\"/execute/shell\"": {
+        "count": 2,
+        "sum": 0.004,
+        "mean": 0.002,
+        "buckets": {
+          "1": 2,
+          "5": 2,
+          "10": 2,
+          "0.005": 2,
+          "0.01": 2,
+          "0.025": 2,
+          "0.05": 2,
+          "0.1": 2,
+          "0.25": 2,
+          "0.5": 2,
+          "2.5": 2
+        }
+      },
+      "endpoint=\"/enhanced\",method=\"POST\"": {
+        "count": 1,
+        "sum": 3.46,
+        "mean": 3.46,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/api/search/enhanced\",method=\"POST\"": {
+        "count": 1,
+        "sum": 3.46,
+        "mean": 3.46,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "method=\"POST\",path=\"/enhanced\"": {
+        "count": 1,
+        "sum": 3.46,
+        "mean": 3.46,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 0
+        }
+      },
+      "endpoint=\"/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/mcp/status\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"GET\",path=\"/status\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/pending\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/hitl/pending\",method=\"GET\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"GET\",path=\"/pending\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/file_read\",method=\"POST\"": {
+        "count": 3,
+        "sum": 0.003,
+        "mean": 0.001,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/api/plugins/execute/file_read\",method=\"POST\"": {
+        "count": 3,
+        "sum": 0.003,
+        "mean": 0.001,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "method=\"POST\",path=\"/execute/file_read\"": {
+        "count": 3,
+        "sum": 0.003,
+        "mean": 0.001,
+        "buckets": {
+          "1": 3,
+          "5": 3,
+          "10": 3,
+          "0.005": 3,
+          "0.01": 3,
+          "0.025": 3,
+          "0.05": 3,
+          "0.1": 3,
+          "0.25": 3,
+          "0.5": 3,
+          "2.5": 3
+        }
+      },
+      "endpoint=\"/execute/http_request\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/http_request\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/http_request\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/data_processing\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/data_processing\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/data_processing\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/web_scraper\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/web_scraper\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/web_scraper\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/code_execution\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/code_execution\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/code_execution\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/github\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/github\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/github\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/weather\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/weather\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/weather\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/translation\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/translation\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/translation\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/code_review\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/code_review\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/code_review\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/image_generation\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/image_generation\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/image_generation\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/qrcode\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/qrcode\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/qrcode\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/currency_converter\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/currency_converter\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/currency_converter\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/url_shortener\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/url_shortener\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/url_shortener\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/timezone_converter\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/timezone_converter\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/timezone_converter\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/text_summary\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/text_summary\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/text_summary\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/error_tracking\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/error_tracking\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/error_tracking\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/note\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/note\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/note\"": {
+        "count": 1,
+        "sum": 0.001,
+        "mean": 0.001,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/prompt_template\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/prompt_template\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/prompt_template\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/execute/meeting\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "endpoint=\"/api/plugins/execute/meeting\",method=\"POST\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "method=\"POST\",path=\"/execute/meeting\"": {
+        "count": 1,
+        "sum": 0,
+        "mean": 0,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 1,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      }
+    },
+    "rag_retrieve_duration_seconds": {
+      "kb_id=\"kb_1775231509461\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775231596634\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775474987358\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477737330\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477737407\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477737410\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477743797\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477743865\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477743869\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477790844\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477790913\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477790916\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477796593\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477796662\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775477796665\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479245390\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479245474\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479245480\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479341425\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479341523\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479341527\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479351972\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479352047\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479352050\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479359343\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479359418\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479359420\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479411306\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479411368\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479411371\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479425382\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479431537\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479431540\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479441054\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479441121\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479441124\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479453714\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479453784\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479453787\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479502476\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479502747\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479502749\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479560081\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479560162\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479560165\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479583448\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479583678\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479583681\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479622890\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479622958\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479622961\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479661632\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479661875\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479661878\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479687912\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479687987\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1775479687991\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1776100273690\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1776100273795\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1776100311169\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1776100399114\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301202868\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301202950\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301202954\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301211697\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301211743\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301211747\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301244401\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301244479\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301244483\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301252613\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301252677\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301252681\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301916955\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301916996\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777301916999\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777302040026\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777302040071\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777302040075\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305105032\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305105072\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305105077\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305226651\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305226689\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305226692\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305325506\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305325565\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305325568\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305392336\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305392382\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305392385\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305474611\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305474658\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305474662\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305535538\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305535594\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305535597\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305625880\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305625923\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305625927\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305694630\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305694683\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305694688\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305764731\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305764790\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305764793\"": {
+        "count": 1,
+        "sum": 0.01,
+        "mean": 0.01,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 1,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305854563\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305854610\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777305854614\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777306054374\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777306054425\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777306054429\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777307602031\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777307602071\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777307602075\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777307690256\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777307690308\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777307690311\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777308898802\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333081934\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333081999\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333082002\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333085604\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333086992\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333087008\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333547170\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333547240\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333547243\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333548496\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333549239\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333549263\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333627959\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333628045\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333628049\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333630693\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333631099\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333631119\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333658992\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333659065\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333659070\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333660477\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333703318\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333703377\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333703385\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333704630\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333705009\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777333705020\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777380431549\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777388806527\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1777388818595\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1779649073535\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1780388050872\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1780579957008\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1780581671548\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1780828379834\"": {
+        "count": 1,
+        "sum": 0.011,
+        "mean": 0.011,
+        "buckets": {
+          "1": 1,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 1,
+          "0.05": 1,
+          "0.1": 1,
+          "0.25": 1,
+          "0.5": 1,
+          "2.5": 1
+        }
+      },
+      "kb_id=\"kb_1774028592007\"": {
+        "count": 1,
+        "sum": 2.155,
+        "mean": 2.155,
+        "buckets": {
+          "1": 0,
+          "5": 1,
+          "10": 1,
+          "0.005": 0,
+          "0.01": 0,
+          "0.025": 0,
+          "0.05": 0,
+          "0.1": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "2.5": 1
+        }
+      }
+    },
+    "rag_query_rewrite_duration_seconds": {
+      "rewrite_type=\"intent_preservation\"": {
+        "count": 156,
+        "sum": 3.7989999999999955,
+        "mean": 0.024352564102564072,
+        "buckets": {
+          "1": 155,
+          "5": 156,
+          "10": 156,
+          "0.005": 0,
+          "0.01": 61,
+          "0.025": 155,
+          "0.05": 155,
+          "0.1": 155,
+          "0.25": 155,
+          "0.5": 155,
+          "2.5": 156
+        }
+      }
+    }
+  },
   "summaries": {},
   "activeRequests": 0
 }

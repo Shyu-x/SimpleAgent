@@ -323,14 +323,6 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                         setActiveConversation(conversation.id);
                         addActiveWindow(conversation.id);
                       }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          setActiveConversation(conversation.id);
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
                       className={`group relative flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-all duration-200 ${
                         isActive
                           ? 'border-transparent bg-[hsl(var(--bg-surface))]/97 shadow-md'
