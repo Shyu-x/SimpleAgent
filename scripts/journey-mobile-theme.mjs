@@ -9,7 +9,7 @@
 //  05-dark-mode-main.png       (1440x900) 暗色模式主页
 //  06-dark-mode-chat.png       (1440x900) 暗色模式聊天中（含输入消息 + AI回复）
 //  07-dark-mode-admin.png      (1440x900) 暗色模式管理后台
-//  08-light-vs-dark.png        (1440x900) 设置面板"外观"Tab 主题切换浮层
+//  08-light-vs-dark.png        (390x844)  移动端主题切换面板（实际可用的 MobileSettingsView）
 //
 // 主题切换机制（实测）：
 //  - 设置面板（齿轮图标）→ "外观" Tab → "主题模式" 三选项（浅色/深色/跟随系统）
@@ -221,10 +221,16 @@ const forceTheme = async (page, mode) => {
     }
 
     // =================== 08 主题切换浮层 ===================
-    console.log('\n[08 设置面板 - 外观 Tab 主题切换]');
+    // 注意：桌面端 Settings 弹窗存在 bug —— page.tsx:450 用 <Settings hideTrigger /> 渲染
+    // 但没传 autoOpen，hideTrigger=true 时又没按钮可点，导致 isOpen 永远为 false。
+    // 实际可用的主题切换在 mobile 端 MobileSettingsView，本图用 iPhone 14 视口展示。
+    console.log('\n[08 主题切换 - 移动端 MobileSettingsView 实际工作]');
     {
       const context = await browser.newContext({
-        viewport: { width: 1440, height: 900 },
+        viewport: { width: 390, height: 844 },
+        deviceScaleFactor: 2,
+        isMobile: true,
+        hasTouch: true,
         locale: 'zh-CN',
       });
       const page = await context.newPage();
@@ -234,47 +240,34 @@ const forceTheme = async (page, mode) => {
         await page.waitForSelector('textarea, input[type="text"]', { timeout: 8000 });
       } catch {}
 
-      // 同时让两侧都展示：左侧 desktop-shell 强制深色 + 右侧浮层展示"外观" Tab 当前选中"深色"
+      // 强制深色后再切回浅色做对比（用 mobile 真正可用的 settings view）
       await forceTheme(page, 'dark');
       await sleep(400);
 
-      // 点击设置按钮
+      // 点击移动端右上角设置图标 (aria-label="设置")
       try {
-        const settingsBtn = await page.$('button[title="设置"]');
-        if (!settingsBtn) {
-          // 备选：用 SVG icon 定位
-          const allButtons = await page.$$('button');
-          for (const btn of allButtons) {
-            const text = await btn.textContent().catch(() => '');
-            const html = await btn.innerHTML().catch(() => '');
-            if (html.includes('lucide-settings') || html.includes('Settings') || text.trim() === '') {
-              // 试点击第一个带 lucide-settings 的
-              if (html.includes('lucide-settings')) {
-                await btn.click();
-                break;
-              }
-            }
-          }
-        } else {
+        const settingsBtn = await page.$('button[aria-label="设置"]');
+        if (settingsBtn) {
           await settingsBtn.click();
+          await sleep(1500);
+        } else {
+          // 备选：title 属性
+          const titleBtn = await page.$('button[title="设置"]');
+          if (titleBtn) {
+            await titleBtn.click();
+            await sleep(1500);
+          }
         }
-        await sleep(1200);
       } catch (e) {
         console.log('  打开设置失败:', e.message);
       }
 
-      // 切换到"外观" Tab
+      // 等 mobile settings view 切换完成
       try {
-        const appearanceTab = await page.$('button:has-text("外观")');
-        if (appearanceTab) {
-          await appearanceTab.click();
-          await sleep(800);
-        }
-      } catch (e) {
-        console.log('  切换外观 Tab 失败:', e.message);
-      }
+        await page.waitForSelector('h3:has-text("主题")', { timeout: 5000 });
+      } catch {}
 
-      // 在外观 Tab 中点"深色"按钮（即使页面已是深色，这里点一下能高亮显示）
+      // 在 mobile settings view 中点"深色"高亮显示
       try {
         const darkBtn = await page.$('button:has-text("深色")');
         if (darkBtn) {
@@ -283,8 +276,10 @@ const forceTheme = async (page, mode) => {
         }
       } catch {}
 
+      // 确保主题是深色
+      await forceTheme(page, 'dark');
       await sleep(600);
-      await shot(page, '08-light-vs-dark.png', '深色模式主页 + 浮层显示设置面板"外观"Tab，"深色"选项高亮（蓝紫色边框）');
+      await shot(page, '08-light-vs-dark.png', 'iPhone 14 视口（390x844），深色模式 + 移动端 MobileSettingsView 主题切换面板，"深色"高亮');
       await context.close();
     }
 

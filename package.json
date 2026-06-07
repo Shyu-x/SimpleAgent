@@ -1,5 +1,6 @@
 {
 	"devDependencies": {
+		"@axe-core/playwright": "^4.11.3",
 		"@playwright/mcp": "^0.0.75",
 		"browser-use": "^0.6.1",
 		"playwright": "^1.60.0"
