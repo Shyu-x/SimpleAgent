@@ -34,8 +34,8 @@ class MetricsCollector {
     INFO: 'info',
   };
 
-  // 预编译的正则表达式（无g标志，使用手动的exec循环）
-  static LABEL_KEY_REGEX = /(\w+)="([^"]*)"/;
+  // 预编译的正则表达式（带 g 标志，exec 循环才能推进 lastIndex）
+  static LABEL_KEY_REGEX = /(\w+)="([^"]*)"/g;
 
   /**
    * 创建指标采集器实例

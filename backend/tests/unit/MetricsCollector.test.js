@@ -177,3 +177,46 @@ describe('MetricsCollector 重置', () => {
     assert.ok(metrics);
   });
 });
+
+describe('MetricsCollector _keyToLabels (regression: regex 死循环)', () => {
+  // P0 bug fix: LABEL_KEY_REGEX 之前缺少 'g' 标志位,
+  // 任何带 labels 的 metric 触发 while (regex.exec(key)) 都会死循环 100% CPU
+  test('单 label 字符串应正确解析 (不死循环)', () => {
+    const collector = new MetricsCollector({ enableHotReload: false });
+    const start = Date.now();
+    const labels = collector._keyToLabels('http_requests_total{status="500"}');
+    const elapsed = Date.now() - start;
+
+    assert.deepStrictEqual(labels, { status: '500' });
+    assert.ok(elapsed < 100, `解析耗时 ${elapsed}ms 超过 100ms 阈值, 可能死循环`);
+  });
+
+  test('多 label 字符串应正确解析 (不死循环)', () => {
+    const collector = new MetricsCollector({ enableHotReload: false });
+    const start = Date.now();
+    const labels = collector._keyToLabels('http_requests_total{status="500",method="GET",path="/api"}');
+    const elapsed = Date.now() - start;
+
+    assert.deepStrictEqual(labels, { status: '500', method: 'GET', path: '/api' });
+    assert.ok(elapsed < 100, `解析耗时 ${elapsed}ms 超过 100ms 阈值, 可能死循环`);
+  });
+
+  test('空 key 应返回空对象', () => {
+    const collector = new MetricsCollector({ enableHotReload: false });
+    const labels = collector._keyToLabels('');
+    assert.deepStrictEqual(labels, {});
+  });
+
+  test('无 label 字符串应返回空对象', () => {
+    const collector = new MetricsCollector({ enableHotReload: false });
+    const labels = collector._keyToLabels('simple_counter');
+    assert.deepStrictEqual(labels, {});
+  });
+
+  test('LABEL_KEY_REGEX 必须带 g 标志位 (防死循环)', () => {
+    assert.ok(
+      MetricsCollector.LABEL_KEY_REGEX.global,
+      'LABEL_KEY_REGEX 缺少 g 标志, exec() 会死循环'
+    );
+  });
+});
