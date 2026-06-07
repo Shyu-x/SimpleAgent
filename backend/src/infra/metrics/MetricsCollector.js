@@ -13,6 +13,9 @@
  */
 
 const fs = require('fs');
+
+// 孤立请求超时清理（5分钟）- 模块级常量（修复：原本定义在构造函数内部导致 ReferenceError）
+const ORPHAN_REQUEST_TIMEOUT = 5 * 60 * 1000;
 const path = require('path');
 const os = require('os');
 const { normalizePath: utilsNormalizePath } = require('../../utils/pathUtils');
@@ -59,8 +62,7 @@ class MetricsCollector {
     this._histogramBuckets = options.buckets || [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10];
     this._summaryQuantiles = options.quantiles || [0.5, 0.9, 0.95, 0.99];
 
-    // 孤立请求超时清理（5分钟）
-    const ORPHAN_REQUEST_TIMEOUT = 5 * 60 * 1000;
+    // 孤立请求超时清理（5分钟）- 引用模块级常量
 
     // 活跃请求追踪
     this._activeRequests = 0;
