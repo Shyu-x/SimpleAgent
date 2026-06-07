@@ -1,24 +1,6 @@
 {
-  "timestamp": "2026-05-24T17:39:58.359Z",
-  "counters": {
-    "tool_calls_total": {
-      "success=\"true\",tool=\"successTool\"": 1,
-      "success=\"true\",tool=\"paramTool\"": 1,
-      "success=\"true\",tool=\"delayTool\"": 1,
-      "success=\"true\",tool=\"retryTool\"": 1,
-      "success=\"true\",tool=\"first\"": 1,
-      "success=\"true\",tool=\"second\"": 1,
-      "success=\"true\",tool=\"third\"": 1,
-      "success=\"true\",tool=\"slow1\"": 1,
-      "success=\"true\",tool=\"slow2\"": 1
-    },
-    "tool_errors_total": {
-      "error_type=\"Error\",tool=\"failTool\"": 1,
-      "error_type=\"Error\",tool=\"timeoutTool\"": 1,
-      "error_type=\"Error\",tool=\"retryTool\"": 2,
-      "error_type=\"Error\",tool=\"alwaysFailTool\"": 3
-    }
-  },
+  "timestamp": "2026-06-07T08:52:50.947Z",
+  "counters": {},
   "gauges": {
     "process_cpu_seconds_total": {
       "{}": 0
@@ -30,7 +12,7 @@
       "{}": 0
     },
     "nodejs_active_handles": {
-      "{}": 0
+      "{}": 1
     },
     "nodejs_active_requests": {
       "{}": 0
@@ -51,13 +33,15 @@
       "{}": 0
     },
     "model_errors_total": {
-      "{}": 0
+      "{}": 0,
+      "model=\"minimax\"": 0
     },
     "tool_calls_total": {
       "{}": 0
     },
     "tool_errors_total": {
-      "{}": 0
+      "{}": 0,
+      "tool=\"unknown\"": 0
     },
     "tool_duration_seconds": {
       "{}": 0
@@ -72,174 +56,12 @@
       "user_level=\"trial\"": 0,
       "user_level=\"registered\"": 0,
       "user_level=\"premium\"": 0
+    },
+    "circuit_breaker_state": {
+      "circuit=\"default\"": 0
     }
   },
-  "histograms": {
-    "tool_duration_seconds": {
-      "tool=\"successTool\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"paramTool\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"delayTool\"": {
-        "count": 1,
-        "sum": 0.05,
-        "mean": 0.05,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 0,
-          "0.01": 0,
-          "0.025": 0,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"retryTool\"": {
-        "count": 1,
-        "sum": 0.031,
-        "mean": 0.031,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 0,
-          "0.01": 0,
-          "0.025": 0,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"first\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"second\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"third\"": {
-        "count": 1,
-        "sum": 0,
-        "mean": 0,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 1,
-          "0.01": 1,
-          "0.025": 1,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"slow1\"": {
-        "count": 1,
-        "sum": 0.03,
-        "mean": 0.03,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 0,
-          "0.01": 0,
-          "0.025": 0,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      },
-      "tool=\"slow2\"": {
-        "count": 1,
-        "sum": 0.03,
-        "mean": 0.03,
-        "buckets": {
-          "1": 1,
-          "5": 1,
-          "10": 1,
-          "0.005": 0,
-          "0.01": 0,
-          "0.025": 0,
-          "0.05": 1,
-          "0.1": 1,
-          "0.25": 1,
-          "0.5": 1,
-          "2.5": 1
-        }
-      }
-    }
-  },
+  "histograms": {},
   "summaries": {},
   "activeRequests": 0
 }
