@@ -299,7 +299,7 @@ function ToolList({ categories, onRefresh }: { categories: ToolCategory[]; onRef
             >
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{tool.name}</h3>
+                  <h2 className="text-base font-semibold text-gray-900 dark:text-white">{tool.name}</h2>
                   <span className="text-xs text-gray-500">{tool.category}</span>
                 </div>
                 <span

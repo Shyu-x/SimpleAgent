@@ -377,8 +377,18 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                             const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                             openConversationMenu({ x: rect.left, y: rect.bottom + 8 }, conversation);
                           }}
-                          className="cursor-pointer rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-surface))] hover:text-[hsl(var(--text-main))]"
+                          role="button"
+                          tabIndex={0}
                           aria-label="更多操作"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                              openConversationMenu({ x: rect.left, y: rect.bottom + 8 }, conversation);
+                            }
+                          }}
+                          className="cursor-pointer rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-surface))] hover:text-[hsl(var(--text-main))]"
                         >
                           <MoreHorizontal size={14} />
                         </span>
@@ -388,8 +398,17 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                             e.stopPropagation();
                             setDeleteConfirmId(conversation.id);
                           }}
-                          className="cursor-pointer rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-destructive/10 hover:text-destructive"
+                          role="button"
+                          tabIndex={0}
                           aria-label="删除会话"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setDeleteConfirmId(conversation.id);
+                            }
+                          }}
+                          className="cursor-pointer rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-destructive/10 hover:text-destructive"
                         >
                           <Trash2 size={14} />
                         </span>
