@@ -379,24 +379,28 @@ export default function ConversationList({ onCloseSidebar }: ConversationListPro
                       </div>
 
                       <div className="flex items-center gap-1 opacity-0 transition-all duration-150 group-hover:translate-x-0 group-hover:opacity-100 translate-x-1">
-                        <button
-                          onClick={(e) => handleActionMenu(e, conversation)}
-                          className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-surface))] hover:text-[hsl(var(--text-main))]"
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                            openConversationMenu({ x: rect.left, y: rect.bottom + 8 }, conversation);
+                          }}
+                          className="cursor-pointer rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-[hsl(var(--bg-surface))] hover:text-[hsl(var(--text-main))]"
                           aria-label="更多操作"
                         >
                           <MoreHorizontal size={14} />
-                        </button>
+                        </span>
 
-                        <button
+                        <span
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteConfirmId(conversation.id);
                           }}
-                          className="rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-destructive/10 hover:text-destructive"
+                          className="cursor-pointer rounded-lg p-1.5 text-[hsl(var(--text-muted))] transition-colors hover:bg-destructive/10 hover:text-destructive"
                           aria-label="删除会话"
                         >
                           <Trash2 size={14} />
-                        </button>
+                        </span>
                       </div>
                     </motion.div>
                   </DraggableConversationItem>
