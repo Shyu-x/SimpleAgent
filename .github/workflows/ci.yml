@@ -21,7 +21,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11
           
       - name: Get pnpm store directory
         shell: bash
@@ -55,7 +55,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11
           
       - name: Get pnpm store directory
         shell: bash
@@ -90,7 +90,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 11
           
       - name: Get pnpm store directory
         shell: bash
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - uses: pnpm/action-setup@v4
-        with: { version: 10 }
+        with: { version: 11 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @simpleagent/backend install --frozen-lockfile
       - run: pnpm --filter @simpleagent/frontend install --frozen-lockfile

@@ -1,0 +1,39 @@
+name: PR source branch check
+
+# 强制: PR 到 master 必须来自 release/** 分支
+# 禁止: feature/* fix/* hotfix/* 直接 PR 到 master
+# 允许: release/v*.*.* → master (通过 GATE 验收)
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  check-source-branch:
+    name: Check PR source branch is release/**
+    runs-on: ubuntu-latest
+    # 只对 PR 到 master 触发
+    if: github.event.pull_request.base.ref == 'master'
+    steps:
+      - name: Verify source branch pattern
+        run: |
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          echo "PR head ref: $HEAD_REF"
+          if [[ ! "$HEAD_REF" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]] && [[ ! "$HEAD_REF" =~ ^release/v[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::PR 到 master 必须来自 release/vX.Y.Z 或 release/vX.Y 分支"
+            echo "::error::当前 source branch: $HEAD_REF"
+            echo "::error::正确流程: feature/fix/hotfix → release/v*.*.* → master"
+            echo "::error::请关闭此 PR 并从 release/* 分支重新创建"
+            exit 1
+          fi
+          echo "✅ Source branch $HEAD_REF 符合 release/v*.*.* 规范"
+
+      - name: Check PR has release notes
+        run: |
+          BODY="${{ github.event.pull_request.body }}"
+          if [[ -z "$BODY" || ${#BODY} -lt 100 ]]; then
+            echo "::error::PR 描述必须 ≥ 100 字符, 含 release notes"
+            exit 1
+          fi
+          echo "✅ PR 描述完整"
