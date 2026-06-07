@@ -69,8 +69,9 @@ echo
 
 # === 单元测试 ===
 echo "[4] 单元测试"
-BACKEND_UNIT=$(cd backend && pnpm test 2>&1 | grep -E '^Tests:' | tail -1)
-FRONTEND_UNIT=$(cd frontend && pnpm test 2>&1 | grep -E 'Tests +[0-9]+' | tail -1)
+# pnpm 11 + node 26 不兼容, 改用直接调 jest/vitest
+BACKEND_UNIT=$(cd backend && DISABLE_RATE_LIMIT=true ./node_modules/.bin/jest --silent 2>&1 | grep -E '^Tests:' | tail -1)
+FRONTEND_UNIT=$(cd frontend && timeout 180 ./node_modules/.bin/vitest run 2>&1 | grep -E 'Tests +[0-9]+' | tail -1)
 echo "后端: $BACKEND_UNIT"
 echo "前端: $FRONTEND_UNIT"
 if echo "$BACKEND_UNIT" | grep -qE 'Tests: +[0-9]+ passed' && \

@@ -278,5 +278,32 @@
     "verification": "验证",
     "generate": "生成",
     "waiting": "等待"
+  },
+  "input": {
+    "audioFileName": "音频文件",
+    "customModelAdded": "已添加自定义模型: {{model}}",
+    "imageTooLarge": "图片过大, 最大 10MB",
+    "imageTypeError": "仅支持 JPG/PNG/WebP/GIF 格式",
+    "imageUploadSuccess": "图片上传成功",
+    "micPermissionDenied": "无法访问麦克风, 请检查浏览器权限",
+    "modelSwitchSuccess": "已切换到 {{model}}",
+    "placeholder": "输入消息, Shift+Enter 换行...",
+    "recording": "正在录音... 点击停止",
+    "recordingCancel": "取消",
+    "recordingDone": "录音完成 ({{duration}})",
+    "recordingFinish": "完成",
+    "settingsSaved": "设置已保存"
+  },
+  "time": {
+    "lastMonth": "上月",
+    "lastWeek": "上周",
+    "monthYear": "{{year}}年{{month}}月",
+    "today": "今天",
+    "yesterday": "昨天"
+  },
+  "confidence": {
+    "high": "高置信度",
+    "low": "低置信度",
+    "medium": "中等置信度"
   }
 }

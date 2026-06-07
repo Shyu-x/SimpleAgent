@@ -278,5 +278,32 @@
     "verification": "Verification",
     "generate": "Generate",
     "waiting": "Waiting"
+  },
+  "input": {
+    "audioFileName": "Audio file",
+    "customModelAdded": "Custom model added: {{model}}",
+    "imageTooLarge": "Image too large (max 10MB)",
+    "imageTypeError": "Only JPG/PNG/WebP/GIF supported",
+    "imageUploadSuccess": "Image uploaded",
+    "micPermissionDenied": "Microphone access denied. Check browser permissions.",
+    "modelSwitchSuccess": "Switched to {{model}}",
+    "placeholder": "Type a message, Shift+Enter for newline...",
+    "recording": "Recording... click to stop",
+    "recordingCancel": "Cancel",
+    "recordingDone": "Recording done ({{duration}})",
+    "recordingFinish": "Finish",
+    "settingsSaved": "Settings saved"
+  },
+  "time": {
+    "lastMonth": "Last month",
+    "lastWeek": "Last week",
+    "monthYear": "{{month}}/{{year}}",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "confidence": {
+    "high": "High confidence",
+    "low": "Low confidence",
+    "medium": "Medium confidence"
   }
 }
